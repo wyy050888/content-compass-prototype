@@ -1,0 +1,52 @@
+body.creation-product-picker-open { overflow:hidden; }
+.creation-product-picker-backdrop[hidden] { display:none; }
+.creation-product-picker-backdrop { position:fixed; inset:0; z-index:3200; display:grid; place-items:center; padding:32px; background:rgba(22,24,35,.42); backdrop-filter:blur(2px); }
+.creation-product-picker-modal { width:min(1040px,calc(100vw - 64px)); max-height:min(790px,calc(100vh - 64px)); display:flex; flex-direction:column; overflow:hidden; background:#fff; border:1px solid #e7e6ef; border-radius:18px; box-shadow:0 24px 72px rgba(26,22,58,.2); color:#202033; }
+.creation-product-picker-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding:24px 26px 18px; border-bottom:1px solid #eeedf4; }
+.creation-product-picker-head h2 { margin:0 0 6px; font-size:20px; }
+.creation-product-picker-head p { margin:0; font-size:13px; color:#8a8998; }
+.creation-product-picker-close { width:34px; height:34px; border:1px solid #e5e3ed; border-radius:9px; background:#fff; color:#747283; font-size:20px; cursor:pointer; }
+.creation-product-picker-toolbar { display:grid; grid-template-columns:minmax(280px,1fr) 160px 160px; gap:12px; padding:18px 26px 12px; }
+.creation-product-search { height:42px; display:flex; align-items:center; gap:8px; padding:0 12px; border:1px solid #dddbea; border-radius:10px; color:#8c899d; }
+.creation-product-search:focus-within { border-color:#7464ee; box-shadow:0 0 0 3px rgba(116,100,238,.1); }
+.creation-product-search input { width:100%; border:0; outline:0; font:inherit; color:#26243a; }
+.creation-product-picker-toolbar select { height:42px; border:1px solid #dddbea; border-radius:10px; padding:0 34px 0 12px; background:#fff; color:#4a4859; }
+.creation-product-picker-summary { display:flex; justify-content:space-between; align-items:center; padding:0 27px 12px; color:#8a8998; font-size:12px; }
+.creation-product-picker-summary button { border:0; background:transparent; color:#6554e8; cursor:pointer; }
+.creation-product-picker-grid { min-height:250px; overflow:auto; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; padding:0 26px 24px; }
+.creation-product-card { position:relative; min-height:248px; display:flex; flex-direction:column; align-items:stretch; gap:11px; padding:18px; text-align:left; border:1px solid #e4e2ec; border-radius:14px; background:#fff; color:#29273b; cursor:pointer; transition:.16s ease; }
+.creation-product-card:hover { border-color:#b7aff7; box-shadow:0 8px 24px rgba(77,62,171,.08); transform:translateY(-1px); }
+.creation-product-card.selected { border:2px solid #6755eb; padding:17px; background:#fbfaff; box-shadow:0 0 0 3px rgba(103,85,235,.08); }
+.creation-product-card-check { position:absolute; top:15px; right:15px; width:22px; height:22px; display:grid; place-items:center; border:1px solid #ddd9ef; border-radius:50%; background:#fff; color:#fff; font-size:12px; }
+.creation-product-card.selected .creation-product-card-check { border-color:#6755eb; background:#6755eb; }
+.creation-product-card-top { display:flex; align-items:center; gap:11px; padding-right:28px; }
+.creation-product-card-top > b { width:42px; height:42px; flex:0 0 auto; display:grid; place-items:center; border-radius:11px; background:linear-gradient(145deg,#7564ee,#4e3ad0); color:#fff; font-size:18px; }
+.creation-product-card-top > span { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.creation-product-card-top strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:15px; }
+.creation-product-card-top small { color:#a09eac; font-size:11px; }
+.creation-product-card-tags,.creation-product-card-audience { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+.creation-product-card-tags i,.creation-product-card-audience i { padding:3px 8px; border-radius:6px; background:#f1efff; color:#6654da; font-size:11px; font-style:normal; }
+.creation-product-card-audience em,.creation-product-card-fact em { flex:0 0 auto; color:#9895a6; font-size:11px; font-style:normal; }
+.creation-product-card-fact { display:flex; gap:9px; font-size:13px; line-height:1.55; }
+.creation-product-card-fact.secondary { color:#686678; font-size:12px; }
+.creation-product-card-meta { margin-top:auto; padding-top:10px; display:flex; justify-content:space-between; gap:12px; border-top:1px solid #efedf4; color:#aaa7b4; }
+.creation-product-card-meta small:first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.creation-product-picker-empty { grid-column:1/-1; min-height:240px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; border:1px dashed #ddd9e8; border-radius:14px; color:#9996a6; }
+.creation-product-picker-empty b { color:#4b495a; }
+.creation-product-picker-foot { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:16px 26px; border-top:1px solid #eceaf2; background:#fcfbfe; font-size:13px; }
+.creation-product-picker-foot > div { display:flex; gap:10px; }
+.creation-product-picker-foot button { height:38px; padding:0 20px; border-radius:9px; cursor:pointer; }
+.picker-secondary { border:1px solid #dddbea; background:#fff; color:#4d4a5a; }
+.picker-primary { border:0; background:#6655e8; color:#fff; }
+.picker-primary:disabled { background:#c9c5df; cursor:not-allowed; }
+.header-product-picker-trigger { min-width:200px; height:38px; display:flex; align-items:center; justify-content:space-between; gap:18px; padding:0 12px; border:1px solid #dedbe9; border-radius:9px; background:#fff; color:#353247; cursor:pointer; }
+.header-product-picker-trigger:hover { border-color:#9c91ef; }
+.header-product-picker-trigger .placeholder { color:#aaa7b4; }
+.header-product-picker-trigger small { color:#817d91; font-size:14px; }
+@media (max-width:760px) {
+  .creation-product-picker-backdrop { padding:12px; }
+  .creation-product-picker-modal { width:100%; max-height:calc(100vh - 24px); }
+  .creation-product-picker-toolbar { grid-template-columns:1fr 1fr; }
+  .creation-product-search { grid-column:1/-1; }
+  .creation-product-picker-grid { grid-template-columns:1fr; }
+}

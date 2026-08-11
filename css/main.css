@@ -2366,6 +2366,9 @@
     }
 
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .toast.has-action { display:flex; align-items:center; gap:14px; pointer-events:auto; }
+    .toast.has-action button { padding:0; border:0; color:#b9b2ff; background:transparent; font:inherit; font-weight:700; cursor:pointer; }
+    .toast.has-action button:hover { color:#fff; }
 
     .mobile-toggle { display: none; }
 
@@ -4588,6 +4591,10 @@
     #page-creation .agent-task-shell .composer-wrap { width: 100%; margin: 0; padding: 10px; border-top: 1px solid #ededf1; }
     #page-creation .agent-task-shell .composer { border-radius: 13px; }
     #page-creation .agent-task-shell .composer-selectors { display: none; }
+    #page-creation .agent-task-shell .task-chat-target { display: flex; align-items: center; gap: 4px; padding: 0 7px 7px; color: #8a8d99; font-size: 11px; }
+    #page-creation .agent-task-shell .task-chat-target[hidden] { display: none; }
+    #page-creation .agent-task-shell .task-chat-target strong { color: #666a76; font-weight: 600; }
+    #page-creation .agent-task-shell .task-chat-target button { margin-left: 6px; padding: 0; border: 0; background: transparent; color: #6854df; font-size: 11px; cursor: pointer; }
     #page-creation .agent-task-shell .composer textarea { min-height: 74px; }
     #page-creation .agent-task-shell .composer textarea:disabled { cursor: not-allowed; color: #a39dab; background: #fbfaff; }
     #page-creation .agent-task-shell .composer textarea:disabled::placeholder { color: #9b91aa; opacity: 1; }
@@ -6457,7 +6464,7 @@
     .script-product-display small { margin-top:3px; color:#898393; font-size:11px; line-height:1.45; }
     .script-picker-modal .lib-pick-card { gap:10px; padding-top:16px; padding-bottom:16px; }
     .script-picker-modal .lib-pick-content { color:#5d5867; }
-    .script-picker-modal .lib-pick-tags { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px 12px; padding-top:9px; border-top:1px solid #f0eef4; }
+    .script-picker-modal .lib-pick-tags { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px 12px; padding-top:9px; border-top:1px solid #f0eef4; }
     .script-picker-modal .lib-pick-tag-group { display:flex; align-items:flex-start; gap:7px; min-width:0; }
     .script-picker-modal .lib-pick-tag-group > b { flex:0 0 auto; padding-top:3px; color:#9993a2; font-size:10px; font-weight:650; }
     .script-picker-modal .lib-pick-tag-group > div { display:flex; flex-wrap:wrap; gap:4px; min-width:0; }

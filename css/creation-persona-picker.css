@@ -1,0 +1,48 @@
+body.creation-persona-picker-open { overflow:hidden; }
+.creation-persona-picker-backdrop[hidden] { display:none; }
+.creation-persona-picker-backdrop { position:fixed; inset:0; z-index:3210; display:grid; place-items:center; padding:32px; background:rgba(22,24,35,.42); backdrop-filter:blur(2px); }
+.creation-persona-picker-modal { width:min(1120px,calc(100vw - 64px)); max-height:min(820px,calc(100vh - 64px)); display:flex; flex-direction:column; overflow:hidden; background:#fff; border:1px solid #e7e6ef; border-radius:18px; box-shadow:0 24px 72px rgba(26,22,58,.2); color:#202033; }
+.creation-persona-picker-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding:24px 26px 18px; border-bottom:1px solid #eeedf4; }
+.creation-persona-picker-head h2 { margin:0 0 6px; font-size:20px; }
+.creation-persona-picker-head p { margin:0; font-size:13px; color:#8a8998; }
+.creation-persona-picker-close { width:34px; height:34px; border:1px solid #e5e3ed; border-radius:9px; background:#fff; color:#747283; font-size:20px; cursor:pointer; }
+.creation-persona-picker-toolbar { padding:18px 26px 12px; }
+.creation-persona-search { height:42px; display:flex; align-items:center; gap:8px; padding:0 12px; border:1px solid #dddbea; border-radius:10px; color:#8c899d; }
+.creation-persona-search:focus-within { border-color:#7464ee; box-shadow:0 0 0 3px rgba(116,100,238,.1); }
+.creation-persona-search input { width:100%; border:0; outline:0; font:inherit; color:#26243a; }
+.creation-persona-picker-summary { padding:0 27px 12px; color:#8a8998; font-size:12px; }
+.creation-persona-picker-grid { min-height:280px; overflow:auto; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; padding:0 26px 24px; }
+.creation-persona-card { position:relative; min-height:316px; display:flex; flex-direction:column; align-items:stretch; gap:11px; padding:18px; overflow:hidden; text-align:left; border:1px solid #e4e2ec; border-radius:14px; background:#fff; color:#29273b; cursor:pointer; transition:.16s ease; }
+.creation-persona-card:hover { border-color:#b7aff7; box-shadow:0 8px 24px rgba(77,62,171,.08); transform:translateY(-1px); }
+.creation-persona-card.selected { border:2px solid #6755eb; padding:17px; background:#fbfaff; box-shadow:0 0 0 3px rgba(103,85,235,.08); }
+.creation-persona-card-check { position:absolute; top:15px; right:15px; width:22px; height:22px; display:grid; place-items:center; border:1px solid #ddd9ef; border-radius:50%; background:#fff; color:#fff; font-size:12px; }
+.creation-persona-card.selected .creation-persona-card-check { border-color:#6755eb; background:#6755eb; }
+.creation-persona-card-title { min-height:42px; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding-right:28px; }
+.creation-persona-card-title > span { min-width:0; }
+.creation-persona-card-title strong,.creation-persona-card-title small { display:block; }
+.creation-persona-card-title strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:15px; }
+.creation-persona-card-title small { margin-top:4px; color:#a09eac; font-size:11px; }
+.creation-persona-card-title > em { flex:0 0 auto; padding:4px 8px; border-radius:6px; background:#eeeaff; color:#6552db; font-size:10px; font-style:normal; }
+.creation-persona-card-tags { display:flex; flex-wrap:wrap; gap:6px; }
+.creation-persona-card-tags i { padding:3px 8px; border-radius:6px; background:#f1efff; color:#6654da; font-size:11px; font-style:normal; }
+.creation-persona-card-scope { display:grid; grid-template-columns:auto minmax(0,1fr); gap:3px 9px; padding:10px; border-radius:9px; background:#f8f8fb; }
+.creation-persona-card-scope em,.creation-persona-card-detail em { color:#9895a6; font-size:11px; font-style:normal; }
+.creation-persona-card-scope b { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
+.creation-persona-card-scope small { grid-column:2; color:#9d9aaa; }
+.creation-persona-card-detail { display:grid; grid-template-columns:60px minmax(0,1fr); gap:4px 9px; color:#555365; font-size:12px; line-height:1.45; }
+.creation-persona-card-detail i { grid-column:2; position:relative; padding-left:10px; font-style:normal; }
+.creation-persona-card-detail i::before { content:"•"; position:absolute; left:0; color:#7664e9; }
+.creation-persona-card-meta { min-height:24px; margin-top:auto; padding:10px 0 3px; display:flex; align-items:center; gap:12px; border-top:1px solid #efedf4; color:#aaa7b4; line-height:1.2; }
+.creation-persona-picker-empty { grid-column:1/-1; min-height:250px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; border:1px dashed #ddd9e8; border-radius:14px; color:#9996a6; }
+.creation-persona-picker-empty b { color:#4b495a; }
+.creation-persona-picker-foot { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:16px 26px; border-top:1px solid #eceaf2; background:#fcfbfe; font-size:13px; }
+.creation-persona-picker-foot > div { display:flex; gap:10px; }
+.creation-persona-picker-foot button { height:38px; padding:0 20px; border-radius:9px; cursor:pointer; }
+.persona-picker-secondary { border:1px solid #dddbea; background:#fff; color:#4d4a5a; }
+.persona-picker-primary { border:0; background:#6655e8; color:#fff; }
+.persona-picker-primary:disabled { background:#c9c5df; cursor:not-allowed; }
+@media (max-width:700px) {
+  .creation-persona-picker-backdrop { padding:12px; }
+  .creation-persona-picker-modal { width:100%; max-height:calc(100vh - 24px); }
+  .creation-persona-picker-grid { grid-template-columns:1fr; }
+}

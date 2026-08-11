@@ -925,6 +925,11 @@
     const productCatalog = {
       "mite-pro": {
         name: "轻净 Pro 除螨仪",
+        brand: "轻净",
+        category: "清洁电器",
+        code: "SPU-QJ-MITE-PRO",
+        status: "在售",
+        assetCount: "关联资产 18",
         core: "大吸力深层清洁，拍打吸尘同步完成",
         secondary: "透明尘杯可拆卸水洗，床垫、沙发和布艺均可使用",
         difference: "清洁效果可视化，操作完成后尘杯清理方便",
@@ -934,6 +939,11 @@
       },
       "air-a8": {
         name: "轻享空气炸锅 A8",
+        brand: "轻享",
+        category: "厨房电器",
+        code: "SPU-QX-AIR-A8",
+        status: "在售",
+        assetCount: "关联资产 15",
         core: "可视化烹饪窗口，少翻面也能掌握食物状态",
         secondary: "大容量满足家庭用餐，炸篮可拆洗",
         difference: "烹饪过程看得见，降低反复开盖造成的热量流失",
@@ -943,6 +953,11 @@
       },
       "washer-s5": {
         name: "净界洗地机 S5",
+        brand: "净界",
+        category: "清洁电器",
+        code: "SPU-JJ-WASHER-S5",
+        status: "在售",
+        assetCount: "关联资产 21",
         core: "吸拖洗一体，一次完成地面干湿垃圾清洁",
         secondary: "滚刷自清洁，减少清洁工具二次处理",
         difference: "复杂地面污渍一次推进处理，缩短家庭清洁链路",
@@ -952,6 +967,11 @@
       },
       "blend-mini": {
         name: "随行榨汁杯 Mini",
+        brand: "随行",
+        category: "厨房电器",
+        code: "SPU-SX-BLEND-MINI",
+        status: "在售",
+        assetCount: "关联资产 9",
         core: "便携随行，一键启动即可完成日常果蔬搅拌",
         secondary: "杯体轻巧，支持充电使用和拆洗",
         difference: "适合通勤、健身和办公室等临时饮用场景",
@@ -961,11 +981,12 @@
       }
     };
     const creationContext = {
-      productId: "mite-pro",
+      productId: "",
+      productName: "",
       productSource: "library",
-      productConfirmed: true,
+      productConfirmed: false,
       productSaved: true,
-      originalFields: {},
+      originalFields: { marketingScene: "直播间引流" },
       customPresets: []
     };
     const fixedCopywritingModel = { value:"gpt-5-6-terra", label:"GPT-5.6 Terra" };
@@ -1231,7 +1252,7 @@
             <div class="form-section-head"><div><strong>本次创作</strong><small>只保留最常用参数，其他信息放在高级设置</small></div></div>
             <div class="section-grid">
               <div class="field full"><label>文案风格 *</label><div class="choice-row" data-single="style" data-role="style"><span class="choice-chip active">不限</span><span class="choice-chip">引发好奇</span><span class="choice-chip">痛点类型</span><span class="choice-chip">活动类型</span><span class="choice-chip">悬疑类型</span><span class="choice-chip">打感情类型</span><span class="choice-chip">对比类型</span><span class="choice-chip">种草类型</span><span class="choice-chip">网络爆款音频类型</span><span class="choice-chip">制造焦虑类型</span><span class="choice-chip">明星文案类型</span><span class="choice-chip">点名人群类型</span><span class="choice-chip">正话反说类型</span><span class="choice-chip">品牌类型</span></div></div>
-              <div class="field"><label>文案字数 *</label><div class="input-with-unit"><input type="number" min="30" max="2000" value="120" data-word-count><span>字</span></div><div class="estimate-line">预计口播时长：<b data-duration>约 30 秒</b></div></div>
+              <div class="field"><label>文案字数 *</label><div class="input-with-unit"><input type="number" min="30" max="2000" value="300" data-word-count><span>字</span></div><div class="estimate-line">预计口播时长：<b data-duration>约 1 分 15 秒</b></div></div>
               <div class="field"><label>生成数量 *</label><select><option>3 条</option><option>5 条</option></select></div>
               <div class="field full"><label>本轮主测变量 *</label><div class="choice-row" data-single="variable"><span class="choice-chip active">前 3 秒钩子</span><span class="choice-chip">卖点顺序</span><span class="choice-chip">人群切口</span><span class="choice-chip">CTA</span></div></div>
               <details class="advanced-block">
@@ -1291,7 +1312,7 @@
               <div class="field full"><label>目标产品 *</label><select data-product-select>${productOptions}</select></div>
               <div class="field"><label>目标人群</label><input value="有孩子或养宠物的家庭"></div>
               <div class="field"><label>输出数量 *</label><select><option>3 条</option><option>5 条</option></select></div>
-              <div class="field"><label>文案字数 *</label><div class="input-with-unit"><input type="number" min="30" max="2000" value="120" data-word-count><span>字</span></div><div class="estimate-line">预计口播时长：<b data-duration>约 30 秒</b></div></div>
+              <div class="field"><label>文案字数 *</label><div class="input-with-unit"><input type="number" min="30" max="2000" value="300" data-word-count><span>字</span></div><div class="estimate-line">预计口播时长：<b data-duration>约 1 分 15 秒</b></div></div>
               <div class="field"><label>目标风格</label><select><option>沿用参考节奏</option><option>硬广直给</option><option>痛点口播</option><option>专业测评</option></select></div>
               <div class="field full"><label>仿写边界</label><textarea>不沿用参考商品的品牌名、功效参数、价格和优惠；不逐句同义替换；所有产品表达必须来自目标产品档案。</textarea></div>
             </div>
@@ -1340,7 +1361,7 @@
               <div class="field full"><label>改写任务 *</label><div class="choice-row"><span class="choice-chip active">只换 3 秒钩子</span><span class="choice-chip">缩短篇幅</span><span class="choice-chip">更换目标人群</span><span class="choice-chip">卖点前置</span><span class="choice-chip">调整为硬广</span><span class="choice-chip">调整为测评</span><span class="choice-chip">减少废话</span></div></div>
               <div class="field full"><label>自定义改写要求 *</label><textarea>保留正文结构和结尾 CTA，只把第一句改成更有冲击力的结果型钩子。</textarea></div>
               <div class="field full"><label>必须锁定、不允许修改</label><input value="正文卖点顺序、可水洗尘杯、结尾 CTA"></div>
-              <div class="field"><label>目标字数</label><div class="input-with-unit"><input type="number" min="20" max="2000" value="120" data-word-count><span>字</span></div><div class="estimate-line">预计口播时长：<b data-duration>约 30 秒</b></div></div>
+              <div class="field"><label>目标字数</label><div class="input-with-unit"><input type="number" min="20" max="2000" value="300" data-word-count><span>字</span></div><div class="estimate-line">预计口播时长：<b data-duration>约 1 分 15 秒</b></div></div>
               <div class="field"><label>输出版本 *</label><select><option>3 个版本</option><option>5 个版本</option><option>1 个版本</option></select></div>
             </div>
           </section>
@@ -1697,7 +1718,7 @@
 
     function currentProduct() {
       return productCatalog[creationContext.productId] || {
-        name: creationContext.productName || "当前产品",
+        name: creationContext.productName || "未选择产品",
         core: creationContext.originalFields.core || "",
         secondary: creationContext.originalFields.secondary || "",
         difference: creationContext.originalFields.difference || "",
@@ -1718,7 +1739,35 @@
         saveProductButton.disabled = false;
       }
       contextStatus.hidden = !activeType || activeType === "script";
-      contextStatus.textContent = `已带入：${currentProduct().name}`;
+      contextStatus.textContent = creationContext.productConfirmed ? `已带入：${currentProduct().name}` : "未选择产品";
+    }
+
+    function syncCreationProductControl(productId = "", productName = "") {
+      dynamicForm.querySelectorAll("[data-product-select]").forEach(control => { control.value = productId; });
+      dynamicForm.querySelectorAll("[data-product-picker-label]").forEach(label => {
+        label.textContent = productName || "选择产品";
+        label.classList.toggle("placeholder", !productName);
+      });
+    }
+
+    function clearLibraryProductFields() {
+      creationContext.productId = "";
+      creationContext.productName = "";
+      creationContext.productConfirmed = false;
+      creationContext.productSaved = true;
+      const clear = selector => {
+        const field = dynamicForm.querySelector(selector);
+        if (field) field.value = "";
+      };
+      clear("[data-original-product-name]");
+      clear("[data-original-brand]");
+      clear("[data-original-category]");
+      ["core", "secondary", "trust"].forEach(key => setPointEditorValues(key, [""]));
+      ["difference", "marketing", "pain", "scenes"].forEach(key => clear(`[data-field="${key}"]`));
+      dynamicForm.querySelectorAll(".audience-chip").forEach(chip => chip.classList.remove("active"));
+      const factHint = dynamicForm.querySelector("[data-product-fact-hint]");
+      if (factHint) factHint.textContent = "选择产品后读取产品事实、关联资产和禁用表达";
+      syncCreationProductControl();
     }
 
     function clearOriginalProductFields(source) {
@@ -1747,10 +1796,9 @@
       const sourceInline = dynamicForm.querySelector(".product-source-inline");
       if (sourceInline) sourceInline.hidden = source !== "link";
       if (source === "library") {
-        creationContext.productConfirmed = true;
-        creationContext.productSaved = true;
-        const librarySelect = dynamicForm.querySelector("[data-product-source-panel=\"library\"] [data-product-select]");
-        if (librarySelect?.value && productCatalog[librarySelect.value]) applyProductToForm(librarySelect.value);
+        const selectedId = creationContext.productId;
+        if (selectedId && productCatalog[selectedId]) applyProductToForm(selectedId);
+        else clearLibraryProductFields();
       } else {
         clearOriginalProductFields(source);
         creationContext.productConfirmed = false;
@@ -1786,12 +1834,7 @@
       }[productId] || ["轻净", "清洁电器"]);
       if (brand) brand.value = productMeta[0];
       if (category) category.value = productMeta[1];
-      dynamicForm.querySelectorAll("[data-product-select]").forEach(select => {
-        if (![...select.options].some(option => option.value === productId)) {
-          select.add(new Option(product.name, productId));
-        }
-        select.value = productId;
-      });
+      syncCreationProductControl(productId, product.name);
       const fieldMap = { core: product.core, secondary: product.secondary, difference: product.difference };
       Object.entries(fieldMap).forEach(([key, value]) => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
@@ -1800,7 +1843,6 @@
       });
       const factHint = dynamicForm.querySelector("[data-product-fact-hint]");
       if (factHint) factHint.textContent = product.facts;
-      setActiveAudience(product.audiences);
       const primary = dynamicForm.querySelector('[data-field="primaryPsychology"]');
       const secondary = dynamicForm.querySelector('[data-field="secondaryPsychology"]');
       if (primary) primary.value = product.psychology[0];
@@ -1882,16 +1924,16 @@
       creationContext.productName = dynamicForm.querySelector("[data-original-product-name]")?.value.trim() || creationContext.productName;
       creationContext.originalFields.brand = dynamicForm.querySelector("[data-original-brand]")?.value || "";
       creationContext.originalFields.category = dynamicForm.querySelector("[data-original-category]")?.value || "";
-      creationContext.originalFields.wordCount = dynamicForm.querySelector("[data-word-count]")?.value || "180";
+      creationContext.originalFields.wordCount = dynamicForm.querySelector("[data-word-count]")?.value || "300";
       creationContext.originalFields.generationCount = dynamicForm.querySelector("[data-generation-count]")?.value || "3";
-      creationContext.originalFields.marketingScene = dynamicForm.querySelector('[data-role="marketing-scene"] .choice-chip.active')?.textContent.trim() || "短视频带货";
+      creationContext.originalFields.marketingScene = dynamicForm.querySelector('[data-role="marketing-scene"] .choice-chip.active')?.textContent.trim() || "直播间引流";
       const selectedStructureId = dynamicForm.querySelector("[data-copy-structure-value]")?.value || "";
       const selectedStructure = copyStructureCatalog.find(item => item.id === selectedStructureId);
       creationContext.originalFields.copyStructureId = selectedStructureId;
       creationContext.originalFields.copyStructure = selectedStructure?.name || "不限";
       creationContext.originalFields.scriptType = dynamicForm.querySelector('[data-role="script-type"] .choice-chip.active')?.textContent.trim() || "不限";
-      creationContext.originalFields.gender = dynamicForm.querySelector('[data-role="gender"] .choice-chip.active')?.textContent.trim() || "不限";
-      const selectedAge = dynamicForm.querySelector('[data-role="age"] .choice-chip.active')?.textContent.trim() || "不限";
+      creationContext.originalFields.gender = dynamicForm.querySelector('[data-role="gender"] .choice-chip.active')?.textContent.trim() || "";
+      const selectedAge = dynamicForm.querySelector('[data-role="age"] .choice-chip.active')?.textContent.trim() || "";
       creationContext.originalFields.age = selectedAge === "自定义"
         ? `${dynamicForm.querySelector("[data-age-min]")?.value || 18}–${dynamicForm.querySelector("[data-age-max]")?.value || 35}`
         : selectedAge;
@@ -1910,7 +1952,7 @@
       if (productCatalog[contextProductId]) applyProductToForm(contextProductId);
       const fields = creationContext.originalFields;
       const manualName = dynamicForm.querySelector("[data-manual-product-name]");
-      if (manualName) manualName.value = creationContext.productName || currentProduct().name || "";
+      if (manualName) manualName.value = creationContext.productName || "";
       Object.entries(fields).forEach(([key, value]) => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
         if (field && typeof value === "string") field.value = value;
@@ -2017,7 +2059,6 @@
         if (field) field.value = product[key];
         if (key === "core" || key === "secondary") setPointEditorValues(key, String(product[key] || "").split(/[；\n]/).map(item => item.trim()).filter(Boolean));
       });
-      setActiveAudience(product.audiences);
       ["marketing", "trust", "pain", "scenes"].forEach(key => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
         if (field) field.value = "";
@@ -2221,19 +2262,19 @@
 
     const originalAiSuggestions = {
       core: [
-        ["大吸力深入床褥缝隙，拍打吸尘同步完成"],
-        ["边拍边吸带走织物深处毛发与碎屑", "透明尘杯让清洁结果看得见"],
-        ["床垫、沙发、布艺多场景深层清洁"]
+        ["大吸力深入床褥缝隙，拍打吸尘同步完成", "边拍边吸带走织物深处毛发与碎屑", "透明尘杯让清洁结果看得见"],
+        ["高频拍打松动织物深处碎屑", "吸尘与拍打同步完成深层清洁", "床垫、沙发和布艺均可使用"],
+        ["针对床褥缝隙完成深层吸尘", "清洁过程与结果都能直观看见", "一次操作覆盖多种家庭软装场景"]
       ],
       secondary: [
-        ["透明尘杯可拆卸水洗", "床垫、沙发和布艺均可使用"],
-        ["机身轻巧，日常取用方便", "清洁后尘杯可直接拆洗"],
-        ["拍打与吸尘同步进行", "操作结束后清理步骤简单"]
+        ["透明尘杯可拆卸水洗", "床垫、沙发和布艺均可使用", "机身轻巧，日常取用方便"],
+        ["清洁后尘杯可直接拆洗", "电源线满足卧室日常清洁范围", "收纳体积小，不占家庭空间"],
+        ["操作步骤简单，拿起即可使用", "多种软装场景无需更换工具", "使用结束后清理维护方便"]
       ],
       trust: [
-        ["整机质保 1 年，产品参数与包装清单可核验"],
-        ["产品型号、参数与售后信息均可查询", "核心功能有真实产品资料支持"],
-        ["公司自有产品实拍与历史素材可验证使用效果"]
+        ["整机质保 1 年，产品参数与包装清单可核验", "官方渠道销售，支持正品验证", "核心功能均有真实产品资料支持"],
+        ["产品型号、参数与售后信息均可查询", "公司自有产品实拍可验证使用过程", "透明尘杯可直接展示清洁结果"],
+        ["包装清单和售后政策信息完整", "历史真实素材可追溯产品表现", "所有对外功能表达均来源于产品事实"]
       ],
       pain: [
         ["孩子后背红疹反复，半夜痒醒哭闹", "床单刚换，尘杯仍吸出毛发碎屑", "宠物上床后，床褥清洁总停在表面"],
@@ -2241,31 +2282,79 @@
         ["清洁结果看不见，不知道有没有吸干净", "机器难清理，使用一次就闲置", "多种布艺需要反复更换工具"]
       ],
       scene: [
-        ["宝宝家庭的床垫日常清洁", "养宠家庭的沙发布艺清洁"],
-        ["换洗床单前后的床褥深层清洁", "宠物上床后的毛发碎屑清理"],
-        ["卧室床垫、客厅沙发和布艺座椅连续清洁"]
+        ["宝宝家庭的床垫日常清洁", "养宠家庭的沙发布艺清洁", "换季时卧室床褥深层清洁"],
+        ["换洗床单前后的床褥深层清洁", "宠物上床后的毛发碎屑清理", "客厅沙发与布艺座椅连续清洁"],
+        ["卧室床垫的周期性清洁", "毛绒玩具与靠枕的日常清洁", "全屋软装集中清洁整理"]
       ]
     };
     const originalSuggestionIndex = {};
+    const originalSuggestionPrevious = {};
+    const originalSuggestionDirty = new Set();
 
-    function regenerateOriginalSuggestion(type) {
-      const groups = originalAiSuggestions[type] || [];
-      if (!groups.length) return;
-      originalSuggestionIndex[type] = ((originalSuggestionIndex[type] || 0) + 1) % groups.length;
-      const values = groups[originalSuggestionIndex[type]];
-      if (type === "core" || type === "secondary" || type === "trust") setPointEditorValues(type, values);
-      if (type === "pain") {
-        const field = dynamicForm.querySelector('[data-field="pain"]');
-        if (field) field.value = values.join("\n");
+    function originalSuggestionKey(type, agentType = activeType) {
+      return `${agentType}:${type}`;
+    }
+
+    function readOriginalSuggestion(type) {
+      if (type === "core" || type === "secondary" || type === "trust") {
+        return [...dynamicForm.querySelectorAll(`[data-point-editor="${type}"] [data-point-value]`)].map(input => input.value.trim()).filter(Boolean);
       }
-      if (type === "scene") {
-        const field = dynamicForm.querySelector('[data-field="scenes"]');
+      const fieldName = type === "scene" ? "scenes" : type;
+      return (dynamicForm.querySelector(`[data-field="${fieldName}"]`)?.value || "").split(/\n+/).map(value => value.trim()).filter(Boolean);
+    }
+
+    function applyOriginalSuggestion(type, values) {
+      if (type === "core" || type === "secondary" || type === "trust") setPointEditorValues(type, values);
+      const fieldName = type === "scene" ? "scenes" : type;
+      if (type === "pain" || type === "scene") {
+        const field = dynamicForm.querySelector(`[data-field="${fieldName}"]`);
         if (field) field.value = values.join("\n");
       }
       creationContext.productConfirmed = false;
       creationContext.productSaved = false;
       updateModalContext();
-      showToast("AI 推荐已更新，可继续换一组或人工修改");
+    }
+
+    function restoreOriginalSuggestion(type, key) {
+      const values = originalSuggestionPrevious[key];
+      if (!values) return;
+      applyOriginalSuggestion(type, values);
+      originalSuggestionDirty.delete(key);
+      showToast("已恢复上一组内容");
+    }
+
+    function requireProductInfoForAiSuggestion() {
+      const fields = [
+        dynamicForm.querySelector("[data-original-product-name]"),
+        dynamicForm.querySelector("[data-original-brand]"),
+        dynamicForm.querySelector("[data-original-category]")
+      ];
+      const missing = fields.filter(field => !String(field?.value || "").trim());
+      fields.forEach(field => field?.closest(".original-field")?.classList.toggle("invalid", missing.includes(field)));
+      if (!missing.length) return true;
+      setFormFeedback("请先选择、解析或填写完整产品信息，再使用 AI 换一组。", "error");
+      missing[0]?.focus();
+      return false;
+    }
+
+    async function regenerateOriginalSuggestion(type, button) {
+      if (!requireProductInfoForAiSuggestion()) return;
+      const groups = originalAiSuggestions[type] || [];
+      if (!groups.length || button?.disabled) return;
+      const requestAgentType = activeType;
+      const key = originalSuggestionKey(type, requestAgentType);
+      const label = { core:"核心卖点", secondary:"次要卖点", trust:"信任背书", pain:"人群核心痛点", scene:"使用场景" }[type] || "当前内容";
+      if (originalSuggestionDirty.has(key) && !confirm(`${label}已被手动修改。继续换一组将覆盖当前内容，是否继续？`)) return;
+      const defaultLabel = button?.textContent || "AI 换一组";
+      if (button) { button.disabled = true; button.textContent = "生成中…"; }
+      await new Promise(resolve => setTimeout(resolve, 520));
+      if (activeType !== requestAgentType) return;
+      originalSuggestionPrevious[key] = readOriginalSuggestion(type);
+      originalSuggestionIndex[key] = ((originalSuggestionIndex[key] || 0) + 1) % groups.length;
+      applyOriginalSuggestion(type, groups[originalSuggestionIndex[key]]);
+      originalSuggestionDirty.delete(key);
+      if (button?.isConnected) { button.disabled = false; button.textContent = defaultLabel; }
+      showToast("已生成 3 条新建议", "撤销", () => restoreOriginalSuggestion(type, key));
     }
 
     function validateOriginalStep(step) {
@@ -2297,6 +2386,8 @@
             setFormFeedback(
               referenceSource === "library"
                 ? "请先从视频库选择参考视频。"
+                : referenceSource === "copy-library"
+                  ? "请先从文案库选择参考文案。"
                 : referenceSource === "upload"
                   ? "请先上传参考视频。"
                   : "请先分析参考文案。",
@@ -2519,36 +2610,36 @@
       `;
     }
 
-    // 文案库数据(无标题,展示用产品名 + 内容前 80 字 + chips)
+    // 文案库数据：正文用于识别资产，产品、人群和场景属于关联元数据。
     const SCRIPT_LIBRARY_ITEMS = [
       {
         id: "mite-summer", productId: "mite-pro",
         text: "刚换的床单,也能吸出一杯脏东西。看得见的是表面,看不见的都藏在床垫深处。轻净 Pro 边拍边吸,脏东西直接进尘杯,用完还能拆下水洗。",
-        crowd: ["家庭主妇", "宿舍人群"], pain: ["螨虫危害", "床垫清洁"], scenes: ["家庭场景"],
+        crowd: ["家庭主妇", "宿舍人群"], scenes: ["家庭场景"],
         source: "AI 生成", createdBy: "me", scope: "mine", updated: "2026-08-05 14:20"
       },
       {
         id: "mite-family", productId: "mite-pro",
         text: "床单刚换一周,第一遍照样能吸出碎屑和毛发。床垫深处的脏东西,普通清理根本触达不到。轻净 Pro 拍打吸尘同步完成,尘杯可水洗。",
-        crowd: ["年轻父母", "品质家庭"], pain: ["宝宝卫生", "床垫深层"], scenes: ["家庭场景"],
+        crowd: ["年轻父母", "品质家庭"], scenes: ["家庭场景"],
         source: "AI 生成", createdBy: "me", scope: "mine", updated: "2026-08-05 14:25"
       },
       {
         id: "mite-pet", productId: "mite-pro",
         text: "家里养宠物,床铺最该清理的是藏起来的毛。刚洗完的床单,宠物上去转一圈就又有碎屑。轻净 Pro 大吸力,一拍一吸全带走。",
-        crowd: ["养宠人群"], pain: ["宠物毛发", "过敏"], scenes: ["家庭场景"],
+        crowd: ["养宠人群"], scenes: ["家庭场景"],
         source: "AI 生成", createdBy: "me", scope: "mine", updated: "2026-08-05 14:30"
       },
       {
         id: "mite-rationale", productId: "mite-pro",
         text: "先不讲参数,直接看一次真实使用。轻净 Pro 工作时可以做到深层清洁,处理后的变化通过尘杯直接呈现。",
-        crowd: ["理性消费者"], pain: ["产品质疑"], scenes: ["实测演示"],
+        crowd: ["理性消费者"], scenes: ["实测演示"],
         source: "AI 生成", createdBy: "team-1", scope: "team", updated: "2026-08-04 10:12"
       },
       {
         id: "mite-curiosity", productId: "mite-pro",
         text: "明明刚整理过,为什么再次处理还能看到变化?答案不靠猜,直接看完整演示。",
-        crowd: ["好奇心驱动"], pain: ["效果存疑"], scenes: ["悬念揭秘"],
+        crowd: ["好奇心驱动"], scenes: ["悬念揭秘"],
         source: "AI 生成", createdBy: "team-1", scope: "team", updated: "2026-08-04 10:18"
       }
     ];
@@ -2843,11 +2934,11 @@
       });
     }
 
-    function openScriptLibraryPicker() {
+    function openScriptLibraryPicker(options = {}) {
       let activeScope = "all";
       let searchText = "";
       let selectedId = "";  // 单选 ID
-      const current = dynamicForm.querySelector("[data-script-source-library]")?.value;
+      const current = options.selectedId || dynamicForm.querySelector("[data-script-source-library]")?.value;
       if (current) selectedId = current;
 
       const filterItems = () => SCRIPT_LIBRARY_ITEMS.filter(i => {
@@ -2857,7 +2948,6 @@
         return i.text.toLowerCase().includes(s) ||
                (productCatalog[i.productId]?.name || "").toLowerCase().includes(s) ||
                i.crowd.some(c => c.toLowerCase().includes(s)) ||
-               i.pain.some(p => p.toLowerCase().includes(s)) ||
                i.scenes.some(sc => sc.toLowerCase().includes(s));
       });
 
@@ -2866,7 +2956,7 @@
       overlay.innerHTML = `
         <div class="modal-card script-picker-modal" role="dialog" aria-label="从文案库选择">
           <header class="modal-head">
-            <div><strong>从文案库选择文案</strong><small>支持按"全部 / 我创建的 / 我的团队"切换,输入关键词快速定位(单选)</small></div>
+            <div><strong>${escapeHtml(options.title || "从文案库选择文案")}</strong><small>${escapeHtml(options.subtitle || '支持按"全部 / 我创建的 / 我的团队"切换，输入关键词快速定位（单选）')}</small></div>
             <button class="modal-close" type="button" data-modal-close>×</button>
           </header>
           <div class="lib-picker-toolbar">
@@ -2875,7 +2965,7 @@
               <button type="button" data-scope="mine">我创建的</button>
               <button type="button" data-scope="team">我的团队</button>
             </div>
-            <input type="text" class="lib-pick-search" placeholder="搜索文案内容 / 产品 / 人群 / 痛点 / 场景">
+            <input type="text" class="lib-pick-search" placeholder="搜索文案内容 / 产品 / 人群 / 场景">
           </div>
           <div class="lib-pick-list" data-lib-pick-list></div>
           <footer class="modal-foot">
@@ -2896,16 +2986,19 @@
           const product = productCatalog[i.productId];
           const productName = product?.name || "通用产品";
           const preview = i.text.length > 80 ? i.text.slice(0, 80) + "…" : i.text;
+          const wordCount = i.text.replace(/\s/g, "").length;
+          const estimatedDuration = Math.max(1, Math.round(wordCount / 4));
           const tagGroups = [
+            ["产品", [productName]],
             ["人群", i.crowd || []],
-            ["痛点", i.pain || []],
+            ["字数", [`${wordCount} 字`]],
             ["场景", i.scenes || []],
-            ["来源", [i.source]]
+            ["来源", [i.source]],
+            ["预计时长", [`${estimatedDuration} 秒`]]
           ].filter(([, values]) => values.length);
           const isSel = i.id === selectedId;
           return `<article class="lib-pick-card${isSel ? " selected" : ""}" data-pick-id="${i.id}">
             <i class="lib-pick-check">${isSel ? "✓" : ""}</i>
-            <div class="lib-pick-head"><strong>${escapeHtml(productName)}</strong><small>${i.text.replace(/\s/g, "").length} 字 · 预计口播 ${Math.max(1, Math.round(i.text.replace(/\s/g, "").length / 4))} 秒</small></div>
             <p class="lib-pick-content">${escapeHtml(preview)}</p>
             <div class="lib-pick-tags">${tagGroups.map(([label, values]) => `<div class="lib-pick-tag-group"><b>${label}</b><div>${values.map(value => `<span class="lib-pick-tag ${label === "来源" ? "is-source" : ""}">${escapeHtml(value)}</span>`).join("")}</div></div>`).join("")}</div>
           </article>`;
@@ -2935,9 +3028,14 @@
       });
       confirmBtn.addEventListener("click", () => {
         if (!selectedId) return;
+        const item = SCRIPT_LIBRARY_ITEMS.find(i => i.id === selectedId);
+        if (typeof options.onConfirm === "function") {
+          options.onConfirm(item);
+          overlay.remove();
+          return;
+        }
         const hidden = dynamicForm.querySelector("[data-script-source-library]");
         if (hidden) hidden.value = selectedId;
-        const item = SCRIPT_LIBRARY_ITEMS.find(i => i.id === selectedId);
         const productInput = dynamicForm.querySelector('[data-script-product-panel="library"] [data-script-product]');
         if (item && productInput) {
           productInput.value = productCatalog[item.productId]?.name || item.productId;
@@ -3104,11 +3202,12 @@
       dynamicForm.innerHTML = config.form;
       if (type === "copy") {
         referenceTranscriptState.library = { defaultValue: "", value: "" };
+        referenceTranscriptState["copy-library"] = { defaultValue: "", value: "" };
         referenceTranscriptState.upload = { defaultValue: "", value: "" };
       }
       if (type === "rewrite") {
         creationContext.productSource = "library";
-        rewriteSourceState.library = rewriteCopySamples["mite-summer"];
+        rewriteSourceState.library = "";
         rewriteSourceState.paste = "";
       }
       if (isStructuredCopyFlow(type)) {
@@ -3144,13 +3243,79 @@
       });
     }
 
-    const referenceTranscriptSamples = {
-      "7553983811703193643": "这不吸真是不知道，真没想到我每天竟然跟这些东西睡在一起。这秋天可是螨虫的高发期，家里床上的螨虫数量非常大。咱们家里记得晒，更要用除螨仪把藏在床垫和沙发里的毛发、灰尘吸出来。轻净 Pro 拍打和吸尘同步完成，尘杯还能拆下水洗，日常清理更方便。",
-      "7553983811703195018": "洗地机最怕什么？不是洗不干净，而是滚刷缠毛、边角留污。净界洗地机吸拖洗同步完成，贴边清洁不留缝，滚刷还能自动清洗。厨房油污、客厅脚印和宠物毛发，一遍就能处理干净。",
-      "external-mite-hook-01": "别只看床单表面干不干净，真正影响睡眠体验的是藏在织物深处的毛发、皮屑和灰尘。先把清洁结果展示出来，再说明产品如何拍打、吸尘和清理尘杯，让用户直接看到使用前后的差别。"
+    const referenceVideoLabels = {
+      status:{ done:"已分析", pending:"待分析", running:"分析中", failed:"分析失败" },
+      source:{ infinite:"无限画板", local:"本地上传", remix:"智能混剪" },
+      platform:{ douyin:"抖音", kuaishou:"快手", channels:"视频号", xiaohongshu:"小红书", other:"其他" }
     };
+    function referenceProductId(productName = "") {
+      const normalized = productName.trim();
+      return Object.entries(productCatalog).find(([, product]) => product.name === normalized)?.[0]
+        || ({ "轻享空气炸锅":"air-a8" }[normalized] || "");
+    }
+    function formatReferenceDuration(seconds = 0) {
+      return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+    }
+    const referenceVideoCatalogBridge = { finished: [], external: null };
+    window.addEventListener("message", event => {
+      if (event.data?.type !== "content-compass-video-catalog") return;
+      const finishedFrame = document.querySelector('#page-finished-videos iframe');
+      const externalFrame = document.querySelector('#page-reference-videos iframe');
+      if (event.source === finishedFrame?.contentWindow && event.data.source === "finished") {
+        referenceVideoCatalogBridge.finished = Array.isArray(event.data.items) ? event.data.items : [];
+      }
+      if (event.source === externalFrame?.contentWindow && event.data.source === "external") {
+        referenceVideoCatalogBridge.external = event.data.items || null;
+      }
+    });
+    function requestReferenceVideoCatalog() {
+      const message = { type:"content-compass-video-catalog-request" };
+      document.querySelector('#page-finished-videos iframe')?.contentWindow?.postMessage(message, '*');
+      document.querySelector('#page-reference-videos iframe')?.contentWindow?.postMessage(message, '*');
+    }
+    function readReferenceVideoCatalog() {
+      let finished = [];
+      let externalStore = null;
+      try {
+        const finishedFrame = document.querySelector('#page-finished-videos iframe')?.contentWindow;
+        const externalFrame = document.querySelector('#page-reference-videos iframe')?.contentWindow;
+        finished = Array.isArray(finishedFrame?.ContentCompassFinishedVideoCatalog) ? finishedFrame.ContentCompassFinishedVideoCatalog : [];
+        externalStore = externalFrame?.ContentCompassExternalVideoCatalog || null;
+      } catch (error) {
+        // 本地 file:// 打开时，浏览器可能禁止父页面直接读取 iframe；保持选择器可打开。
+        finished = [];
+        externalStore = null;
+      }
+      if (!finished.length) finished = referenceVideoCatalogBridge.finished;
+      if (!externalStore) externalStore = referenceVideoCatalogBridge.external;
+      const external = Array.isArray(externalStore?.videos) ? externalStore.videos : [];
+      const externalProducts = Array.isArray(externalStore?.products) ? externalStore.products : [];
+      return [
+        ...finished.map(video => ({
+          id:video.id, source:"finished", productId:referenceProductId(video.product), title:video.file,
+          channel:referenceVideoLabels.source[video.source] || video.source, product:video.product,
+          duration:formatReferenceDuration(video.duration), origin:referenceVideoLabels.source[video.source] || video.source,
+          status:referenceVideoLabels.status[video.status] || video.status, updated:video.created, tags:[...(video.tags || [])],
+          file:video.file, detailLabel:"", detail:"",
+          auxiliary:`${video.size} MB${video.ads?.length ? " · 已关联千川" : ""}`,
+          transcript:Array.isArray(video.shots) ? video.shots.map(shot => shot.voice).filter(Boolean).join("") : ""
+        })),
+        ...external.map(video => {
+          const product = externalProducts.find(item => item.id === video.productId);
+          return {
+            id:video.id, source:"external", productId:video.productId || "", title:video.title,
+            channel:referenceVideoLabels.platform[video.platform] || video.platform, product:product?.name || "未关联产品",
+            duration:formatReferenceDuration(video.duration), origin:video.source,
+            status:referenceVideoLabels.status[video.state] || video.state, updated:video.uploadedAt, tags:[...(video.tags || [])],
+            file:"", detailLabel:"文件信息", detail:`${video.size}${video.version ? ` · 拉片版本 V${video.version}` : ""}`,
+            auxiliary:video.source, transcript:""
+          };
+        })
+      ];
+    }
     const referenceTranscriptState = {
       library: { defaultValue: "", value: "" },
+      "copy-library": { defaultValue: "", value: "" },
       upload: { defaultValue: "", value: "" }
     };
 
@@ -3163,14 +3328,16 @@
     function refreshReferenceTranscriptEditor(source = dynamicForm.querySelector("[data-reference-source]")?.value) {
       const editor = dynamicForm.querySelector("[data-reference-transcript-editor]");
       const textarea = editor?.querySelector("[data-reference-transcript]");
+      const resetButton = editor?.querySelector('[data-action="reset-reference-transcript"]');
       const state = referenceTranscriptState[source];
       const sourcePanel = dynamicForm.querySelector(`[data-reference-panel="${source}"]`);
-      const sourceReady = source === "library"
+      const sourceReady = source === "library" || source === "copy-library"
         ? Boolean(sourcePanel?.querySelector("[data-reference-value]")?.value)
         : source === "upload" && Boolean(sourcePanel?.querySelector("[data-reference-upload].selected"));
-      const visible = Boolean(state?.defaultValue) && sourceReady && (source === "library" || source === "upload");
+      const visible = Boolean(state?.defaultValue) && sourceReady && (source === "library" || source === "copy-library" || source === "upload");
       if (!editor || !textarea) return;
       editor.hidden = !visible;
+      if (resetButton) resetButton.hidden = source === "copy-library";
       if (visible) {
         textarea.value = state.value;
         editor.dataset.transcriptSource = source;
@@ -3187,12 +3354,7 @@
       showToast("已恢复识别原文");
     }
 
-    const rewriteCopySamples = {
-      "mite-summer": "你家床垫真的洗干净了吗？轻净 Pro 一边拍打一边吸走织物深处的毛发和碎屑，清洁结果直接进入透明尘杯。床垫、沙发和布艺都能使用，用完尘杯还能拆下水洗。点击商品，先看实际使用效果。",
-      "mite-family": "每天睡的床，看起来干净不代表织物深处没有毛发和碎屑。轻净 Pro 拍打和吸尘同步完成，清洁结果直接看得见。床垫、沙发都能用，用完尘杯拆下水洗，家庭日常清洁更方便。",
-      "mite-pet": "家里养宠物，床铺清洁别只处理表面的毛。轻净 Pro 边拍边吸，把藏进床垫和沙发里的毛发碎屑带进透明尘杯。用完可拆卸水洗，养宠家庭日常使用更省事。"
-    };
-    const rewriteSourceState = { library: rewriteCopySamples["mite-summer"], paste: "" };
+    const rewriteSourceState = { library: "", paste: "" };
     const rewriteBaseStyles = ["硬广直给", "生活化口播", "专业测评", "情绪冲击", "理性对比"];
     const rewriteCustomStyles = [];
     function rewriteStyleOptionsMarkup() {
@@ -3210,12 +3372,24 @@
       if (textarea) textarea.value = rewriteSourceState[source] || "";
     }
 
-    function refreshRewriteLibraryCopy() {
-      const id = dynamicForm.querySelector("[data-rewrite-library]")?.value;
-      const textarea = dynamicForm.querySelector("[data-rewrite-original]");
-      rewriteSourceState.library = rewriteCopySamples[id] || "";
-      if (textarea) textarea.value = rewriteSourceState.library;
-      setFormFeedback("");
+    function openRewriteLibraryPicker() {
+      const value = dynamicForm.querySelector("[data-rewrite-library]");
+      openScriptLibraryPicker({
+        title:"从文案库选择待改写文案",
+        subtitle:"选择后读取文案内容；若已关联产品，将自动带入基础信息（单选）",
+        selectedId:value?.value || "",
+        onConfirm(item) {
+          if (!item) return;
+          if (value) value.value = item.id;
+          rewriteSourceState.library = item.text;
+          const textarea = dynamicForm.querySelector("[data-rewrite-original]");
+          if (textarea) textarea.value = item.text;
+          const triggerText = dynamicForm.querySelector("[data-rewrite-library-trigger-text]");
+          if (triggerText) triggerText.textContent = "重新选择文案";
+          applyReferenceProduct(item.productId, "所选文案");
+          setFormFeedback("");
+        }
+      });
     }
 
     function refreshRewriteSetting() {
@@ -3230,12 +3404,12 @@
           <div class="original-field-head"><label>改写后目标人群<span class="required-star">*</span></label></div>
           <div class="audience-selector rewrite-audience-selector">
             <div class="audience-selector-row"><span>抖音八大人群</span><div class="choice-row original-choices" data-rewrite-audience-box>
-              <button class="rewrite-audience-chip active" type="button">精致妈妈</button><button class="rewrite-audience-chip" type="button">新锐白领</button><button class="rewrite-audience-chip" type="button">资深中产</button><button class="rewrite-audience-chip" type="button">Z世代</button><button class="rewrite-audience-chip" type="button">小镇青年</button><button class="rewrite-audience-chip" type="button">小镇中老年</button><button class="rewrite-audience-chip" type="button">都市蓝领</button><button class="rewrite-audience-chip" type="button">都市银发</button>
+              <button class="rewrite-audience-chip" type="button">精致妈妈</button><button class="rewrite-audience-chip" type="button">新锐白领</button><button class="rewrite-audience-chip" type="button">资深中产</button><button class="rewrite-audience-chip" type="button">Z世代</button><button class="rewrite-audience-chip" type="button">小镇青年</button><button class="rewrite-audience-chip" type="button">小镇中老年</button><button class="rewrite-audience-chip" type="button">都市蓝领</button><button class="rewrite-audience-chip" type="button">都市银发</button>
             </div></div>
-            <div class="audience-selector-row"><span>性别</span><div class="choice-row original-choices" data-single="rewrite-gender" data-role="rewrite-gender"><span class="choice-chip active">不限</span><span class="choice-chip">女性</span><span class="choice-chip">男性</span></div></div>
-            <div class="audience-selector-row"><span>年龄</span><div class="choice-row original-choices" data-single="rewrite-age" data-role="rewrite-age"><span class="choice-chip active">不限</span><span class="choice-chip">18–23</span><span class="choice-chip">24–30</span><span class="choice-chip">31–40</span><span class="choice-chip">41–50</span><span class="choice-chip">51+</span><span class="choice-chip" data-rewrite-custom-age-trigger>自定义</span><span class="custom-age-range" data-rewrite-custom-age hidden><input type="number" min="1" max="99" value="25" data-rewrite-age-min><i>至</i><input type="number" min="1" max="99" value="35" data-rewrite-age-max></span></div></div>
+            <div class="audience-selector-row"><span>性别</span><div class="choice-row original-choices" data-single="rewrite-gender" data-role="rewrite-gender"><span class="choice-chip">不限</span><span class="choice-chip">女性</span><span class="choice-chip">男性</span></div></div>
+            <div class="audience-selector-row"><span>年龄</span><div class="choice-row original-choices" data-single="rewrite-age" data-role="rewrite-age"><span class="choice-chip">不限</span><span class="choice-chip">18–23</span><span class="choice-chip">24–30</span><span class="choice-chip">31–40</span><span class="choice-chip">41–50</span><span class="choice-chip">51+</span><span class="choice-chip" data-rewrite-custom-age-trigger>自定义</span><span class="custom-age-range" data-rewrite-custom-age hidden><input type="number" min="1" max="99" value="25" data-rewrite-age-min><i>至</i><input type="number" min="1" max="99" value="35" data-rewrite-age-max></span></div></div>
           </div>
-          <input type="hidden" data-field="rewriteTarget" data-required value="精致妈妈、不限、不限">
+          <input type="hidden" data-field="rewriteTarget" data-required value="">
           <div class="rewrite-audience-details">
             <div class="original-field-head"><label>人群核心痛点</label><button class="ai-refresh" type="button" data-ai-suggest="pain">AI 换一组</button></div>
             <textarea data-field="pain" placeholder="一行一个人群核心痛点">床单刚换，尘杯仍吸出毛发碎屑\n宠物上床后，床褥清洁总停在表面</textarea>
@@ -3275,34 +3449,80 @@
       });
       const stepPanel = dynamicForm.querySelector('[data-original-step="1"]');
       const activePanel = dynamicForm.querySelector(`[data-reference-panel="${source}"]`);
-      const hasLibrarySelection = source === "library" && Boolean(activePanel?.querySelector("[data-reference-value]")?.value);
+      const hasLibrarySelection = (source === "library" || source === "copy-library") && Boolean(activePanel?.querySelector("[data-reference-value]")?.value);
       const hasUpload = source === "upload" && Boolean(activePanel?.querySelector("[data-reference-upload].selected"));
       if (stepPanel) stepPanel.dataset.referenceReady = hasLibrarySelection || hasUpload ? "true" : "false";
       const feedback = dynamicForm.querySelector("[data-reference-feedback]");
       if (feedback) {
-        feedback.hidden = !(hasLibrarySelection || hasUpload);
+        feedback.hidden = source === "copy-library" || !(hasLibrarySelection || hasUpload);
       }
       refreshReferenceTranscriptEditor(source);
     }
 
-    function filterReferenceVideos() {
-      const keyword = dynamicForm.querySelector("[data-reference-search]")?.value.trim().toLowerCase() || "";
-      const filter = dynamicForm.querySelector('[data-single="reference-filter"] .choice-chip.active')?.dataset.referenceFilter || "all";
-      dynamicForm.querySelectorAll("[data-reference-video]").forEach(item => {
-        const matchesSource = filter === "all" || item.dataset.referenceSourceType === filter;
-        const matchesKeyword = !keyword || (item.dataset.referenceSearchText || "").toLowerCase().includes(keyword);
-        item.hidden = !(matchesSource && matchesKeyword);
+    function waitForReferenceVideoCatalog(timeoutMs = 2000) {
+      return new Promise(resolve => {
+        const startedAt = Date.now();
+        const checkCatalog = () => {
+          requestReferenceVideoCatalog();
+          const items = readReferenceVideoCatalog();
+          if (items.length || Date.now() - startedAt >= timeoutMs) {
+            resolve(items);
+            return;
+          }
+          window.setTimeout(checkCatalog, 100);
+        };
+        checkCatalog();
       });
     }
 
-    function selectReferenceVideo(option) {
+    async function openReferenceVideoPicker() {
+      if (!window.CreationVideoPicker) {
+        setFormFeedback("视频选择器加载失败，请刷新页面后重试。", "error");
+        return;
+      }
+      const selectedId = dynamicForm.querySelector('[data-reference-panel="library"] [data-reference-value]')?.value || "";
+      let items = readReferenceVideoCatalog();
+      if (!items.length) requestReferenceVideoCatalog();
+      window.CreationVideoPicker.open({
+        items,
+        selectedId,
+        loading:!items.length,
+        onConfirm(video) { if (video) selectReferenceVideo(video); }
+      });
+      if (!items.length) {
+        setFormFeedback("正在加载视频库，请稍候……");
+        items = await waitForReferenceVideoCatalog();
+        window.CreationVideoPicker.setItems?.(items);
+      }
+      if (!items.length) setFormFeedback("当前视频库暂无可选视频，可先前往成片视频或外部参考视频导入内容。", "error");
+      else setFormFeedback("");
+    }
+
+    function applyReferenceProduct(productId, sourceLabel) {
+      if (!productId || !productCatalog[productId]) {
+        showToast(`${sourceLabel}未关联产品，已保留当前基础信息`);
+        return false;
+      }
+      creationContext.productId = productId;
+      creationContext.productName = productCatalog[productId].name;
+      setProductSource("library");
+      applyProductToForm(productId);
+      showToast(`已自动带入关联产品：${productCatalog[productId].name}`);
+      return true;
+    }
+
+    function selectReferenceVideo(video) {
       const panel = dynamicForm.querySelector('[data-reference-panel="library"]');
       const value = panel?.querySelector("[data-reference-value]");
-      const title = option.querySelector("strong")?.textContent.trim() || "已选参考视频";
-      const meta = option.querySelector("small")?.textContent.trim() || "";
-      if (value) value.value = option.dataset.referenceVideo || title;
-      showReferenceTranscript("library", referenceTranscriptSamples[option.dataset.referenceVideo] || "已识别该参考视频中的口播文案，可在此修改后用于爆款仿写。 ");
-      dynamicForm.querySelectorAll("[data-reference-video]").forEach(item => item.classList.toggle("selected", item === option));
+      const title = video.title || "已选参考视频";
+      const sourceLabel = video.source === "finished" ? "成片视频" : "外部参考视频";
+      const meta = `${sourceLabel} · ${video.channel} · ${video.product} · ${video.duration}`;
+      if (value) value.value = video.id || title;
+      if (video.transcript) showReferenceTranscript("library", video.transcript);
+      else {
+        referenceTranscriptState.library = { defaultValue:"", value:"" };
+        refreshReferenceTranscriptEditor("library");
+      }
       const selected = dynamicForm.querySelector("[data-selected-reference]");
       if (selected) {
         selected.hidden = false;
@@ -3310,19 +3530,45 @@
       }
       const triggerText = dynamicForm.querySelector("[data-reference-trigger-text]");
       if (triggerText) triggerText.textContent = "重新选择视频";
-      const picker = dynamicForm.querySelector("[data-reference-library]");
-      if (picker) picker.hidden = true;
       const stepPanel = dynamicForm.querySelector('[data-original-step="1"]');
       if (stepPanel) stepPanel.dataset.referenceReady = "true";
       const feedback = dynamicForm.querySelector("[data-reference-feedback]");
       if (feedback) {
         feedback.hidden = false;
-        feedback.innerHTML = option.dataset.referenceSourceType === "history"
-          ? "<strong>已带入</strong><span>已读取该历史投放视频的口播和拉片结果，并用于仿写结构学习。</span>"
-          : "<strong>已带入</strong><span>已读取外部参考视频的拉片结果，仅学习创作方法，不作为效果样本。</span>";
+        feedback.innerHTML = video.transcript
+          ? "<strong>已带入</strong><span>已读取视频库现有口播内容，可在本次任务中继续修改。</span>"
+          : "<strong>已带入</strong><span>已读取视频库现有基础信息；当前资产未提供可编辑口播原文。</span>";
       }
+      applyReferenceProduct(video.productId, "所选视频");
       setFormFeedback("");
-      showToast("参考视频已带入");
+    }
+
+    function openReferenceCopyPicker() {
+      const panel = dynamicForm.querySelector('[data-reference-panel="copy-library"]');
+      openScriptLibraryPicker({
+        title:"从文案库选择参考文案",
+        subtitle:"选择后读取文案内容与结构；若已关联产品，将自动带入基础信息（单选）",
+        selectedId:panel?.querySelector("[data-reference-value]")?.value || "",
+        onConfirm(item) { if (item) selectReferenceCopy(item); }
+      });
+    }
+
+    function selectReferenceCopy(item) {
+      const panel = dynamicForm.querySelector('[data-reference-panel="copy-library"]');
+      const value = panel?.querySelector("[data-reference-value]");
+      if (value) value.value = item.id;
+      showReferenceTranscript("copy-library", item.text);
+      const triggerText = panel?.querySelector("[data-reference-copy-trigger-text]");
+      if (triggerText) triggerText.textContent = "重新选择文案";
+      const stepPanel = dynamicForm.querySelector('[data-original-step="1"]');
+      if (stepPanel) stepPanel.dataset.referenceReady = "true";
+      const feedback = dynamicForm.querySelector("[data-reference-feedback]");
+      if (feedback) {
+        feedback.hidden = true;
+        feedback.innerHTML = "";
+      }
+      applyReferenceProduct(item.productId, "所选文案");
+      setFormFeedback("");
     }
 
     function analyzeReference() {
@@ -3359,7 +3605,7 @@
     function refreshWordDuration(input) {
       const inputs = input ? [input] : [...dynamicForm.querySelectorAll("[data-word-count]")];
       inputs.forEach(wordInput => {
-        const durationOutput = wordInput.closest(".field")?.querySelector("[data-duration]");
+        const durationOutput = wordInput.closest(".field, .original-field")?.querySelector("[data-duration]");
         if (!durationOutput) return;
         const seconds = Math.max(1, Math.round((Number(wordInput.value) || 0) / 4));
         durationOutput.textContent = seconds < 60
@@ -3459,14 +3705,17 @@
       sessionAssets = [];
       pendingSourceAssetId = "";
       Object.assign(creationContext, {
-        productId: "mite-pro",
-        productName: productCatalog["mite-pro"].name,
+        productId: "",
+        productName: "",
         productSource: "library",
-        productConfirmed: true,
+        productConfirmed: false,
         productSaved: true,
-        originalFields: {},
+        originalFields: { marketingScene: "直播间引流" },
         customPresets: []
       });
+      Object.keys(originalSuggestionIndex).forEach(key => delete originalSuggestionIndex[key]);
+      Object.keys(originalSuggestionPrevious).forEach(key => delete originalSuggestionPrevious[key]);
+      originalSuggestionDirty.clear();
       renderSessionAssets();
       activateAssetType("copy");
       setAssetPanel(false);
@@ -3548,15 +3797,35 @@
             <button type="button" data-persona-source-mode="template">从模板库选择</button>
           </div>
           <div class="persona-template-select" data-persona-template-select hidden>
-            <button class="persona-picker-trigger" type="button" data-persona-trigger><span data-persona-selected>搜索或选择人群画像</span><small>⌄</small></button>
-            <div class="persona-picker-dropdown" data-persona-dropdown hidden>
-              <input class="persona-picker-search" data-persona-search placeholder="搜索画像名称、人群、痛点或场景">
-              <div class="persona-picker-options" data-persona-options></div>
-            </div>
+            <button class="persona-picker-trigger" type="button" data-persona-trigger aria-haspopup="dialog"><span data-persona-selected>选择人群画像模板</span><small>⌄</small></button>
             <div class="persona-applied" data-persona-applied hidden><span></span><button type="button" data-persona-clear>改为自行输入</button></div>
           </div>
         </div>
       </div>`;
+    }
+    function creationProductPickerMarkup(hasSourcePanel = false) {
+      return `<div class="header-product-picker"${hasSourcePanel ? ' data-product-source-panel="library"' : ""}>
+        <button class="header-product-picker-trigger" type="button" data-open-creation-product-picker aria-haspopup="dialog">
+          <span class="placeholder" data-product-picker-label>选择产品</span><small>⌄</small>
+        </button>
+        <input type="hidden" data-product-select data-required value="">
+      </div>`;
+    }
+
+    function openCreationProductPicker() {
+      if (!window.CreationProductPicker) {
+        setFormFeedback("产品选择器加载失败，请刷新页面后重试。", "error");
+        return;
+      }
+      const items = Object.entries(productCatalog).map(([id, product]) => ({ id, ...product }));
+      window.CreationProductPicker.open({
+        items,
+        selectedId: creationContext.productId,
+        onConfirm(productId) {
+          applyProductToForm(productId, true);
+          setFormFeedback(`已选择“${productCatalog[productId].name}”，产品信息已自动带入。`);
+        }
+      });
     }
     agentConfigs.original.intro = "基于产品事实、目标人群与内容设定，生成可直接用于千川短视频创作的多版本口播文案。";
     agentConfigs.original.process = "确认产品信息 → 设置开场、文案结构、脚本类型、长度与模型 → 生成文案 → 保存、转脚本或继续对话修改。";
@@ -3571,7 +3840,7 @@
                 <button type="button" data-product-source="link">商品链接</button>
                 <button type="button" data-product-source="manual">手工输入</button>
               </div>
-              <div class="header-product-picker" data-product-source-panel="library"><select aria-label="选择产品" data-product-select data-required>${productOptions}</select></div>
+              ${creationProductPickerMarkup(true)}
               <button class="advanced-toggle" type="button" data-action="toggle-original-advanced" aria-expanded="false">展开高级设置</button>
             </div>
           </div>
@@ -3613,7 +3882,7 @@
                 </div>
               </div>
               <div class="original-field advanced-field" hidden><label>差异化卖点</label><textarea data-field="difference">清洁效果可视化，操作完成后尘杯清理方便</textarea></div>
-              <div class="original-field"><label>营销场景<span class="required-star">*</span></label><div class="choice-row original-choices" data-single="marketing-scene" data-role="marketing-scene"><span class="choice-chip active">短视频带货</span><span class="choice-chip">直播间引流</span></div></div>
+              <div class="original-field"><label>营销场景<span class="required-star">*</span></label><div class="choice-row original-choices" data-single="marketing-scene" data-role="marketing-scene"><span class="choice-chip">短视频带货</span><span class="choice-chip active">直播间引流</span></div></div>
               <div class="original-field full"><label>营销策略</label><textarea data-field="marketing" placeholder="填写价格、优惠、赠品或活动信息；没有可留空">暑期活动，到手赠送 3 个替换滤网</textarea></div>
               <div class="original-field full advanced-field" hidden>
                 <div class="original-field-head"><label>信任背书</label><button class="ai-refresh" type="button" data-ai-suggest="trust">AI 换一组</button></div>
@@ -3633,9 +3902,9 @@
               <div class="original-field full">
                 <label>核心目标人群<span class="required-star">*</span></label>
                 <div class="audience-selector">
-                  <div class="audience-selector-row"><span>抖音八大人群</span><div class="choice-row original-choices" data-audience-box><button class="original-audience-chip audience-chip active" type="button">精致妈妈</button><button class="original-audience-chip audience-chip" type="button">新锐白领</button><button class="original-audience-chip audience-chip" type="button">资深中产</button><button class="original-audience-chip audience-chip" type="button">Z世代</button><button class="original-audience-chip audience-chip" type="button">小镇青年</button><button class="original-audience-chip audience-chip" type="button">小镇中老年</button><button class="original-audience-chip audience-chip" type="button">都市蓝领</button><button class="original-audience-chip audience-chip" type="button">都市银发</button></div></div>
-                  <div class="audience-selector-row"><span>性别</span><div class="choice-row original-choices" data-single="gender" data-role="gender" data-audience-locked-gender="女性"><span class="choice-chip">不限</span><span class="choice-chip active">女性</span><span class="choice-chip">男性</span></div></div>
-                  <div class="audience-selector-row"><span>年龄</span><div class="choice-row original-choices" data-single="age" data-role="age"><span class="choice-chip">18–23</span><span class="choice-chip">24–30</span><span class="choice-chip">31–40</span><span class="choice-chip">41–50</span><span class="choice-chip">50+</span><span class="choice-chip active" data-custom-age-trigger>自定义</span><span class="age-custom" data-custom-age><input type="number" min="1" max="99" value="25" data-age-min><span>至</span><input type="number" min="1" max="99" value="40" data-age-max></span></div></div>
+                  <div class="audience-selector-row"><span>抖音八大人群</span><div class="choice-row original-choices" data-audience-box><button class="original-audience-chip audience-chip" type="button">精致妈妈</button><button class="original-audience-chip audience-chip" type="button">新锐白领</button><button class="original-audience-chip audience-chip" type="button">资深中产</button><button class="original-audience-chip audience-chip" type="button">Z世代</button><button class="original-audience-chip audience-chip" type="button">小镇青年</button><button class="original-audience-chip audience-chip" type="button">小镇中老年</button><button class="original-audience-chip audience-chip" type="button">都市蓝领</button><button class="original-audience-chip audience-chip" type="button">都市银发</button></div></div>
+                  <div class="audience-selector-row"><span>性别</span><div class="choice-row original-choices" data-single="gender" data-role="gender" data-audience-locked-gender=""><span class="choice-chip">不限</span><span class="choice-chip">女性</span><span class="choice-chip">男性</span></div></div>
+                  <div class="audience-selector-row"><span>年龄</span><div class="choice-row original-choices" data-single="age" data-role="age"><span class="choice-chip">18–23</span><span class="choice-chip">24–30</span><span class="choice-chip">31–40</span><span class="choice-chip">41–50</span><span class="choice-chip">50+</span><span class="choice-chip" data-custom-age-trigger>自定义</span><span class="age-custom" data-custom-age hidden><input type="number" min="1" max="99" value="25" data-age-min><span>至</span><input type="number" min="1" max="99" value="40" data-age-max></span></div></div>
                 </div>
               </div>
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>人群核心痛点</label><button class="ai-refresh" type="button" data-ai-suggest="pain">AI 换一组</button></div><textarea data-field="pain" placeholder="一行一个人群核心痛点">孩子后背红疹反复，半夜痒醒哭闹
@@ -3663,7 +3932,7 @@
                   </div>
                 </div>
               </div>
-              <div class="original-field"><label>口播字数<span class="required-star">*</span></label><div class="number-control"><input type="number" min="30" max="2000" value="180" data-word-count data-required><span>字</span></div><div class="duration-estimate">预计口播时长 <b data-duration>约 45 秒</b></div></div>
+              <div class="original-field"><label>口播字数<span class="required-star">*</span></label><div class="number-control"><input type="number" min="30" max="2000" value="300" data-word-count data-required><span>字</span></div><div class="duration-estimate">预计口播时长 <b data-duration>约 1 分 15 秒</b></div></div>
               <div class="original-field"><label>生成数量<span class="required-star">*</span></label><div class="number-control"><input type="number" min="1" max="10" value="3" data-generation-count data-required><span>条</span></div></div>
               <div class="original-field full"><label>模型</label><section class="task-model-card original-model-card" data-original-model-host data-task-step="2"></section></div>
             </div>
@@ -3688,12 +3957,17 @@
           <div class="original-group copy-reference-group">
             <div class="original-group-title"><strong>爆款参考</strong><span>从视频库选择、上传视频或粘贴文案；仅学习结构，不复制原文</span></div>
             <div class="original-group-fields">
-              <div class="original-field"><label>参考来源<span class="required-star">*</span></label><select data-reference-source data-required><option value="library">从视频库选择</option><option value="upload">上传视频</option><option value="text">粘贴文案</option></select></div>
+              <div class="original-field"><label>参考来源<span class="required-star">*</span></label><select data-reference-source data-required><option value="library">从视频库选择</option><option value="copy-library">从文案库选择</option><option value="upload">上传视频</option><option value="text">粘贴文案</option></select></div>
               <div class="original-field" data-reference-panel="library">
                 <label>参考视频<span class="required-star">*</span></label>
                 <input type="hidden" data-reference-value data-required>
                 <button class="reference-library-trigger" type="button" data-action="toggle-reference-library"><span data-reference-trigger-text>从视频库选择</span><b>›</b></button>
                 <div class="selected-reference-video" data-selected-reference hidden></div>
+              </div>
+              <div class="original-field" data-reference-panel="copy-library" hidden>
+                <label>参考文案<span class="required-star">*</span></label>
+                <input type="hidden" data-reference-value data-required>
+                <button class="reference-library-trigger" type="button" data-action="toggle-reference-copy-library"><span data-reference-copy-trigger-text>从文案库选择</span><b>›</b></button>
               </div>
               <div class="original-field full" data-reference-panel="upload" hidden><label>上传参考视频<span class="required-star">*</span></label><div class="upload-box reference-upload" data-reference-upload><strong>点击选择或拖拽上传视频</strong><span>上传后自动识别口播文案、结构和表达节奏</span></div></div>
               <div class="original-field full" data-reference-panel="text" hidden><label>参考文案<span class="required-star">*</span></label><textarea data-reference-value data-required placeholder="粘贴需要参考的完整口播文案"></textarea></div>
@@ -3701,15 +3975,7 @@
                 <div class="reference-transcript-head"><label>识别文案<span class="required-star">*</span></label><button type="button" data-action="reset-reference-transcript">恢复识别原文</button></div>
                 <textarea data-reference-transcript data-required placeholder="视频中的口播文案将在识别后显示，可直接修改"></textarea>
               </div>
-              <div class="reference-video-picker full" data-reference-library hidden>
-                <div class="reference-picker-head"><div><strong>选择参考视频</strong><span>历史投放素材和外部参考视频统一在视频库管理</span></div><button type="button" data-action="toggle-reference-library">×</button></div>
-                <div class="reference-picker-tools"><input data-reference-search placeholder="搜索视频名称或素材 ID"><div class="choice-row" data-single="reference-filter"><span class="choice-chip active" data-reference-filter="all">全部</span><span class="choice-chip" data-reference-filter="history">历史投放</span><span class="choice-chip" data-reference-filter="external">外部参考</span></div></div>
-                <div class="reference-video-list">
-                  <button class="reference-video-option" type="button" data-reference-video="7553983811703193643" data-reference-source-type="history" data-reference-search-text="轻净生活电器账户 QJ_8821 除螨仪结果冲击主视频 7553983811703193643"><span class="reference-video-cover" data-reference-preview>▶</span><span class="reference-video-info"><strong>除螨仪结果冲击主视频</strong><small>千川账户：轻净生活电器账户（QJ_8821）<br>素材 ID：7553983811703193643</small><span class="reference-metrics"><b>消耗 ¥86,420</b><b>广告GMV ¥321,880</b><b>广告ROI 3.72</b></span></span><em>选择</em></button>
-                  <button class="reference-video-option" type="button" data-reference-video="7553983811703195018" data-reference-source-type="history" data-reference-search-text="净界环境电器账户 JJ_5512 洗地机痛点直给主视频 7553983811703195018"><span class="reference-video-cover" data-reference-preview>▶</span><span class="reference-video-info"><strong>洗地机痛点直给主视频</strong><small>千川账户：净界环境电器账户（JJ_5512）<br>素材 ID：7553983811703195018</small><span class="reference-metrics"><b>消耗 ¥72,960</b><b>广告GMV ¥248,370</b><b>广告ROI 3.40</b></span></span><em>选择</em></button>
-                  <button class="reference-video-option" type="button" data-reference-video="external-mite-hook-01" data-reference-source-type="external" data-reference-search-text="外部参考 EXT_20260805001 清洁家电结果钩子参考"><span class="reference-video-cover" data-reference-preview>▶</span><span class="reference-video-info"><strong>清洁家电结果钩子参考</strong><small>视频 ID：EXT_20260805001<br>暂无千川投放数据</small></span><em>选择</em></button>
-                </div>
-              </div>
+              <div class="inline-feedback full" data-reference-feedback hidden></div>
             </div>
           </div>
 
@@ -3722,7 +3988,7 @@
                   <button type="button" data-product-source="link">商品链接</button>
                   <button type="button" data-product-source="manual">手工输入</button>
                 </div>
-                <div class="header-product-picker" data-product-source-panel="library"><select aria-label="选择产品" data-product-select data-required>${productOptions}</select></div>
+                ${creationProductPickerMarkup(true)}
               </div>
             </div>
             <div class="original-group-fields">
@@ -3745,7 +4011,7 @@
               </div>
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>次要卖点（最多 3 个）</label><button class="ai-refresh" type="button" data-ai-suggest="secondary">AI 换一组</button></div><div class="point-editor" data-point-editor="secondary" data-limit="3"><div class="point-row"><span class="point-index">●</span><input data-point-value value="透明尘杯可拆卸水洗"></div><div class="point-row"><span class="point-index">●</span><input data-point-value value="床垫、沙发和布艺均可使用"></div><button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button><textarea data-field="secondary" hidden>透明尘杯可拆卸水洗\n床垫、沙发和布艺均可使用</textarea></div></div>
               <div class="original-field full advanced-field" hidden><label>差异化卖点</label><textarea data-field="difference">清洁效果可视化，操作完成后尘杯清理方便</textarea></div>
-              <div class="original-field advanced-field" hidden><label>营销场景</label><div class="choice-row original-choices" data-single="marketing-scene" data-role="marketing-scene"><span class="choice-chip active">短视频带货</span><span class="choice-chip">直播间引流</span></div></div>
+              <div class="original-field advanced-field" hidden><label>营销场景</label><div class="choice-row original-choices" data-single="marketing-scene" data-role="marketing-scene"><span class="choice-chip">短视频带货</span><span class="choice-chip active">直播间引流</span></div></div>
               <div class="original-field advanced-field" hidden><label>营销策略</label><textarea data-field="marketing" placeholder="填写当前产品真实价格、优惠、赠品或活动信息">暑期活动，到手赠送 3 个替换滤网</textarea></div>
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>信任背书</label><button class="ai-refresh" type="button" data-ai-suggest="trust">AI 换一组</button></div><div class="point-editor" data-point-editor="trust" data-limit="5"><div class="point-row"><span class="point-index">●</span><input data-point-value value="整机质保 1 年，产品参数与包装清单可核验"></div><button class="point-add" type="button" data-point-action="add">＋ 添加背书</button><textarea data-field="trust" hidden>整机质保 1 年，产品参数与包装清单可核验</textarea></div></div>
             </div>
@@ -3755,7 +4021,7 @@
             <div class="original-group-title"><strong>人群与表达策略</strong><span>确定仿写内容最终对谁表达</span></div>
             <div class="original-group-fields">
               ${personaPickerMarkup("copy")}
-              <div class="original-field full"><label>核心目标人群<span class="required-star">*</span></label><div class="audience-selector"><div class="audience-selector-row"><span>抖音八大人群</span><div class="choice-row original-choices" data-audience-box><button class="original-audience-chip audience-chip active" type="button">精致妈妈</button><button class="original-audience-chip audience-chip" type="button">新锐白领</button><button class="original-audience-chip audience-chip" type="button">资深中产</button><button class="original-audience-chip audience-chip" type="button">Z世代</button><button class="original-audience-chip audience-chip" type="button">小镇青年</button><button class="original-audience-chip audience-chip" type="button">小镇中老年</button><button class="original-audience-chip audience-chip" type="button">都市蓝领</button><button class="original-audience-chip audience-chip" type="button">都市银发</button></div></div><div class="audience-selector-row"><span>性别</span><div class="choice-row original-choices" data-single="gender" data-role="gender" data-audience-locked-gender="女性"><span class="choice-chip">不限</span><span class="choice-chip active">女性</span><span class="choice-chip">男性</span></div></div><div class="audience-selector-row"><span>年龄</span><div class="choice-row original-choices" data-single="age" data-role="age"><span class="choice-chip">不限</span><span class="choice-chip">18–23</span><span class="choice-chip">24–30</span><span class="choice-chip">31–40</span><span class="choice-chip">41–50</span><span class="choice-chip">51+</span><span class="choice-chip active" data-custom-age-trigger>自定义</span><span class="custom-age-range" data-custom-age><input type="number" min="1" max="99" value="25" data-age-min><i>至</i><input type="number" min="1" max="99" value="40" data-age-max></span></div></div></div></div>
+              <div class="original-field full"><label>核心目标人群<span class="required-star">*</span></label><div class="audience-selector"><div class="audience-selector-row"><span>抖音八大人群</span><div class="choice-row original-choices" data-audience-box><button class="original-audience-chip audience-chip" type="button">精致妈妈</button><button class="original-audience-chip audience-chip" type="button">新锐白领</button><button class="original-audience-chip audience-chip" type="button">资深中产</button><button class="original-audience-chip audience-chip" type="button">Z世代</button><button class="original-audience-chip audience-chip" type="button">小镇青年</button><button class="original-audience-chip audience-chip" type="button">小镇中老年</button><button class="original-audience-chip audience-chip" type="button">都市蓝领</button><button class="original-audience-chip audience-chip" type="button">都市银发</button></div></div><div class="audience-selector-row"><span>性别</span><div class="choice-row original-choices" data-single="gender" data-role="gender" data-audience-locked-gender=""><span class="choice-chip">不限</span><span class="choice-chip">女性</span><span class="choice-chip">男性</span></div></div><div class="audience-selector-row"><span>年龄</span><div class="choice-row original-choices" data-single="age" data-role="age"><span class="choice-chip">不限</span><span class="choice-chip">18–23</span><span class="choice-chip">24–30</span><span class="choice-chip">31–40</span><span class="choice-chip">41–50</span><span class="choice-chip">51+</span><span class="choice-chip" data-custom-age-trigger>自定义</span><span class="custom-age-range" data-custom-age hidden><input type="number" min="1" max="99" value="25" data-age-min><i>至</i><input type="number" min="1" max="99" value="40" data-age-max></span></div></div></div></div>
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>人群核心痛点</label><button class="ai-refresh" type="button" data-ai-suggest="pain">AI 换一组</button></div><textarea data-field="pain" placeholder="一行一个人群核心痛点">孩子后背红疹反复，半夜痒醒哭闹\n床单刚换，尘杯仍吸出毛发碎屑</textarea></div>
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>使用场景</label><button class="ai-refresh" type="button" data-ai-suggest="scene">AI 换一组</button></div><textarea data-field="scenes" placeholder="一行一个使用场景">宝宝家庭的床垫日常清洁\n养宠家庭的沙发布艺清洁</textarea></div>
             </div>
@@ -3765,7 +4031,7 @@
         <section class="original-step-panel" data-original-step="2" data-task-step="2" hidden>
           <div class="original-step-title"><div><h2>生成设置</h2><p>确定仿写文案的长度、生成数量和使用模型。</p></div></div>
           <div class="original-group"><div class="original-group-fields">
-            <div class="original-field"><label>口播字数<span class="required-star">*</span></label><div class="number-control"><input type="number" min="30" max="2000" value="120" data-word-count data-required><span>字</span></div><div class="duration-estimate">预计口播时长 <b data-duration>约 30 秒</b></div></div>
+            <div class="original-field"><label>口播字数<span class="required-star">*</span></label><div class="number-control"><input type="number" min="30" max="2000" value="300" data-word-count data-required><span>字</span></div><div class="duration-estimate">预计口播时长 <b data-duration>约 1 分 15 秒</b></div></div>
             <div class="original-field"><label>生成数量<span class="required-star">*</span></label><div class="number-control"><input type="number" min="1" max="10" value="3" data-generation-count data-required><span>条</span></div></div>
             <div class="original-field full"><label>模型</label><section class="task-model-card original-model-card" data-original-model-host data-task-step="2"></section></div>
           </div></div>
@@ -3781,7 +4047,6 @@
           <div class="original-step-title">
             <div><h2>原文与产品信息</h2><p>选择待改写文案，并确认改写时允许使用的产品事实。</p></div>
             <div class="original-header-controls">
-              <div class="header-product-picker"><select aria-label="选择产品" data-product-select data-required>${productOptions}</select></div>
               <button class="advanced-toggle" type="button" data-action="toggle-original-advanced" aria-expanded="false">展开高级设置</button>
             </div>
           </div>
@@ -3790,14 +4055,32 @@
             <div class="original-group-title"><strong>原文信息</strong><span>从文案库选择或直接粘贴，原资产不会被覆盖</span></div>
             <div class="original-group-fields">
               <div class="original-field"><label>原文来源<span class="required-star">*</span></label><select data-rewrite-source data-required><option value="library">从文案库选择</option><option value="paste">粘贴文案</option></select></div>
-              <div class="original-field" data-rewrite-library-field><label>选择文案<span class="required-star">*</span></label><select data-rewrite-library data-required><option value="mite-summer">除螨仪暑期投放文案</option><option value="mite-family">除螨仪家庭场景文案</option><option value="mite-pet">除螨仪养宠人群文案</option></select></div>
-              <div class="original-field full"><label>待改写文案<span class="required-star">*</span></label><textarea data-rewrite-original data-field="sourceCopy" data-required>你家床垫真的洗干净了吗？轻净 Pro 一边拍打一边吸走织物深处的毛发和碎屑，清洁结果直接进入透明尘杯。床垫、沙发和布艺都能使用，用完尘杯还能拆下水洗。点击商品，先看实际使用效果。</textarea></div>
+              <div class="original-field" data-rewrite-library-field>
+                <label>选择文案<span class="required-star">*</span></label>
+                <input type="hidden" data-rewrite-library data-required>
+                <button class="reference-library-trigger" type="button" data-action="toggle-rewrite-copy-library"><span data-rewrite-library-trigger-text>从文案库选择</span><b>›</b></button>
+              </div>
+              <div class="original-field full"><label>待改写文案<span class="required-star">*</span></label><textarea data-rewrite-original data-field="sourceCopy" data-required placeholder="选择文案后自动带入，仍可在本次任务中修改"></textarea></div>
             </div>
           </div>
 
           <div class="original-group">
-            <div class="original-group-title"><strong>基础信息</strong><span>确定本次改写对应的产品</span></div>
+            <div class="original-group-title copy-basic-title">
+              <div><strong>基础信息</strong><span>默认带入所选文案的关联产品，也可重新指定</span></div>
+              <div class="copy-basic-controls">
+                <div class="source-switch" aria-label="产品信息来源">
+                  <button class="active" type="button" data-product-source="library">产品库</button>
+                  <button type="button" data-product-source="link">商品链接</button>
+                  <button type="button" data-product-source="manual">手工输入</button>
+                </div>
+                ${creationProductPickerMarkup(true)}
+              </div>
+            </div>
             <div class="original-group-fields">
+              <div class="product-source-inline full">
+                <div data-product-source-panel="link" hidden><div class="original-field full"><label>商品链接<span class="required-star">*</span></label><div class="link-recognizer"><input data-product-link placeholder="粘贴抖店商品链接"><button type="button" data-action="recognize-product">解析商品</button></div><div class="inline-feedback" data-recognition-feedback hidden></div></div></div>
+                <div data-product-source-panel="manual" hidden></div>
+              </div>
               <div class="original-field full"><label>产品名称<span class="required-star">*</span></label><input data-manual-product-name data-original-product-name data-required value="轻净 Pro 除螨仪"></div>
               <div class="original-field"><label>品牌<span class="required-star">*</span></label><input data-original-brand data-required value="轻净"></div>
               <div class="original-field"><label>类目<span class="required-star">*</span></label><input data-original-category data-required value="清洁电器"></div>
@@ -3810,7 +4093,7 @@
               <div class="original-field full"><div class="original-field-head"><label>核心卖点<span class="required-star">*</span></label><button class="ai-refresh" type="button" data-ai-suggest="core">AI 换一组</button></div><div class="point-editor" data-point-editor="core" data-limit="3"><div class="point-row"><span class="point-index">●</span><input data-point-value value="大吸力深层清洁，拍打吸尘同步完成"><span class="point-actions"><button type="button" data-point-action="up">↑</button><button type="button" data-point-action="down">↓</button><button type="button" data-point-action="remove">×</button></span></div><button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button><textarea data-field="core" data-required hidden>大吸力深层清洁，拍打吸尘同步完成</textarea></div></div>
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>次要卖点（最多 3 个）</label><button class="ai-refresh" type="button" data-ai-suggest="secondary">AI 换一组</button></div><div class="point-editor" data-point-editor="secondary" data-limit="3"><div class="point-row"><span class="point-index">●</span><input data-point-value value="透明尘杯可拆卸水洗"></div><div class="point-row"><span class="point-index">●</span><input data-point-value value="床垫、沙发和布艺均可使用"></div><button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button><textarea data-field="secondary" hidden>透明尘杯可拆卸水洗\n床垫、沙发和布艺均可使用</textarea></div></div>
               <div class="original-field full advanced-field" hidden><label>差异化卖点</label><textarea data-field="difference">清洁结果可视化，操作完成后尘杯清理方便</textarea></div>
-              <div class="original-field"><label>营销场景<span class="required-star">*</span></label><div class="choice-row original-choices" data-single="marketing-scene" data-role="marketing-scene"><span class="choice-chip active">短视频带货</span><span class="choice-chip">直播间引流</span></div></div>
+              <div class="original-field"><label>营销场景<span class="required-star">*</span></label><div class="choice-row original-choices" data-single="marketing-scene" data-role="marketing-scene"><span class="choice-chip">短视频带货</span><span class="choice-chip active">直播间引流</span></div></div>
               <div class="original-field"><label>营销策略</label><textarea data-field="marketing" placeholder="填写当前真实价格、优惠、赠品或活动信息">暑期活动，到手赠送 3 个替换滤网</textarea></div>
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>信任背书</label><button class="ai-refresh" type="button" data-ai-suggest="trust">AI 换一组</button></div><div class="point-editor" data-point-editor="trust" data-limit="5"><div class="point-row"><span class="point-index">●</span><input data-point-value value="整机质保 1 年，产品参数与包装清单可核验"></div><button class="point-add" type="button" data-point-action="add">＋ 添加背书</button><textarea data-field="trust" hidden>整机质保 1 年，产品参数与包装清单可核验</textarea></div></div>
             </div>
@@ -3823,7 +4106,7 @@
           <div class="original-group"><div class="original-group-fields">
             <div class="original-field full"><label>改写方式<span class="required-star">*</span></label><div class="choice-row original-choices" data-single="rewrite-method" data-role="rewrite-method"><span class="choice-chip active" data-rewrite-method="hook">只换前 3 秒钩子</span><span class="choice-chip" data-rewrite-method="shorten">缩短文案</span><span class="choice-chip" data-rewrite-method="audience">更换目标人群</span><span class="choice-chip" data-rewrite-method="selling">卖点前置</span><span class="choice-chip" data-rewrite-method="style">调整表达风格</span><span class="choice-chip" data-rewrite-method="rephrase">保留结构重新表达</span></div></div>
             <div class="original-field full" data-rewrite-setting-host></div>
-            <div class="original-field"><label>口播字数<span class="required-star">*</span></label><div class="number-control"><input type="number" min="30" max="2000" value="120" data-word-count data-required><span>字</span></div><div class="duration-estimate">预计口播时长 <b data-duration>约 30 秒</b></div></div>
+            <div class="original-field"><label>口播字数<span class="required-star">*</span></label><div class="number-control"><input type="number" min="30" max="2000" value="300" data-word-count data-required><span>字</span></div><div class="duration-estimate">预计口播时长 <b data-duration>约 1 分 15 秒</b></div></div>
             <div class="original-field"><label>生成数量<span class="required-star">*</span></label><div class="number-control"><input type="number" min="1" max="10" value="3" data-generation-count data-required><span>条</span></div></div>
             <div class="original-field full"><label>模型</label><section class="task-model-card original-model-card" data-original-model-host data-task-step="2"></section></div>
           </div></div>
@@ -4127,6 +4410,19 @@
       if (title) title.textContent = activeCreationSessionTitle();
     }
 
+    function syncTaskChatTarget() {
+      const host = document.getElementById("taskChatTarget");
+      const label = document.getElementById("taskChatTargetLabel");
+      const clear = document.getElementById("taskChatTargetClear");
+      if (!host || !label || !clear) return;
+      const visible = taskShell?.classList.contains("show") && taskCompleted && isStructuredCopyFlow() && originalTaskAssetIds.length > 0;
+      host.hidden = !visible;
+      if (!visible) return;
+      const selected = originalCopyTargetId ? getSessionAsset(originalCopyTargetId) : null;
+      label.textContent = selected?.title || `全部${originalTaskAssetIds.length}个文案`;
+      clear.hidden = !selected;
+    }
+
     function exitAgentTask() {
       if (!taskShell?.classList.contains("show")) return;
       const stage = document.querySelector("#page-creation .creation-stage");
@@ -4143,6 +4439,7 @@
       agentPillButton.disabled = false;
       modelTrigger.disabled = false;
       modelTrigger.hidden = false;
+      syncTaskChatTarget();
     }
 
     function openAgentTask() {
@@ -4154,6 +4451,7 @@
       scriptTaskAssetIds = [];
       originalCopySequence = 0;
       originalCopyTargetId = "";
+      syncTaskChatTarget();
       if (activeType === "script") window.__scriptMaterialSelected = [];
       taskShell.dataset.agentType = isStructuredCopyFlow() ? "original" : activeType;
       document.getElementById("taskAgentTitle").textContent = activeAgent;
@@ -4219,6 +4517,7 @@
         <div class="task-result-top"><div><strong>${isCopy ? "AI生成原创仿写文案" : isRewrite ? "AI生成改写文案" : "AI生成文案"}</strong><small>已生成 ${assets.length} 条 · ${escapeHtml(currentProduct().name)} · ${escapeHtml(selectedModelLabel())}</small></div></div>
         <div class="original-result-list">${assets.map(originalCopyCardHtml).join("")}</div>
         <div class="original-continue-box"><span>需要更多方向？继续生成会在下方追加3条，已有结果不会被覆盖。</span><button type="button" data-original-continue>继续生成3条</button></div>`;
+      syncTaskChatTarget();
     }
 
     function showTaskResult(response, generatedAssets) {
@@ -4251,7 +4550,9 @@
       setTaskChatCollapsed(false);
       document.getElementById("taskChatSubtitle").textContent = "可继续用自然语言修改本次结果";
       promptInput.disabled = false;
-      promptInput.placeholder = activeType === "script"
+      promptInput.placeholder = isStructuredCopyFlow()
+        ? "告诉我你想怎么调整全部文案"
+        : activeType === "script"
         ? "继续修改本次分镜，例如:把第 2 个镜头改成全景,时长调整为 4s"
         : "继续修改本次结果,例如:把首 3 秒钩子更直接一些";
       sendPromptButton.disabled = false;
@@ -4597,6 +4898,15 @@
     let originalCopySequence = 0;
     let scriptTaskAssetIds = [];
     let pendingSourceAssetId = "";
+
+    document.getElementById("taskChatTargetClear")?.addEventListener("click", () => {
+      originalCopyTargetId = "";
+      pendingSourceAssetId = "";
+      renderOriginalTaskResult();
+      document.getElementById("taskChatSubtitle").textContent = "可继续用自然语言批量修改本次文案";
+      promptInput.placeholder = "告诉我你想怎么调整全部文案";
+      promptInput.focus();
+    });
 
     function generationTimestamp(date = new Date()) {
       const pad = value => String(value).padStart(2, "0");
@@ -5201,7 +5511,7 @@
       const product = currentProduct();
       const rewriteMethodLabel = ({ hook:"只换前3秒钩子", shorten:"缩短文案", audience:"更换目标人群", selling:"卖点前置", style:"调整表达风格", rephrase:"保留结构重新表达" })[creationContext.originalFields.rewriteMethod] || "只换前3秒钩子";
       const requests = {
-        original: `为“${product.name}”生成${creationContext.originalFields.generationCount || 3}条千川口播文案；营销场景：${creationContext.originalFields.marketingScene || "短视频带货"}；目标人群：${creationContext.originalFields.audiences?.join("、") || "产品默认人群"}；开场钩子：${creationContext.originalFields.hook || "不限"}；文案结构：${creationContext.originalFields.copyStructure || "不限"}；脚本类型：${creationContext.originalFields.scriptType || "不限"}；每条约${creationContext.originalFields.wordCount || 180}字。仅使用已确认的产品卖点与信任背书。`,
+        original: `为“${product.name}”生成${creationContext.originalFields.generationCount || 3}条千川口播文案；营销场景：${creationContext.originalFields.marketingScene || "直播间引流"}；目标人群：${creationContext.originalFields.audiences?.join("、") || "产品默认人群"}；开场钩子：${creationContext.originalFields.hook || "不限"}；文案结构：${creationContext.originalFields.copyStructure || "不限"}；脚本类型：${creationContext.originalFields.scriptType || "不限"}；每条约${creationContext.originalFields.wordCount || 180}字。仅使用已确认的产品卖点与信任背书。`,
         copy: `参考当前已解析爆款内容的钩子、结构与节奏，为“${product.name}”生成${creationContext.originalFields.generationCount || 3}条原创仿写文案，每条约${creationContext.originalFields.wordCount || 120}字；仅使用当前产品事实，不复制原文，不迁移参考商品的品牌、参数、价格或优惠。`,
         rewrite: `对“${product.name}”现有文案执行“${rewriteMethodLabel}”改写，生成${creationContext.originalFields.generationCount || 3}条，每条约${creationContext.originalFields.wordCount || 120}字；未指定修改的原文结构、产品事实、卖点顺序和CTA保持不变。`,
         "image-main": `为“${product.name}”生成3张商品主图，突出“${product.core}”。`,
@@ -5492,6 +5802,9 @@
       const messageId = `assistant-turn-${turnNumber}`;
       const sourceAssetId = pendingSourceAssetId;
       const sourceAsset = sessionAssets.find(asset => asset.id === sourceAssetId);
+      const chatTargetIds = inAgentTask && taskCompleted && isStructuredCopyFlow()
+        ? (originalCopyTargetId ? [originalCopyTargetId] : [...originalTaskAssetIds])
+        : (sourceAssetId ? [sourceAssetId] : []);
       const generatedAssets = response.assets.map(asset => ({
         ...asset,
         id: `session-asset-${++assetSequence}`,
@@ -5499,6 +5812,7 @@
         turnNumber,
         sourceType: activeType,
         sourceAssetId,
+        sourceAssetIds: [...chatTargetIds],
         sourceTitle: sourceAsset?.title || asset.sourceTitle,
         scriptRows: asset.type === "video" && activeType === "mix" ? (sourceAsset?.scriptRows || asset.scriptRows || completeScriptRows) : asset.scriptRows,
         model: selectedModelLabel(),
@@ -5506,6 +5820,7 @@
       }));
       const userTurn = document.createElement("div");
       userTurn.className = "message user";
+      userTurn.dataset.targetAssetIds = chatTargetIds.join(",");
       userTurn.textContent = requestText;
 
       const assistantTurn = document.createElement("div");
@@ -5514,6 +5829,7 @@
       assistantTurn.dataset.agentType = activeType;
       assistantTurn.dataset.modelLabel = selectedModelLabel();
       assistantTurn.dataset.assetIds = generatedAssets.map(asset => asset.id).join(",");
+      assistantTurn.dataset.sourceAssetIds = chatTargetIds.join(",");
       assistantTurn.innerHTML = `
         <div class="message-head">
           <strong title="${escapeHtml(selectedModelLabel())}">✦ ${activeAgent}</strong>
@@ -5569,6 +5885,10 @@
     }
 
     dynamicForm.addEventListener("click", event => {
+      if (event.target.closest("[data-open-creation-product-picker]")) {
+        openCreationProductPicker();
+        return;
+      }
       const conflictAction = event.target.closest("[data-conflict-action]");
       if (conflictAction) {
         const panel = conflictAction.closest("[data-agent-conflict]");
@@ -5670,20 +5990,6 @@
         showToast("表达风格已添加");
         return;
       }
-      const referencePreview = event.target.closest("[data-reference-preview]");
-      if (referencePreview) {
-        event.preventDefault();
-        event.stopPropagation();
-        const playing = referencePreview.classList.toggle("playing");
-        referencePreview.textContent = playing ? "Ⅱ" : "▶";
-        setFormFeedback(playing ? "正在预览参考视频，再次点击可暂停。" : "参考视频预览已暂停。");
-        return;
-      }
-      const referenceVideo = event.target.closest("[data-reference-video]");
-      if (referenceVideo) {
-        selectReferenceVideo(referenceVideo);
-        return;
-      }
       const taskModel = event.target.closest("[data-task-model]");
       if (taskModel) {
         modelSelect.value = taskModel.dataset.taskModel;
@@ -5718,7 +6024,7 @@
       }
       const aiSuggestion = event.target.closest("[data-ai-suggest]");
       if (aiSuggestion) {
-        regenerateOriginalSuggestion(aiSuggestion.dataset.aiSuggest);
+        regenerateOriginalSuggestion(aiSuggestion.dataset.aiSuggest, aiSuggestion);
         return;
       }
       const sourceTab = event.target.closest("[data-product-source]");
@@ -5730,15 +6036,10 @@
       if (actionButton) {
         const action = actionButton.dataset.action;
         if (action === "toggle-reference-library") {
-          const picker = dynamicForm.querySelector("[data-reference-library]");
-          if (picker) {
-            picker.hidden = !picker.hidden;
-            if (!picker.hidden) {
-              filterReferenceVideos();
-              picker.querySelector("[data-reference-search]")?.focus();
-            }
-          }
+          openReferenceVideoPicker();
         }
+        if (action === "toggle-reference-copy-library") openReferenceCopyPicker();
+        if (action === "toggle-rewrite-copy-library") openRewriteLibraryPicker();
         if (action === "reset-reference-transcript") resetReferenceTranscript();
         if (action === "toggle-original-advanced") {
           setOriginalAdvanced(!actionButton.classList.contains("active"));
@@ -5826,7 +6127,6 @@
         }
         row.querySelectorAll(".choice-chip").forEach(item => item.classList.remove("active"));
         chip.classList.add("active");
-        if (row.dataset.single === "reference-filter") filterReferenceVideos();
         if (row.dataset.single === "rewrite-method") refreshRewriteSetting();
         if (row.dataset.single === "rewrite-gender" || row.dataset.single === "rewrite-age") syncRewriteAudienceTarget();
         if (row.dataset.role === "script-type") syncCopyStructureByScriptType(chip.textContent.trim());
@@ -5877,14 +6177,12 @@
       if (event.target.matches("[data-mode-control]")) setFormFeedback(`已切换为“${event.target.options[event.target.selectedIndex].text}”，输入槽位已更新。`);
       if (event.target.matches("[data-reference-source]")) refreshReferenceSource();
       if (event.target.matches("[data-rewrite-source]")) refreshRewriteSource();
-      if (event.target.matches("[data-rewrite-library]")) refreshRewriteLibraryCopy();
       if (event.target.matches("[data-product-select]")) applyProductToForm(event.target.value, true);
       if (event.target.matches("[data-creation-preset]")) applyCreationPreset(event.target.value);
     });
 
     dynamicForm.addEventListener("input", event => {
       if (event.target.matches("[data-copy-structure-search]")) renderCopyStructurePicker(event.target.value);
-      if (event.target.matches("[data-reference-search]")) filterReferenceVideos();
       if (event.target.matches("[data-reference-transcript]")) {
         const source = dynamicForm.querySelector("[data-reference-source]")?.value;
         if (referenceTranscriptState[source]) referenceTranscriptState[source].value = event.target.value;
@@ -5896,6 +6194,9 @@
       if (event.target.matches("[data-word-count]")) refreshWordDuration(event.target);
       if (event.target.matches("[data-rewrite-age-min], [data-rewrite-age-max]")) syncRewriteAudienceTarget();
       if (event.target.matches("[data-point-value]")) syncPointEditor(event.target.closest("[data-point-editor]"));
+      const aiSuggestionType = event.target.closest("[data-point-editor]")?.dataset.pointEditor
+        || ({ pain:"pain", scenes:"scene" }[event.target.dataset.field]);
+      if (aiSuggestionType) originalSuggestionDirty.add(originalSuggestionKey(aiSuggestionType));
       event.target.closest(".field")?.classList.remove("invalid");
       event.target.closest(".original-field")?.classList.remove("invalid");
       if (isStructuredCopyFlow() && event.target.matches('[data-field="core"], [data-field="secondary"], [data-field="difference"], [data-field="marketing"], [data-field="pain"], [data-field="scenes"], [data-manual-product-name], [data-point-value], [data-original-brand], [data-original-category]')) {
@@ -5960,11 +6261,23 @@
 
     const toast = document.getElementById("toast");
     let toastTimer;
-    function showToast(text) {
+    function showToast(text, actionLabel = "", action = null) {
       toast.textContent = text;
+      toast.classList.toggle("has-action", Boolean(actionLabel && action));
+      if (actionLabel && action) {
+        const actionButton = document.createElement("button");
+        actionButton.type = "button";
+        actionButton.textContent = actionLabel;
+        actionButton.addEventListener("click", () => {
+          clearTimeout(toastTimer);
+          toast.classList.remove("show", "has-action");
+          action();
+        }, { once:true });
+        toast.append(actionButton);
+      }
       toast.classList.add("show");
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove("show"), 2100);
+      toastTimer = setTimeout(() => toast.classList.remove("show", "has-action"), actionLabel ? 4200 : 2100);
     }
 
     function updateAssetCounts() {
@@ -6161,6 +6474,7 @@
         originalCopyTargetId = asset.id;
         pendingSourceAssetId = asset.id;
         renderOriginalTaskResult();
+        syncTaskChatTarget();
         document.getElementById("taskChatSubtitle").textContent = `正在修改：${asset.title}`;
         promptInput.value = "";
         promptInput.placeholder = `描述对“${asset.title}”的修改要求`;
@@ -8336,13 +8650,21 @@
       };
     }
     function isPersonaRecommended(persona, context) { return Boolean((context.name && persona.product === context.name) || (context.category && persona.category === context.category) || (context.brand && persona.brand === context.brand)); }
-    function renderPersonaPickerOptions(picker, keyword = "") {
-      const host = picker.querySelector("[data-persona-options]");
-      if (!host) return;
+    function openPersonaTemplatePicker(picker) {
+      if (!window.CreationPersonaPicker) {
+        setFormFeedback("人群画像选择器加载失败，请刷新页面后重试。", "error");
+        return;
+      }
       const context = personaPickerProductContext();
-      const term = keyword.trim().toLowerCase();
-      const rows = personaCatalog.filter(persona => !term || [persona.name, persona.audience, persona.gender, persona.age, ...persona.pain, ...persona.scenes].join(" ").toLowerCase().includes(term)).sort((a,b) => Number(isPersonaRecommended(b,context)) - Number(isPersonaRecommended(a,context)));
-      host.innerHTML = rows.length ? rows.map(persona => `<button class="persona-picker-option" type="button" data-persona-option="${persona.id}"><span><strong>${escapeHtml(persona.name)}</strong><small>${escapeHtml(persona.audience)} · ${escapeHtml(persona.gender)} · ${escapeHtml(persona.age)}岁</small></span>${isPersonaRecommended(persona,context) ? `<em class="persona-recommended">推荐</em>` : ""}</button>`).join("") : `<div class="persona-picker-empty">没有匹配的人群画像</div>`;
+      const items = personaCatalog.map(persona => ({ ...persona, recommended:isPersonaRecommended(persona, context) }));
+      window.CreationPersonaPicker.open({
+        items,
+        selectedId:picker.dataset.personaId || "",
+        onConfirm(persona) {
+          const source = personaCatalog.find(item => item.id === persona?.id);
+          if (source) applyPersonaToCurrentForm(picker, source);
+        }
+      });
     }
     function activatePersonaChoice(row, text) {
       if (!row) return;
@@ -8396,7 +8718,7 @@
     }
     function clearPersonaPicker(picker, notify = true) {
       delete picker.dataset.personaId;
-      picker.querySelector("[data-persona-selected]").textContent = "搜索或选择人群画像";
+      picker.querySelector("[data-persona-selected]").textContent = "选择人群画像模板";
       picker.querySelector("[data-persona-applied]").hidden = true;
       creationContext.originalFields.personaTemplateId = "";
       delete creationContext.originalFields.personaSnapshot;
@@ -8409,8 +8731,7 @@
       const templateSelect = picker.querySelector("[data-persona-template-select]");
       if (templateSelect) templateSelect.hidden = !templateMode;
       if (!templateMode) {
-        picker.classList.remove("open");
-        picker.querySelector("[data-persona-dropdown]").hidden = true;
+        window.CreationPersonaPicker?.close();
         clearPersonaPicker(picker, notify);
       } else if (notify) {
         showToast("请从模板库选择人群画像，选择后将回填本次任务字段");
@@ -8426,19 +8747,7 @@
       const trigger = event.target.closest("[data-persona-trigger]");
       if (trigger) {
         const picker = trigger.closest("[data-persona-picker]");
-        const opening = !picker.classList.contains("open");
-        dynamicForm.querySelectorAll("[data-persona-picker].open").forEach(item => { item.classList.remove("open"); item.querySelector("[data-persona-dropdown]").hidden = true; });
-        picker.classList.toggle("open", opening);
-        picker.querySelector("[data-persona-dropdown]").hidden = !opening;
-        if (opening) { renderPersonaPickerOptions(picker); setTimeout(() => picker.querySelector("[data-persona-search]")?.focus(), 0); }
-        return;
-      }
-      const option = event.target.closest("[data-persona-option]");
-      if (option) {
-        const picker = option.closest("[data-persona-picker]");
-        const persona = personaCatalog.find(item => item.id === option.dataset.personaOption);
-        if (persona) applyPersonaToCurrentForm(picker, persona);
-        picker.classList.remove("open"); picker.querySelector("[data-persona-dropdown]").hidden = true;
+        openPersonaTemplatePicker(picker);
         return;
       }
       const clear = event.target.closest("[data-persona-clear]");
@@ -8446,13 +8755,6 @@
         const picker = clear.closest("[data-persona-picker]");
         setPersonaPickerMode(picker, "manual");
       }
-    });
-    dynamicForm.addEventListener("input", event => {
-      if (event.target.matches("[data-persona-search]")) renderPersonaPickerOptions(event.target.closest("[data-persona-picker]"), event.target.value);
-    });
-    document.addEventListener("click", event => {
-      if (event.target.closest("[data-persona-picker]")) return;
-      dynamicForm.querySelectorAll("[data-persona-picker].open").forEach(picker => { picker.classList.remove("open"); picker.querySelector("[data-persona-dropdown]").hidden = true; });
     });
     renderPersonaLibrary();
 

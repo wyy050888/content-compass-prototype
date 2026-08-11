@@ -55,19 +55,19 @@
                 <button class="agent-filter" type="button" data-agent-filter="analysis" role="tab" aria-selected="false">视频分析</button>
               </div>
               <div class="agent-grid" id="agentGrid">
-              <button class="agent-card" data-agent="智能文案 Agent" data-type="original" data-category="copy">
+              <button class="agent-card" data-agent="智能文案创作" data-type="original" data-category="copy">
                 <span class="agent-icon">原</span>
                 <strong>智能文案</strong>
                 <small>结合产品事实与历史策略，生成多条单变量 A/B 文案</small>
                 <span class="agent-foot"><span class="agent-chip">产品事实</span><span class="agent-chip">单变量 A/B</span><span class="agent-chip">多版本</span></span>
               </button>
-              <button class="agent-card" data-agent="爆款文案仿写 Agent" data-type="copy" data-category="copy">
+              <button class="agent-card" data-agent="爆款文案仿写创作" data-type="copy" data-category="copy">
                 <span class="agent-icon">仿</span>
                 <strong>爆款文案仿写</strong>
                 <small>拆参考素材的钩子与结构，再映射为当前产品的新文案</small>
                 <span class="agent-foot"><span class="agent-chip">结构拆解</span><span class="agent-chip">原创映射</span><span class="agent-chip">去同质化</span></span>
               </button>
-              <button class="agent-card" data-agent="智能改写 Agent" data-type="rewrite" data-category="copy">
+              <button class="agent-card" data-agent="智能改写创作" data-type="rewrite" data-category="copy">
                 <span class="agent-icon">改</span>
                 <strong>智能改写</strong>
                 <small>换钩子、压时长、换人群，保留需要保留的内容</small>
@@ -109,7 +109,7 @@
             <div class="agent-task-shell" id="agentTaskShell" aria-live="polite">
               <section class="task-work-pane">
                 <div class="task-taskbar">
-                  <div><strong id="taskAgentTitle">智能文案 Agent</strong><small id="taskAgentIntro">请按步骤补全必要信息。</small></div>
+                  <div><strong id="taskAgentTitle">智能文案创作</strong><small id="taskAgentIntro">请按步骤补全必要信息。</small></div>
                 </div>
                 <div class="task-stepper" id="taskStepper" aria-label="创作步骤"></div>
                 <div class="task-form-scroll" id="taskFormScroll">
@@ -134,6 +134,10 @@
             <div class="composer-wrap">
               <div class="composer">
                 <div class="followup-hint" id="followupHint"><strong>已关联上一版</strong><span>可继续说：保留第二版，只把钩子缩短到 3 秒｜卖点不变，换成人群视角</span></div>
+                <div class="task-chat-target" id="taskChatTarget" hidden>
+                  <span>当前聊天对象：</span><strong id="taskChatTargetLabel"></strong>
+                  <button type="button" id="taskChatTargetClear" hidden>切换为全部文案</button>
+                </div>
                 <textarea id="promptInput" placeholder="描述你的想法，或选择下方专业能力开始创作"></textarea>
                 <div class="composer-foot">
                   <div class="composer-selectors">

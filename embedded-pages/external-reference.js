@@ -16,6 +16,18 @@
       {id:'rv6', title:'清洁工具效果对比参考', productId:'washer-s5', platform:'douyin', source:'采集', state:'pending', duration:15, created:3, uploadedAt:'08/05 11:03:09', tags:['结果直给','效果证明'], size:'—', version:0}
     ]
   };
+  window.ContentCompassExternalVideoCatalog = { videos: state.videos, products: state.products };
+  function publishExternalVideoCatalog() {
+    window.parent?.postMessage({
+      type: 'content-compass-video-catalog',
+      source: 'external',
+      items: { videos: state.videos, products: state.products }
+    }, '*');
+  }
+  window.addEventListener('message', (event) => {
+    if (event.data?.type === 'content-compass-video-catalog-request') publishExternalVideoCatalog();
+  });
+  publishExternalVideoCatalog();
   const names = {douyin:'抖音',kuaishou:'快手',channels:'视频号',xiaohongshu:'小红书',other:'其他'};
   const states = {pending:'待分析',running:'分析中',done:'已分析',failed:'分析失败'};
   const icons = {download:'⇩',tag:'◇',analyze:'✦'};

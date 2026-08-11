@@ -105,7 +105,7 @@
   <div class="modal-backdrop" id="agentModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
       <div class="modal-head">
-        <div><span class="badge">开始创作</span><h3 id="modalTitle">智能文案 Agent</h3></div>
+        <div><span class="badge">开始创作</span><h3 id="modalTitle">智能文案创作</h3></div>
         <button class="close-btn" id="closeModal" aria-label="关闭">×</button>
       </div>
       <div class="modal-body">

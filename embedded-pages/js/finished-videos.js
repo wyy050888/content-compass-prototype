@@ -65,6 +65,20 @@
     { id: 'mix-3', name: '空气炸锅新品种草混剪', file: 'MIX_AIR_NEW_30S.mp4', type: 'mix', folder: 'air', duration: 30, size: 302, created: '2026-08-06 16:11', product: '轻享空气炸锅', status: 'pending', source: 'local', code: 'MIX', theme: 'mix-c', tags: ['新品种草'], ads: makeAds(1) },
     { id: 'mix-fail', name: '家庭清洁场景混剪（待重试）', file: 'MIX_HOME_22S.mp4', type: 'mix', folder: 'pending', duration: 22, size: 226, created: '2026-08-05 09:26', product: '轻净 Pro 除螨仪', status: 'failed', source: 'local', code: 'MIX', theme: 'mix-a', tags: ['家庭清洁'], ads: [] }
   ];
+  window.ContentCompassFinishedVideoCatalog = videos;
+
+  function publishFinishedVideoCatalog() {
+    window.parent?.postMessage({
+      type: 'content-compass-video-catalog',
+      source: 'finished',
+      items: videos
+    }, '*');
+  }
+
+  window.addEventListener('message', (event) => {
+    if (event.data?.type === 'content-compass-video-catalog-request') publishFinishedVideoCatalog();
+  });
+  publishFinishedVideoCatalog();
 
   const state = {
     folder: 'all', source: 'all', status: 'all', tags: new Set(), sort: 'time-desc', search: '',
