@@ -1,0 +1,11 @@
+/* 外部交付页面通过 iframe 接入主原型，避免复制样式和脚本造成耦合。 */
+.embedded-library-page { min-height:100vh; padding:0; overflow:hidden; background:#f7f7fa; }
+.embedded-library-frame { display:block; width:100%; height:100vh; min-height:760px; border:0; background:#fff; }
+.embedded-library-page.pda-bridge-open { display:block!important; position:fixed; z-index:3000; inset:0 0 0 var(--sidebar); min-height:0; padding:0; background:transparent; overflow:hidden; }
+.embedded-library-page.pda-bridge-open .embedded-library-frame { height:100vh; min-height:0; background:transparent; }
+@media(max-width:860px){.embedded-library-page.pda-bridge-open{left:0}}
+.app.canvas-fullscreen { grid-template-columns:minmax(0,1fr); }
+.app.canvas-fullscreen > .sidebar,
+.app.canvas-fullscreen > .sub-sidebar { display:none !important; }
+.app.canvas-fullscreen > .main { grid-column:1; padding-left:0 !important; }
+@media (max-width:860px) { .embedded-library-frame { min-height:100dvh; } }

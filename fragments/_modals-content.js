@@ -1,0 +1,132 @@
+(function(){var s=document.currentScript;if(!s)return;s.insertAdjacentHTML('beforebegin',`
+  <!-- 爆款文案结构：详情及自建结构编辑 -->
+  <div class="modal-backdrop" id="copyStructureDetailModal" role="dialog" aria-modal="true">
+    <div class="modal copy-structure-detail">
+      <div class="modal-head">
+        <div><span class="badge" id="copyStructureDetailSource">千川</span><h3 id="copyStructureDetailTitle">爆款文案结构</h3></div>
+        <div class="copy-structure-head-actions"><button class="primary-btn" type="button" id="copyStructureCloneFromDetail">复制为自建</button><button class="close-btn" type="button" data-close-copy-structure-detail aria-label="关闭">×</button></div>
+      </div>
+      <div class="modal-body">
+        <div class="copy-structure-detail-summary" id="copyStructureDetailSummary"></div>
+        <div class="copy-related-rank-note"><i>榜</i><div><strong>高消耗素材示例</strong><span>为便于快速判断，仅展示命中该结构且消耗最高的前 20 条素材，按消耗从高到低排列。</span></div></div>
+        <div class="copy-related-toolbar">
+          <div><strong>相关千川文案与视频</strong><small id="copyStructureRelatedCount" style="margin-left:8px;color:#999aa4;"></small></div>
+          <input type="search" id="copyStructureRelatedSearch" placeholder="搜索产品、视频名称、素材 ID 或文案">
+        </div>
+        <div class="copy-related-list" id="copyStructureRelatedList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="copyStructureEditorModal" role="dialog" aria-modal="true">
+    <div class="modal copy-structure-editor-modal">
+      <div class="modal-head"><div class="modal-head-title"><i>构</i><div><h3 id="copyStructureEditorTitle">新建爆款文案结构</h3><small>保存后可在智能文案创作时直接调用</small></div></div><button class="close-btn" type="button" data-close-copy-structure-editor aria-label="关闭">×</button></div>
+      <div class="modal-body">
+        <div class="copy-structure-editor-grid">
+          <label class="full">结构名称<input id="copyStructureNameInput" maxlength="40" placeholder="例如：结果前置·痛点解决·行动引导型"></label>
+          <label class="full">结构公式<input id="copyStructureFormulaInput" maxlength="120" placeholder="例如：结果前置 → 痛点放大 → 能力证明 → 行动引导"></label>
+          <div class="copy-structure-editor-field full"><span>结构标签 <b style="color:#e14b53;">*</b></span><input type="hidden" id="copyStructureLevelInput" value="general"><div class="copy-level-options"><button class="active" type="button" data-copy-level="general"><i>通</i><span><b>通用结构</b><small>可供不同产品创作时复用</small></span><em>✓</em></button><button type="button" data-copy-level="product"><i>品</i><span><b>产品级结构</b><small>仅在关联产品创作时优先调用</small></span><em>✓</em></button></div></div>
+          <label class="full">关联产品<select id="copyStructureProductInput"><option value="">通用结构（不限定产品）</option><option>轻净 Pro 除螨仪</option><option>轻享空气炸锅 A8</option><option>净界洗地机 S5</option><option>随行榨汁杯 Mini</option></select></label>
+        </div>
+      </div>
+      <div class="modal-foot"><div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-copy-structure-editor>取消</button><button class="primary-btn" type="button" id="saveCopyStructure">保存结构</button></div></div>
+    </div>
+  </div>
+
+  <!-- 文案库：新增文案 -->
+  <div class="modal-backdrop" id="clCreateModal" role="dialog" aria-modal="true">
+    <div class="modal cl-create-modal">
+      <div class="modal-head"><div class="modal-head-title"><i>文</i><div><h3>新增文案</h3><small>手工录入或从视频识别口播，保存后统一进入文案库</small></div></div><button class="close-btn" type="button" data-close-cl-create aria-label="关闭">×</button></div>
+      <div class="modal-body">
+        <div class="cl-create-tabs" role="tablist">
+          <button class="active" type="button" data-cl-create-source="manual"><i>✎</i><span>手工录入<small>直接填写已有口播文案</small></span></button>
+          <button type="button" data-cl-create-source="library"><i>▶</i><span>从视频库解析<small>选择视频并识别音频口播</small></span></button>
+          <button type="button" data-cl-create-source="upload"><i>↑</i><span>上传视频识别<small>上传本地视频自动转写</small></span></button>
+        </div>
+        <div class="cl-create-panel" data-cl-create-panel="manual"></div>
+        <div class="cl-create-panel" data-cl-create-panel="library" hidden>
+          <div class="cl-video-source-list">
+            <button class="cl-video-source-option" type="button" data-cl-video-id="7553983811703193643" data-product="轻净 Pro 除螨仪" data-crowd="精致妈妈"><i class="cl-video-source-cover">▶</i><span><strong>除螨仪结果冲击型主视频</strong><small>历史投放 · 00:32 · 素材 ID 7553983811703193643</small></span></button>
+            <button class="cl-video-source-option" type="button" data-cl-video-id="7553983811703197228" data-product="轻享空气炸锅 A8" data-crowd="新锐白领"><i class="cl-video-source-cover">▶</i><span><strong>空气炸锅晚餐场景视频</strong><small>历史投放 · 00:28 · 素材 ID 7553983811703197228</small></span></button>
+          </div>
+        </div>
+        <div class="cl-create-panel" data-cl-create-panel="upload" hidden>
+          <input type="file" id="clVideoUploadInput" accept="video/*" hidden>
+          <button class="cl-upload-video" type="button" id="clVideoUploadTrigger"><span><strong>点击选择视频</strong><span>上传后自动识别音频中的口播文案</span></span></button>
+        </div>
+        <div class="cl-parse-status" id="clParseStatus" hidden><b>✓</b><span>口播识别完成，可继续修改后保存到文案库。</span></div>
+        <section class="cl-create-section"><div class="cl-create-section-head"><div><h4>基础信息</h4><p>关联产品，并补充文案对应的人群信息</p></div></div><div class="cl-create-form">
+          <label class="cl-create-field"><span>关联产品 <b style="color:#e14b53;">*</b></span><select id="clCreateProduct"><option value="">请选择产品</option><option>轻净 Pro 除螨仪</option><option>轻享空气炸锅 A8</option><option>净界洗地机 S5</option><option>随行榨汁杯 Mini</option></select></label>
+          <div></div>
+          <div class="cl-audience-block">
+            <div class="cl-audience-line"><span>抖音八大人群 <b style="color:#e14b53;">*</b></span><div class="cl-audience-chips" data-cl-choice-group="audience"><button class="cl-audience-chip active" type="button" data-value="精致妈妈">精致妈妈</button><button class="cl-audience-chip" type="button" data-value="新锐白领">新锐白领</button><button class="cl-audience-chip" type="button" data-value="资深中产">资深中产</button><button class="cl-audience-chip" type="button" data-value="Z世代">Z世代</button><button class="cl-audience-chip" type="button" data-value="小镇青年">小镇青年</button><button class="cl-audience-chip" type="button" data-value="小镇中老年">小镇中老年</button><button class="cl-audience-chip" type="button" data-value="都市蓝领">都市蓝领</button><button class="cl-audience-chip" type="button" data-value="都市银发">都市银发</button></div></div>
+            <div class="cl-audience-line"><span>性别 <b style="color:#e14b53;">*</b></span><div class="cl-audience-chips" data-cl-choice-group="gender"><button class="cl-audience-chip active" type="button" data-value="不限">不限</button><button class="cl-audience-chip" type="button" data-value="女性">女性</button><button class="cl-audience-chip" type="button" data-value="男性">男性</button></div></div>
+            <div class="cl-audience-line"><span>年龄 <b style="color:#e14b53;">*</b></span><div class="cl-audience-chips" data-cl-choice-group="age"><button class="cl-audience-chip" type="button" data-value="18–23">18–23</button><button class="cl-audience-chip active" type="button" data-value="24–30">24–30</button><button class="cl-audience-chip" type="button" data-value="31–40">31–40</button><button class="cl-audience-chip" type="button" data-value="41–50">41–50</button><button class="cl-audience-chip" type="button" data-value="51+">51+</button><button class="cl-audience-chip" type="button" data-value="custom">自定义</button><div class="cl-custom-age" id="clCustomAge"><input type="number" id="clAgeMin" min="1" max="99" placeholder="最小"><span>至</span><input type="number" id="clAgeMax" min="1" max="99" placeholder="最大"></div></div></div>
+            <div class="cl-audience-text-grid"><label class="cl-create-field"><span>人群核心痛点</span><textarea id="clCreatePain" placeholder="一行一个人群核心痛点"></textarea></label><label class="cl-create-field"><span>使用场景</span><textarea id="clCreateScenes" placeholder="一行一个使用场景"></textarea></label></div>
+          </div>
+        </div></section>
+        <section class="cl-create-section"><div class="cl-create-section-head"><div><h4>文案内容</h4><p>视频识别结果会自动填入，保存前可继续修改</p></div></div><div class="cl-create-form"><label class="cl-create-field full"><span>文案内容 <b style="color:#e14b53;">*</b></span><textarea id="clCreateText" placeholder="请输入完整口播文案"></textarea></label></div></section>
+      </div>
+      <div class="modal-foot"><div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-cl-create>取消</button><button class="primary-btn" type="button" id="clCreateSave">新增文案</button></div></div>
+    </div>
+  </div>
+
+  <!-- 文案库：编辑文案 -->
+  <div class="modal-backdrop" id="clEditModal" role="dialog" aria-modal="true">
+    <div class="modal cl-edit-modal">
+      <div class="modal-head"><div class="modal-head-title"><i>编</i><div><h3>编辑文案</h3><small>修改文案内容、关联产品或目标人群，保存后立即生效</small></div></div><button class="close-btn" type="button" data-close-cl-edit aria-label="关闭">×</button></div>
+      <div class="modal-body">
+        <div class="cl-edit-meta" id="clEditMeta">
+          <span class="cl-edit-meta-item"><label>来源</label><b id="clEditMetaSource">—</b></span>
+          <span class="cl-edit-meta-item"><label>字数 / 时长</label><b id="clEditMetaChars">—</b></span>
+          <span class="cl-edit-meta-item"><label>最后更新</label><b id="clEditMetaUpdated">—</b></span>
+        </div>
+        <section class="cl-edit-section">
+          <div class="cl-edit-section-head"><h4>基础信息</h4><p>关联产品与目标人群会用于后续 AI 创作匹配</p></div>
+          <div class="cl-edit-form">
+            <label class="cl-edit-field"><span>关联产品 <b style="color:#e14b53;">*</b></span><input type="text" id="clEditProduct" placeholder="如：除螨仪、空气炸锅"></label>
+            <label class="cl-edit-field"><span>目标人群 <b style="color:#e14b53;">*</b></span><input type="text" id="clEditCrowd" placeholder="如：宝妈/家庭、年轻白领"></label>
+          </div>
+        </section>
+        <section class="cl-edit-section">
+          <div class="cl-edit-section-head"><h4>文案内容</h4><p>支持 5–500 字，Enter 换行不保存</p></div>
+          <label class="cl-edit-field full"><span>文案详情 <b style="color:#e14b53;">*</b></span><textarea id="clEditText" rows="6" placeholder="请输入完整口播文案"></textarea><small class="cl-edit-counter" id="clEditCounter">0 / 500 字</small></label>
+        </section>
+        <div class="cl-edit-error" id="clEditModalError" hidden></div>
+      </div>
+      <div class="modal-foot"><div class="cl-edit-foot-info" id="clEditFootInfo">编辑后立即同步到文案库</div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-cl-edit>取消</button><button class="primary-btn" type="button" id="clEditSave">保存修改</button></div></div>
+    </div>
+  </div>
+
+  <!-- 智能脚本 Agent · 单条分镜行编辑弹窗 -->
+  <div class="modal script-row-edit-modal" id="scriptRowEditModal" role="dialog" aria-modal="true" aria-labelledby="scriptRowEditTitle">
+    <div class="modal-backdrop" data-close-script-row></div>
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="scriptRowEditTitle">编辑分镜</h3>
+        <button class="ghost-btn ghost-btn-sm" type="button" data-close-script-row>×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-hint" style="margin:0;">仅修改当前分镜，不影响其他镜头。</div>
+        <label class="cl-edit-field"><span>镜头时段 <em class="required-mark">*</em></span><input data-row-time inputmode="text" placeholder="例如 00–03s"></label>
+        <label class="cl-edit-field"><span>景别 <em class="required-mark">*</em></span>
+          <select data-row-shot-type>
+            <option>特写</option><option>近景</option><option>中景</option><option>全景</option><option>远景</option>
+          </select>
+        </label>
+        <label class="cl-edit-field"><span>运镜方式 <em class="required-mark">*</em></span>
+          <select data-row-camera-move>
+            <option>固定</option><option>推进</option><option>拉远</option><option>平移跟拍</option><option>环绕</option><option>手持跟随</option>
+          </select>
+        </label>
+        <label class="cl-edit-field full"><span>对应口播片段 <em class="required-mark">*</em></span><textarea data-row-voice rows="3"></textarea></label>
+        <label class="cl-edit-field full"><span>画面内容描述 <em class="required-mark">*</em></span><textarea data-row-visual rows="4"></textarea></label>
+        <div class="cl-edit-field full" data-row-material-field><span>匹配素材</span><div class="script-row-materials" data-row-material-summary></div><button class="ghost-btn script-row-material-picker" type="button" data-row-select-material>从素材库选择</button></div>
+        <label class="cl-edit-field full" data-row-video-prompt-field hidden><span>生视频提示词 <em class="required-mark">*</em></span><textarea data-row-video-prompt rows="4" placeholder="描述主体、场景、动作、运镜、光线与画面比例"></textarea></label>
+      </div>
+      <div class="modal-foot">
+        <button class="ghost-btn danger-ghost" type="button" data-delete-script-row>删除分镜</button>
+        <div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-script-row>取消</button><button class="primary-btn" type="button" id="scriptRowEditSave">保存分镜</button></div>
+      </div>
+    </div>
+  `);})();

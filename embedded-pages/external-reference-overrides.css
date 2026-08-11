@@ -1,0 +1,73 @@
+/* Tag dialog follows the finished-video tag selector. */
+.rv-modal:has(.rv-preview-body){width:min(940px,96vw);max-height:90vh}
+.rv-tag-create{display:flex;min-height:30px;align-items:flex-start}
+.rv-new-tag{min-height:30px;padding:0 12px;border:1px dashed #c8cbd8;border-radius:999px;background:#fff;color:#74798c;font-size:11px}
+.rv-new-tag:hover{border-color:var(--rv-primary);background:var(--rv-primary-soft);color:var(--rv-primary)}
+.rv-tag-selected-hint{margin-left:auto!important;margin-right:0!important}
+.rv-modal:has(.rv-tag-modal-body){width:min(760px,96vw)!important}
+.rv-select svg{width:12px;height:12px}
+
+.rv-modal:has(.rv-tag-modal-body) .rv-modal-foot{align-items:center;gap:12px}
+.rv-modal:has(.rv-tag-modal-body) .rv-modal-foot .rv-btn{height:36px;padding:0 14px;border-radius:9px;font-size:13px;font-weight:650;box-shadow:none}
+.rv-modal:has(.rv-tag-modal-body) .rv-modal-foot .rv-btn-secondary{border-color:#dfe1eb;color:#343645;background:#fff}
+.rv-modal:has(.rv-tag-modal-body) .rv-modal-foot .rv-btn-primary{border-color:#6254e8;background:#6254e8;box-shadow:0 6px 14px rgba(98,84,232,.2)}
+.rv-selection>div{display:flex;align-items:center}
+.rv-selection-info{gap:9px;color:#5f6271;font-size:13px}
+.rv-selection-info b{margin:0 2px;color:#15161f;font-size:14px}
+.rv-selection-check{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--rv-primary);color:#fff}
+.rv-selection-check svg{width:13px;height:13px}
+.rv-selection-actions{gap:4px}
+.rv-selection .rv-action{display:inline-flex;align-items:center;gap:5px;height:36px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:#15161f;font-size:12px}
+.rv-selection .rv-action:hover{border:0;background:#f0efff;color:var(--rv-primary)}
+.rv-selection .rv-action svg{width:14px;height:14px}
+.rv-selection .rv-action-danger{color:#c4344c}
+.rv-selection .rv-action-danger:hover{background:#ffeef0;color:#c4344c}
+.rv-selection .rv-action-close{display:grid;place-items:center;width:30px;height:30px;margin-left:4px;padding:0;border:0;border-radius:50%;background:transparent;color:#8a8fa1;font-size:18px}
+.rv-selection .rv-action-close:hover{border:0;background:#f0f0f5;color:#15161f}
+.rv-card-tag.source.collect{background:#e6f4ff;color:#2574a9}
+
+.rv-card-tag.source.local{background:#f4f1ea;color:#8a7042}
+.rv-card-menu .rv-menu-divider{display:block;height:1px;margin:5px 4px;background:#ecebf3}
+.rv-card-menu button:disabled{color:#b7bac6;background:transparent;cursor:not-allowed}
+.rv-card-menu button:disabled:hover{background:transparent;color:#b7bac6}
+
+/* 外部参考视频详情：对齐成片视频未关联千川详情页。 */
+.rv-detail-mode .rv-app{padding:22px}.rv-detail-page{padding:0;background:transparent;box-shadow:none}.rv-detail-page-head{min-height:88px;padding:15px 22px;border:1px solid var(--rv-line);border-radius:16px;background:linear-gradient(135deg,#fff 72%,#f5f2ff)}
+.rv-detail-page-title{display:block;flex:1}.rv-detail-page-title>div{display:flex;align-items:center;gap:8px}.rv-detail-page-title b{font-size:21px}.rv-detail-page-title p{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:7px 0 0;color:#969aaa;font-size:11px}.rv-detail-page-title p i{font-style:normal;color:#c2c5d0}.rv-detail-meta-tag{padding:3px 7px;border-radius:6px;background:#f0edff;color:#6254e8;font-weight:600}.rv-detail-meta-empty{color:#a6a9b6}
+.rv-detail-result{margin-top:14px;padding:24px 14px 0;border:1px solid var(--rv-line);border-radius:16px;background:#fff;overflow:hidden}.rv-detail-result-head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 8px 12px 278px}.rv-detail-result-head strong{font-size:16px}.rv-detail-result-head span{color:#969aaa;font-size:11px;white-space:nowrap}
+.rv-detail-main{grid-template-columns:250px repeat(3,minmax(0,1fr));gap:14px;margin:0 8px}.rv-detail-video{position:relative;min-height:420px;border-radius:12px;background:linear-gradient(155deg,#ead09c,#8b673d);cursor:pointer}.rv-detail-video>.rv-play{opacity:1}.rv-detail-video>div{position:absolute;right:14px;bottom:12px;left:14px;color:#fff;text-align:center}.rv-detail-video b,.rv-detail-video small{display:block}.rv-detail-video small{margin-top:5px;font-size:10px;opacity:.9}
+.rv-detail-card{position:relative;min-height:420px;padding:17px;border:1px solid #dce6f4;border-radius:9px;background:#eef5ff;color:#52627d;overflow:hidden}.rv-detail-card h3{margin:0 34px 15px 0;color:#172440;font-size:14px}.rv-detail-card p{margin:8px 0;font-size:12px;line-height:1.75}.rv-detail-card p>b{display:inline-block;min-width:70px;color:#344661}.rv-detail-scroll{height:360px;overflow:auto;padding-right:4px}.rv-copy{position:absolute;top:14px;right:14px;float:none;width:28px;height:28px;padding:5px;border-radius:6px}.rv-copy:hover{background:#fff;color:var(--rv-primary)}.rv-copy svg{width:16px;height:16px}
+.rv-summary-rows p{display:flex;align-items:flex-start;gap:9px}.rv-summary-rows p>b{flex:0 0 56px;min-width:56px}.rv-summary-rows p>span{flex:1;color:#3c4149}.rv-summary-rows em{display:inline-grid;place-items:center;min-width:17px;height:17px;margin-left:3px;border-radius:50%;background:#dbe8ff;color:#3479ee;font-size:9px;font-style:normal}
+.rv-color-row,.rv-scene-row{display:flex;gap:9px;margin:10px 0 17px}.rv-color-row i,.rv-scene-row i{width:48px;height:48px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #d8deea;background:#d5b388}.rv-color-row i:nth-child(2){background:#c3a5df}.rv-color-row i:nth-child(3){background:#94c7ad}.rv-color-row i:nth-child(4){background:#dfa295}.rv-color-row i:nth-child(5){background:#99b4dc}.rv-scene-row i{width:60px;height:45px;border-radius:6px}.rv-scene-row i:nth-child(2){background:#8fc1a5}.rv-scene-row i:nth-child(3){background:#e9c474}
+.rv-main-scene-row{display:flex;gap:9px;margin:10px 0 4px}.rv-main-scene-row i{width:60px;height:45px;border:2px solid #fff;border-radius:6px;box-shadow:0 0 0 1px #d8deea;background:#c8a87d}.rv-main-scene-row i:nth-child(2){background:#8fc1a5}.rv-main-scene-row i:nth-child(3){background:#e9c474}.rv-main-scene-row i:nth-child(4){background:#c98eb4}
+.rv-detail-tabs{align-items:flex-end;margin:16px 8px 0;padding:0}.rv-detail-tabs>span{flex:1}.rv-detail-tabs button{font-size:13px}.rv-detail-download{height:38px!important;margin-bottom:7px;padding:0 15px!important;border:0!important;border-radius:8px;background:#242630!important;color:#fff!important;font-weight:650}.rv-shots{display:block;margin:0 8px;padding:12px 0 18px;overflow:auto}.rv-frame-table{display:grid;grid-template-columns:repeat(7,minmax(180px,1fr));min-width:1260px;border:1px solid var(--rv-line);border-radius:10px;overflow:hidden}.rv-frame-cell{min-width:0;border-right:1px solid var(--rv-line);background:#fff}.rv-frame-cell:last-child{border-right:0}.rv-frame-cell header{padding:11px;text-align:center;font-size:11px}.rv-frame-thumb{position:relative;height:145px;margin:0 10px;border-radius:7px}.rv-frame-thumb span{position:absolute;bottom:7px;left:7px;color:#fff;font-size:9px}.rv-frame-thumb b{position:absolute;right:6px;bottom:6px;padding:2px 5px;border-radius:4px;background:#332f2bb5;color:#fff;font-size:9px}.rv-frame-cell p{margin:0;padding:10px;color:#686c7b;font-size:10px;line-height:1.5}
+.rv-shot-grid{display:grid;min-width:max-content;border-top:1px solid #eef0f4;border-left:1px solid #eef0f4}.rv-shot-grid>div{border-right:1px solid #eef0f4;border-bottom:1px solid #eef0f4}.rv-shot-label{position:sticky;left:0;z-index:2;display:flex;align-items:center;justify-content:center;padding:12px 7px;background:#fff;color:#959ba6;font-size:12px;text-align:center}.rv-shot-analysis{grid-row:span 4}.rv-shot-head{padding:10px 14px;background:#fafbfc;color:#242730;font-size:12px;font-weight:600;text-align:center}.rv-shot-thumb{position:relative;height:145px;margin:10px 14px 2px;border:0!important;border-radius:6px}.rv-shot-thumb span{position:absolute;bottom:7px;left:6px;color:#ffffffd0;font-size:9px}.rv-shot-thumb b{position:absolute;right:6px;bottom:6px;padding:2px 6px;border-radius:4px;background:#0000008c;color:#fff;font-size:10px}.rv-shot-time{padding:8px 14px 12px;color:#292c35;font-size:12px;font-weight:600;text-align:center}.rv-shot-tags{padding:9px 14px;background:#fdf0e9;text-align:center}.rv-shot-tags em{color:#7b6cf0;font-size:11px;font-style:normal}.rv-shot-text{min-height:74px;padding:12px 14px;color:#424752;font-size:12px;line-height:1.7}.rv-muted-text{color:#8f959e}.rv-frames-grid{display:grid;grid-template-columns:repeat(9,minmax(120px,1fr));gap:34px 14px;padding:10px}.rv-frame-item{min-width:0}.rv-frame-image{position:relative;aspect-ratio:5/4;border-radius:6px}.rv-frame-image>span{position:absolute;top:5px;left:5px;display:grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:3px;background:#fff;color:#252730;font-size:10px}.rv-frame-image>button{position:absolute;right:6px;bottom:6px;width:24px;height:24px;padding:5px;border:0;border-radius:4px;background:#0000006b;color:#fff}.rv-frame-image>button:hover{background:#0000009c}.rv-frame-image svg{width:13px;height:13px}.rv-frame-item>p{margin:8px 0 0;color:#3c4149;font-size:12px;text-align:center}
+@media(max-width:1100px){.rv-detail-main{grid-template-columns:220px repeat(3,minmax(220px,1fr));overflow:auto}.rv-detail-result-head{padding-left:248px}.rv-detail-card,.rv-detail-video{min-height:380px}.rv-detail-scroll{height:320px}}@media(max-width:850px){.rv-detail-page-head{align-items:flex-start;flex-wrap:wrap}.rv-detail-page-title{order:2;flex-basis:calc(100% - 100px)}.rv-detail-page-actions{margin-left:auto}.rv-detail-result-head{padding-left:8px;align-items:flex-start;flex-direction:column}.rv-detail-main{grid-template-columns:1fr;margin:0}.rv-detail-video{width:min(280px,100%);min-height:440px;margin:auto}.rv-detail-card{min-height:260px}.rv-detail-scroll{height:auto;max-height:300px}}
+
+/* 关联产品属于资产关系字段：卡片使用独立关系行，避免与平台/来源/视频标签混淆。 */
+#rvProductMenu{left:0;right:auto;z-index:90;max-height:280px;overflow:auto}
+#rvProductBtn{max-width:180px}
+#rvProductBtn span{overflow:hidden;text-overflow:ellipsis}
+.rv-info{min-height:90px}
+.rv-product-platform-row{display:flex;align-items:center;gap:6px;min-width:0}
+.rv-card-tag.product{max-width:calc(100% - 44px);overflow:hidden;background:#f0edff;color:#6254e8;text-overflow:ellipsis;white-space:nowrap}
+.rv-card-tag.product.empty{background:#f3f3f6;color:#9a9dab}
+.rv-product-platform-row .rv-card-tag.platform{flex:0 0 auto}
+.rv-cover-source{position:absolute;left:8px;bottom:8px;z-index:3;display:inline-flex;align-items:center;min-height:20px;padding:0 7px;border-radius:999px;font-size:9px;font-weight:700;backdrop-filter:blur(6px)}
+.rv-cover-source.collect{background:rgba(230,244,255,.94);color:#2574a9}
+.rv-cover-source.local{background:rgba(244,241,234,.94);color:#8a7042}
+.rv-card-menu{bottom:108px;width:132px}
+.rv-relation-value{color:#4f43d3}
+.rv-detail-product{color:#565a69;font-weight:650}
+.rv-field-hint{display:block;margin-top:7px;color:#969aaa;font-size:11px;line-height:1.5}
+@media(max-width:1120px){.rv-toolbar{flex-wrap:wrap}.rv-search{order:5;flex-basis:calc(100% - 86px)}}
+
+/* 产品详情复用时只暴露原交互层，不显示外部参考视频列表页。 */
+html.pda-overlay-mode,body.pda-overlay-mode{background:transparent!important}
+body.pda-overlay-mode .rv-app{background:transparent}
+body.pda-overlay-mode .rv-head,body.pda-overlay-mode .rv-content,body.pda-overlay-mode .rv-selection{visibility:hidden}
+body.pda-overlay-mode .rv-head,body.pda-overlay-mode .rv-selection{pointer-events:none}
+body.pda-overlay-mode .rv-overlay,body.pda-overlay-mode .rv-card-menu{visibility:visible;pointer-events:auto}
+body.pda-overlay-mode .rv-card-menu,body.pda-overlay-mode .rv-card-menu *{z-index:120;visibility:visible;pointer-events:auto}
+body.pda-overlay-mode.rv-detail-mode,body.pda-overlay-mode.rv-detail-mode .rv-app{background:var(--rv-bg)!important}
+body.pda-overlay-mode.rv-detail-mode .rv-detail-page{visibility:visible;pointer-events:auto}

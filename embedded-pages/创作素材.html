@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>创作素材 · 内容罗盘</title>
+<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="creation-material.css?v=20260811a">
+<link rel="stylesheet" href="host-embed.css?v=20260808">
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ 项目侧栏 ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">◈</div>
+      <div class="brand-copy">
+        <strong>内容罗盘</strong>
+        <small>AI 经营增长平台</small>
+      </div>
+      <button class="sidebar-collapse" id="sidebarCollapse" type="button" aria-label="收起菜单" title="收起菜单">‹</button>
+    </div>
+    <div class="sidebar-menu-scroll" id="sidebarMenuScroll">
+      <nav class="nav" aria-label="主导航">
+        <details class="nav-group" open>
+          <summary><span class="nav-group-title"><span class="nav-icon">AI</span>AI创作</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub" data-page="creation">AI创作</button>
+            <button class="nav-item nav-sub" data-page="infinite-canvas">无限画板</button>
+          </div>
+        </details>
+        <details class="nav-group" open>
+          <summary><span class="nav-group-title"><span class="nav-icon">库</span>资产库</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub" data-page="brands">品牌库</button>
+            <button class="nav-item nav-sub" data-page="products">产品库</button>
+            <button class="nav-item nav-sub" data-page="competitors">竞品库</button>
+            <button class="nav-item nav-sub" data-page="copy-library">文案库</button>
+            <button class="nav-item nav-sub" data-page="script-library">脚本库</button>
+            <details class="nav-child-group" open>
+              <summary><span>视频库</span><span>⌄</span></summary>
+              <div class="nav-child-list">
+                <button class="nav-item nav-sub nested" data-page="creation-videos">创作素材</button>
+                <button class="nav-item nav-sub nested active" data-page="material">素材管理</button>
+                <button class="nav-item nav-sub nested" data-page="finished-videos">成片视频</button>
+                <button class="nav-item nav-sub nested" data-page="reference-videos">外部参考视频</button>
+              </div>
+            </details>
+            <button class="nav-item nav-sub" data-page="image-library">图片库</button>
+            <button class="nav-item nav-sub" data-page="template-library">模板库</button>
+          </div>
+        </details>
+        <details class="nav-group" open>
+          <summary><span class="nav-group-title"><span class="nav-icon">投</span>推广自动化</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub" data-page="material-monitor">素材监控</button>
+            <button class="nav-item nav-sub" data-page="review-distribute">视频过审与分发</button>
+            <button class="nav-item nav-sub" data-page="product-card">商品卡推广</button>
+            <button class="nav-item nav-sub" data-page="content-promo">图文推广</button>
+            <button class="nav-item nav-sub" data-page="account-config">推广配置</button>
+          </div>
+        </details>
+        <details class="nav-group" open>
+          <summary><span class="nav-group-title"><span class="nav-icon">店</span>抖店运营</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub" data-page="store">一键铺链</button>
+            <button class="nav-item nav-sub" data-page="store">评论分析</button>
+          </div>
+        </details>
+        <details class="nav-group" open>
+          <summary><span class="nav-group-title"><span class="nav-icon">达</span>达人建联</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub" data-page="creator">达人库</button>
+            <button class="nav-item nav-sub" data-page="creator">达人匹配</button>
+            <button class="nav-item nav-sub" data-page="creator">建联线索</button>
+            <button class="nav-item nav-sub" data-page="creator">达人建联规则</button>
+          </div>
+        </details>
+        <details class="nav-group">
+          <summary><span class="nav-group-title"><span class="nav-icon">任</span>任务协作</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub planned" data-planned="我的任务">我的任务</button>
+            <button class="nav-item nav-sub planned" data-planned="团队任务">团队任务</button>
+            <button class="nav-item nav-sub planned" data-planned="任务分析">任务分析</button>
+          </div>
+        </details>
+        <details class="nav-group">
+          <summary><span class="nav-group-title"><span class="nav-icon">播</span>直播复盘</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub planned" data-planned="直播复盘">直播复盘</button>
+          </div>
+        </details>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <nav class="nav">
+        <details class="nav-group">
+          <summary><span class="nav-group-title"><span class="nav-icon">管</span>系统管理</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub" data-page="role-management">角色管理</button>
+            <button class="nav-item nav-sub" data-page="member-management">人员管理</button>
+            <button class="nav-item nav-sub" data-page="admin">AI管理后台</button>
+          </div>
+        </details>
+      </nav>
+    </div>
+    <div class="account" data-tip="切换团队 / 账户">
+      <div class="avatar">嗡</div>
+      <div>
+        <strong>嗡大发</strong>
+        <small>运营 · 抖音三区</small>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ 主区域 ============ -->
+  <main class="main">
+    <section class="page active" id="page-material">
+      <div class="page-pad">
+        <div class="page-head">
+          <div>
+            <h1>创作素材</h1>
+            <p>统一管理创作素材，按类型与素材组组织，AI 自动分析画面与语义</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <input type="file" id="fileInput" multiple accept="video/*,image/*" style="display:none;">
+            <button class="primary-btn" id="uploadBtn" data-tip="选择本地素材文件">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              导入素材
+            </button>
+          </div>
+        </div>
+
+        <div class="mat-grid-wrap">
+          <!-- ============ 文件夹树 ============ -->
+          <aside class="mat-side">
+            <div class="folder-tree-head">
+              <div><h3>素材文件夹</h3><p>支持多级文件夹管理</p></div>
+              <span class="tree-actions-inline"><span class="tree-collapse-link" id="collapseAllTree" data-tip="展开/收起全部">折叠</span><span class="tree-collapse-link" id="newRootFolder2" data-tip="新建一级文件夹">+</span></span>
+            </div>
+            <div class="folder-tree" id="folderTree"></div>
+          </aside>
+
+          <!-- ============ 素材主区域 ============ -->
+          <div>
+            <div class="mat-toolbar">
+              <div class="check-all" id="checkAll" data-tip="全选/取消全选"></div>
+              <div class="filter-tabs" id="typeTabs">
+                <button class="ft active" data-type="all">全部<span class="ft-count">54</span></button>
+                <button class="ft" data-type="video">视频<span class="ft-count">32</span></button>
+                <button class="ft" data-type="image">图片<span class="ft-count">18</span></button>
+              </div>
+              <button class="filter-trigger" id="tagFilterBtn" data-tip="按素材标签筛选">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7" cy="8" r="1.5" fill="currentColor"/></svg>
+                素材标签
+              </button>
+              <button class="filter-trigger" id="statusFilter" data-tip="按分析状态筛选">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+                <span class="value">全部状态</span>
+              </button>
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+                <input id="searchInput" type="search" placeholder="搜索素材名称、产品名称或素材标签" autocomplete="off">
+                <button class="search-clear" id="searchClear" type="button" aria-label="清空搜索" hidden>×</button>
+              </div>
+              <div class="right-group">
+                <div class="dropdown" id="sortDropdown" style="position:relative;">
+                  <button class="icon-btn-tool" data-tip="排序方式">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+                  </button>
+                  <div class="dropdown-menu" style="display:none; right:0; left:auto; min-width:140px;">
+                    <div class="item" data-sort="time-desc">上传时间 ↓</div>
+                    <div class="item" data-sort="time-asc">上传时间 ↑</div>
+                    <div class="item" data-sort="name">文件名</div>
+                    <div class="item" data-sort="size-desc">大小 ↓</div>
+                    <div class="item" data-sort="size-asc">大小 ↑</div>
+                  </div>
+                </div>
+                <button class="icon-btn-tool" id="refreshBtn" data-tip="刷新">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0115-6.7L21 3M21 12a9 9 0 01-15 6.7L3 21"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="mat-grid-card">
+              <div class="mat-grid" id="matGrid"></div>
+              <!-- 单素材操作 popover(全局共享,fixed 定位,避免被卡片 overflow:hidden 裁切) -->
+              <div class="mat-card-popover" id="matPopover" role="menu" aria-label="素材操作">
+                <div class="item" data-mat-act="download" role="menuitem">下载</div>
+                <div class="item" data-mat-act="reanalyze" role="menuitem">分析</div>
+                <div class="sep"></div>
+                <div class="item" data-mat-act="rename" role="menuitem">重命名</div>
+                <div class="item" data-mat-act="tag" role="menuitem">编辑标签…</div>
+                <div class="item" data-mat-act="move" role="menuitem">移动至文件夹…</div>
+                <div class="sep"></div>
+                <div class="item" data-mat-act="product" role="menuitem">关联产品</div>
+                <div class="sep"></div>
+                <div class="item danger" data-mat-act="delete" role="menuitem">删除</div>
+              </div>
+              <div class="mat-empty hidden" id="matEmpty">
+                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 22a4 4 0 014-4h12l4 4h20a4 4 0 014 4v22a4 4 0 01-4 4H14a4 4 0 01-4-4V22z"/><path d="M24 34l16-10M40 24l-16 20" stroke-dasharray="3 3"/></svg>
+                <p id="matEmptyText">该文件夹下还没有素材</p>
+                <small id="matEmptyHelp">点击右上角「导入素材」添加文件，或在左侧创建新文件夹</small>
+              </div>
+              <div class="mat-pager">
+                <span>每页 20 条 · 第 1 / 3 页</span>
+                <div class="pages">
+                  <button data-tip="上一页" disabled>‹</button>
+                  <button class="active">1</button>
+                  <button>2</button>
+                  <button>3</button>
+                  <button data-tip="下一页">›</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ 批量操作栏 ============ -->
+<div class="mat-batchbar hidden" id="batchBar">
+  <div class="count">已选 <b id="batchCount">0</b> 项</div>
+  <div class="sep"></div>
+  <button class="batch-btn" data-batch="download" data-tip="下载到本地"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M5 10l7 7 7-7M5 21h14"/></svg>下载</button>
+  <button class="batch-btn" data-batch="tag" data-tip="批量打标签"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7" cy="8" r="1.5" fill="currentColor"/></svg>打标签</button>
+  <button class="batch-btn" data-batch="product" data-tip="批量关联产品"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4"/></svg>关联产品</button>
+  <button class="batch-btn" data-batch="move" data-tip="转移到其他素材组"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>转移</button>
+  <button class="batch-btn" data-batch="reanalyze" data-tip="重新分析素材"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0115-6.7L21 3M21 12a9 9 0 01-15 6.7L3 21"/></svg>分析</button>
+  <button class="batch-btn danger" data-batch="delete" data-tip="删除所选素材"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14"/></svg>删除</button>
+  <button class="close-batch" id="closeBatch" data-tip="退出批量选择"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
+
+<!-- ============ 右键菜单 ============ -->
+<div class="mat-context-menu hidden" id="ctxMenu">
+  <div class="item" data-act="open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>预览<span class="shortcut">⏎</span></div>
+  <div class="item" data-act="download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M5 10l7 7 7-7M5 21h14"/></svg>下载<span class="shortcut">⌘D</span></div>
+  <div class="item" data-act="rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16 4l4 4-12 12H4v-4z"/></svg>改名<span class="shortcut">F2</span></div>
+  <div class="item" data-act="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7" cy="8" r="1.5" fill="currentColor"/></svg>打标签…</div>
+  <div class="item" data-act="move"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>转移到素材组…</div>
+  <div class="item" data-act="reanalyze"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0115-6.7L21 3M21 12a9 9 0 01-15 6.7L3 21"/></svg>重新分析</div>
+  <div class="sep"></div>
+  <div class="item danger" data-act="delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14"/></svg>删除<span class="shortcut">Del</span></div>
+</div>
+
+<!-- ============ 文件夹树右键菜单 ============ -->
+<div class="tree-context-menu hidden" id="treeCtxMenu">
+  <div class="item" data-tree-act="new-sub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7zM12 11v6M9 14l3-3 3 3"/></svg>新建子文件夹</div>
+  <div class="item" data-tree-act="rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16 4l4 4-12 12H4v-4z"/></svg>重命名</div>
+  <div class="item" data-tree-act="move"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>移动到…</div>
+  <div class="sep"></div>
+  <div class="item danger" data-tree-act="delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14"/></svg>删除</div>
+</div>
+
+<!-- ============ 标签分组右键菜单 ============ -->
+<div class="tree-context-menu hidden" id="tagGroupCtxMenu">
+  <div class="item" data-tag-grp-act="rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16 4l4 4-12 12H4v-4z"/></svg>重命名</div>
+  <div class="sep"></div>
+  <div class="item danger" data-tag-grp-act="delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14"/></svg>删除分组</div>
+</div>
+
+<!-- ============ 删除非空文件夹弹窗 ============ -->
+<div class="modal-backdrop" id="migrateFolderModal" role="dialog" aria-modal="true">
+  <div class="modal" style="width:min(460px, 100%); height:auto;">
+    <div class="modal-head">
+      <div><span class="badge" style="color:#c8424e;background:#fff0f1;">删除文件夹</span><h3 id="migrateTitle">删除文件夹</h3></div>
+      <button class="close-btn" type="button" data-close-modal="migrateFolder" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0 0 12px; color:#555a6d; line-height:1.7;">该文件夹下还有视频和子文件夹，请先选择视频迁移到哪个目标文件夹。</p>
+      <div class="field full">
+        <label>选择迁移目标</label>
+        <select id="migrateTarget" style="width:100%; padding:9px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; font-size:13px;"></select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span></span>
+      <div class="modal-foot-actions">
+        <button class="ghost-btn" data-close-modal="migrateFolder">取消</button>
+        <button class="primary-btn" id="confirmMigrate" style="background:linear-gradient(135deg,#e55353,#c8424e);">迁移并删除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 标签筛选弹窗 ============ -->
+<div class="modal-backdrop" id="tagFilterModal" role="dialog" aria-modal="true">
+  <div class="modal" style="width:min(720px, 100%);">
+    <div class="modal-head">
+      <div><span class="badge" id="tagModalKicker">筛选</span><h3 id="tagModalTitle">按标签筛选素材</h3></div>
+      <button class="close-btn" type="button" data-close-modal="tagFilter" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body" style="padding: 0;">
+      <div class="tag-modal-body">
+        <div class="tag-modal-side">
+          <div class="side-item active" data-tag-group="all"><span class="name">全部标签</span><span class="count" id="tgCountAll">0</span></div>
+          <div class="side-item" data-tag-group="uncategorized"><span class="name">未分组</span><span class="count" id="tgCountNone">0</span></div>
+          <div class="side-divider"></div>
+          <div class="side-list" id="tagGroupList"></div>
+          <button class="new-group-btn" id="addNewTagGroup"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>新建分组</button>
+        </div>
+        <div class="tag-modal-main">
+          <div class="tag-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+            <input type="text" placeholder="搜索标签..." id="tagSearchInput">
+          </div>
+          <div class="tag-list" id="tagList"></div>
+          <button class="new-tag-btn" id="addNewTagBtn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            新建标签
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span style="color:#8a8fa1; font-size:12px;" id="tagSelectedHint">已选 0 个标签</span>
+      <div class="modal-foot-actions">
+        <button class="ghost-btn" id="clearTagFilter">清空</button>
+        <button class="primary-btn" id="applyTagFilter">应用筛选</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 重命名素材弹窗 ============ -->
+<div class="modal-backdrop" id="renameMaterialModal" role="dialog" aria-modal="true">
+  <div class="modal" style="width:min(460px, 100%); height:auto;">
+    <div class="modal-head"><div><span class="badge">素材操作</span><h3>重命名素材</h3></div><button class="close-btn" type="button" data-close-modal="renameMaterial" aria-label="关闭">×</button></div>
+    <div class="modal-body"><div class="field full"><label>素材名称<em class="required-mark">*</em></label><input id="renameMaterialInput" maxlength="60"><small id="renameMaterialError" style="color:#c8424e;font-size:12px;"></small></div></div>
+    <div class="modal-foot"><span></span><div class="modal-foot-actions"><button class="ghost-btn" data-close-modal="renameMaterial">取消</button><button class="primary-btn" id="confirmRenameMaterial">保存</button></div></div>
+  </div>
+</div>
+
+<!-- ============ 通用批量操作弹窗（关联产品 / 移动至文件夹 / 删除） ============ -->
+<div class="modal-backdrop" id="batchEditModal" role="dialog" aria-modal="true">
+  <div class="modal" style="width:min(460px, 100%); height:auto;">
+    <div class="modal-head">
+      <div>
+        <span class="badge" id="batchEditKicker" style="color:#5a3fc8;background:#f0ecff;">素材操作</span>
+        <h3 id="batchEditTitle">批量操作</h3>
+        <p id="batchEditSubtitle" style="margin:6px 0 0; color:#6b7080; font-size:12px; line-height:1.5;"></p>
+      </div>
+      <button class="close-btn" type="button" data-close-modal="batchEdit" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body" id="batchEditBody"></div>
+    <div class="modal-foot">
+      <span></span>
+      <div class="modal-foot-actions">
+        <button class="ghost-btn" data-close-modal="batchEdit">取消</button>
+        <button class="primary-btn" id="confirmBatchEdit">确认</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 转移到素材组弹窗 ============ -->
+<div class="modal-backdrop" id="moveModal" role="dialog" aria-modal="true">
+  <div class="modal" style="width:min(520px, 100%); height:auto; max-height:80vh;">
+    <div class="modal-head">
+      <div><span class="badge">移动</span><h3>转移到素材组</h3></div>
+      <button class="close-btn" type="button" data-close-modal="move" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field full"><label>选择目标素材组</label>
+        <div id="moveTargetList" style="display:grid; gap:6px; max-height:300px; overflow:auto;"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span></span>
+      <div class="modal-foot-actions">
+        <button class="ghost-btn" data-close-modal="move">取消</button>
+        <button class="primary-btn" id="confirmMove">确认转移</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 删除确认弹窗 ============ -->
+<div class="modal-backdrop" id="deleteModal" role="dialog" aria-modal="true">
+  <div class="modal" style="width:min(460px, 100%); height:auto;">
+    <div class="modal-head">
+      <div><span class="badge" style="color:#c8424e;background:#fff0f1;">删除确认</span><h3 id="deleteTitle">删除素材？</h3></div>
+      <button class="close-btn" type="button" data-close-modal="delete" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0; color:#555a6d; line-height:1.8;" id="deleteCopy">删除后无法恢复，相关分析结果将同步删除。确认删除？</p>
+    </div>
+    <div class="modal-foot">
+      <span></span>
+      <div class="modal-foot-actions">
+        <button class="ghost-btn" data-close-modal="delete">取消</button>
+        <button class="primary-btn" id="confirmDelete" style="background:linear-gradient(135deg,#e55353,#c8424e);">确认删除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 新建标签弹窗 ============ -->
+<div class="modal-backdrop" id="newTagModal" role="dialog" aria-modal="true">
+  <div class="modal" style="width:min(420px, 100%); height:auto;">
+    <div class="modal-head">
+      <div><span class="badge">新建</span><h3>新建标签</h3></div>
+      <button class="close-btn" type="button" data-close-modal="newTag" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field full"><label>标签名称<em class="required-mark">*</em></label><input type="text" id="newTagName" placeholder="如：洗地机、客厅场景、高转化"></div>
+      <div class="field full"><label>标签分组</label>
+        <select id="newTagGroup">
+          <option value="product">产品标签</option>
+          <option value="scene">场景标签</option>
+          <option value="custom" selected>自定义标签</option>
+        </select>
+      </div>
+      <div class="field full"><label>标签颜色</label>
+        <div style="display:flex; gap:8px;">
+          <span style="width:24px; height:24px; border-radius:50%; background:#5b5ce2;"></span>
+          <span style="width:24px; height:24px; border-radius:50%; background:#16a778;"></span>
+          <span style="width:24px; height:24px; border-radius:50%; background:#ff8a3d;"></span>
+          <span style="width:24px; height:24px; border-radius:50%; background:#e55353;"></span>
+          <span style="width:24px; height:24px; border-radius:50%; background:#20b8cd;"></span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span></span>
+      <div class="modal-foot-actions">
+        <button class="ghost-btn" data-close-modal="newTag">取消</button>
+        <button class="primary-btn" id="confirmNewTagModal">新建标签</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 状态筛选下拉 ============ -->
+<div class="dropdown" id="statusDropdown" style="position:absolute;">
+  <div class="dropdown-menu" style="display:none;">
+    <div class="item" data-status="all">全部状态</div>
+    <div class="item" data-status="analyzed">已分析</div>
+    <div class="item" data-status="analyzing">分析中</div>
+    <div class="item" data-status="pending">待分析</div>
+    <div class="item" data-status="failed">分析失败</div>
+  </div>
+</div>
+
+<!-- ============ 素材预览弹窗 ============ -->
+<div class="modal-backdrop" id="materialPreviewModal" role="dialog" aria-modal="true" aria-labelledby="materialPreviewTitle">
+  <div class="modal material-preview-modal">
+    <div class="modal-head">
+      <div><span class="badge">素材预览</span><h3 id="materialPreviewTitle">素材预览</h3></div>
+      <button class="close-btn" type="button" data-close-modal="materialPreview" aria-label="关闭">×</button>
+    </div>
+    <div class="material-preview-body">
+      <div class="material-preview-stage" id="materialPreviewStage"></div>
+      <section class="material-preview-meta">
+        <div class="preview-meta-top"><div class="preview-statuses"><span class="preview-status" id="materialPreviewType">视频素材</span><span class="preview-status" id="materialPreviewStatus"></span></div><button class="preview-edit" id="materialPreviewEdit" type="button">编辑</button></div>
+        <div class="preview-meta-grid">
+          <div class="preview-meta-cell"><span class="label">关联产品</span><strong class="value" id="materialPreviewProduct"></strong></div><div class="preview-meta-cell"><span class="label">所属素材文件夹</span><strong class="value" id="materialPreviewFolder"></strong></div>
+          <div class="preview-meta-cell"><span class="label">文件名称</span><strong class="value" id="materialPreviewName"></strong></div><div class="preview-meta-cell"><span class="label">时长 / 大小</span><strong class="value" id="materialPreviewDurationSize"></strong></div>
+          <div class="preview-meta-cell"><span class="label">创建时间</span><strong class="value" id="materialPreviewCreated"></strong></div><div class="preview-meta-cell"><span class="label">素材类型</span><strong class="value" id="materialPreviewKind"></strong></div>
+        </div>
+        <div class="preview-tag-row"><div><div class="preview-tag-title">素材标签</div><div class="preview-tag-list" id="materialPreviewTags"></div></div><button class="preview-add-tag" id="materialPreviewAddTag" type="button">＋ 添加标签</button></div>
+      </section>
+    </div>
+    <div class="modal-foot">
+      <span></span>
+      <div class="modal-foot-actions">
+        <button class="ghost-btn" id="materialPreviewAnalyze">开始分析</button>
+        <button class="primary-btn" id="materialPreviewDownload">下载素材</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 编辑素材信息弹窗 ============ -->
+<div class="modal-backdrop" id="materialInfoEditModal" role="dialog" aria-modal="true" aria-labelledby="materialInfoEditTitle">
+  <div class="modal" style="width:min(520px, 100%);height:auto;">
+    <div class="modal-head"><div><span class="badge">素材操作</span><h3 id="materialInfoEditTitle">编辑素材信息</h3></div><button class="close-btn" type="button" data-close-modal="materialInfoEdit" aria-label="关闭">×</button></div>
+    <div class="modal-body">
+      <div class="field full"><label>素材名称 <em class="required-mark">*</em></label><input id="materialInfoEditName" maxlength="60"><small id="materialInfoEditError" style="color:#c8424e;font-size:12px;"></small></div>
+      <div class="field full" style="margin-top:14px;"><label>关联产品</label><select id="materialInfoEditProduct"></select></div>
+      <div class="field full" style="margin-top:14px;"><label>所属素材文件夹</label><select id="materialInfoEditFolder"></select></div>
+    </div>
+    <div class="modal-foot"><span></span><div class="modal-foot-actions"><button class="ghost-btn" data-close-modal="materialInfoEdit">取消</button><button class="primary-btn" id="saveMaterialInfoEdit">保存</button></div></div>
+  </div>
+</div>
+
+<!-- ============ 详情抽屉 ============ -->
+<div class="mat-drawer-mask" id="drawerMask"></div>
+<aside class="mat-drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="name" id="drawerTitle">自牵引AI.mp4</div>
+    <div class="close-drawer" id="closeDrawer" data-tip="关闭（Esc）">×</div>
+  </div>
+  <div class="drawer-body">
+    <div class="video-preview">
+      <div class="vp-bg">
+        <div class="big-play" data-tip="播放/暂停"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+      </div>
+      <div class="vp-expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
+      <div class="vp-controls">
+        <button data-tip="播放"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="time">0:00 / 0:08</span>
+        <div class="spacer"></div>
+        <button data-tip="静音"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg></button>
+      </div>
+    </div>
+
+    <div class="analysis-status">
+      <div class="left">
+        <span class="ok-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span>
+        素材分析完成
+      </div>
+      <button class="re-btn" id="reAnalyzeBtn" data-tip="使用最新模型重新分析">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0115-6.7L21 3M21 12a9 9 0 01-15 6.7L3 21"/></svg>
+        重新分析
+      </button>
+    </div>
+
+    <div class="tabs" id="drawerTabs">
+      <button class="tab active" data-tab="info">素材信息</button>
+      <button class="tab" data-tab="shot"><span id="shotTabLabel">镜头拆分</span><span class="count" id="shotTabCount">1</span></button>
+    </div>
+
+    <div class="tab-pane" data-pane="info">
+      <div class="info-cards">
+        <!-- 1. 标签与归属 -->
+        <section class="info-card">
+          <header class="ic-head">
+            <span class="ic-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7" cy="8" r="1.5" fill="currentColor"/></svg></span>
+            <span class="ic-title">标签与归属</span>
+          </header>
+          <div class="ic-body">
+            <div class="info-row">
+              <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7" cy="8" r="1.5" fill="currentColor"/></svg>标签</div>
+              <div class="value empty">暂无标签</div>
+              <span class="add-pill" data-open-modal="tagFilter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>添加标签</span>
+            </div>
+            <div class="info-row">
+              <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>所在素材组</div>
+              <div class="value empty">未归入素材组</div>
+              <span class="add-pill" data-open-modal="move"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>添加分组</span>
+            </div>
+            <div class="info-row" id="drawerProductRow">
+              <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8 10-4-5"/><circle cx="20" cy="7" r="2.5"/></svg>关联产品</div>
+              <div class="value empty" id="drawerProductValue">未关联产品</div>
+              <span class="add-pill" id="drawerProductBtn" data-edit-product><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg><span id="drawerProductBtnText">关联产品</span></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. AI 描述 -->
+        <section class="info-card">
+          <header class="ic-head">
+            <span class="ic-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h12l4 4v12a2 2 0 01-2 2H4z"/><path d="M16 4v4h4M8 13h8M8 17h5"/></svg></span>
+            <span class="ic-title">AI 描述</span>
+          </header>
+          <div class="ic-body desc">在这段8.2秒的视频中，我们看到一位年轻女性在现代公寓的明亮客厅中，关注地阅读，展现出一种悠闲的生活方式。随着一台黑色手洗地机的高效运作，地面上的顽固紫色污渍被迅速清除，瓷砖恢复了光洁如新的状态。清洁完成后，女性兴奋地从沙发上起身，走到干净的地板中央，随即躺下并伸展双臂，尽情享受这份清新与舒适。整个场景不仅展示了现代居家生活的美学，还突显了高效清洁工具带来的便捷与轻松，营造出一种愉悦的居家氛围。</div>
+        </section>
+
+        <!-- 4. 文件信息 -->
+        <section class="info-card">
+          <header class="ic-head">
+            <span class="ic-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg></span>
+            <span class="ic-title">文件信息</span>
+          </header>
+          <div class="ic-body">
+            <div class="info-row"><div class="label">文件名</div><div class="value" style="display:flex; align-items:center; justify-content:space-between;">自牵引AI.mp4 <button data-tip="复制文件名" style="border:0; background:transparent; color:#8a8fa1; cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg></button></div></div>
+            <div class="info-row"><div class="label">格式</div><div class="value" style="text-align:right;">MP4</div></div>
+            <div class="info-row"><div class="label">大小</div><div class="value" style="text-align:right;">10.07 MB</div></div>
+            <div class="info-row"><div class="label">时长</div><div class="value" style="text-align:right;">0:08</div></div>
+            <div class="info-row"><div class="label">分辨率</div><div class="value" style="text-align:right;">1080 × 1920</div></div>
+            <div class="info-row"><div class="label">MIME</div><div class="value" style="text-align:right;">video/mp4</div></div>
+            <div class="info-row"><div class="label">上传时间</div><div class="value" style="text-align:right;">2026-08-07 17:35</div></div>
+            <div class="info-row"><div class="label">上传者</div><div class="value" style="text-align:right;">嗡大发</div></div>
+            <div class="info-row"><div class="label">MD5</div><div class="value" style="text-align:right; font-family:monospace; font-size:11px; color:#8a8fa1;">a1b2c3d4e5f6...</div></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="tab-pane" data-pane="shot" style="display:none;">
+      <div class="shot-head">
+        <span>共 <b>1</b> 个片段</span>
+        <span class="collapse-all" id="collapseAllBtn" data-tip="折叠/展开所有片段"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>折叠全部</span>
+      </div>
+      <div class="shot-card">
+        <div class="shot-card-head">
+          <span class="name">片段 1</span>
+          <span class="time">0:00 - 0:08</span>
+          <span class="used">混剪使用 0 次</span>
+          <span style="flex:1"></span>
+          <span class="empty" style="font-size:11px;">暂无标签</span>
+          <span class="add-tag" data-open-modal="tagFilter">+ 添加</span>
+          <span class="arrow" data-toggle-shot><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 15l6-6 6 6"/></svg></span>
+        </div>
+        <div class="shot-preview">
+          <div class="sp-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+        </div>
+        <div class="shot-analysis">
+          <div class="shot-section" data-section="objective">
+            <div class="sec-head" data-toggle-section><span class="sec-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg></span>客观层<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span></div>
+            <div class="sec-body">
+              <div class="item"><div class="it-label">总体客观描述</div><div class="it-text">在现代明亮客厅中，一台黑色手洗地机迅速清理掉白色瓷砖地面上大片紫色污渍。清洁完成后地面光洁如新，一位穿紫色长裙的女性从沙发起身，走到地板中央顺势躺下，展示地面的干净与光滑。</div></div>
+              <div class="item"><div class="it-label">人物</div><div class="it-text">年轻女性，穿紫色连衣裙，长发，起初坐在沙发上看书，后起身在地板中央躺下并伸展双臂</div></div>
+              <div class="item"><div class="it-label">场景</div><div class="it-text">现代高层公寓客厅，大面积落地窗可见城市天际线，白色光洁瓷砖地面，自然光线明亮充足</div></div>
+              <div class="item"><div class="it-label">产品</div><div class="it-text">黑色手洗洗地机，正在清理地面紫色污渍，机身带有黄色细节装饰</div></div>
+              <div class="item"><div class="it-label">动作</div><div class="it-text">洗地机前后推拉迅速清理紫色污渍；女性看书、放下书本起身、走到地板中央、滑倒/躺下并伸展双臂</div></div>
+              <div class="item"><div class="it-label">镜头</div><div class="it-text">固定机位全景，视角略高，完整记录清洁过程、地面反光效果及人物互动</div></div>
+            </div>
+          </div>
+
+          <div class="shot-section" data-section="semantic">
+            <div class="sec-head" data-toggle-section><span class="sec-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2 0 4 1 5.5 2M21 4l-5 5h4M16 9l5-5"/></svg></span>语义层<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span></div>
+            <div class="sec-body">
+              <div class="item"><div class="it-label">可代表</div><div class="chip-list"><span class="chip green">高效清洁</span><span class="chip green">地面光洁如新</span><span class="chip green">懒人清洁神器</span><span class="chip green">极致干净体验</span><span class="chip green">居家生活美学</span></div></div>
+              <div class="item"><div class="it-label">情绪氛围</div><div class="chip-list"><span class="chip blue">轻松</span><span class="chip blue">愉悦</span><span class="chip blue">干净</span><span class="chip blue">舒适</span></div></div>
+              <div class="item"><div class="it-label">语义标签</div><div class="chip-list"><span class="chip">产品动态操作 / 功能演示</span><span class="chip">人物享受 / 舒适状态</span><span class="chip">产品使用场景 - 室内多场景</span></div></div>
+              <div class="item"><div class="it-label">关键词</div><div class="chip-list"><span class="chip pink">洗地机</span><span class="chip pink">清洁</span><span class="chip pink">去污</span><span class="chip pink">紫色污渍</span><span class="chip pink">光洁</span><span class="chip pink">躺下</span><span class="chip pink">客厅</span><span class="chip pink">智能家电</span><span class="chip pink">高效</span><span class="chip pink">干净</span><span class="chip pink">席地而坐</span><span class="chip pink">一拖即净</span></div></div>
+            </div>
+          </div>
+
+          <div class="shot-section" data-section="function">
+            <div class="sec-head" data-toggle-section><span class="sec-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 017 7c0 3-2 5-3 6-1 1-1 2-1 3H9c0-1 0-2-1-3-1-1-3-3-3-6a7 7 0 017-7z"/></svg></span>功能层<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span></div>
+            <div class="sec-body">
+              <div class="item"><div class="it-label">叙事功能</div><div class="it-text">直观展示洗地机强大的去污能力和清洁效率，通过女性清洁后直接在地板躺下的夸张动作，极致化表达清洁后地面干净无尘、可随意席地而坐的产品卖点，强化视觉冲击力。</div></div>
+              <div class="item"><div class="it-label">使用方式</div><div class="it-text">作为核心功能演示的高潮部分，前段展示去污过程（可加速处理），后段展示人物在干净地板上躺下的成果，建议叠加文字"一拖即净""光脚自由""席地而坐"等。</div></div>
+              <div class="item"><div class="it-label">推荐时机</div><div class="it-text">当 ASR 提到"一拖就干净""去污力强""光脚踩""席地而坐""懒人必备""一推一拉"时插入</div></div>
+              <div class="item"><div class="it-label">框架阶段</div><div class="chip-list"><span class="chip purple">功能使用</span> → <span class="chip purple">成果展示</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Toast -->
+<div class="toast" id="toast">已完成</div>
+
+<!-- ============ 上传队列 ============ -->
+<div class="upload-queue hidden" id="uploadQueue">
+  <div class="uq-head">
+    <span class="title">素材上传</span>
+    <span class="summary" id="uqSummary">0 / 0</span>
+    <button class="close" id="uqClose" aria-label="关闭">×</button>
+  </div>
+  <div class="uq-list" id="uqList"></div>
+</div>
+<script src="creation-material.js?v=20260811a"></script>
+</body>
+</html>

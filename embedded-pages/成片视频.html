@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="内容罗盘 · 成片视频库">
+  <title>成片视频库 · 内容罗盘</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../css/lapan-detail.css?v=20260808">
+  <link rel="stylesheet" href="finished-videos.css?v=20260811f">
+</head>
+<body class="fv-body">
+  <main class="fv-app" id="finishedVideoApp">
+    <section class="fv-list-view" id="fvListView">
+      <header class="fv-page-head">
+        <div>
+          <h1>成片视频</h1>
+          <p>集中管理成片视频，支持归档、智能拉片与千川投放数据联动。</p>
+        </div>
+        <div class="fv-head-actions"><button class="fv-btn fv-btn-primary" type="button" id="fvImportBtn">＋ 导入成片</button></div>
+      </header>
+
+      <div class="fv-workspace">
+        <aside class="fv-folder-panel" aria-label="视频文件夹">
+          <div class="fv-panel-head">
+            <div><strong>视频文件夹</strong><small>支持多级文件夹管理</small></div>
+            <button class="fv-icon-btn" id="fvNewRootFolder" type="button" title="新建一级文件夹" aria-label="新建一级文件夹">＋</button>
+          </div>
+          <div class="fv-folder-tree" id="fvFolderTree"></div>
+        </aside>
+
+        <section class="fv-content-panel">
+          <div class="fv-content-toolbar" aria-label="视频搜索与筛选">
+            <div class="fv-filter-bar" aria-label="视频筛选">
+              <div class="fv-segmented fv-source-tabs" id="fvSourceFilter">
+                <button class="active" type="button" data-value="all">全部<span class="fv-filter-count" id="fvSourceCountAll"></span></button>
+                <button type="button" data-value="infinite">无限画板<span class="fv-filter-count" id="fvSourceCountInfinite"></span></button>
+                <button type="button" data-value="local">本地上传<span class="fv-filter-count" id="fvSourceCountLocal"></span></button>
+                <button type="button" data-value="remix">智能混剪<span class="fv-filter-count" id="fvSourceCountRemix"></span></button>
+              </div>
+              <button class="fv-filter-trigger" id="fvTagFilterBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7" cy="8" r="1.5" fill="currentColor"/></svg>视频标签</button>
+              <div class="fv-filter-select-wrap">
+                <button class="fv-filter-trigger" id="fvStatusFilter" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg><span id="fvStatusFilterText">全部状态</span></button>
+                <div class="fv-toolbar-menu" id="fvStatusDropdown" hidden>
+                  <button type="button" data-status="all">全部状态</button>
+                  <button type="button" data-status="pending">待分析</button>
+                  <button type="button" data-status="running">分析中</button>
+                  <button type="button" data-status="done">已分析</button>
+                  <button type="button" data-status="failed">分析失败</button>
+                </div>
+              </div>
+            </div>
+            <div class="fv-toolbar-actions">
+              <label class="fv-search">
+                <span aria-hidden="true">⌕</span>
+                <input id="fvSearch" type="search" placeholder="搜索视频名称、产品名称、视频标签或千川素材 ID" autocomplete="off">
+                <button type="button" id="fvClearSearch" aria-label="清空搜索" hidden>×</button>
+              </label>
+              <div class="fv-filter-select-wrap">
+                <button class="fv-toolbar-icon" id="fvSortBtn" type="button" aria-label="排序方式" title="排序方式"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M7 12h10M10 17h4"/></svg></button>
+                <div class="fv-toolbar-menu fv-sort-menu" id="fvSortDropdown" hidden>
+                  <button type="button" data-sort="time-desc">上传时间 ↓</button>
+                  <button type="button" data-sort="time-asc">上传时间 ↑</button>
+                  <button type="button" data-sort="name">文件名</button>
+                  <button type="button" data-sort="size-desc">大小 ↓</button>
+                  <button type="button" data-sort="size-asc">大小 ↑</button>
+                </div>
+              </div>
+              <button class="fv-toolbar-icon" id="fvRefreshBtn" type="button" aria-label="刷新列表" title="刷新列表"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></svg></button>
+            </div>
+          </div>
+
+          <div class="fv-grid" id="fvVideoGrid" aria-live="polite"></div>
+          <div class="fv-empty" id="fvEmpty" hidden>
+            <div>▣</div><strong>未找到符合条件的内容</strong>
+            <p>尝试清空搜索或切换筛选条件。</p>
+            <button class="fv-btn fv-btn-secondary" id="fvResetFilters" type="button">清空筛选</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="fv-selection-bar" id="fvSelectionBar" hidden>
+        <div class="fv-selection-info">
+          <span class="fv-selection-check">✓</span>
+          <span>已选 <b id="fvSelectedCount">0</b> 项</span>
+        </div>
+        <div class="fv-selection-actions">
+          <button class="fv-action" type="button" data-batch="download" title="下载"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>下载</button>
+          <button class="fv-action" type="button" data-batch="tag" title="打标签"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7" cy="8" r="1.5" fill="currentColor"/></svg>打标签</button>
+          <button class="fv-action" type="button" data-batch="move" title="转移"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>转移</button>
+          <button class="fv-action" type="button" data-batch="analyze" title="分析"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 21 12 17l-5.5 4L8 13.5 3 9l6.5-.5z"/></svg>分析</button>
+          <button class="fv-action" type="button" data-batch="product" title="关联产品"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2M8 13h8"/></svg>关联产品</button>
+          <button class="fv-action fv-action-danger" type="button" data-batch="delete" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>删除</button>
+          <button class="fv-action-close" type="button" id="fvCancelSelection" title="取消选择" aria-label="取消选择">×</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="fv-detail-view" id="fvDetailView" hidden>
+      <header class="fv-detail-head">
+        <div class="fv-detail-title-row">
+          <button class="fv-back-btn" id="fvBackToList" type="button"><span aria-hidden="true">←</span> 返回列表</button>
+          <div class="fv-detail-title-content">
+            <div class="fv-detail-title-line">
+              <h1 id="fvDetailTitle">视频详情</h1>
+              <div class="fv-detail-title-meta">
+              <span class="fv-tag fv-tag-remix" id="fvDetailSourceTag">智能混剪</span>
+              <span class="fv-tag fv-tag-neutral" id="fvDetailQianchuanTag">未关联千川</span>
+              </div>
+            </div>
+            <div class="fv-detail-info"><span id="fvDetailFolderPath">所属文件夹：—</span><i></i><span id="fvDetailCreated">创建时间：—</span><i id="fvDetailTagsDivider"></i><span class="fv-detail-video-tags" id="fvDetailVideoTags"></span></div>
+          </div>
+        </div>
+        <div class="fv-detail-actions">
+          <button class="fv-btn fv-btn-secondary" id="fvEditDetailInfo" type="button">编辑信息</button>
+          <button class="fv-btn fv-btn-primary" id="fvReanalyze" type="button">重新分析</button>
+        </div>
+      </header>
+
+      <section class="fv-data-analysis-section" id="fvDataAnalysisSection">
+        <section class="fv-ad-section" id="fvAdSection" hidden>
+          <div class="fv-section-head fv-analysis-section-head">
+            <div class="fv-ad-title"><h2>千川投流数据</h2><span class="fv-ad-material-id" id="fvAdMaterialId"></span></div>
+            <div class="fv-period-filter">
+              <span>统计周期：</span>
+              <input type="date" id="fvRangeStart" value="2026-08-02" aria-label="统计开始日期">
+              <b>~</b>
+              <input type="date" id="fvRangeEnd" value="2026-08-08" aria-label="统计结束日期">
+              <small id="fvRangeError"></small>
+            </div>
+          </div>
+          <div class="fv-ad-grid" id="fvAdGrid"></div>
+        </section>
+
+        <div class="fv-interaction-head" id="fvInteractionHead">
+          <div><h2>互动时序分析</h2></div>
+        </div>
+        <section class="fv-player-analytics" id="fvPlayerAnalytics">
+          <article class="fv-video-panel">
+            <div class="fv-video-shell" id="fvVideoShell">
+              <video id="fvNativeVideo" playsinline hidden></video>
+              <div class="fv-video-poster" id="fvVideoPoster"><span id="fvPosterCode">MIX</span><small id="fvPosterName">混剪</small></div>
+              <button class="fv-big-play" id="fvPlayBtn" type="button" aria-label="播放视频">▶</button>
+              <div class="fv-video-progress"><i id="fvVideoProgress"></i></div>
+              <div class="fv-video-time"><span id="fvCurrentTime">00:00</span><span>/</span><span id="fvTotalTime">00:30</span></div>
+            </div>
+          </article>
+
+          <article class="fv-chart-panel" id="fvChartPanel">
+            <div class="fv-metric-tabs" id="fvMetricTabs"></div>
+            <div class="fv-peak-insight" id="fvPeakInsight"><span>i</span><p>互动峰值将用于识别高价值画面，辅助后续视频创作。</p></div>
+            <div class="fv-chart-wrap" id="fvChartWrap">
+              <svg class="fv-chart" id="fvChart" viewBox="0 0 920 330" preserveAspectRatio="none" aria-label="秒级互动曲线"></svg>
+              <div class="fv-chart-tooltip" id="fvChartTooltip" hidden></div>
+            </div>
+            <div class="fv-chart-scrollbar"><i></i><i></i></div>
+            <div class="fv-chart-state" id="fvChartState" hidden></div>
+          </article>
+        </section>
+      </section>
+
+      <section id="page-pull" class="fv-pull-replica">
+        <div class="page-head" hidden></div>
+        <section class="main-card fv-pull-summary-card">
+          <div class="video-box fv-pull-video-box" id="fvPullVideoBox" hidden>
+            <button class="video-thumb" id="fvPullPreview" type="button" aria-label="预览视频">
+              <span class="play-btn">▶</span><span class="wm" id="fvPullVideoName">视频预览</span>
+            </button>
+          </div>
+          <div class="summary-col">
+            <div class="summary-head fv-pull-summary-head" id="fvPullSummaryHead" hidden><span class="name" id="fvPullSummaryTitle">视频分析结果</span><span class="meta" id="fvPullSummaryMeta"></span></div>
+            <div class="summary-grid">
+              <div class="sum-card">
+                <h4><span class="t">✦ 口播文案</span><button class="copy-icon" type="button" data-pull-copy="voice" title="复制口播文案" aria-label="复制口播文案"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg></button></h4>
+                <div class="script-lines" id="fvPullVoiceText">
+                  00:00：刚换的床单，也能吸出一杯脏东西。<br>
+                  00:03：看得见的是表面，看不见的都藏在床垫深处。<br>
+                  00:06：轻净 Pro 一边拍打一边吸，深层脏污直接带出来。<br>
+                  00:10：毛发和细小碎屑都会进到透明尘杯里。<br>
+                  00:14：床垫、沙发和布艺椅，都能顺手清理。<br>
+                  00:18：机身握持轻松，日常拿出来不费劲。<br>
+                  00:23：现在把看不见的脏东西，也一起清理干净。
+                </div>
+              </div>
+              <div class="sum-card">
+                <h4><span class="t">✦ 脚本总结</span><button class="copy-icon" type="button" data-pull-copy="script" title="复制脚本总结" aria-label="复制脚本总结"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg></button></h4>
+                <div class="sum-rows" id="fvPullScriptText">
+                  <div class="sum-row"><span class="label">结构公式</span><span class="val">结果钩子—用户痛点—产品介绍—核心卖点—使用场景—行动引导</span></div>
+                  <div class="sum-row"><span class="label">钩子形式</span><span class="val">结果前置型 / 视觉冲击 <span class="ref-num">1</span></span></div>
+                  <div class="sum-row"><span class="label">主打场景</span><span class="val">床垫深层清洁 <span class="ref-num">3</span>、沙发布艺清洁 <span class="ref-num">5</span></span></div>
+                  <div class="sum-row"><span class="label">用户痛点</span><span class="val">床垫深处的灰尘和毛发肉眼难以发现，普通清洁难以触达。</span></div>
+                  <div class="sum-row"><span class="label">产品卖点</span><span class="val">拍打与吸尘同步、透明尘杯结果可见、机身轻巧、支持多场景使用。</span></div>
+                  <div class="sum-row"><span class="label">圈定人群</span><span class="val">养宠家庭、敏感人群家庭、重视床品清洁的用户。</span></div>
+                  <div class="sum-row"><span class="label">行动引导</span><span class="val">以清洁前后对比收尾，引导用户立即清理床品。</span></div>
+                </div>
+              </div>
+              <div class="sum-card">
+                <h4><span class="t">✦ 画面总结</span><button class="copy-icon" type="button" data-pull-copy="visual" title="复制画面总结" aria-label="复制画面总结"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg></button></h4>
+                <div id="fvPullVisualText">
+                  <div class="vs-row"><div class="vs-head"><span class="label">出镜人物</span><span class="divider"></span><span class="val">一位家庭用户，完成拿取、启动、清洁和展示尘杯等动作。</span></div><div class="thumb-strip"><span class="cir g1"></span><span class="cir g2"></span><span class="cir g3"></span><span class="cir g4"></span><span class="cir g5"></span></div></div>
+                  <div class="vs-row"><div class="vs-head"><span class="label">产品展示方式</span><span class="divider"></span><span class="val">床垫清洁演示、透明尘杯特写、清洁前后效果对比。</span></div><div class="thumb-strip"><span class="sq g7"></span><span class="sq g2"></span><span class="sq g5"></span><span class="sq g8"></span></div></div>
+                  <div class="vs-row" style="margin-bottom:0"><div class="vs-head"><span class="label">主要场景</span><span class="divider"></span><span class="val">卧室、客厅、布艺清洁场景。</span></div><div class="thumb-strip"><span class="sq g1"></span><span class="sq g3"></span><span class="sq g6"></span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="tabs-bar">
+          <div class="tabs"><div class="tab active">分镜分析</div><div class="tab">画面逐帧</div></div>
+          <button class="btn-download" type="button" id="fvPullDownload">↓ 一键下载</button>
+        </div>
+        <section class="shots-wrap" id="shotsWrap"><div class="shots-scroll"><div class="shots-grid" id="shotsGrid"></div></div></section>
+        <section class="frames-wrap" id="framesWrap"><div class="frames-grid" id="framesGrid"></div></section>
+      </section>
+    </section>
+  </main>
+
+  <div class="fv-menu" id="fvCardMenu" hidden></div>
+  <div class="fv-tooltip" id="fvTooltip" hidden></div>
+  <div class="fv-toast-region" id="fvToastRegion" aria-live="polite"></div>
+
+  <div class="fv-modal-backdrop" id="fvFolderModal" hidden>
+    <section class="fv-modal fv-modal-small" role="dialog" aria-modal="true" aria-labelledby="fvFolderModalTitle">
+      <header><div><span class="fv-modal-kicker">文件夹管理</span><h2 id="fvFolderModalTitle">新建文件夹</h2><p id="fvFolderModalSubtitle">创建一级或多级视频文件夹。</p></div><button type="button" data-close-modal="fvFolderModal" aria-label="关闭">×</button></header>
+      <div class="fv-modal-body">
+        <label class="fv-field"><span>文件夹名称 <b>*</b></span><input id="fvFolderName" maxlength="30" placeholder="输入 1–30 个字符"><small id="fvFolderNameError"></small></label>
+        <label class="fv-field"><span>父级文件夹</span><select id="fvFolderParent"></select><small>不能移动到自身或其子级；最多 5 层。</small></label>
+      </div>
+      <footer><button class="fv-btn fv-btn-secondary" type="button" data-close-modal="fvFolderModal">取消</button><button class="fv-btn fv-btn-primary" id="fvSaveFolder" type="button">确认</button></footer>
+    </section>
+  </div>
+
+  <div class="fv-modal-backdrop" id="fvDeleteFolderModal" hidden>
+    <section class="fv-modal" role="dialog" aria-modal="true" aria-labelledby="fvDeleteFolderTitle">
+      <header><div><span class="fv-modal-kicker danger">删除确认</span><h2 id="fvDeleteFolderTitle">删除文件夹？</h2><p id="fvDeleteFolderSummary"></p></div><button type="button" data-close-modal="fvDeleteFolderModal" aria-label="关闭">×</button></header>
+      <div class="fv-modal-body" id="fvDeleteFolderBody"></div>
+      <footer><button class="fv-btn fv-btn-secondary" type="button" data-close-modal="fvDeleteFolderModal">取消</button><button class="fv-btn fv-btn-danger" id="fvConfirmDeleteFolder" type="button">确认删除</button></footer>
+    </section>
+  </div>
+
+  <div class="fv-modal-backdrop" id="fvImportModal" hidden>
+    <section class="fv-modal" role="dialog" aria-modal="true" aria-labelledby="fvImportTitle">
+      <header><div><span class="fv-modal-kicker">导入成片</span><h2 id="fvImportTitle">上传本地成片</h2></div><button type="button" data-close-modal="fvImportModal" aria-label="关闭">×</button></header>
+      <div class="fv-modal-body">
+        <label class="fv-upload" id="fvImportDrop"><input id="fvImportFile" type="file" accept=".mp4,.mov,.m4v,.webm,.ogv,video/mp4,video/quicktime,video/x-m4v,video/webm,video/ogg" hidden><span>⇧</span><strong>点击选择或拖拽视频至此</strong><small>支持 MP4、MOV、M4V、WebM、OGV 格式，单个文件不超过 500M</small></label>
+        <div class="fv-import-file" id="fvImportFileInfo" hidden></div>
+        <div class="fv-form-grid">
+          <label class="fv-field full"><span>文件名称 <b>*</b></span><input id="fvImportFileName" maxlength="60" placeholder="选择视频后自动填入"><small id="fvImportNameError"></small></label>
+          <label class="fv-field"><span>对应产品 <b>*</b></span><select id="fvImportProduct"></select><small id="fvImportProductError"></small></label>
+          <label class="fv-field"><span>所属文件夹 <b>*</b></span><select id="fvImportFolder"></select></label>
+          <label class="fv-field full" id="fvImportIdsField"><span>关联千川素材 ID <em>选填</em></span><input id="fvImportIds" maxlength="60" placeholder="输入一个千川素材 ID"><small>填写后，成片将展示“已关联千川”标签并同步投流数据。</small></label>
+          <div class="fv-field full fv-import-tags"><span>视频标签 <em>选填</em></span><div class="fv-import-tag-control"><div id="fvImportTagList"></div><button class="fv-btn fv-btn-secondary small" id="fvImportAddTag" type="button">＋ 添加标签</button></div></div>
+        </div>
+      </div>
+      <footer><button class="fv-btn fv-btn-secondary" type="button" data-close-modal="fvImportModal">取消</button><button class="fv-btn fv-btn-primary" id="fvConfirmImport" type="button">导入成片</button></footer>
+    </section>
+  </div>
+
+  <div class="fv-modal-backdrop" id="fvAnalyzeModal" hidden>
+    <section class="fv-modal fv-modal-small" role="dialog" aria-modal="true" aria-labelledby="fvAnalyzeTitle">
+      <header><div><span class="fv-modal-kicker">智能拉片</span><h2 id="fvAnalyzeTitle">确认开始智能拉片？</h2></div><button type="button" data-close-modal="fvAnalyzeModal" aria-label="关闭">×</button></header>
+      <div class="fv-modal-body">
+        <ul class="fv-check-list">
+          <li>生成口播文案、脚本结构、画面总结与分镜结果</li>
+          <li id="fvAnalyzeQianchuan">已关联千川素材，同步生成互动时序分析</li>
+          <li>已有分析结果将保留历史版本，本次生成新版本</li>
+        </ul>
+        <p class="fv-modal-note">生成期间可继续浏览，完成后可在视频详情查看结果。</p>
+      </div>
+      <footer><button class="fv-btn fv-btn-secondary" type="button" data-close-modal="fvAnalyzeModal">取消</button><button class="fv-btn fv-btn-primary" id="fvStartAnalyze" type="button">开始拉片</button></footer>
+    </section>
+  </div>
+
+  <div class="fv-modal-backdrop" id="fvBatchResultModal" hidden>
+    <section class="fv-modal fv-modal-small" role="dialog" aria-modal="true" aria-labelledby="fvBatchResultTitle">
+      <header><div><span class="fv-modal-kicker success">分析完成</span><h2 id="fvBatchResultTitle">批量任务已完成</h2><p id="fvBatchResultSummary"></p></div><button type="button" data-close-modal="fvBatchResultModal" aria-label="关闭">×</button></header>
+      <div class="fv-modal-body" id="fvBatchResultBody"></div>
+      <footer><button class="fv-btn fv-btn-primary" type="button" data-close-modal="fvBatchResultModal">完成</button></footer>
+    </section>
+  </div>
+
+  <div class="fv-modal-backdrop" id="fvPreviewModal" hidden>
+    <section class="fv-modal fv-preview-modal" role="dialog" aria-modal="true" aria-labelledby="fvPreviewTitle">
+      <header><div><span class="fv-modal-kicker" id="fvPreviewKicker">成片预览</span><h2 id="fvPreviewTitle">成片预览</h2></div><button type="button" data-close-modal="fvPreviewModal" aria-label="关闭">×</button></header>
+      <div class="fv-modal-body fv-preview-body">
+        <div class="fv-preview-layout">
+          <div class="fv-preview-video" id="fvPreviewVideo"><video id="fvPreviewNative" controls playsinline hidden></video><div class="fv-preview-poster"><span>▶</span><strong id="fvPreviewPosterName">视频预览</strong></div></div>
+          <aside class="fv-preview-info" aria-label="视频信息">
+            <div class="fv-preview-info-head"><div class="fv-preview-info-tags"><span class="fv-tag" id="fvPreviewSourceTag">来源</span><span class="fv-preview-status-tag" id="fvPreviewStatusTag">待分析</span><span class="fv-tag fv-tag-neutral" id="fvPreviewQianchuanTag">未关联千川</span></div><button class="fv-btn fv-btn-secondary small" id="fvPreviewEditInfo" type="button">编辑</button></div>
+            <dl>
+              <div><dt>对应产品</dt><dd id="fvPreviewProduct">—</dd></div><div><dt>所属文件夹</dt><dd id="fvPreviewFolder">—</dd></div>
+              <div><dt>文件名称</dt><dd id="fvPreviewFile">—</dd></div><div><dt>时长 / 大小</dt><dd id="fvPreviewDuration">—</dd></div>
+              <div class="full"><dt>创建时间</dt><dd id="fvPreviewCreated">—</dd></div>
+              <div class="full"><dt>千川素材 ID</dt><dd id="fvPreviewQianchuanId">未关联</dd></div>
+            </dl>
+            <section class="fv-preview-tag-module" aria-label="视频标签">
+              <div><span>视频标签</span><div id="fvPreviewTagList"></div></div>
+              <button class="fv-btn fv-btn-secondary small" id="fvPreviewAddTag" type="button">＋ 添加标签</button>
+            </section>
+          </aside>
+        </div>
+      </div>
+      <footer><button class="fv-btn fv-btn-secondary" id="fvPreviewAnalyze" type="button" hidden>开始分析</button><button class="fv-btn fv-btn-secondary" id="fvPreviewDetail" type="button">查看拉片结果</button><button class="fv-btn fv-btn-primary" id="fvPreviewDownload" type="button">下载视频</button></footer>
+    </section>
+  </div>
+
+  <div class="fv-modal-backdrop" id="fvAssetModal" hidden>
+    <section class="fv-modal fv-modal-small" role="dialog" aria-modal="true" aria-labelledby="fvAssetModalTitle">
+      <header><div><span class="fv-modal-kicker">视频操作</span><h2 id="fvAssetModalTitle">编辑视频</h2><p id="fvAssetModalSubtitle"></p></div><button type="button" data-close-modal="fvAssetModal" aria-label="关闭">×</button></header>
+      <div class="fv-modal-body" id="fvAssetModalBody"></div>
+      <footer><button class="fv-btn fv-btn-secondary" type="button" data-close-modal="fvAssetModal">取消</button><button class="fv-btn fv-btn-primary" id="fvAssetModalConfirm" type="button">确认</button></footer>
+    </section>
+  </div>
+
+  <div class="fv-modal-backdrop" id="fvTagModal" hidden>
+    <section class="fv-modal fv-tag-modal" role="dialog" aria-modal="true" aria-labelledby="fvTagModalTitle">
+      <header><div><span class="fv-modal-kicker">标签</span><h2 id="fvTagModalTitle">按标签筛选</h2><p id="fvTagModalSubtitle">选择一个或多个标签。</p></div><button type="button" data-close-modal="fvTagModal" aria-label="关闭">×</button></header>
+      <div class="fv-modal-body fv-tag-modal-body">
+        <aside class="fv-tag-modal-side">
+          <button class="fv-tag-group active" type="button" data-tag-group="all"><span>全部标签</span><b id="fvTagCountAll">0</b></button>
+          <button class="fv-tag-group" type="button" data-tag-group="uncategorized"><span>未分组</span><b id="fvTagCountNone">0</b></button>
+          <i></i>
+          <div id="fvTagGroupList"></div>
+          <button class="fv-new-tag-group" type="button" id="fvNewTagGroup">＋ 新建分组</button>
+        </aside>
+        <div class="fv-tag-modal-main">
+          <label class="fv-tag-search"><span>⌕</span><input id="fvTagSearch" type="search" placeholder="搜索标签..."></label>
+          <div class="fv-tag-list" id="fvTagList"></div>
+          <button class="fv-show-new-tag" id="fvShowNewTag" type="button">＋ 新建标签</button>
+          <div class="fv-tag-create" id="fvTagCreateRow" hidden><input id="fvNewTagName" maxlength="20" placeholder="输入 1–20 个字符"><button class="fv-btn fv-btn-secondary small" id="fvCreateTag" type="button">新建</button></div>
+          <small id="fvTagError"></small>
+        </div>
+      </div>
+      <footer><span class="fv-tag-selected-hint" id="fvTagSelectedHint">已选 0 个标签</span><div><button class="fv-btn fv-btn-secondary" id="fvClearTag" type="button">清空</button><button class="fv-btn fv-btn-primary" id="fvConfirmTag" type="button">确定</button></div></footer>
+    </section>
+  </div>
+
+  <div class="fv-modal-backdrop" id="fvBatchEditModal" hidden>
+    <section class="fv-modal fv-modal-small" role="dialog" aria-modal="true" aria-labelledby="fvBatchEditTitle">
+      <header><div><span class="fv-modal-kicker">批量操作</span><h2 id="fvBatchEditTitle">编辑视频</h2><p id="fvBatchEditSubtitle"></p></div><button type="button" data-close-modal="fvBatchEditModal" aria-label="关闭">×</button></header>
+      <div class="fv-modal-body" id="fvBatchEditBody"></div>
+      <footer><button class="fv-btn fv-btn-secondary" type="button" data-close-modal="fvBatchEditModal">取消</button><button class="fv-btn fv-btn-primary" id="fvConfirmBatchEdit" type="button">确认</button></footer>
+    </section>
+  </div>
+
+  <div class="fv-modal-backdrop" id="fvHistoryModal" hidden>
+    <section class="fv-modal" role="dialog" aria-modal="true" aria-labelledby="fvHistoryTitle">
+      <header><div><span class="fv-modal-kicker">分析历史</span><h2 id="fvHistoryTitle">历史分析记录</h2><p>重新分析会生成新记录，历史结果不会被覆盖。</p></div><button type="button" data-close-modal="fvHistoryModal" aria-label="关闭">×</button></header>
+      <div class="fv-modal-body"><div class="fv-history-list" id="fvHistoryList"></div></div>
+      <footer><button class="fv-btn fv-btn-primary" type="button" data-close-modal="fvHistoryModal">完成</button></footer>
+    </section>
+  </div>
+
+  <script src="js/finished-videos.js?v=20260811f"></script>
+  <script src="../js/lapan-detail.js?v=20260808"></script>
+</body>
+</html>

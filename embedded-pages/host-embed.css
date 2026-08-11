@@ -1,0 +1,8 @@
+/* 嵌入主原型时仅保留页面内容：导航由外层统一提供。 */
+html,body { min-width:0 !important; }
+.app { display:block !important; grid-template-columns:none !important; }
+.app > .sidebar,
+.app > .sub-sidebar,
+.app > .asset-panel,
+.app > .asset-backdrop { display:none !important; }
+.app > .main { display:block !important; min-width:0 !important; min-height:100vh; padding-left:0 !important; }

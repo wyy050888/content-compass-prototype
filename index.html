@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta name="description" content="内容罗盘——面向兴趣电商团队的 AI 内容生产与经营增长平台产品原型">
+  <title>内容罗盘 · AI经营增长平台</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/competitor.css">
+  <link rel="stylesheet" href="css/lapan-detail.css">
+  <link rel="stylesheet" href="css/script-agent.css">
+  <link rel="stylesheet" href="css/script-library.css?v=20260810d">
+  <link rel="stylesheet" href="css/embedded-library.css?v=20260811f">
+  <link rel="stylesheet" href="css/product-detail-assets.css?v=20260811l">
+</head>
+<body>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">◈</div>
+        <div class="brand-copy">
+          <strong>内容罗盘</strong>
+          <small>AI 经营增长平台</small>
+        </div>
+        <button class="sidebar-collapse" id="sidebarCollapse" type="button" aria-label="收起菜单" title="收起菜单">‹</button>
+      </div>
+
+      <div class="sidebar-menu-scroll" id="sidebarMenuScroll">
+      <nav class="nav" aria-label="主导航">
+        <details class="nav-group" open>
+          <summary><span class="nav-group-title"><span class="nav-icon">AI</span>AI创作</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub active" data-page="creation">AI创作</button>
+            <button class="nav-item nav-sub" data-page="infinite-canvas">无限画板</button>
+          </div>
+        </details>
+
+        <details class="nav-group" open>
+          <summary><span class="nav-group-title"><span class="nav-icon">库</span>资产库</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub" data-page="brands">品牌库</button>
+            <button class="nav-item nav-sub" data-page="products">产品库</button>
+            <button class="nav-item nav-sub" data-page="competitor-library">竞品库</button>
+            <button class="nav-item nav-sub" data-page="copy-library">文案库</button>
+            <button class="nav-item nav-sub" data-page="script-library">脚本库</button>
+            <details class="nav-child-group" open>
+              <summary><span>视频库</span><span>⌄</span></summary>
+              <div class="nav-child-list">
+                <button class="nav-item nav-sub nested" data-page="creation-videos">创作素材</button>
+                <button class="nav-item nav-sub nested" data-page="finished-videos">成片视频</button>
+                <button class="nav-item nav-sub nested" data-page="reference-videos">外部参考视频</button>
+              </div>
+            </details>
+            <button class="nav-item nav-sub" data-page="image-library">图片库</button>
+            <button class="nav-item nav-sub" data-page="template-library">模板库</button>
+          </div>
+        </details>
+
+        <details class="nav-group" open>
+          <summary><span class="nav-group-title"><span class="nav-icon">投</span>推广自动化</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub" data-page="material-monitor">素材监控</button>
+            <button class="nav-item nav-sub" data-page="review-distribute">视频过审与分发</button>
+            <button class="nav-item nav-sub" data-page="product-card">商品卡推广</button>
+            <button class="nav-item nav-sub" data-page="content-promo">图文推广</button>
+            <button class="nav-item nav-sub" data-page="account-config">推广配置</button>
+          </div>
+        </details>
+
+        <details class="nav-group" open>
+          <summary><span class="nav-group-title"><span class="nav-icon">店</span>抖店运营</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub" data-page="store" data-store-view="link">一键铺链</button>
+            <button class="nav-item nav-sub" data-page="store" data-store-view="sentiment">评论分析</button>
+          </div>
+        </details>
+
+        <details class="nav-group" open>
+          <summary><span class="nav-group-title"><span class="nav-icon">达</span>达人建联</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub" data-page="creator" data-creator-view="library">达人库</button>
+            <button class="nav-item nav-sub" data-page="creator" data-creator-view="match">达人匹配</button>
+            <button class="nav-item nav-sub" data-page="creator" data-creator-view="lead">建联线索</button>
+            <button class="nav-item nav-sub" data-page="creator" data-creator-view="rule">达人建联规则</button>
+          </div>
+        </details>
+
+        <details class="nav-group">
+          <summary><span class="nav-group-title"><span class="nav-icon">任</span>任务协作</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub planned" data-planned="我的任务">我的任务</button>
+            <button class="nav-item nav-sub planned" data-planned="团队任务">团队任务</button>
+            <button class="nav-item nav-sub planned" data-planned="任务分析">任务分析</button>
+          </div>
+        </details>
+
+        <details class="nav-group">
+          <summary><span class="nav-group-title"><span class="nav-icon">播</span>直播复盘</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub planned" data-planned="直播复盘">直播复盘</button>
+          </div>
+        </details>
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+      <nav class="nav">
+        <details class="nav-group">
+          <summary><span class="nav-group-title"><span class="nav-icon">管</span>系统管理</span><span class="nav-group-caret">⌄</span></summary>
+          <div class="nav-sublist">
+            <button class="nav-item nav-sub" data-page="role-management">角色管理</button>
+            <button class="nav-item nav-sub" data-page="member-management">人员管理</button>
+            <button class="nav-item nav-sub" data-page="admin">AI管理后台</button>
+          </div>
+        </details>
+      </nav>
+      </div>
+      <div class="account">
+        <div class="avatar">嗡</div>
+        <div>
+          <strong>嗡大发</strong>
+          <small>运营 · 抖音三区</small>
+        </div>
+      </div>
+    </aside>
+
+    <aside class="sub-sidebar" id="subSidebar">
+      <div class="sub-sidebar-head">广告账户</div>
+      <div class="sub-sidebar-search">
+        <input type="text" id="accSearchInput" placeholder="搜索账户名 / ID">
+        <select id="accFilterSelect">
+          <option value="all">全部分类</option>
+          <option value="live">直播投放</option>
+          <option value="image">图文投放</option>
+          <option value="review">过审账户</option>
+        </select>
+      </div>
+      <div class="sub-acc-list" id="accListContainer">
+        <button class="sub-acc-item active" data-acc="all" data-type="all" data-name="全部账户" data-id="all">
+          <div class="acc-name">全部账户</div>
+          <div class="acc-id">汇总视图</div>
+          <span class="acc-tag t-all">全部</span>
+        </button>
+        <button class="sub-acc-item" data-acc="ZB_3344" data-type="live" data-name="苏泊尔生活电器直投" data-id="ZB_3344">
+          <div class="acc-name">苏泊尔生活电器直投</div>
+          <div class="acc-id">ZB_3344</div>
+          <span class="acc-tag t-live">直播投放</span>
+        </button>
+        <button class="sub-acc-item" data-acc="ZB_7788" data-type="live" data-name="苏泊尔厨具直投" data-id="ZB_7788">
+          <div class="acc-name">苏泊尔厨具直投</div>
+          <div class="acc-id">ZB_7788</div>
+          <span class="acc-tag t-live">直播投放</span>
+        </button>
+        <button class="sub-acc-item" data-acc="ZB_5512" data-type="live" data-name="苏泊尔环境电器直投" data-id="ZB_5512">
+          <div class="acc-name">苏泊尔环境电器直投</div>
+          <div class="acc-id">ZB_5512</div>
+          <span class="acc-tag t-live">直播投放</span>
+        </button>
+        <button class="sub-acc-item" data-acc="TW_8821" data-type="image" data-name="生活电器图文投放" data-id="TW_8821">
+          <div class="acc-name">生活电器图文投放</div>
+          <div class="acc-id">TW_8821</div>
+          <span class="acc-tag t-image">图文投放</span>
+        </button>
+        <button class="sub-acc-item" data-acc="TW_5567" data-type="image" data-name="厨具图文投放" data-id="TW_5567">
+          <div class="acc-name">厨具图文投放</div>
+          <div class="acc-id">TW_5567</div>
+          <span class="acc-tag t-image">图文投放</span>
+        </button>
+        <button class="sub-acc-item" data-acc="TW_3399" data-type="image" data-name="环境电器图文投放" data-id="TW_3399">
+          <div class="acc-name">环境电器图文投放</div>
+          <div class="acc-id">TW_3399</div>
+          <span class="acc-tag t-image">图文投放</span>
+        </button>
+        <button class="sub-acc-item" data-acc="SF_8821" data-type="review" data-name="生活电器过审专用" data-id="SF_8821">
+          <div class="acc-name">生活电器过审专用</div>
+          <div class="acc-id">SF_8821</div>
+          <span class="acc-tag t-review">过审账户</span>
+        </button>
+        <button class="sub-acc-item" data-acc="SF_5567" data-type="review" data-name="厨具过审专用" data-id="SF_5567">
+          <div class="acc-name">厨具过审专用</div>
+          <div class="acc-id">SF_5567</div>
+          <span class="acc-tag t-review">过审账户</span>
+        </button>
+        <button class="sub-acc-item" data-acc="SF_3399" data-type="review" data-name="环境电器过审专用" data-id="SF_3399">
+          <div class="acc-name">环境电器过审专用</div>
+          <div class="acc-id">SF_3399</div>
+          <span class="acc-tag t-review">过审账户</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">
+          <button class="icon-btn mobile-toggle" id="mobileToggle" aria-label="打开导航">☰</button>
+          <span>内容罗盘</span><span>/</span><strong id="pageTitle">AI创作</strong>
+        </div>
+        <div class="top-actions">
+          <select class="team-select" aria-label="选择团队">
+            <option>小家电事业部</option>
+            <option>品牌一组</option>
+            <option>品牌二组</option>
+          </select>
+          <!-- 全局账户选择器 -->
+          <div class="account-switcher" id="accountSwitcher">
+            <button class="account-trigger" id="accountTrigger">
+              <span class="account-label">千川账户</span>
+              <span class="account-name" id="accountName">优选家居旗舰店</span>
+              <span class="account-star" id="accountStar">★</span>
+              <span class="account-arrow">▾</span>
+            </button>
+            <div class="account-dropdown" id="accountDropdown">
+              <div class="account-search">
+                <input type="text" placeholder="搜索账户名/ID" id="accountSearch">
+                <label class="star-filter"><input type="checkbox" id="accountStarFilter"> ⭐仅看星标</label>
+              </div>
+              <div class="account-list" id="accountList"></div>
+              <div class="account-foot">
+                <button class="text-btn" id="gotoAccounts">管理账户授权 →</button>
+              </div>
+            </div>
+          </div>
+          <button class="ghost-btn">帮助中心</button>
+          <button class="icon-btn" aria-label="通知">●</button>
+        </div>
+      </header>
+
+      <!-- AI 创作 -->
+        <script src="fragments/page-creation.js"></script>
+  <script src="fragments/page-pull-entry.js"></script>
+  <script src="fragments/page-pull.js"></script>
+  <script src="fragments/page-brands.js"></script>
+  <script src="fragments/page-brand-detail.js"></script>
+  <script src="fragments/page-products.js"></script>
+  <script src="fragments/page-competitor-library.js?v=20260808"></script>
+  <script src="fragments/page-product-detail.js?v=20260811b"></script>
+  <script src="fragments/page-copy-library.js"></script>
+  <script src="fragments/page-script-library.js?v=20260810b"></script>
+  <script src="fragments/page-creation-videos.js?v=20260811a"></script>
+  <script src="fragments/page-finished-videos.js?v=20260811f"></script>
+  <script src="fragments/page-reference-videos.js?v=20260811l"></script>
+  <script src="fragments/page-external-views.js?v=20260808"></script>
+  <script src="fragments/page-library.js"></script>
+  <script src="fragments/page-material-monitor.js"></script>
+  <script src="fragments/page-review-distribute.js"></script>
+  <script src="fragments/page-product-card.js"></script>
+  <script src="fragments/page-content-promo.js"></script>
+  <script src="fragments/page-account-config.js"></script>
+  <script src="fragments/page-promotion.js"></script>
+  <script src="fragments/page-promotion-batch.js"></script>
+  <script src="fragments/page-promotion-rules.js"></script>
+  <script src="fragments/page-promotion-accounts.js"></script>
+  <script src="fragments/page-promotion-sync.js"></script>
+  <script src="fragments/page-store.js"></script>
+  <script src="fragments/page-creator.js"></script>
+  <script src="fragments/page-role-management.js"></script>
+  <script src="fragments/page-member-management.js"></script>
+  <script src="fragments/page-admin.js"></script>
+  <script src="fragments/_modals-core.js?v=20260811a"></script>
+  <script src="fragments/_modals-promotion.js?v=20260811a"></script>
+  <script src="fragments/_modals-content.js?v=20260811a"></script>
+</div>
+
+
+    <script src="js/app.js?v=20260808d"></script>
+  <script src="js/script-library.js?v=20260810d"></script>
+  <script src="js/competitor.js"></script>
+  <script src="js/lapan-detail.js"></script>
+  <script src="js/product-detail-media-cards.js?v=20260811a"></script>
+  <script src="js/product-detail-media-bridge.js?v=20260811a"></script>
+  <script src="js/product-detail-assets.js?v=20260811n"></script>
+</body>
+</html>
