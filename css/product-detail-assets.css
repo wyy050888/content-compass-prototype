@@ -187,7 +187,18 @@
 .pda-associate-modal{height:min(760px,calc(100vh - 48px))}
 .pda-associate-toolbar{display:grid;grid-template-columns:minmax(280px,1fr) 150px 150px;gap:10px;padding:14px 20px;border-bottom:1px solid #e9ebf2;background:#fafbfe}
 .pda-associate-toolbar select{height:38px;padding:0 10px;border:1px solid #dfe3ee;border-radius:9px;background:#fff;color:#4a5268;outline:0}
-.pda-associate-body{flex:1;background:#f7f8fb}
+.pda-associate-body{flex:1;padding:0;overflow:hidden;background:#f7f8fb}
+.pda-associate-body.has-folders{display:grid;grid-template-columns:220px minmax(0,1fr)}
+.pda-associate-folders{min-width:0;padding:16px 12px;border-right:1px solid #e5e8f0;background:#fff;overflow:auto}
+.pda-associate-folders>strong{display:block;padding:0 8px 10px;color:#3f4658;font-size:12px}
+.pda-associate-folder-tree{display:grid;gap:3px}
+.pda-associate-folder{width:100%;min-height:34px;display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:6px;padding:6px 8px 6px calc(8px + var(--folder-indent,0px));border:0;border-radius:8px;background:transparent;color:#626a7d;text-align:left;cursor:pointer}
+.pda-associate-folder:hover{background:#f5f4fb}
+.pda-associate-folder.active{color:#5d50db;background:#efedff}
+.pda-associate-folder span{font-size:11px;text-align:center}
+.pda-associate-folder b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.pda-associate-folder em{color:#9aa1b2;font-size:10px;font-style:normal}
+.pda-associate-results{min-width:0;padding:18px 20px;overflow:auto}
 .pda-associate-body .pda-media-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
 .pda-associate-body .pda-media-card{cursor:pointer}
 .pda-associate-body .pda-mat-more,.pda-associate-body .pda-fv-more{display:none}
@@ -260,4 +271,10 @@
   .pda-detail-grid{grid-template-columns:1fr 1fr}
   .pda-detail-view{left:0}
   .pda-associate-toolbar{grid-template-columns:1fr}
+  .pda-associate-body.has-folders{grid-template-columns:180px minmax(0,1fr)}
+}
+
+@media(max-width:760px){
+  .pda-associate-body.has-folders{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+  .pda-associate-folders{max-height:150px;border-right:0;border-bottom:1px solid #e5e8f0}
 }

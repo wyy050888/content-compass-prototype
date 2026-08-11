@@ -989,7 +989,15 @@
       originalFields: { marketingScene: "直播间引流" },
       customPresets: []
     };
-    const fixedCopywritingModel = { value:"gpt-5-6-terra", label:"GPT-5.6 Terra" };
+    const copywritingModelCatalog = [
+      { value:"gpt-5-6-terra", label:"GPT-5.6 Terra", group:"推荐模型", recommended:true },
+      { value:"claude-sonnet-5", label:"Claude Sonnet 5", group:"国外模型" },
+      { value:"gemini-3-6-flash", label:"Gemini 3.6 Flash", group:"国外模型" },
+      { value:"doubao-seed-2-pro", label:"豆包 Seed 2.0 Pro", group:"国内模型" },
+      { value:"deepseek-v4-pro", label:"DeepSeek V4 Pro", group:"国内模型" },
+      { value:"qwen-3-7-max", label:"通义千问 Qwen3.7-Max", group:"国内模型" }
+    ];
+    const fixedCopywritingModel = copywritingModelCatalog[0];
     const copyStructureCatalog = [
       {
         id:"cs-qc-result", name:"结果前置·痛点解决·行动引导型", formula:"结果前置 → 痛点放大 → 能力证明 → 行动引导", source:"qianchuan", level:"product", products:["轻净 Pro 除螨仪"], updated:"08-05 10:32",
@@ -1050,7 +1058,7 @@
           <option value="deepseek-v4-pro">DeepSeek V4 Pro</option>
           <option value="qwen-3-7-max">通义千问 Qwen3.7-Max</option>
         </optgroup>
-        <optgroup label="国际模型">
+        <optgroup label="国外模型">
           <option value="gpt-5-6-terra">GPT-5.6 Terra</option>
           <option value="claude-sonnet-5">Claude Sonnet 5</option>
           <option value="gemini-3-6-flash">Gemini 3.6 Flash</option>
@@ -1418,17 +1426,33 @@
                 <label>对应产品 <span class="required-star">*</span></label>
                 <div class="script-product-display" data-script-library-product-display>
                   <span class="script-product-display-icon">◈</span>
-                  <div><strong>等待带入对应产品</strong><small>选择文案后，系统将自动带入该文案关联的产品信息。</small></div>
+                  <div><strong>等待带入对应产品</strong></div>
                 </div>
                 <input type="hidden" data-script-product>
               </div>
 
               <div class="field full" data-script-product-panel="manual" hidden>
                 <label>对应产品 <span class="required-star">*</span></label>
-                <div class="script-product-row">
-                  <input type="text" data-script-product data-required list="scriptProductOptions" placeholder="输入产品名称，或从产品库选择">
-                  <datalist id="scriptProductOptions"><option value="轻净 Pro 除螨仪"><option value="轻享空气炸锅 A8"><option value="净界洗地机 S5"></datalist>
-                  <button class="ghost-btn script-product-pick" type="button" data-action="open-script-product-picker">从产品库选择</button>
+                <div class="source-mode-switch script-product-source-switch" role="tablist" aria-label="产品来源切换">
+                  <button type="button" class="active" data-script-product-source="library" role="tab" aria-selected="true">产品库</button>
+                  <button type="button" data-script-product-source="link" role="tab" aria-selected="false">商品链接</button>
+                  <button type="button" data-script-product-source="manual" role="tab" aria-selected="false">手工输入</button>
+                </div>
+                <div data-script-manual-product-panel="library">
+                  <div class="script-product-row">
+                    <input type="hidden" data-script-product data-required>
+                    <button class="script-library-trigger" type="button" data-action="open-script-product-picker"><span data-script-selected-product>选择产品</span><i>⌄</i></button>
+                  </div>
+                </div>
+                <div data-script-manual-product-panel="link" hidden>
+                  <div class="script-product-row">
+                    <input type="url" data-script-product-link placeholder="粘贴商品链接">
+                    <input type="hidden" data-script-product data-required>
+                    <button class="ghost-btn script-product-pick" type="button" data-action="recognize-script-product">解析商品</button>
+                  </div>
+                </div>
+                <div data-script-manual-product-panel="manual" hidden>
+                  <input type="text" data-script-product data-required placeholder="输入产品名称">
                 </div>
               </div>
 
@@ -2444,6 +2468,13 @@
       return true;
     }
 
+    function getScriptProductInput(sourceMode) {
+      if (sourceMode === "library") {
+        return dynamicForm.querySelector('[data-script-product-panel="library"] [data-script-product]');
+      }
+      return dynamicForm.querySelector('[data-script-product-panel="manual"] [data-script-manual-product-panel]:not([hidden]) [data-script-product]');
+    }
+
     // 智能脚本 Agent 校验:步骤①(来源文案/产品/配音/时长) + 步骤②(素材与模型)
     function validateScriptStep(step) {
       const panel = dynamicForm.querySelector(`.form-section[data-task-step="${step}"]`);
@@ -2451,7 +2482,7 @@
       const materialMode = dynamicForm.querySelector('[data-role="script-material-mode"] .choice-chip.active')?.dataset.materialMode || "depend";
       // 步骤①校验
       if (step === 1) {
-        const sourceMode = panel.querySelector(".source-mode-switch .active")?.dataset.scriptSourceMode || "library";
+        const sourceMode = panel.querySelector("[data-script-source-mode].active")?.dataset.scriptSourceMode || "library";
         const sourceValue = sourceMode === "library"
           ? panel.querySelector("[data-script-source-library]")?.value
           : panel.querySelector("[data-script-source-text]")?.value.trim();
@@ -2464,7 +2495,7 @@
           setFormFeedback(sourceMode === "library" ? "请从文案库选择一条口播文案。" : "请输入需要转为分镜的口播文案。", "error");
           return false;
         }
-        const productInput = panel.querySelector(`[data-script-product-panel="${sourceMode}"] [data-script-product]`);
+        const productInput = getScriptProductInput(sourceMode);
         if (!productInput?.value.trim()) {
           productInput?.closest(".field")?.classList.add("invalid");
           productInput?.focus();
@@ -2516,8 +2547,8 @@
     // 采集智能脚本 Agent 的当前参数,用于生成请求和汇总面板
     function captureScriptContext() {
       if (activeType !== "script") return;
-      const sourceMode = dynamicForm.querySelector(".source-mode-switch .active")?.dataset.scriptSourceMode || "library";
-      const productInput = dynamicForm.querySelector(`[data-script-product-panel="${sourceMode}"] [data-script-product]`);
+      const sourceMode = dynamicForm.querySelector("[data-script-source-mode].active")?.dataset.scriptSourceMode || "library";
+      const productInput = getScriptProductInput(sourceMode);
       const product = productInput?.dataset.productId || "";
       const materialMode = dynamicForm.querySelector('[data-role="script-material-mode"] .choice-chip.active')?.dataset.materialMode || "depend";
       const sourceValue = sourceMode === "library"
@@ -2670,7 +2701,7 @@
             panel.hidden = panel.dataset.scriptProductPanel !== mode;
           });
           root.querySelectorAll(".field.invalid").forEach(f => f.classList.remove("invalid"));
-          const productInput = root.querySelector(`[data-script-product-panel="${mode}"] [data-script-product]`);
+          const productInput = getScriptProductInput(mode);
           if (mode === "manual" && productInput) {
             productInput.value = "";
             delete productInput.dataset.productId;
@@ -2731,14 +2762,42 @@
       // 初始化:始终隐藏"自动带入"等噪音提示
       root.querySelectorAll("[data-tip-material-depend]").forEach(el => { el.hidden = true; });
 
-      // 5) 手动输入时可从产品库选择对应产品
-      root.querySelector("[data-action='open-script-product-picker']")?.addEventListener("click", () => {
-        openScriptProductPicker('[data-script-product-panel="manual"] [data-script-product]');
+      // 5) 手动输入文案时，支持通过产品库、商品链接或手工输入确定产品
+      root.querySelectorAll("[data-script-product-source]").forEach(button => {
+        button.addEventListener("click", () => {
+          const source = button.dataset.scriptProductSource;
+          root.querySelectorAll("[data-script-product-source]").forEach(item => {
+            const active = item === button;
+            item.classList.toggle("active", active);
+            item.setAttribute("aria-selected", String(active));
+          });
+          root.querySelectorAll("[data-script-manual-product-panel]").forEach(panel => {
+            panel.hidden = panel.dataset.scriptManualProductPanel !== source;
+          });
+          setFormFeedback("");
+        });
       });
-      root.querySelector('[data-script-product-panel="manual"] [data-script-product]')?.addEventListener("input", event => {
+      root.querySelector("[data-action='open-script-product-picker']")?.addEventListener("click", () => {
+        openScriptProductPicker('[data-script-manual-product-panel="library"] [data-script-product]');
+      });
+      root.querySelector('[data-script-manual-product-panel="library"] [data-script-product]')?.addEventListener("change", event => {
+        const label = root.querySelector("[data-script-selected-product]");
+        if (label) label.textContent = event.target.value || "选择产品";
+      });
+      root.querySelector('[data-script-manual-product-panel="manual"] [data-script-product]')?.addEventListener("input", event => {
         const matched = Object.entries(productCatalog).find(([, product]) => product.name === event.target.value.trim());
         if (matched) event.target.dataset.productId = matched[0];
         else delete event.target.dataset.productId;
+      });
+      root.querySelector("[data-action='recognize-script-product']")?.addEventListener("click", () => {
+        const link = root.querySelector("[data-script-product-link]")?.value.trim();
+        if (!link) return setFormFeedback("请先粘贴商品链接。", "error");
+        const input = root.querySelector('[data-script-manual-product-panel="link"] [data-script-product]');
+        if (input) {
+          input.value = productCatalog["mite-pro"].name;
+          input.dataset.productId = "mite-pro";
+        }
+        setFormFeedback(`已解析产品“${productCatalog["mite-pro"].name}”。`);
       });
 
       // 6) 素材库弹窗触发
@@ -2813,20 +2872,25 @@
       const hidden = dynamicForm.querySelector("[data-script-model]");
       if (!picker || !menu) return;
       const candidates = [
-        { value: "gpt-5-6-terra", label: "GPT-5.6 Terra", recommended: true },
-        { value: "claude-sonnet-5", label: "Claude Sonnet 5", recommended: false },
-        { value: "gemini-3-6-flash", label: "Gemini 3.6 Flash", recommended: false },
-        { value: "doubao-seed-2-pro", label: "豆包 Seed 2.0 Pro", recommended: false },
-        { value: "qwen-3-7-max", label: "Qwen 3.7 Max", recommended: false }
+        { value: "gpt-5-6-terra", label: "GPT-5.6 Terra", group: "推荐模型", recommended: true },
+        { value: "claude-sonnet-5", label: "Claude Sonnet 5", group: "国外模型" },
+        { value: "gemini-3-6-flash", label: "Gemini 3.6 Flash", group: "国外模型" },
+        { value: "doubao-seed-2-pro", label: "豆包 Seed 2.0 Pro", group: "国内模型" },
+        { value: "deepseek-v4-pro", label: "DeepSeek V4 Pro", group: "国内模型" },
+        { value: "qwen-3-7-max", label: "通义千问 Qwen3.7-Max", group: "国内模型" }
       ];
+      const groups = ["推荐模型", "国外模型", "国内模型"];
       const current = hidden?.value || "gpt-5-6-terra";
       const currentItem = candidates.find(c => c.value === current) || candidates[0];
       if (triggerText) triggerText.textContent = `${currentItem.label}${currentItem.recommended ? "（推荐）" : ""}`;
-      menu.innerHTML = candidates.map(m => `
-        <button type="button" class="single-model-option" data-script-model-option="${m.value}">
-          <span><b>${escapeHtml(m.label)}${m.recommended ? "（推荐）" : ""}</b></span>
-          <strong>${m.value === current ? "✓" : ""}</strong>
-        </button>
+      menu.innerHTML = groups.map(group => `
+        <div class="single-model-group">${group}</div>
+        ${candidates.filter(model => model.group === group).map(model => `
+          <button type="button" class="single-model-option${model.value === current ? " selected" : ""}" data-script-model-option="${model.value}">
+            <span><b>${escapeHtml(model.label)}${model.recommended ? "（推荐）" : ""}</b></span>
+            <strong>${model.value === current ? "✓" : ""}</strong>
+          </button>
+        `).join("")}
       `).join("");
       const trigger = picker.querySelector("[data-script-model-trigger]");
       if (trigger) {
@@ -2843,7 +2907,9 @@
           const item = candidates.find(c => c.value === v);
           if (triggerText && item) triggerText.textContent = `${item.label}${item.recommended ? "（推荐）" : ""}`;
           menu.querySelectorAll("[data-script-model-option]").forEach(o => {
-            o.querySelector("strong").textContent = o.dataset.scriptModelOption === v ? "✓" : "";
+            const selected = o.dataset.scriptModelOption === v;
+            o.classList.toggle("selected", selected);
+            o.querySelector("strong").textContent = selected ? "✓" : "";
           });
           picker.classList.remove("open");
         });
@@ -2904,8 +2970,8 @@
       if (!display || !productInput) return;
       const product = productCatalog[productInput.dataset.productId || ""];
       display.innerHTML = product
-        ? `<span class="script-product-display-icon">◈</span><div><strong>${escapeHtml(product.name)}</strong><small>已根据所选文案自动带入，可在切换为手动输入时重新选择。</small></div>`
-        : `<span class="script-product-display-icon">◈</span><div><strong>等待带入对应产品</strong><small>选择文案后，系统将自动带入该文案关联的产品信息。</small></div>`;
+        ? `<span class="script-product-display-icon">◈</span><div><strong>${escapeHtml(product.name)}</strong></div>`
+        : `<span class="script-product-display-icon">◈</span><div><strong>等待带入对应产品</strong></div>`;
     }
 
     function refreshScriptMaterialSummary() {
@@ -3052,44 +3118,21 @@
     }
 
     function openScriptProductPicker(targetSelector) {
-      const overlay = document.createElement("div");
-      overlay.className = "modal-overlay show";
-      const productEntries = Object.entries(productCatalog);
       const inputEl = dynamicForm.querySelector(targetSelector);
-      const currentValue = inputEl?.dataset.productId || "";
-      overlay.innerHTML = `
-        <div class="modal-card product-picker-modal" role="dialog" aria-label="从产品库选择">
-          <header class="modal-head">
-            <div><strong>从产品库选择产品</strong><small>单选,选择后将作为本次分镜脚本的对应产品</small></div>
-            <button class="modal-close" type="button" data-modal-close>×</button>
-          </header>
-          <div class="product-pick-list">
-            ${productEntries.map(([id, p]) => `
-              <button type="button" class="product-pick-card${id === currentValue ? " selected" : ""}" data-pick-product="${id}">
-                <strong>${escapeHtml(p.name)}</strong>
-                <small>${escapeHtml(p.brand || "—")} · ${escapeHtml(p.industry || "—")}</small>
-                <i class="product-pick-check">${id === currentValue ? "✓" : ""}</i>
-              </button>
-            `).join("")}
-          </div>
-        </div>
-      `;
-      document.body.appendChild(overlay);
-      overlay.addEventListener("click", e => {
-        if (e.target === overlay || e.target.matches("[data-modal-close]")) overlay.remove();
-        const card = e.target.closest("[data-pick-product]");
-        if (card) {
-          const id = card.dataset.pickProduct;
-          const product = productCatalog[id];
-          const input = dynamicForm.querySelector(targetSelector);
-          if (input) {
-            input.value = product?.name || id;
-            input.dataset.productId = id;
-            input.setAttribute("data-product-id", id);
-            // 触发 change 事件以联动其它逻辑
-            input.dispatchEvent(new Event("change", { bubbles: true }));
+      if (!window.CreationProductPicker) {
+        setFormFeedback("产品选择器加载失败，请刷新页面后重试。", "error");
+        return;
+      }
+      window.CreationProductPicker.open({
+        items: Object.entries(productCatalog).map(([id, product]) => ({ id, ...product })),
+        selectedId: inputEl?.dataset.productId || "",
+        onConfirm(productId, product) {
+          if (inputEl) {
+            inputEl.value = product?.name || productId;
+            inputEl.dataset.productId = productId;
+            inputEl.setAttribute("data-product-id", productId);
+            inputEl.dispatchEvent(new Event("change", { bubbles:true }));
           }
-          overlay.remove();
           showToast(`已选择产品: ${product?.name || ""}`);
         }
       });
@@ -3100,6 +3143,11 @@
       const selectedIds = new Set(options.selectedIds || window.__scriptMaterialSelected || []);
       let activeGroup = "all";
       let searchText = "";
+      let typeFilter = "all";
+      let statusFilter = "all";
+      const materialItems = allScriptMaterials();
+      const statusLabels = { ok:"已分析", pending:"待分析", analyzing:"分析中", fail:"分析失败" };
+      const typeLabels = { video:"视频", image:"图片" };
 
       const overlay = document.createElement("div");
       overlay.className = "modal-overlay show";
@@ -3107,7 +3155,7 @@
       overlay.innerHTML = `
         <div class="modal-card material-picker-modal" role="dialog" aria-label="从素材库选择素材">
           <header class="modal-head">
-            <div><strong>${options.title || "从素材库选择素材"}</strong><small>可多选；搜索素材名称或标签</small></div>
+            <div><strong>${options.title || "从素材库选择素材"}</strong><small>可多选；支持按文件夹、类型和分析状态筛选，产品可直接搜索</small></div>
             <button class="modal-close" type="button" data-modal-close>×</button>
           </header>
           <div class="lib-picker">
@@ -3117,7 +3165,9 @@
             </aside>
             <section class="lib-content">
               <div class="lib-toolbar">
-                <input type="text" class="lib-pick-search" placeholder="搜索素材名称、标签或素材 ID">
+                <input type="text" class="lib-pick-search" placeholder="搜索素材名称、产品、标签或素材 ID">
+                <select class="script-material-filter" data-material-filter="type" aria-label="素材类型"><option value="all">全部类型</option><option value="video">视频</option><option value="image">图片</option></select>
+                <select class="script-material-filter" data-material-filter="status" aria-label="分析状态"><option value="all">全部状态</option><option value="ok">已分析</option><option value="pending">待分析</option><option value="analyzing">分析中</option><option value="fail">分析失败</option></select>
               </div>
               <div class="lib-grid" data-lib-grid></div>
               <div class="lib-foot">
@@ -3140,29 +3190,40 @@
 
       const render = () => {
         const groups = activeGroup === "all" ? Object.keys(SCRIPT_MATERIAL_CATALOG) : activeGroup.split("|");
-        const items = allScriptMaterials().filter(item => groups.includes(item.group));
+        const items = materialItems.filter(item => groups.includes(item.group));
         const filtered = items.filter(i => {
+          if (typeFilter !== "all" && i.type !== typeFilter) return false;
+          if (statusFilter !== "all" && i.status !== statusFilter) return false;
           if (searchText) {
             const s = searchText.toLowerCase();
-            return i.id.toLowerCase().includes(s) || i.name.toLowerCase().includes(s) || i.tags.some(t => t.toLowerCase().includes(s));
+            return [i.id,i.name,i.scene,i.product || "未关联产品",...i.tags].some(value=>String(value).toLowerCase().includes(s));
           }
           return true;
         });
-        grid.innerHTML = filtered.length ? filtered.map(i => {
+        grid.innerHTML = filtered.length ? filtered.map((i,index) => {
           const isSel = selectedIds.has(i.id);
-          return `<article class="lib-card${isSel ? " selected" : ""}" data-pick-material="${i.id}">
-            <div class="lib-card-cover">${escapeHtml(i.id)}</div>
-            <div class="lib-card-info"><strong>${escapeHtml(i.name)}</strong><small>${escapeHtml(i.scene)} · 9:16 · ${i.duration}s</small></div>
-            <div class="lib-card-tags"><div>${i.tags.map(t => `<span>${escapeHtml(t)}</span>`).join("")}</div></div>
-            <span class="lib-card-check">${isSel ? "✓" : ""}</span>
+          const statusIcon = i.status === "ok" ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>' : i.status === "fail" ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 8v4M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>' : i.status === "pending" ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>' : "";
+          const duration = i.type === "video" ? `0:${String(Math.round(i.duration)).padStart(2,"0")}` : "";
+          return `<article class="script-mat-card tone-${index%6}${isSel ? " selected" : ""}" data-pick-material="${i.id}">
+            <div class="script-mat-cover">
+              <span class="script-mat-status status-${i.status}"><span class="ico">${statusIcon}</span><span>${statusLabels[i.status] || i.status}</span></span>
+              ${duration ? `<span class="script-mat-duration">${duration}</span>` : ""}
+              <div class="script-mat-play"><span>▶</span></div>
+              <span class="script-mat-select">${isSel ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>' : ""}</span>
+            </div>
+            <div class="script-mat-info">
+              <div class="script-mat-name" title="${escapeHtml(i.name)}">${escapeHtml(i.name)}</div>
+              <div class="script-mat-meta"><span class="script-mat-product${i.product ? "" : " is-empty"}">${escapeHtml(i.product || "未关联产品")}</span><span class="script-mat-type">${typeLabels[i.type] || i.type}</span></div>
+              <div class="script-mat-created">${escapeHtml(i.created)}</div>
+            </div>
           </article>`;
         }).join("") : `<div class="lib-empty">当前文件夹没有匹配素材，换个关键词试试。</div>`;
-        grid.querySelectorAll(".lib-card").forEach(card => {
+        grid.querySelectorAll(".script-mat-card").forEach(card => {
           card.addEventListener("click", () => {
             const id = card.dataset.pickMaterial;
             if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
             card.classList.toggle("selected");
-            card.querySelector(".lib-card-check").textContent = selectedIds.has(id) ? "✓" : "";
+            card.querySelector(".script-mat-select").innerHTML = selectedIds.has(id) ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>' : "";
             selectedCountEl.textContent = selectedIds.size;
             confirmBtn.textContent = `确认(${selectedIds.size} 项)`;
           });
@@ -3180,6 +3241,12 @@
         searchText = e.target.value.trim();
         render();
       });
+      overlay.querySelectorAll("[data-material-filter]").forEach(select=>select.addEventListener("change",event=>{
+        const value = event.target.value;
+        if (event.target.dataset.materialFilter === "type") typeFilter = value;
+        if (event.target.dataset.materialFilter === "status") statusFilter = value;
+        render();
+      }));
       overlay.addEventListener("click", e => { if (e.target === overlay || e.target.matches("[data-modal-close]")) overlay.remove(); });
       confirmBtn.addEventListener("click", () => {
         const ids = [...selectedIds];
@@ -3368,6 +3435,11 @@
       const previous = dynamicForm.dataset.rewriteSource;
       if (!initial && previous && textarea) rewriteSourceState[previous] = textarea.value;
       dynamicForm.dataset.rewriteSource = source;
+      dynamicForm.querySelectorAll("[data-rewrite-source-mode]").forEach(button => {
+        const active = button.dataset.rewriteSourceMode === source;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", String(active));
+      });
       if (libraryField) libraryField.hidden = source !== "library";
       if (textarea) textarea.value = rewriteSourceState[source] || "";
     }
@@ -4045,16 +4117,16 @@
       <div class="original-flow-form rewrite-flow-form">
         <section class="original-step-panel" data-original-step="1" data-task-step="1">
           <div class="original-step-title">
-            <div><h2>原文与产品信息</h2><p>选择待改写文案，并确认改写时允许使用的产品事实。</p></div>
+            <div><h2>文案与产品信息</h2><p>选择待改写文案，并确认改写时允许使用的产品事实。</p></div>
             <div class="original-header-controls">
               <button class="advanced-toggle" type="button" data-action="toggle-original-advanced" aria-expanded="false">展开高级设置</button>
             </div>
           </div>
 
           <div class="original-group rewrite-source-group">
-            <div class="original-group-title"><strong>原文信息</strong><span>从文案库选择或直接粘贴，原资产不会被覆盖</span></div>
+            <div class="original-group-title"><strong>文案信息</strong><span>从文案库选择或手动输入，原资产不会被覆盖</span></div>
             <div class="original-group-fields">
-              <div class="original-field"><label>原文来源<span class="required-star">*</span></label><select data-rewrite-source data-required><option value="library">从文案库选择</option><option value="paste">粘贴文案</option></select></div>
+              <div class="original-field"><label>文案来源<span class="required-star">*</span></label><input type="hidden" data-rewrite-source data-required value="library"><div class="source-mode-switch" role="tablist" aria-label="文案来源切换"><button type="button" class="active" data-rewrite-source-mode="library" role="tab" aria-selected="true">从文案库选择</button><button type="button" data-rewrite-source-mode="paste" role="tab" aria-selected="false">手动输入</button></div></div>
               <div class="original-field" data-rewrite-library-field>
                 <label>选择文案<span class="required-star">*</span></label>
                 <input type="hidden" data-rewrite-library data-required>
@@ -4116,7 +4188,7 @@
     const agentStepPlans = {
       original: ["产品信息", "生成设置", "AI生成文案"],
       copy: ["爆款参考与产品信息", "生成设置", "AI生成文案"],
-      rewrite: ["原文与产品信息", "改写设置", "AI生成文案"],
+      rewrite: ["文案与产品信息", "改写设置", "AI生成文案"],
       "image-main": ["产品与主图目标", "画面要求", "选择模型", "确认生成"],
       "image-detail": ["产品与详情页模块", "画面约束", "选择模型", "确认生成"],
       script: ["文案信息", "脚本策略", "AI 生成脚本"],
@@ -4200,14 +4272,23 @@
       const mode = getModelMode(activeType);
       const options = [...modelSelect.options];
       if (isStructuredCopyFlow()) {
-        if ([...modelSelect.options].some(option => option.value === fixedCopywritingModel.value)) {
-          modelSelect.value = fixedCopywritingModel.value;
+        let currentModel = copywritingModelCatalog.find(model => model.value === modelSelect.value);
+        if (!currentModel) {
+          currentModel = fixedCopywritingModel;
+          modelSelect.value = currentModel.value;
           renderModelPickerOptions();
         }
+        const groups = ["推荐模型", "国外模型", "国内模型"];
         host.innerHTML = `
           <div class="single-model-picker" data-single-model-picker>
-            <button class="single-model-trigger" type="button" data-single-model-trigger><span><small>当前最优模型</small><b>${fixedCopywritingModel.label}</b></span><i>⌃</i></button>
-            <div class="single-model-menu"><button class="single-model-option" type="button" data-single-model-option><span><b>${fixedCopywritingModel.label}</b><small>系统已根据当前 Agent 自动优选</small></span><strong>✓</strong></button></div>
+            <button class="single-model-trigger" type="button" data-single-model-trigger><span><b>${escapeHtml(currentModel.label)}${currentModel.recommended ? "（推荐）" : ""}</b></span><i>⌃</i></button>
+            <div class="single-model-menu">${groups.map(group => `
+              <div class="single-model-group">${group}</div>
+              ${copywritingModelCatalog.filter(model => model.group === group).map(model => `
+                <button class="single-model-option${model.value === currentModel.value ? " selected" : ""}" type="button" data-single-model-option="${escapeHtml(model.value)}">
+                  <span><b>${escapeHtml(model.label)}${model.recommended ? "（推荐）" : ""}</b></span><strong>${model.value === currentModel.value ? "✓" : ""}</strong>
+                </button>`).join("")}
+            `).join("")}</div>
           </div>`;
         return;
       }
@@ -4568,7 +4649,7 @@
       const scriptCtx = creationContext.script || {};
       const product = productCatalog[scriptCtx.product] || { ...currentProduct(), name: scriptCtx.productName || currentProduct().name };
       const versionCount = generatedAssets.length;
-      const modelLabels = { "gpt-5-6-terra":"GPT-5.6 Terra", "claude-sonnet-5":"Claude Sonnet 5", "gemini-3-6-flash":"Gemini 3.6 Flash", "doubao-seed-2-pro":"豆包 Seed 2.0 Pro", "qwen-3-7-max":"Qwen 3.7 Max" };
+      const modelLabels = { "gpt-5-6-terra":"GPT-5.6 Terra", "claude-sonnet-5":"Claude Sonnet 5", "gemini-3-6-flash":"Gemini 3.6 Flash", "doubao-seed-2-pro":"豆包 Seed 2.0 Pro", "deepseek-v4-pro":"DeepSeek V4 Pro", "qwen-3-7-max":"通义千问 Qwen3.7-Max" };
       const modelLabel = modelLabels[scriptCtx.model] || scriptCtx.model || "—";
 
       // 计算每个脚本的状态
@@ -5047,21 +5128,21 @@
     };
 
     const SCRIPT_MATERIAL_SAMPLE_META = {
-      "M-CL-101": { name:"透明尘杯脏污特写", scene:"床垫清洁", duration:2, tags:["脏污证据", "结果直给"] },
-      "M-CL-102": { name:"拍打吸尘动作特写", scene:"床垫使用", duration:3, tags:["真实操作", "拍打吸尘"] },
-      "M-CL-103": { name:"机身按键与吸口细节", scene:"产品卖点", duration:5, tags:["功能展示", "产品特写"] },
-      "M-PF-201": { name:"卧室床垫清洁全景", scene:"家庭卧室", duration:2, tags:["使用场景", "床垫清洁"] },
-      "M-PF-202": { name:"沙发布艺清洁全景", scene:"客厅沙发", duration:3, tags:["养宠家庭", "毛发清理"] },
-      "M-PF-203": { name:"多场景使用切换", scene:"床垫与沙发", duration:5, tags:["一机多用", "家庭清洁"] },
-      "M-SC-301": { name:"床垫表面推进清洁", scene:"卧室日常", duration:3, tags:["使用过程", "镜头推进"] },
-      "M-SC-302": { name:"沙发表面拍打吸尘", scene:"养宠家庭", duration:5, tags:["毛发清理", "真实使用"] },
-      "M-SC-303": { name:"儿童房床垫深度清洁", scene:"亲子家庭", duration:10, tags:["完整过程", "家庭场景"] },
-      "M-PC-401": { name:"毛发皮屑脏污特写", scene:"清洁痛点", duration:2, tags:["视觉冲击", "脏污特写"] },
-      "M-PC-402": { name:"床面使用前对比", scene:"床垫卫生", duration:3, tags:["前后对比", "痛点呈现"] },
-      "M-PC-403": { name:"床面使用后对比", scene:"清洁结果", duration:5, tags:["前后对比", "结果直给"] },
-      "M-AT-501": { name:"品牌角标与行动按钮", scene:"品牌收口", duration:2, tags:["CTA", "品牌露出"] },
-      "M-AT-502": { name:"夏季深度清洁活动", scene:"营销活动", duration:5, tags:["促销信息", "活动氛围"] },
-      "M-AT-503": { name:"产品定帧与购买引导", scene:"品牌收口", duration:10, tags:["完整尾帧", "购买引导"] }
+      "M-CL-101": { name:"透明尘杯脏污特写", scene:"床垫清洁", duration:2, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/08 09:14", tags:["脏污证据", "结果直给"] },
+      "M-CL-102": { name:"拍打吸尘动作特写", scene:"床垫使用", duration:3, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/08 08:42", tags:["真实操作", "拍打吸尘"] },
+      "M-CL-103": { name:"机身按键与吸口细节", scene:"产品卖点", duration:5, type:"video", status:"pending", product:"轻净 Pro 除螨仪", created:"08/07 17:35", tags:["功能展示", "产品特写"] },
+      "M-PF-201": { name:"卧室床垫清洁全景", scene:"家庭卧室", duration:2, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/07 15:20", tags:["使用场景", "床垫清洁"] },
+      "M-PF-202": { name:"沙发布艺清洁全景", scene:"客厅沙发", duration:3, type:"video", status:"ok", product:"", created:"08/07 11:36", tags:["养宠家庭", "毛发清理"] },
+      "M-PF-203": { name:"多场景使用切换", scene:"床垫与沙发", duration:5, type:"video", status:"analyzing", product:"轻净 Pro 除螨仪", created:"08/06 18:24", tags:["一机多用", "家庭清洁"] },
+      "M-SC-301": { name:"床垫表面推进清洁", scene:"卧室日常", duration:3, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/06 16:11", tags:["使用过程", "镜头推进"] },
+      "M-SC-302": { name:"沙发表面拍打吸尘", scene:"养宠家庭", duration:5, type:"video", status:"fail", product:"", created:"08/06 10:08", tags:["毛发清理", "真实使用"] },
+      "M-SC-303": { name:"儿童房床垫深度清洁", scene:"亲子家庭", duration:10, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/05 19:42", tags:["完整过程", "家庭场景"] },
+      "M-PC-401": { name:"毛发皮屑脏污特写", scene:"清洁痛点", duration:0, type:"image", status:"ok", product:"轻净 Pro 除螨仪", created:"08/05 15:50", tags:["视觉冲击", "脏污特写"] },
+      "M-PC-402": { name:"床面使用前对比", scene:"床垫卫生", duration:0, type:"image", status:"ok", product:"轻净 Pro 除螨仪", created:"08/05 13:27", tags:["前后对比", "痛点呈现"] },
+      "M-PC-403": { name:"床面使用后对比", scene:"清洁结果", duration:5, type:"video", status:"pending", product:"轻净 Pro 除螨仪", created:"08/05 11:08", tags:["前后对比", "结果直给"] },
+      "M-AT-501": { name:"品牌角标与行动按钮", scene:"品牌收口", duration:0, type:"image", status:"ok", product:"轻净 Pro 除螨仪", created:"08/04 18:30", tags:["CTA", "品牌露出"] },
+      "M-AT-502": { name:"夏季深度清洁活动", scene:"营销活动", duration:0, type:"image", status:"analyzing", product:"轻净 Pro 除螨仪", created:"08/04 14:12", tags:["促销信息", "活动氛围"] },
+      "M-AT-503": { name:"产品定帧与购买引导", scene:"品牌收口", duration:0, type:"image", status:"ok", product:"", created:"08/03 19:02", tags:["完整尾帧", "购买引导"] }
     };
 
     const SCRIPT_MATERIAL_FOLDERS = [
@@ -5074,7 +5155,11 @@
         ...item, ...SCRIPT_MATERIAL_SAMPLE_META[item.id],
         group,
         name: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.name || item.tags[0] || item.id,
-        scene: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.scene || item.tags[1] || group
+        scene: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.scene || item.tags[1] || group,
+        type: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.type || "video",
+        status: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.status || "ok",
+        product: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.product || "",
+        created: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.created || ""
       })));
     }
 
@@ -5889,6 +5974,13 @@
         openCreationProductPicker();
         return;
       }
+      const rewriteSourceMode = event.target.closest("[data-rewrite-source-mode]");
+      if (rewriteSourceMode) {
+        const source = dynamicForm.querySelector("[data-rewrite-source]");
+        if (source) source.value = rewriteSourceMode.dataset.rewriteSourceMode;
+        refreshRewriteSource();
+        return;
+      }
       const conflictAction = event.target.closest("[data-conflict-action]");
       if (conflictAction) {
         const panel = conflictAction.closest("[data-agent-conflict]");
@@ -5949,8 +6041,13 @@
       }
       const singleModelOption = event.target.closest("[data-single-model-option]");
       if (singleModelOption) {
+        const selectedModel = copywritingModelCatalog.find(model => model.value === singleModelOption.dataset.singleModelOption);
+        if (!selectedModel) return;
+        modelSelect.value = selectedModel.value;
+        renderModelPickerOptions();
+        renderTaskModelStep();
         singleModelOption.closest("[data-single-model-picker]")?.classList.remove("open");
-        showToast(`当前任务使用 ${fixedCopywritingModel.label}`);
+        showToast(`已切换为 ${selectedModel.label}`);
         return;
       }
       const openStyleEditor = event.target.closest("[data-add-rewrite-style]");

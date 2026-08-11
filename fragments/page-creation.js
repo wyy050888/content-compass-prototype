@@ -85,7 +85,7 @@
                 <small>按产品卖点和详情页模块，生成可继续编辑的图文页面</small>
                 <span class="agent-foot"><span class="agent-chip">详情页模块</span><span class="agent-chip">图文生成</span></span>
               </button>
-              <button class="agent-card" data-agent="智能脚本 Agent" data-type="script" data-category="video">
+              <button class="agent-card" data-agent="智能脚本创作" data-type="script" data-category="video">
                 <span class="agent-icon">导</span>
                 <strong>智能脚本</strong>
                 <small>把可用文案转成包含分镜、可直接驱动混剪的脚本</small>
