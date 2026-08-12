@@ -1266,13 +1266,13 @@
                 <thead>
                   <tr>
                     <th style="width:15%;">结构名称</th>
-                    <th style="width:24%;">内容公式</th>
+                    <th style="width:22%;">内容公式</th>
                     <th style="width:8%;">来源</th>
+                    <th style="width:14%;">参考成品 / 解析</th>
                     <th style="width:10%;">适用范围</th>
                     <th style="width:9%;">适用时长</th>
-                    <th style="width:11%;">关联产品</th>
-                    <th style="width:8%;">更新时间</th>
-                    <th style="width:15%;">操作</th>
+                    <th style="width:9%;">解析状态</th>
+                    <th style="width:13%;">操作</th>
                   </tr>
                 </thead>
                 <tbody id="contentStructureTbody"></tbody>
@@ -1378,6 +1378,7 @@
           </div>
           <div class="modal-body">
             <div id="clCreateSourceStep">
+              <div id="clCreateModeStep">
               <div class="cl-create-step-title"><span>1</span><div><strong>选择创建方式</strong><p>推荐从一条参考视频提炼，AI 会自动生成内容公式和各阶段要求。</p></div></div>
               <div class="cl-create-mode-grid">
                 <button class="cl-create-mode selected" type="button" data-cl-create-mode="video">
@@ -1387,8 +1388,9 @@
                   <span class="cl-mode-icon">✎</span><div><strong>手动创建</strong><small>适合已有成熟方法论，直接定义各阶段</small></div>
                 </button>
               </div>
-              <div class="cl-video-source-picker" id="clVideoSourcePicker">
-                <div class="cl-create-step-title compact"><span>2</span><div><strong>选择参考视频</strong><p>解析结果仅作为自建结构草稿，保存前可继续修改。</p></div></div>
+              </div>
+              <div class="cl-video-source-picker" id="clVideoSourcePicker" hidden>
+                <div class="cl-video-source-head"><span>从视频库选择一条参考视频</span><button class="cl-action-btn" type="button" id="clBackCreateMode">← 返回创建方式</button></div>
                 <div class="cl-video-source-tabs" id="clVideoSourceTabs">
                   <button type="button" data-cl-video-source="finished">成品视频</button>
                   <button class="active" type="button" data-cl-video-source="external">外部参考视频</button>
@@ -1446,10 +1448,17 @@
               <div class="cl-stage-editor" id="clStageEditor"></div>
             </div>
             </div>
+            <div id="clParseProgressStep" hidden>
+              <div class="cl-parse-progress-head"><span class="cl-parse-spin">◌</span><div><strong id="clParseProgressTitle">正在解析参考视频</strong><p id="clParseProgressSubtitle">任务已创建，可留在此处查看进度，也可转入后台继续处理。</p></div></div>
+              <div class="cl-parse-video-summary" id="clParseVideoSummary"></div>
+              <div class="cl-parse-steps" id="clParseSteps"></div>
+              <div class="cl-parse-background-note"><span>任务已同步到“爆款内容结构”列表</span><small>解析完成后即可直接查看或编辑</small></div>
+            </div>
           </div>
           <div class="cl-modal-foot-stack">
             <button class="ghost-btn" type="button" id="clBackSource" hidden>上一步</button>
             <span class="cl-modal-foot-spacer"></span>
+            <button class="ghost-btn" type="button" id="clBackgroundParse" hidden>后台解析，稍后处理</button>
             <button class="ghost-btn" type="button" data-cl-close="new">取消</button>
             <button class="primary-btn" type="button" id="clNewSave" hidden><span id="clNewSaveText">保存结构</span></button>
           </div>

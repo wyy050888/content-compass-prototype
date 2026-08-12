@@ -174,6 +174,62 @@
     return { scope:[['all','全部来源'],['infinite','无限画板'],['remix','智能混剪'],['local','本地上传']], status:[['all','全部状态'],['done','已分析'],['pending','待分析'],['running','分析中'],['failed','分析失败']] };
   }
   function selectOptions(options) { return options.map(([value,label])=>`<option value="${value}">${label}</option>`).join(''); }
+  const associateStatusText = { ok:'已分析', pending:'待分析', analyzing:'分析中', fail:'分析失败', done:'已分析', running:'分析中', failed:'分析失败' };
+  function associateFilterMenu(key, label, options) {
+    const associate = state.associate;
+    return `<div class="pda-associate-filter-menu"><button type="button" data-pda-associate-menu="${key}">◉ <span>${esc(label)}</span></button><div class="pda-associate-filter-options" ${associate.menu===key?'':'hidden'}>${options.map(([value,text])=>`<button class="${associate[key]===value?'active':''}" type="button" data-pda-associate-filter="${key}" data-pda-associate-value="${esc(value)}">${esc(text)}</button>`).join('')}</div></div>`;
+  }
+  function associateTagButton() {
+    const selected = state.associate.tags || [];
+    return `<button class="pda-associate-filter-trigger" type="button" data-pda-associate-tag-filter>◇ <span>${selected.length?`已选 ${selected.length} 标签`:'视频标签'}</span></button>`;
+  }
+  function renderAssociateToolbar() {
+    const associate = state.associate;
+    if (!associate) return;
+    const items = data[associate.kind];
+    const statusOptions = associate.kind==='material'
+      ? [['all','全部状态'],['ok','已分析'],['pending','待分析'],['analyzing','分析中'],['fail','分析失败']]
+      : [['all','全部状态'],['done','已分析'],['pending','待分析'],['running','分析中'],['failed','分析失败']];
+    const statusLabel = associate.status==='all' ? '全部状态' : associateStatusText[associate.status];
+    const searchPlaceholder = associate.kind==='material' ? '搜索素材名称、素材标签或素材 ID' : associate.kind==='video' ? '搜索视频名称、产品名称、视频标签或千川素材 ID' : '搜索视频名称、关联产品或视频标签';
+    let filters = '';
+    if (associate.kind==='material') {
+      filters = `<div class="pda-associate-segmented">${[['all','全部'],['video','视频'],['image','图片']].map(([value,label])=>`<button class="${associate.scope===value?'active':''}" type="button" data-pda-associate-scope="${value}">${label}<b>${value==='all'?items.length:items.filter(item=>item.type===value).length}</b></button>`).join('')}</div>${associateTagButton()}${associateFilterMenu('status',statusLabel,statusOptions)}`;
+    } else if (associate.kind==='video') {
+      filters = `<div class="pda-associate-segmented">${[['all','全部'],['infinite','无限画板'],['local','本地上传'],['remix','智能混剪']].map(([value,label])=>`<button class="${associate.scope===value?'active':''}" type="button" data-pda-associate-scope="${value}">${label}<b>${value==='all'?items.length:items.filter(item=>item.source===value).length}</b></button>`).join('')}</div>${associateTagButton()}${associateFilterMenu('status',statusLabel,statusOptions)}${associateFilterMenu('relation',associate.relation==='all'?'全部关联':associate.relation==='linked'?'已关联千川':'未关联千川',[['all','全部关联'],['linked','已关联千川'],['unlinked','未关联千川']])}`;
+    } else {
+      const platformText={douyin:'抖音',kuaishou:'快手',channels:'视频号',xiaohongshu:'小红书',other:'其他'};
+      filters = `${associateFilterMenu('scope',associate.scope==='all'?'全部平台':platformText[associate.scope]||'其他',[['all','全部平台'],['douyin','抖音'],['kuaishou','快手'],['channels','视频号'],['xiaohongshu','小红书'],['other','其他']])}${associateTagButton()}${associateFilterMenu('status',statusLabel,statusOptions)}`;
+    }
+    $('#pdaAssociateToolbar').innerHTML = `${filters}<label class="pda-search pda-associate-search"><span>⌕</span><input data-pda-associate-search type="search" placeholder="${searchPlaceholder}" value="${esc(associate.search)}"></label>`;
+  }
+  function openAssociateTagFilter() {
+    const associate = state.associate;
+    if (!associate) return;
+    const tags = [...new Set(data[associate.kind].flatMap(item=>item.tags||[]))];
+    const selected = new Set(associate.tags||[]);
+    const overlay = document.createElement('div');
+    overlay.className = 'pda-layer pda-associate-tag-layer';
+    const tagLabel = associate.kind==='material' ? '素材标签' : '视频标签';
+    overlay.innerHTML = `<div class="pda-modal pda-associate-tag-modal" role="dialog" aria-modal="true"><header><div><small>${tagLabel}</small><h3>按标签筛选</h3><p>可多选标签，筛选同时满足全部标签的资产。</p></div><button type="button" data-pda-close-associate-tag>×</button></header><div class="pda-associate-tag-body"><label class="pda-search"><span>⌕</span><input type="search" placeholder="搜索标签" data-pda-associate-tag-search></label><div data-pda-associate-tag-list></div></div><footer><span data-pda-associate-tag-count></span><div><button class="pda-btn" type="button" data-pda-clear-associate-tag>清空</button><button class="pda-btn primary" type="button" data-pda-apply-associate-tag>确认筛选</button></div></footer></div>`;
+    document.body.appendChild(overlay);
+    let query = '';
+    const render = () => {
+      const visible = tags.filter(tag=>tag.includes(query));
+      overlay.querySelector('[data-pda-associate-tag-list]').innerHTML = visible.length ? visible.map(tag=>`<button class="${selected.has(tag)?'selected':''}" type="button" data-pda-associate-tag="${esc(tag)}">${esc(tag)}${selected.has(tag)?'<b>✓</b>':''}</button>`).join('') : '<span>暂无匹配标签</span>';
+      overlay.querySelector('[data-pda-associate-tag-count]').textContent = `已选 ${selected.size} 个标签`;
+    };
+    const close = () => overlay.remove();
+    overlay.addEventListener('click',event=>{
+      if(event.target===overlay||event.target.closest('[data-pda-close-associate-tag]')) return close();
+      const tag = event.target.closest('[data-pda-associate-tag]');
+      if(tag){const value=tag.dataset.pdaAssociateTag;selected.has(value)?selected.delete(value):selected.add(value);return render();}
+      if(event.target.closest('[data-pda-clear-associate-tag]')){selected.clear();return render();}
+      if(event.target.closest('[data-pda-apply-associate-tag]')){associate.tags=[...selected];close();renderAssociation();}
+    });
+    overlay.querySelector('[data-pda-associate-tag-search]').addEventListener('input',event=>{query=event.target.value.trim();render();});
+    render();
+  }
   function associateFolderTree(items) {
     const root = { children:new Map() };
     items.forEach(item => {
@@ -203,26 +259,24 @@
   function openAssociation(kind) {
     cancelMediaOverlay();
     const label = mediaLabel(kind);
-    state.associate = { kind, search:'', scope:'all', status:'all', folder:'all', selected:new Set(data[kind].filter(item=>item.linked).map(item=>item.id)) };
-    const options = associateOptions(kind);
+    state.associate = { kind, search:'', scope:'all', status:'all', relation:'all', tags:[], menu:'', folder:'all', selected:new Set(data[kind].filter(item=>item.linked).map(item=>item.id)) };
     $('#pdaAssociateTitle').textContent = `关联${label}`;
-    $('#pdaAssociateSearch').value = '';
-    $('#pdaAssociateType').innerHTML = selectOptions(options.scope);
-    $('#pdaAssociateStatus').innerHTML = selectOptions(options.status);
     renderAssociation();
     open('pdaAssociateModal');
   }
-  function renderAssociation() {
+  function renderAssociation(refreshToolbar=true) {
     const associate = state.associate;
     if (!associate) return;
     renderAssociateFolders();
+    if (refreshToolbar) renderAssociateToolbar();
     const query = associate.search.trim().toLowerCase();
     const items = data[associate.kind].filter(item => {
       const scope = associate.kind === 'material' ? item.type : associate.kind === 'reference' ? item.platform : item.source;
-      const text = [item.name,item.file,item.product,...(item.tags||[])].join(' ').toLowerCase();
+      const text = [item.name,item.file,item.libraryId,item.product,...(item.tags||[])].join(' ').toLowerCase();
       const folder = String(item.folder || '未分类');
       const folderMatches = associate.folder === 'all' || folder === associate.folder || folder.startsWith(`${associate.folder}/`);
-      return (!query || text.includes(query)) && folderMatches && (associate.scope === 'all' || scope === associate.scope) && (associate.status === 'all' || item.status === associate.status);
+      const relationMatches = associate.kind!=='video'||associate.relation==='all'||(associate.relation==='linked'?!!item.ads?.length:!item.ads?.length);
+      return (!query || text.includes(query)) && folderMatches && relationMatches && (associate.scope === 'all' || scope === associate.scope) && (associate.status === 'all' || item.status === associate.status) && (associate.tags||[]).every(tag=>(item.tags||[]).includes(tag));
     });
     $('#pdaAssociateGrid').innerHTML = items.length ? items.map(item => {
       const card = mediaCard(associate.kind,item);
@@ -478,9 +532,14 @@
     const action=e.target.closest('[data-pda-action]');if(action)handleAction(action);
   });
   $('#pdaSearch').addEventListener('input',e=>{state.search=e.target.value;render()});
-  $('#pdaAssociateSearch').addEventListener('input',e=>{if(!state.associate)return;state.associate.search=e.target.value;renderAssociation()});
-  $('#pdaAssociateType').addEventListener('change',e=>{if(!state.associate)return;state.associate.scope=e.target.value;renderAssociation()});
-  $('#pdaAssociateStatus').addEventListener('change',e=>{if(!state.associate)return;state.associate.status=e.target.value;renderAssociation()});
+  $('#pdaAssociateToolbar').addEventListener('input',e=>{if(!state.associate||!e.target.matches('[data-pda-associate-search]'))return;state.associate.search=e.target.value;renderAssociation(false)});
+  $('#pdaAssociateToolbar').addEventListener('click',e=>{
+    if(!state.associate)return;
+    const tag=e.target.closest('[data-pda-associate-tag-filter]');if(tag)return openAssociateTagFilter();
+    const scope=e.target.closest('[data-pda-associate-scope]');if(scope){state.associate.scope=scope.dataset.pdaAssociateScope;state.associate.menu='';return renderAssociation();}
+    const menu=e.target.closest('[data-pda-associate-menu]');if(menu){state.associate.menu=state.associate.menu===menu.dataset.pdaAssociateMenu?'':menu.dataset.pdaAssociateMenu;return renderAssociateToolbar();}
+    const filter=e.target.closest('[data-pda-associate-filter]');if(filter){state.associate[filter.dataset.pdaAssociateFilter]=filter.dataset.pdaAssociateValue;state.associate.menu='';return renderAssociation();}
+  });
   $('#pdaAssociateFolderTree').addEventListener('click',e=>{
     const button=e.target.closest('[data-pda-associate-folder]');
     if(!button||!state.associate)return;

@@ -2219,7 +2219,7 @@
     let contentStructures = [
       {
         id: 1, name: "结果前置·实拍证明型", formula: "结果钩子 → 痛点解释 → 产品演示 → 效果证明 → 行动引导",
-        source: "千川学习", scope: "产品级结构", product: "轻净 Pro 除螨仪", duration: "30–45 秒", method: "平台数据学习", updated: "08-10 16:42",
+        source: "千川学习", scope: "产品级结构", product: "轻净 Pro 除螨仪", duration: "30–45 秒", method: "平台数据学习", updated: "08-10 16:42", parseStatus:"completed",
         stages: [
           { name:"结果钩子", say:"先抛出清洁后的反差结果，让用户立刻知道视频能解决什么问题。", visual:"尘杯灰尘特写或床褥清洁前后对比，产品不必完整出镜。", edit:"1–2 个近景；单镜 1–2 秒；结果画面直接硬切进入。" },
           { name:"痛点解释", say:"说明肉眼看着干净，不代表纤维深处没有毛发、碎屑和灰尘。", visual:"床垫纤维、毛发碎屑、手拍扬尘等问题证据。", edit:"2–3 个细节镜头；正常速度；随信息点硬切。" },
@@ -2231,7 +2231,7 @@
       },
       {
         id: 2, name: "场景代入·功能证明型", formula: "生活场景 → 问题出现 → 功能演示 → 成品证明 → 优惠收口",
-        source: "千川学习", scope: "产品级结构", product: "轻享空气炸锅 A8", duration: "45–60 秒", method: "平台数据学习", updated: "08-09 14:28",
+        source: "千川学习", scope: "产品级结构", product: "轻享空气炸锅 A8", duration: "45–60 秒", method: "平台数据学习", updated: "08-09 14:28", parseStatus:"completed",
         stages: [
           { name:"生活场景", say:"从下班晚、做饭麻烦的真实场景切入。", visual:"下班回家、厨房台面、准备食材。", edit:"2–3 个环境与人物镜头；正常速度；硬切。" },
           { name:"问题出现", say:"点出传统烹饪耗时、油烟和看火的问题。", visual:"锅具、油烟、等待过程或凌乱台面。", edit:"2–3 个问题镜头；单镜 1–2 秒。" },
@@ -2243,7 +2243,7 @@
       },
       {
         id: 3, name: "人群点名·卖点展开型", formula: "人群点名 → 需求唤醒 → 核心卖点 → 证明补充 → 产品推荐",
-        source: "千川学习", scope: "通用结构", product: "通用", duration: "30–60 秒", method: "平台数据学习", updated: "08-08 18:20",
+        source: "千川学习", scope: "通用结构", product: "通用", duration: "30–60 秒", method: "平台数据学习", updated: "08-08 18:20", parseStatus:"completed",
         stages: [
           { name:"人群点名", say:"直接点名最容易产生共鸣的一类目标用户。", visual:"目标人群在典型生活场景中的状态。", edit:"1–2 个人物或场景镜头；快速进入主题。" },
           { name:"需求唤醒", say:"说明这类人经常遇到的具体问题与损失。", visual:"问题发生过程和细节证据。", edit:"2–3 个问题镜头；跟随信息点硬切。" },
@@ -2255,7 +2255,7 @@
       },
       {
         id: 4, name: "反差开场·实测证明型", formula: "反差开场 → 过程实测 → 结果证明 → 行动引导",
-        source: "自建", scope: "产品级结构", product: "净界洗地机 S5", duration: "15–30 秒", method: "从参考视频提炼", reference:"洗地机紫色污渍实测_成品01.mp4", updated: "08-11 09:16",
+        source: "自建", scope: "产品级结构", product: "净界洗地机 S5", duration: "15–30 秒", method: "从参考视频提炼", reference:"洗地机紫色污渍实测_成品01.mp4", updated: "08-11 09:16", parseStatus:"completed", parseSummary:"已识别口播、12 个镜头与 4 个内容段落",
         stages: [
           { name:"反差开场", say:"先说一遍就干净的强结果，制造预期反差。", visual:"大面积紫色污渍与洗净地面的前后同场对比。", edit:"前后画面直接硬切；开场 2 秒内给结果。" },
           { name:"过程实测", say:"描述推拉一次完成吸污与清洁。", visual:"洗地机经过污渍、污水被吸走的完整动作。", edit:"保留动作起止；等待段可 1.1–1.3 倍加速。" },
@@ -2274,6 +2274,15 @@
     let clEditingId = null;
     let clDeletingId = null;
     let clDeleteTargetName = "";
+    let clActiveParseTaskId = null;
+    const clParseTimers = new Map();
+    const clParseStages = [
+      ["提取音视频与关键帧", "正在读取时长、音轨与关键画面"],
+      ["识别口播与画面文字", "正在转写口播并识别画面文字"],
+      ["拆分镜头与内容段落", "正在识别镜头边界与内容阶段"],
+      ["提取内容结构与剪辑方法", "正在生成内容公式、画面任务与剪辑方法"],
+      ["生成内容结构", "正在整理内容公式与结构阶段"]
+    ];
 
     function clNow() {
       const date = new Date();
@@ -2290,6 +2299,16 @@
     function clSelectedScope(containerId) {
       return document.querySelector(`#${containerId} .cl-tag-card.selected`)?.dataset.clTag === "product" ? "产品级结构" : "通用结构";
     }
+    function clParseStatusHtml(item) {
+      if (item.parseStatus === "parsing") return `<span class="cl-parse-status parsing">◌ 解析中 <small>${clEscape(clParseStages[item.parseStep || 0]?.[0] || "处理中")}</small></span>`;
+      if (item.parseStatus === "completed") return `<span class="cl-parse-status ready">✓ 已解析 <small>${clEscape(item.parseSummary || `${item.stages.length} 个阶段`)}</small></span>`;
+      return `<span class="cl-parse-status manual">— 手动创建</span>`;
+    }
+    function clStructureStatusHtml(item) {
+      const status = item.parseStatus === "parsing" ? "解析中" : item.parseStatus === "completed" ? "已解析" : "手动创建";
+      const className = item.parseStatus === "parsing" ? "parsing" : item.parseStatus === "completed" ? "enabled" : "pending";
+      return `<span class="cl-structure-lifecycle ${className}">${status}</span>`;
+    }
     function clRenderTable() {
       const tbody = document.getElementById("contentStructureTbody");
       if (!tbody) return;
@@ -2302,12 +2321,13 @@
       });
       tbody.innerHTML = filtered.map(item => `
         <tr data-cl-id="${item.id}">
-          <td><strong>${clEscape(item.name)}</strong><small class="cl-row-sub">${item.stages.length} 个阶段</small></td>
+          <td><strong>${clEscape(item.name)}</strong><small class="cl-row-sub">${item.parseStatus === "parsing" ? "解析任务草稿" : `${item.stages.length} 个阶段`}</small></td>
           <td><span class="cl-formula-text">${clEscape(item.formula)}</span></td>
           <td><span class="${item.source === "自建" ? "cl-source-custom" : "cl-source-qc"}">${clEscape(item.source)}</span></td>
+          <td><strong>${clEscape(item.reference || "—")}</strong><small class="cl-row-sub">${clParseStatusHtml(item)}</small></td>
           <td><span class="cl-struct-tag ${item.scope === "产品级结构" ? "cl-struct-tag-product" : "cl-struct-tag-general"}">${clEscape(item.scope)}</span></td>
-          <td>${clEscape(item.duration)}</td><td>${clEscape(item.product)}</td><td>${clEscape(item.updated)}</td>
-          <td><span class="cl-table-actions"><button class="cl-table-action primary" type="button" data-cl-action="view">查看</button>${item.source === "自建" ? '<button class="cl-table-action" type="button" data-cl-action="edit">编辑</button><button class="cl-table-action danger" type="button" data-cl-action="delete">删除</button>' : ""}</span></td>
+          <td>${clEscape(item.duration)}</td><td>${clStructureStatusHtml(item)}</td>
+          <td><span class="cl-table-actions">${item.parseStatus === "parsing" ? '<button class="cl-table-action primary" type="button" data-cl-action="progress">查看进度</button>' : `<button class="cl-table-action primary" type="button" data-cl-action="view">查看</button>${item.source === "自建" ? '<button class="cl-table-action" type="button" data-cl-action="edit">编辑</button><button class="cl-table-action danger" type="button" data-cl-action="delete">删除</button>' : ""}`}</span></td>
         </tr>`).join("");
       document.getElementById("contentStructureEmpty").hidden = filtered.length > 0;
     }
@@ -2362,16 +2382,36 @@
 
     const clVideoSourceCatalog = {
       finished: [
-        { id:"finished-1", name:"轻净 Pro 除螨仪｜床褥结果冲击型", meta:"成品视频库 · 00:36 · 已分析", profileId:1 },
-        { id:"finished-2", name:"空气炸锅 A8｜下班晚餐场景", meta:"成品视频库 · 00:52 · 已分析", profileId:2 }
+        { id:"finished-1", name:"轻净 Pro 除螨仪｜床褥结果冲击型.mp4", product:"轻净 Pro 除螨仪", duration:"00:36", status:"done", source:"remix", meta:"08/12 10:24", profileId:1, tone:"tone-1", qianchuan:true, tags:["痛点钩子","卧室"] },
+        { id:"finished-2", name:"空气炸锅 A8｜下班晚餐场景.mp4", product:"轻享空气炸锅 A8", duration:"00:52", status:"done", source:"local", meta:"08/11 16:18", profileId:2, tone:"tone-2", tags:["场景演示","厨房"] },
+        { id:"finished-3", name:"净界洗地机 S5｜顽渍清洁实测.mp4", product:"净界洗地机 S5", duration:"00:28", status:"done", source:"infinite", meta:"08/10 09:42", profileId:4, tone:"tone-3", qianchuan:true, tags:["效果证明","家庭清洁"] },
+        { id:"finished-4", name:"随行榨汁杯 Mini｜晨间饮品.mov", product:"随行榨汁杯 Mini", duration:"00:22", status:"pending", source:"local", meta:"08/09 14:06", profileId:3, tone:"tone-4", tags:["场景演示","新品种草"] },
+        { id:"finished-5", name:"轻净 Pro 除螨仪｜养宠家庭版.mp4", product:"轻净 Pro 除螨仪", duration:"00:24", status:"done", source:"remix", meta:"08/08 10:16", profileId:1, tone:"tone-1", tags:["人群点名","效果证明"] },
+        { id:"finished-6", name:"净界洗地机 S5｜厨房清洁日常.mp4", product:"净界洗地机 S5", duration:"00:18", status:"running", source:"local", meta:"08/07 15:32", profileId:4, tone:"tone-3", tags:["家庭清洁","场景演示"] }
       ],
       external: [
-        { id:"external-1", name:"洗地机紫色污渍实测_成品01.mp4", meta:"外部参考视频 · 00:28 · 已分析", profileId:4 },
-        { id:"external-2", name:"清洁电器人群痛点参考.mp4", meta:"外部参考视频 · 00:41 · 已分析", profileId:3 }
+        { id:"external-1", name:"洗地机紫色污渍实测_成品01.mp4", product:"净界洗地机 S5", duration:"00:28", status:"done", source:"采集", platform:"douyin", meta:"08/11 13:08", profileId:4, tone:"tone-3", tags:["结果直给","效果证明"] },
+        { id:"external-2", name:"清洁电器人群痛点参考.mp4", product:"轻净 Pro 除螨仪", duration:"00:41", status:"done", source:"采集", platform:"douyin", meta:"08/10 11:34", profileId:3, tone:"tone-1", tags:["痛点钩子","人群点名"] },
+        { id:"external-3", name:"空气炸锅下班做饭高完播参考.mp4", product:"轻享空气炸锅 A8", duration:"00:35", status:"pending", source:"本地", platform:"douyin", meta:"08/08 19:18", profileId:2, tone:"tone-2", tags:["场景演示"] },
+        { id:"external-4", name:"床褥深层灰尘对比参考.mp4", product:"", duration:"00:18", status:"running", source:"采集", platform:"xiaohongshu", meta:"08/07 15:20", profileId:1, tone:"tone-4", tags:["结果直给"] },
+        { id:"external-5", name:"家居收纳短视频结构参考.mp4", product:"", duration:"00:24", status:"failed", source:"采集", platform:"other", meta:"08/06 17:26", profileId:3, tone:"tone-2", tags:["新品种草"] }
       ]
     };
     let clActiveVideoSource = "external";
     let clSelectedVideoRef = null;
+    const clVideoPickerFilters = {
+      finished: { query:"", analysis:"all", scope:"all", tag:"all", relation:"all", menu:"" },
+      external: { query:"", analysis:"all", scope:"all", tag:"all", menu:"" }
+    };
+    const clVideoTagFilters = { finished: [], external: [] };
+    const clVideoTagGroups = {
+      finished: [{id:"all",name:"全部标签"},{id:"content",name:"内容主题"},{id:"scene",name:"使用场景"}],
+      external: [{id:"all",name:"全部标签"},{id:"content",name:"内容主题"},{id:"scene",name:"使用场景"}]
+    };
+    let clVideoTagModalState = null;
+    const clVideoStatusText = { done:"已分析", pending:"待分析", running:"分析中", failed:"分析失败" };
+    const clFinishedSourceText = { infinite:"无限画板", remix:"智能混剪", local:"本地上传" };
+    const clPlatformText = { douyin:"抖音", kuaishou:"快手", channels:"视频号", xiaohongshu:"小红书" };
     let clParseRunId = 0;
 
     function clUpdateParseState() {
@@ -2379,41 +2419,175 @@
       const hint = document.getElementById("clParseHint");
       if (!button || !hint) return;
       button.textContent = "解析并生成结构";
-      button.disabled = !clSelectedVideoRef;
-      hint.textContent = clSelectedVideoRef ? `已选择：${clSelectedVideoRef.name}` : "请选择一条视频";
+      button.disabled = !clSelectedVideoRef || clSelectedVideoRef.uploadStatus === "uploading";
+      hint.textContent = !clSelectedVideoRef ? "请选择一条视频" : clSelectedVideoRef.uploadStatus === "uploading" ? "视频上传中，完成后可开始解析" : `已选择：${clSelectedVideoRef.name}`;
+    }
+    function clFinishedFilterMenu(key, label, options) {
+      const active = clVideoPickerFilters.finished.menu === key;
+      return `<div class="cl-finished-filter-menu"><button type="button" data-cl-finished-menu="${key}">${key === "tag" ? "◇" : key === "analysis" ? "◉" : "⌁"}<span>${clEscape(label)}</span></button><div class="cl-finished-filter-options" ${active ? "" : "hidden"}>${options.map(([value,text]) => `<button class="${clVideoPickerFilters.finished[key] === value ? "active" : ""}" type="button" data-cl-finished-filter="${key}" data-cl-finished-value="${clEscape(value)}">${clEscape(text)}</button>`).join("")}</div></div>`;
+    }
+    function clExternalFilterMenu(key, label, options) {
+      const active = clVideoPickerFilters.external.menu === key;
+      const icon = key === "scope" ? "☷" : key === "tag" ? "◇" : "◉";
+      return `<div class="cl-finished-filter-menu"><button type="button" data-cl-external-menu="${key}">${icon}<span>${clEscape(label)}</span></button><div class="cl-finished-filter-options" ${active ? "" : "hidden"}>${options.map(([value,text]) => `<button class="${clVideoPickerFilters.external[key] === value ? "active" : ""}" type="button" data-cl-external-filter="${key}" data-cl-external-value="${clEscape(value)}">${clEscape(text)}</button>`).join("")}</div></div>`;
+    }
+    const clVideoTagGroupMap = {
+      finished:{ "痛点钩子":"content", "效果证明":"content", "人群点名":"content", "新品种草":"content", "卧室":"scene", "厨房":"scene", "家庭清洁":"scene", "场景演示":"scene" },
+      external:{ "结果直给":"content", "痛点钩子":"content", "人群点名":"content", "新品种草":"content", "效果证明":"content", "场景演示":"scene" }
+    };
+    function clOpenVideoTagFilter(kind) {
+      const catalog = clVideoSourceCatalog[kind];
+      const draft = new Set(clVideoTagFilters[kind]);
+      const modal = document.createElement("div");
+      modal.className = "cl-tag-filter-overlay";
+      modal.innerHTML = `<section class="cl-tag-filter-modal" role="dialog" aria-modal="true"><header><div><small>视频标签</small><h3>按标签筛选</h3><p>可多选标签，筛选同时满足全部标签的视频。</p></div><button type="button" data-cl-tag-close>×</button></header><div class="cl-tag-filter-body"><aside data-cl-tag-groups></aside><main><label class="cl-tag-filter-search">⌕<input type="search" placeholder="搜索标签" data-cl-tag-search></label><div class="cl-tag-filter-choices" data-cl-tag-choices></div><div class="cl-tag-filter-create"><button type="button" data-cl-tag-create-toggle>＋ 新建标签</button><div hidden data-cl-tag-create-row><input type="text" maxlength="20" placeholder="输入标签名称" data-cl-tag-new-input><button type="button" data-cl-tag-create>添加</button></div></div><small data-cl-tag-error></small></main></div><footer><span data-cl-tag-selected>已选 0 个标签</span><div><button type="button" data-cl-tag-clear>清空</button><button class="primary" type="button" data-cl-tag-apply>确认筛选</button></div></footer></section>`;
+      document.body.appendChild(modal);
+      const state = { group:"all", query:"" };
+      const tags = () => [...new Set(catalog.flatMap(video => video.tags || []))];
+      const render = () => {
+        const groupMap = clVideoTagGroupMap[kind];
+        modal.querySelector("[data-cl-tag-groups]").innerHTML = clVideoTagGroups[kind].map(group => `<button class="${state.group === group.id ? "active" : ""}" type="button" data-cl-tag-group="${group.id}"><span>${group.name}</span><b>${group.id === "all" ? tags().length : tags().filter(tag => groupMap[tag] === group.id).length}</b></button>`).join("");
+        const choices = tags().filter(tag => (state.group === "all" || groupMap[tag] === state.group) && (!state.query || tag.toLowerCase().includes(state.query.toLowerCase())));
+        modal.querySelector("[data-cl-tag-choices]").innerHTML = choices.length ? choices.map(tag => `<button class="${draft.has(tag) ? "selected" : ""}" type="button" data-cl-tag-choice="${clEscape(tag)}">${clEscape(tag)}${draft.has(tag) ? "<span>✓</span>" : ""}</button>`).join("") : '<span class="cl-tag-filter-empty">该分组下还没有标签</span>';
+        modal.querySelector("[data-cl-tag-selected]").textContent = `已选 ${draft.size} 个标签`;
+      };
+      const close = () => modal.remove();
+      modal.addEventListener("click", event => {
+        if (event.target === modal || event.target.closest("[data-cl-tag-close]")) return close();
+        const group = event.target.closest("[data-cl-tag-group]");
+        if (group) { state.group = group.dataset.clTagGroup; return render(); }
+        const choice = event.target.closest("[data-cl-tag-choice]");
+        if (choice) { const tag = choice.dataset.clTagChoice; draft.has(tag) ? draft.delete(tag) : draft.add(tag); return render(); }
+        if (event.target.closest("[data-cl-tag-clear]")) { draft.clear(); return render(); }
+        if (event.target.closest("[data-cl-tag-create-toggle]")) { const row = modal.querySelector("[data-cl-tag-create-row]"); row.hidden = !row.hidden; if (!row.hidden) row.querySelector("input").focus(); return; }
+        if (event.target.closest("[data-cl-tag-create]")) {
+          const input = modal.querySelector("[data-cl-tag-new-input]"); const tag = input.value.trim(); const error = modal.querySelector("[data-cl-tag-error]");
+          if (!tag) { error.textContent = "请输入标签名称"; return; }
+          if (tags().includes(tag)) { error.textContent = "已存在同名标签"; return; }
+          catalog[0]?.tags?.push(tag); clVideoTagGroupMap[kind][tag] = state.group === "all" ? "content" : state.group; draft.add(tag); input.value = ""; error.textContent = ""; return render();
+        }
+        if (event.target.closest("[data-cl-tag-apply]")) { clVideoTagFilters[kind] = [...draft]; clRenderVideoSource(); close(); }
+      });
+      modal.querySelector("[data-cl-tag-search]").addEventListener("input", event => { state.query = event.target.value.trim(); render(); });
+      render();
     }
     function clRenderVideoSource() {
       const content = document.getElementById("clVideoSourceContent");
       if (!content) return;
-      clSelectedVideoRef = null;
       if (clActiveVideoSource === "finished" || clActiveVideoSource === "external") {
-        content.innerHTML = `<div class="cl-video-source-list">${clVideoSourceCatalog[clActiveVideoSource].map(video => `<button class="cl-source-video-card" type="button" data-cl-video-id="${video.id}"><span class="cl-source-video-thumb">▶</span><span><strong>${clEscape(video.name)}</strong><small>${clEscape(video.meta)}</small></span><span class="cl-source-video-check">✓</span></button>`).join("")}</div>`;
+        const catalog = clVideoSourceCatalog[clActiveVideoSource];
+        const filters = clVideoPickerFilters[clActiveVideoSource];
+        const scopeOptions = clActiveVideoSource === "finished"
+          ? [["all","全部来源"],["infinite","无限画板"],["local","本地上传"],["remix","智能混剪"]]
+          : [["all","全部平台"],["douyin","抖音"],["kuaishou","快手"],["channels","视频号"],["xiaohongshu","小红书"],["other","其他"]];
+        const tags = [...new Set(catalog.flatMap(video => video.tags || []))];
+        const visible = catalog.filter(video => {
+          const matchesQuery = !filters.query || `${video.name} ${video.product}`.toLowerCase().includes(filters.query.toLowerCase());
+          const matchesStatus = filters.analysis === "all" || video.status === filters.analysis;
+          const scope = clActiveVideoSource === "finished" ? video.source : video.platform;
+          const matchesRelation = clActiveVideoSource !== "finished" || filters.relation === "all" || (filters.relation === "linked" ? !!video.qianchuan : !video.qianchuan);
+          const selectedTags = clVideoTagFilters[clActiveVideoSource];
+          return matchesQuery && matchesStatus && matchesRelation && (filters.scope === "all" || scope === filters.scope) && selectedTags.every(tag => (video.tags || []).includes(tag));
+        });
+        const analyzedCount = catalog.filter(video => video.status === "done").length;
+        const pickerToolbar = clActiveVideoSource === "finished" ? `<div class="cl-finished-picker-toolbar">
+          <div class="cl-finished-source-tabs">${[["all","全部"],["infinite","无限画板"],["local","本地上传"],["remix","智能混剪"]].map(([value,label]) => `<button class="${filters.scope === value ? "active" : ""}" type="button" data-cl-finished-source="${value}">${label}<b>${value === "all" ? catalog.length : catalog.filter(video => video.source === value).length}</b></button>`).join("")}</div>
+          <button class="cl-finished-filter-trigger" type="button" data-cl-open-tag-filter="finished">◇<span>${clVideoTagFilters.finished.length ? `已选 ${clVideoTagFilters.finished.length} 标签` : "视频标签"}</span></button>
+          ${clFinishedFilterMenu("analysis", filters.analysis === "all" ? "全部状态" : clVideoStatusText[filters.analysis], [["all","全部状态"],["pending","待分析"],["running","分析中"],["done","已分析"],["failed","分析失败"]])}
+          ${clFinishedFilterMenu("relation", filters.relation === "all" ? "全部关联" : filters.relation === "linked" ? "已关联千川" : "未关联千川", [["all","全部关联"],["linked","已关联千川"],["unlinked","未关联千川"]])}
+          <label class="cl-finished-search"><span>⌕</span><input type="search" data-cl-video-filter="query" placeholder="搜索视频名称、产品名称、视频标签或千川素材 ID" value="${clEscape(filters.query)}"></label>
+        </div>` : `<div class="cl-external-picker-toolbar">
+          ${clExternalFilterMenu("scope", filters.scope === "all" ? "全部平台" : clPlatformText[filters.scope] || "其他", scopeOptions)}
+          <button class="cl-finished-filter-trigger" type="button" data-cl-open-tag-filter="external">◇<span>${clVideoTagFilters.external.length ? `已选 ${clVideoTagFilters.external.length} 标签` : "视频标签"}</span></button>
+          ${clExternalFilterMenu("analysis", filters.analysis === "all" ? "全部状态" : clVideoStatusText[filters.analysis], [["all","全部状态"],["pending","待分析"],["running","分析中"],["done","已分析"],["failed","分析失败"]])}
+          <label class="cl-external-search"><span>⌕</span><input type="search" data-cl-video-filter="query" placeholder="搜索视频名称、关联产品或视频标签" value="${clEscape(filters.query)}"></label>
+        </div>`;
+        content.innerHTML = `<div class="cl-asset-picker">
+          ${pickerToolbar}
+          <div class="cl-asset-picker-summary">共 ${catalog.length} 条视频 · 已分析 ${analyzedCount} 条${visible.length !== catalog.length ? ` · 显示 ${visible.length} 条` : ""}</div>
+          <div class="cl-asset-video-grid">${visible.length ? visible.map(video => {
+            const isFinished = clActiveVideoSource === "finished";
+            const sourceText = isFinished ? clFinishedSourceText[video.source] : video.source;
+            const sourceClass = isFinished ? video.source : video.source === "本地" ? "local" : "collect";
+            const platform = clPlatformText[video.platform] || "其他";
+            return `<button class="cl-asset-video-card ${clSelectedVideoRef?.id === video.id ? "selected" : ""}" type="button" data-cl-video-id="${video.id}">
+              <span class="cl-asset-video-visual ${video.tone}"><span class="cl-asset-video-status ${video.status}"><i></i>${clVideoStatusText[video.status] || "待分析"}</span><span class="cl-asset-video-check">✓</span><span class="cl-asset-video-source ${sourceClass}">${clEscape(sourceText)}</span><span class="cl-asset-video-play">▶</span><em>${clEscape(video.duration)}</em></span>
+              <span class="cl-asset-video-body"><strong title="${clEscape(video.name)}">${clEscape(video.name)}</strong><span class="cl-asset-video-tags"><b class="product ${video.product ? "" : "empty"}">${clEscape(video.product || "未关联产品")}</b>${isFinished ? video.qianchuan ? '<b class="qianchuan">已关联千川</b>' : "" : `<b class="platform">${clEscape(platform)}</b>`}</span><small>${clEscape(video.meta)}</small></span>
+            </button>`;
+          }).join("") : `<div class="cl-asset-picker-empty"><strong>没有符合条件的视频</strong><span>请调整搜索词或筛选条件</span></div>`}</div>
+        </div>`;
       } else if (clActiveVideoSource === "upload") {
-        content.innerHTML = `<div class="cl-source-input-panel"><input type="file" id="clVideoUploadInput" accept="video/*" hidden><button class="cl-action-btn primary" type="button" id="clChooseVideoFile">选择本地视频</button><p id="clUploadFileName">支持 MP4、MOV，单文件不超过 500MB</p></div>`;
+        content.innerHTML = `<div class="cl-source-input-panel"><input type="file" id="clVideoUploadInput" accept="video/*" hidden><button class="cl-action-btn primary" type="button" id="clChooseVideoFile">选择本地视频</button><p id="clUploadFileName">支持 MP4、MOV，单文件不超过 500MB</p><div class="cl-upload-progress" id="clUploadProgress" hidden><span id="clUploadState">正在上传</span><b id="clUploadPercent">0%</b><div><i id="clUploadBar" style="width:0%"></i></div></div></div>`;
       } else {
         content.innerHTML = `<div class="cl-source-input-panel"><p>粘贴抖音、快手或其他可访问的视频链接</p><div class="cl-source-link-row"><input type="url" id="clVideoLinkInput" placeholder="https://..."><button class="cl-action-btn" type="button" id="clClearVideoLink">清空</button></div><p>解析成功后将在内容结构中记录该提炼来源</p></div>`;
       }
       clUpdateParseState();
     }
     function clShowSourceStep() {
+      document.getElementById("clNewModalTitle").textContent = "新建爆款内容结构";
+      document.getElementById("clNewModalSubtitle").textContent = "优先从一条参考视频提炼，也支持手动创建";
       document.getElementById("clCreateSourceStep").hidden = false;
+      document.getElementById("clCreateModeStep").hidden = false;
       document.getElementById("clStructureFormStep").hidden = true;
+      document.getElementById("clParseProgressStep").hidden = true;
       document.getElementById("clNewSave").hidden = true;
       document.getElementById("clBackSource").hidden = true;
+      document.getElementById("clBackgroundParse").hidden = true;
+      document.querySelectorAll("[data-cl-close='new']").forEach(button => { if (button.textContent !== "✕") button.textContent = "取消"; });
       document.getElementById("clAiDraftNote").hidden = true;
       document.querySelectorAll("[data-cl-create-mode]").forEach(button => button.classList.toggle("selected", button.dataset.clCreateMode === "video"));
+      document.getElementById("clVideoSourcePicker").hidden = true;
+      clActiveVideoSource = "external";
+      document.querySelectorAll("[data-cl-video-source]").forEach(button => button.classList.toggle("active", button.dataset.clVideoSource === clActiveVideoSource));
+      clRenderVideoSource();
+    }
+    function clShowVideoPicker() {
+      document.getElementById("clNewModalTitle").textContent = "选择参考视频";
+      document.getElementById("clNewModalSubtitle").textContent = "从视频库中选择视频，解析后生成内容结构";
+      document.getElementById("clCreateModeStep").hidden = true;
       document.getElementById("clVideoSourcePicker").hidden = false;
       clActiveVideoSource = "external";
+      clSelectedVideoRef = null;
       document.querySelectorAll("[data-cl-video-source]").forEach(button => button.classList.toggle("active", button.dataset.clVideoSource === clActiveVideoSource));
       clRenderVideoSource();
     }
     function clShowStructureForm(isAiDraft, allowBack = true) {
       document.getElementById("clCreateSourceStep").hidden = true;
       document.getElementById("clStructureFormStep").hidden = false;
+      document.getElementById("clParseProgressStep").hidden = true;
       document.getElementById("clNewSave").hidden = false;
       document.getElementById("clBackSource").hidden = !allowBack;
+      document.getElementById("clBackgroundParse").hidden = true;
+      document.querySelectorAll("[data-cl-close='new']").forEach(button => { if (button.textContent !== "✕") button.textContent = "取消"; });
       document.getElementById("clAiDraftNote").hidden = !isAiDraft;
       document.getElementById("clNewModalSubtitle").textContent = isAiDraft ? "AI 已完成结构提炼，请确认后保存为自建内容结构" : "同时定义每个阶段说什么、拍什么、怎么剪，供智能文案、脚本和混剪调用";
+      clNewModal?.querySelector(".modal-body")?.scrollTo?.({ top:0, behavior:"auto" });
+    }
+    function clShowParseProgress(item) {
+      if (!item) return;
+      clActiveParseTaskId = item.id;
+      document.getElementById("clCreateSourceStep").hidden = true;
+      document.getElementById("clStructureFormStep").hidden = true;
+      document.getElementById("clParseProgressStep").hidden = false;
+      document.getElementById("clNewSave").hidden = true;
+      document.getElementById("clBackSource").hidden = true;
+      document.getElementById("clBackgroundParse").hidden = false;
+      document.querySelectorAll("[data-cl-close='new']").forEach(button => { if (button.textContent !== "✕") button.textContent = "关闭"; });
+      document.getElementById("clNewModalTitle").textContent = "正在解析参考视频";
+      document.getElementById("clNewModalSubtitle").textContent = "解析不会阻塞当前操作，可随时转入后台继续处理";
+      const isComplete = item.parseStatus === "completed";
+      document.getElementById("clParseProgressTitle").textContent = isComplete ? "解析完成" : "正在解析参考视频";
+      document.getElementById("clParseProgressSubtitle").textContent = isComplete ? "内容结构已生成，可直接在列表查看或编辑。" : "任务已创建，可留在此处查看进度，也可转入后台继续处理。";
+      document.getElementById("clParseVideoSummary").textContent = `${item.reference || "参考视频"} · ${item.referenceMeta || "正在读取视频信息"}`;
+      const step = item.parseStep || 0;
+      document.getElementById("clParseSteps").innerHTML = clParseStages.map(([title, description], index) => {
+        const state = isComplete || index < step ? "done" : index === step ? "active" : "";
+        const marker = state === "done" ? "✓" : index + 1;
+        const status = state === "done" ? "已完成" : state === "active" ? "处理中" : "等待中";
+        return `<div class="cl-parse-step ${state}"><i>${marker}</i><span><b>${title}</b><small>${description}</small></span><em>${status}</em></div>`;
+      }).join("");
+      const background = document.getElementById("clBackgroundParse");
+      background.textContent = isComplete ? "查看结构" : "后台解析，稍后处理";
       clNewModal?.querySelector(".modal-body")?.scrollTo?.({ top:0, behavior:"auto" });
     }
     function clApplyVideoDraft(reference) {
@@ -2430,6 +2604,68 @@
       clRenderStageEditor(source.stages.map(stage => ({...stage})));
       clToggleReference();
       clShowStructureForm(true, true);
+    }
+    function clHydrateStructureForm(item, confirming = false) {
+      document.getElementById("clNewName").value = item.name;
+      document.getElementById("clNewFormula").value = item.formula;
+      clSetDurationValue(item.duration);
+      document.getElementById("clNewMethod").value = item.reference ? "reference" : "manual";
+      document.getElementById("clNewReference").value = item.reference || "";
+      clScopeCard("clNewTagCards", item.scope);
+      const product = document.getElementById("clNewProduct");
+      product.disabled = item.scope !== "产品级结构";
+      product.innerHTML = item.scope === "产品级结构" ? clProductOptions(item.product) : "<option>通用结构（不限定产品）</option>";
+      clRenderStageEditor(item.stages);
+      clToggleReference();
+      clEditingId = item.id;
+      document.getElementById("clNewModalTitle").textContent = "编辑爆款内容结构";
+      document.getElementById("clNewModalSubtitle").textContent = "解析结果可直接编辑；保存后调用方将使用最新结构";
+      document.getElementById("clNewSaveText").textContent = "保存修改";
+      clShowStructureForm(confirming, false);
+    }
+    function clBuildParseDraft(reference) {
+      const source = contentStructures.find(item => item.id === (reference.profileId || 1)) || contentStructures[0];
+      return {
+        id: Date.now(), name: `${source.name}（解析中）`, formula:"正在提取内容公式…", source:"自建", scope:source.scope, product:source.scope === "产品级结构" ? source.product : "通用", duration:"—", method:"从参考视频提炼", reference:reference.name,
+        referenceMeta:reference.meta || "本地上传视频", updated:clNow(), parseStatus:"parsing", parseStep:0, stages:[], parseProfileId:source.id,
+        example:{ title:reference.name, meta:`提炼来源 · ${reference.meta || "参考视频"}`, badge:"解析中", copy:"正在识别口播、镜头与内容结构…" }
+      };
+    }
+    function clCompleteParseTask(taskId) {
+      const item = contentStructures.find(entry => entry.id === taskId);
+      if (!item || item.parseStatus !== "parsing") return;
+      const source = contentStructures.find(entry => entry.id === item.parseProfileId) || contentStructures[0];
+      Object.assign(item, {
+        name:source.name.replace(/（自建）$/, ""), formula:source.formula, duration:source.duration, scope:source.scope,
+        product:source.scope === "产品级结构" ? source.product : "通用", stages:source.stages.map(stage => ({...stage})), parseStatus:"completed", parseStep:clParseStages.length,
+        parseSummary:`已识别口播、${source.stages.length * 4 - 2} 个镜头与 ${source.stages.length} 个内容段落`, updated:clNow(),
+        example:{ ...source.example, title:item.reference, meta:`提炼来源 · ${item.referenceMeta}`, badge:"已解析", copy:source.example.copy }
+      });
+      clParseTimers.delete(taskId);
+      clRenderTable();
+      if (clNewModal?.classList.contains("show") && clActiveParseTaskId === taskId) clShowParseProgress(item);
+      showToast(`“${item.reference}”已解析完成，已展示在列表`);
+    }
+    function clScheduleParseTask(taskId) {
+      const advance = step => {
+        const item = contentStructures.find(entry => entry.id === taskId);
+        if (!item || item.parseStatus !== "parsing") return;
+        item.parseStep = step;
+        item.updated = clNow();
+        clRenderTable();
+        if (clNewModal?.classList.contains("show") && clActiveParseTaskId === taskId) clShowParseProgress(item);
+        if (step >= clParseStages.length) return clCompleteParseTask(taskId);
+        clParseTimers.set(taskId, setTimeout(() => advance(step + 1), 720));
+      };
+      clParseTimers.set(taskId, setTimeout(() => advance(1), 620));
+    }
+    function clStartParseTask(reference) {
+      const draft = clBuildParseDraft(reference);
+      contentStructures.unshift(draft);
+      clRenderTable();
+      clShowParseProgress(draft);
+      clScheduleParseTask(draft.id);
+      showToast("已创建解析任务，可转入后台继续处理");
     }
     function clApplyManualDefaults() {
       document.getElementById("clNewName").value = "";
@@ -2460,22 +2696,7 @@
 
     function clOpenEditModal(item) {
       clResetNewModalMode();
-      document.getElementById("clNewModalTitle").textContent = "编辑爆款内容结构";
-      document.getElementById("clNewModalSubtitle").textContent = "仅自建结构可编辑；保存后调用方将使用最新结构";
-      document.getElementById("clNewSaveText").textContent = "保存修改";
-      document.getElementById("clNewName").value = item.name;
-      document.getElementById("clNewFormula").value = item.formula;
-      clSetDurationValue(item.duration);
-      document.getElementById("clNewMethod").value = item.reference ? "reference" : "manual";
-      document.getElementById("clNewReference").value = item.reference || "";
-      clScopeCard("clNewTagCards", item.scope);
-      const product = document.getElementById("clNewProduct");
-      product.disabled = item.scope !== "产品级结构";
-      product.innerHTML = item.scope === "产品级结构" ? clProductOptions(item.product) : "<option>通用结构（不限定产品）</option>";
-      clRenderStageEditor(item.stages);
-      clEditingId = item.id;
-      clToggleReference();
-      clShowStructureForm(false, false);
+      clHydrateStructureForm(item, false);
       clOpenModal(clNewModal);
     }
 
@@ -2521,7 +2742,12 @@
       document.getElementById("clDrawerTag").innerHTML = `<span class="cl-struct-tag ${item.scope === "产品级结构" ? "cl-struct-tag-product" : "cl-struct-tag-general"}">${clEscape(item.scope)}</span>`;
       const reference = document.getElementById("clDrawerReference");
       reference.hidden = !item.reference;
-      reference.innerHTML = item.reference ? `<strong>提炼来源：</strong>${clEscape(item.reference)}<span>保存后已作为自建结构独立维护，不与原视频自动同步。</span>` : "";
+      const parseNote = item.parseStatus === "parsing"
+        ? `正在${clEscape(clParseStages[item.parseStep]?.[0] || "解析")}`
+        : item.parseStatus === "completed"
+          ? clEscape(item.parseSummary || "视频解析已完成")
+          : "手动维护的内容结构";
+      reference.innerHTML = item.reference ? `<strong>提炼来源：</strong>${clEscape(item.reference)}<span>${parseNote}</span>` : "";
       document.getElementById("clDrawerStages").innerHTML = item.stages.map((stage, index) => `<article class="cl-stage-card"><div class="cl-stage-card-top"><span>${String(index + 1).padStart(2,"0")}</span><strong>${clEscape(stage.name)}</strong></div><dl><div><dt>说什么</dt><dd>${clEscape(stage.say)}</dd></div><div><dt>拍什么</dt><dd>${clEscape(stage.visual)}</dd></div><div><dt>怎么剪</dt><dd>${clEscape(stage.edit)}</dd></div></dl></article>`).join("");
       const example = item.example;
       document.getElementById("clDrawerExamples").innerHTML = `<div class="cl-video-card"><div class="cl-video-thumb"></div><div class="cl-video-body"><div class="cl-video-head"><div><div class="cl-video-title">${clEscape(example.title)}</div><div class="cl-video-meta">${clEscape(example.meta)}</div></div><span class="cl-consume-chip">${clEscape(example.badge)}</span></div><div class="cl-video-content">${clEscape(example.copy)}</div><div class="cl-video-actions"><button class="cl-action-btn" type="button" data-cl-example="copy">复制示例文案</button><button class="cl-action-btn" type="button" data-cl-example="play">播放视频</button></div></div></div>`;
@@ -2540,6 +2766,7 @@
       if (button.dataset.clAction === "view") clOpenDetail(item);
       if (button.dataset.clAction === "edit") clOpenEditModal(item);
       if (button.dataset.clAction === "delete") clOpenDeleteModal(item);
+      if (button.dataset.clAction === "progress") { clActiveParseTaskId = item.id; clShowParseProgress(item); clOpenModal(clNewModal); }
     });
     document.getElementById("clCreateSourceStep")?.addEventListener("click", event => {
       const mode = event.target.closest("[data-cl-create-mode]");
@@ -2549,25 +2776,67 @@
           clApplyManualDefaults();
           clShowStructureForm(false, true);
         } else {
-          document.getElementById("clVideoSourcePicker").hidden = false;
+          clShowVideoPicker();
         }
         return;
       }
       const sourceTab = event.target.closest("[data-cl-video-source]");
       if (sourceTab) {
         clActiveVideoSource = sourceTab.dataset.clVideoSource;
+        clSelectedVideoRef = null;
         document.querySelectorAll("[data-cl-video-source]").forEach(button => button.classList.toggle("active", button === sourceTab));
+        clRenderVideoSource();
+        return;
+      }
+      const finishedSource = event.target.closest("[data-cl-finished-source]");
+      if (finishedSource) {
+        clVideoPickerFilters.finished.scope = finishedSource.dataset.clFinishedSource;
+        clVideoPickerFilters.finished.menu = "";
+        clRenderVideoSource();
+        return;
+      }
+      const tagFilter = event.target.closest("[data-cl-open-tag-filter]");
+      if (tagFilter) return clOpenVideoTagFilter(tagFilter.dataset.clOpenTagFilter);
+      const finishedMenu = event.target.closest("[data-cl-finished-menu]");
+      if (finishedMenu) {
+        const filters = clVideoPickerFilters.finished;
+        filters.menu = filters.menu === finishedMenu.dataset.clFinishedMenu ? "" : finishedMenu.dataset.clFinishedMenu;
+        clRenderVideoSource();
+        return;
+      }
+      const finishedFilter = event.target.closest("[data-cl-finished-filter]");
+      if (finishedFilter) {
+        const filters = clVideoPickerFilters.finished;
+        filters[finishedFilter.dataset.clFinishedFilter] = finishedFilter.dataset.clFinishedValue;
+        filters.menu = "";
+        clRenderVideoSource();
+        return;
+      }
+      const externalMenu = event.target.closest("[data-cl-external-menu]");
+      if (externalMenu) {
+        const filters = clVideoPickerFilters.external;
+        filters.menu = filters.menu === externalMenu.dataset.clExternalMenu ? "" : externalMenu.dataset.clExternalMenu;
+        clRenderVideoSource();
+        return;
+      }
+      const externalFilter = event.target.closest("[data-cl-external-filter]");
+      if (externalFilter) {
+        const filters = clVideoPickerFilters.external;
+        filters[externalFilter.dataset.clExternalFilter] = externalFilter.dataset.clExternalValue;
+        filters.menu = "";
         clRenderVideoSource();
         return;
       }
       const videoCard = event.target.closest("[data-cl-video-id]");
       if (videoCard) {
         document.querySelectorAll("[data-cl-video-id]").forEach(card => card.classList.toggle("selected", card === videoCard));
-        clSelectedVideoRef = clVideoSourceCatalog[clActiveVideoSource].find(video => video.id === videoCard.dataset.clVideoId) || null;
+        const video = clVideoSourceCatalog[clActiveVideoSource].find(item => item.id === videoCard.dataset.clVideoId);
+        clSelectedVideoRef = video ? { ...video, meta:`${video.meta} · ${video.duration} · ${clVideoStatusText[video.status] || "待分析"}` } : null;
         clUpdateParseState();
         return;
       }
       if (event.target.closest("#clChooseVideoFile")) return document.getElementById("clVideoUploadInput")?.click();
+      if (event.target.closest("#clBackCreateMode")) return clShowSourceStep();
       if (event.target.closest("#clClearVideoLink")) {
         const input = document.getElementById("clVideoLinkInput");
         if (input) input.value = "";
@@ -2575,14 +2844,46 @@
       }
     });
     document.getElementById("clCreateSourceStep")?.addEventListener("change", event => {
+      const filter = event.target.dataset.clVideoFilter;
+      if (filter && clVideoPickerFilters[clActiveVideoSource]) {
+        clVideoPickerFilters[clActiveVideoSource][filter] = event.target.value;
+        clRenderVideoSource();
+        return;
+      }
       if (event.target.id !== "clVideoUploadInput") return;
       const file = event.target.files?.[0];
-      clSelectedVideoRef = file ? { id:"upload", name:file.name, meta:`本地上传 · ${(file.size / 1024 / 1024).toFixed(1)}MB`, profileId:1 } : null;
+      clSelectedVideoRef = file ? { id:"upload", name:file.name, meta:`本地上传 · ${(file.size / 1024 / 1024).toFixed(1)}MB`, profileId:1, uploadStatus:"uploading" } : null;
       const label = document.getElementById("clUploadFileName");
-      if (label && file) { label.textContent = `已选择：${file.name}`; label.classList.add("cl-upload-selected"); }
+      const progress = document.getElementById("clUploadProgress");
+      const state = document.getElementById("clUploadState");
+      const percent = document.getElementById("clUploadPercent");
+      const bar = document.getElementById("clUploadBar");
+      if (label && file) { label.textContent = `正在上传：${file.name}`; label.classList.add("cl-upload-selected"); }
+      if (progress) progress.hidden = !file;
+      if (!file) return clUpdateParseState();
+      let uploadProgress = 12;
+      const renderUpload = () => { if (percent) percent.textContent = `${uploadProgress}%`; if (bar) bar.style.width = `${uploadProgress}%`; };
+      renderUpload();
+      const uploadTimer = setInterval(() => {
+        uploadProgress = Math.min(100, uploadProgress + 22);
+        renderUpload();
+        if (uploadProgress < 100) return;
+        clearInterval(uploadTimer);
+        if (!clSelectedVideoRef || clSelectedVideoRef.name !== file.name) return;
+        clSelectedVideoRef.uploadStatus = "uploaded";
+        if (label) label.textContent = `上传完成：${file.name} · 可开始解析`;
+        if (state) state.textContent = "上传完成";
+        clUpdateParseState();
+      }, 220);
       clUpdateParseState();
     });
     document.getElementById("clCreateSourceStep")?.addEventListener("input", event => {
+      const filter = event.target.dataset.clVideoFilter;
+      if (filter && clVideoPickerFilters[clActiveVideoSource]) {
+        clVideoPickerFilters[clActiveVideoSource][filter] = event.target.value;
+        clRenderVideoSource();
+        return;
+      }
       if (event.target.id !== "clVideoLinkInput") return;
       const link = event.target.value.trim();
       clSelectedVideoRef = /^https?:\/\//i.test(link) ? { id:"link", name:link, meta:"视频链接", profileId:1 } : null;
@@ -2590,18 +2891,15 @@
     });
     document.getElementById("clParseVideo")?.addEventListener("click", () => {
       if (!clSelectedVideoRef) return showToast("请先选择视频或输入有效链接");
-      const button = document.getElementById("clParseVideo");
-      const hint = document.getElementById("clParseHint");
-      const reference = {...clSelectedVideoRef};
-      const runId = ++clParseRunId;
-      button.disabled = true; button.textContent = "正在解析…";
-      hint.textContent = "正在识别口播、镜头和内容节奏";
-      setTimeout(() => {
-        if (runId !== clParseRunId || !clNewModal?.classList.contains("show")) return;
-        button.textContent = "解析并生成结构";
-        clApplyVideoDraft(reference);
-        showToast("视频解析完成，已生成结构草稿");
-      }, 900);
+      if (clSelectedVideoRef.uploadStatus === "uploading") return showToast("视频仍在上传中，请完成后再开始解析");
+      clStartParseTask({...clSelectedVideoRef});
+    });
+    document.getElementById("clBackgroundParse")?.addEventListener("click", () => {
+      const item = contentStructures.find(entry => entry.id === clActiveParseTaskId);
+      if (item?.parseStatus === "completed") { clCloseModal(clNewModal); clOpenDetail(item); return; }
+      clCloseModal(clNewModal);
+      clResetNewModalMode();
+      showToast("解析已转入后台，可在列表查看进度");
     });
     document.getElementById("clBackSource")?.addEventListener("click", () => {
       if (clEditingId) return;
@@ -2644,7 +2942,10 @@
         product:scope === "产品级结构" ? document.getElementById("clNewProduct").value : "通用",
         duration,
         method:reference ? "从参考视频提炼" : "手动创建", reference, stages, updated:clNow(),
-        example:existing?.example || { title:`${newName}｜创作示例`, meta:"自建内容结构 · 暂无投放数据", badge:"自建", copy:stages.map(stage => stage.say).join(" ") }
+        parseStatus: reference ? (existing?.parseStatus || "completed") : "manual",
+        parseStep: existing?.parseStep || 0,
+        parseSummary: existing?.parseSummary || (reference ? "视频解析已完成" : ""),
+        example:{ ...(existing?.example || {}), title:`${newName}｜创作示例`, meta:"自建内容结构 · 暂无投放数据", badge:"自建", copy:stages.map(stage => stage.say).join(" ") }
       };
       if (existing) Object.assign(existing, next); else contentStructures.unshift(next);
       showToast(existing ? "已保存修改" : "已保存自建内容结构");
