@@ -1575,40 +1575,86 @@
         `
       },
       mix: {
-        intro: "基于已确认的结构化脚本，从指定素材范围自动找镜头，完成时间轴编排、字幕、配音、包装和多版本混剪，输出可人工终审的成片。",
-        process: "读取脚本执行层 → 检索并排序候选镜头 → 自动编排时间轴 → 生成字幕、配音和包装 → 质检后输出待终审成片。",
-        placeholder: "还可以补充：第二个卖点镜头换成真人实拍，字幕字号再大一级……",
-        request: "使用除螨仪暑期主视频脚本，从实拍和历史素材中自动混剪 1 条主视频与 3 条延伸视频。",
+        intro: "基于产品信息、已确认文案与已有创作素材，完成 AI 配音、镜头匹配、裁切拼接和成片质检。",
+        process: "确认创作方案 → 确认文案与配音 → 确认脚本与素材 → 裁切拼接并生成成片。",
+        placeholder: "还可以补充：第 3 段换成沙发清洁画面，结尾产品定帧延长 0.5 秒……",
+        request: "为轻净 Pro 除螨仪使用已有创作素材生成 1 条竖版混剪视频。",
         version: "混剪引擎 V16",
-        summary: "已完成 1 条 30 秒主视频初剪。脚本信息点全部覆盖，8 个镜头任务已匹配；成片进入人工终审后，可提交千川提审。",
+        summary: "已完成 1 条 48.6 秒竖版混剪视频。文案、配音和 5 个内容段均已确认，全部画面来自已有创作素材。",
         form: `
-          <section class="form-section">
-            <div class="form-section-head"><div><strong>成片任务</strong><small>脚本和产品决定素材检索范围及成片结构</small></div></div>
-            <div class="section-grid">
-              <div class="field full"><label>结构化脚本 *</label><select><option>除螨仪暑期主视频脚本 V1</option><option>从脚本库选择</option><option>从当前会话资产选择</option></select></div>
-              <div class="field full"><label>对应产品 *</label><select data-product-select>${productOptions}</select></div>
-              <div class="field"><label>生产类型 *</label><select><option>1 条主视频</option><option>1 主 + 3 延伸</option><option>仅生成延伸视频</option></select></div>
-              <div class="field"><label>成片规格 *</label><select><option>9:16｜1080×1920</option><option>9:16｜720×1280</option></select></div>
-            </div>
-          </section>
-          <section class="form-section">
-            <div class="form-section-head"><div><strong>素材范围</strong><small>默认直接使用当前产品已绑定素材，也可缩小范围或临时补充</small></div></div>
-            <div class="section-grid">
-              <div class="field full"><label>选择方式 *</label><div class="choice-row" data-single="mix-material"><span class="choice-chip active">产品全部素材</span><span class="choice-chip">指定产品素材</span><span class="choice-chip">临时上传素材</span></div></div>
-              <div class="material-summary full"><div><strong>轻净 Pro 除螨仪 · 产品素材池</strong><small>实拍 426 段 · 历史成片拆分 782 段 · AI 素材 78 段</small></div><b>1,286</b></div>
-              <div class="smart-tip full"><strong>自动匹配</strong><span>按照脚本镜头任务检索产品素材；缺失镜头进入补拍清单，不使用无关素材凑镜头。</span></div>
-            </div>
-          </section>
-          <section class="form-section">
-            <div class="form-section-head"><div><strong>声音与包装</strong><small>选择品牌标准模板后，可在终审阶段逐项修改</small></div></div>
-            <div class="section-grid">
-              <div class="field"><label>配音</label><select><option>女声｜有力｜1.1×</option><option>男声｜专业｜1.0×</option><option>上传真人音色</option></select></div>
-              <div class="field"><label>字幕与包装</label><select><option>品牌模板｜重点词高亮</option><option>大字硬广模板</option><option>轻量无边框模板</option></select></div>
-              <div class="field"><label>背景音乐</label><select><option>自动匹配｜节奏感</option><option>使用品牌指定 BGM</option><option>不使用 BGM</option></select></div>
-              <div class="field"><label>延伸版本变化规则</label><select><option>换 3 秒钩子 + 对应镜头</option><option>只换开场镜头</option><option>换部分镜头</option></select></div>
-              <div class="field full"><label>制作要求</label><textarea>产品演示优先真人实拍；品牌角标全程保留；任何自动补充素材必须在终审页标识来源。</textarea></div>
-            </div>
-          </section>
+          <div class="mix-flow-form">
+            <section class="mix-step-panel" data-task-step="1">
+              <div class="mix-step-title"><div><span>STEP 1</span><h3>确认本次创作方案</h3><p>系统已带入产品资料和关联素材，只需确认本次采用哪种创作方式。</p></div><span class="mix-fixed-spec">1 条视频 · 9:16 · 1080P</span></div>
+              <article class="mix-block">
+                <div class="mix-block-head"><div><strong>产品与目标人群</strong><small>产品事实用于约束文案，目标人群影响表达方式。</small></div></div>
+                <div class="mix-two-col">
+                  <label class="mix-field"><span>创作产品</span><select data-mix-product><option value="mite-pro">轻净 Pro 除螨仪</option><option value="">不选择产品</option></select></label>
+                  <label class="mix-field"><span>目标人群</span><select data-mix-audience><option>精致妈妈 · 母婴清洁</option><option>养宠家庭 · 毛发清洁</option><option>自定义人群</option></select></label>
+                </div>
+                <div class="mix-fact-strip" data-mix-product-facts><b>已带入产品事实</b><span>深层清洁 · 拍打吸尘同步 · 透明尘杯可水洗 · 禁用“100%除螨”</span><button type="button" data-mix-show-facts>查看</button></div>
+              </article>
+              <article class="mix-block">
+                <div class="mix-block-head"><div><strong>创作方案</strong><small>选择起点，后续仍会统一确认文案、配音和脚本。</small></div></div>
+                <div class="mix-plan-tabs" role="tablist">
+                  <button class="active" type="button" data-mix-plan="ai"><b>AI 自主创作</b><small>根据产品与素材生成</small></button>
+                  <button type="button" data-mix-plan="reference"><b>参考爆款视频</b><small>借鉴内容与镜头结构</small></button>
+                  <button type="button" data-mix-plan="copy"><b>使用已有文案</b><small>从文案库带入并编辑</small></button>
+                  <button type="button" data-mix-plan="script"><b>使用已有脚本</b><small>带入口播与分镜</small></button>
+                </div>
+                <div class="mix-plan-context" data-mix-plan-context><span class="mix-plan-icon">✦</span><div><strong>AI 将自主组织内容</strong><small>结合产品卖点、目标人群和已有素材，先生成一版可编辑文案。</small></div></div>
+              </article>
+              <article class="mix-block" data-mix-material-block>
+                <div class="mix-block-head"><div><strong>创作素材</strong><small>默认展示并选中该产品的关联资产；未选中的素材本次不会使用。</small></div><div class="mix-material-head-actions"><span>已选 <b data-mix-selected-count>6</b> / 6</span><button type="button" data-mix-add-material>＋ 关联创作素材</button></div></div>
+                <div class="mix-material-grid" data-mix-material-grid>
+                  <article class="mix-material-card selected must" data-mix-material="M-CL-101"><button class="mix-material-select" type="button" aria-label="选择透明尘杯脏污特写">✓</button><button class="mix-material-must" type="button" title="设为必用">必用</button><div class="mix-material-cover tone-1"><span>尘杯<br>脏污特写</span><em>00:02</em></div><strong>透明尘杯脏污特写</strong><small>结果证明 · 已分析</small></article>
+                  <article class="mix-material-card selected" data-mix-material="M-SC-301"><button class="mix-material-select" type="button">✓</button><button class="mix-material-must" type="button" title="设为必用">设为必用</button><div class="mix-material-cover tone-2"><span>床垫<br>推进清洁</span><em>00:06</em></div><strong>床垫表面推进清洁</strong><small>使用过程 · 已分析</small></article>
+                  <article class="mix-material-card selected" data-mix-material="M-CL-102"><button class="mix-material-select" type="button">✓</button><button class="mix-material-must" type="button" title="设为必用">设为必用</button><div class="mix-material-cover tone-3"><span>拍打头<br>动作特写</span><em>00:05</em></div><strong>拍打吸尘动作特写</strong><small>功能演示 · 已分析</small></article>
+                  <article class="mix-material-card selected" data-mix-material="M-PF-201"><button class="mix-material-select" type="button">✓</button><button class="mix-material-must" type="button" title="设为必用">设为必用</button><div class="mix-material-cover tone-4"><span>卧室<br>清洁全景</span><em>00:08</em></div><strong>卧室床垫清洁全景</strong><small>使用场景 · 已分析</small></article>
+                  <article class="mix-material-card selected" data-mix-material="M-PF-202"><button class="mix-material-select" type="button">✓</button><button class="mix-material-must" type="button" title="设为必用">设为必用</button><div class="mix-material-cover tone-5"><span>沙发<br>布艺清洁</span><em>00:07</em></div><strong>沙发布艺清洁全景</strong><small>多场景 · 已分析</small></article>
+                  <article class="mix-material-card selected" data-mix-material="M-AT-503"><button class="mix-material-select" type="button">✓</button><button class="mix-material-must" type="button" title="设为必用">设为必用</button><div class="mix-material-cover tone-6"><span>产品<br>定帧收口</span><em>00:04</em></div><strong>产品定帧与购买引导</strong><small>行动引导 · 已分析</small></article>
+                </div>
+                <div class="mix-empty-material" data-mix-empty-material hidden><b>尚未关联创作素材</b><span>请先选择或创建产品，再关联可用于本次混剪的创作素材。</span></div>
+              </article>
+              <label class="mix-block mix-requirement"><span>本次补充要求（选填）</span><textarea data-mix-requirement placeholder="例如：必须提及七天无理由；结尾引导点击商品；不要出现价格信息。">结尾引导点击商品；不要出现未经验证的功效数据。</textarea></label>
+            </section>
+
+            <section class="mix-step-panel" data-task-step="2" hidden>
+              <div class="mix-step-title"><div><span>STEP 2</span><h3>确认文案与配音</h3><p>直接检查整篇口播。最终视频时长以这次确认的配音实际时长为准。</p></div><span class="mix-source-badge" data-mix-source-badge>AI 自主创作</span></div>
+              <article class="mix-block mix-copy-editor">
+                <div class="mix-block-head"><div><strong>口播文案</strong><small>可直接修改；产品库禁用话术会在保存前校验。</small></div><button type="button" data-mix-regenerate-copy>重新生成</button></div>
+                <textarea data-mix-copy>刚换的床单，看起来干净，床垫深处却可能还藏着毛发和碎屑。先别听我讲参数，直接看轻净 Pro 除螨仪走完一遍后的透明尘杯。它在床垫表面推进时，拍打和吸尘同步进行，把织物深处的细小脏污带出来，清洁结果当场就能看见。卧室床垫、客厅沙发和其他布艺都能使用，用完后尘杯还可以拆下来水洗，日常整理更省事。家里有孩子或宠物，别只停留在换床单和粘表面毛发，定期把床褥深处也清理一遍。想看完整实测过程，点击商品了解更多。</textarea>
+                <div class="mix-copy-meta"><span><b data-mix-copy-count>196</b> 字</span><span class="ok">✓ 产品事实校验通过</span><span>已避开禁用话术</span></div>
+              </article>
+              <article class="mix-block">
+                <div class="mix-block-head"><div><strong>配音设置</strong><small>选择音色、试听并微调语速；修改文案后实际时长会自动重算。</small></div></div>
+                <div class="mix-voice-layout">
+                  <label class="mix-field"><span>配音角色</span><select data-mix-voice><option>许念 · 自然亲和</option><option>陈子建 · 清晰有力</option><option>周雨桐 · 轻快种草</option></select></label>
+                  <div class="mix-speed-control"><span>语速</span><button type="button" data-mix-speed-minus>−</button><input type="range" min="0.8" max="1.3" step="0.05" value="1" data-mix-speed><button type="button" data-mix-speed-plus>＋</button><b data-mix-speed-label>1.00×</b></div>
+                  <button class="mix-voice-preview" type="button" data-mix-voice-preview><span>▶</span><div><strong>试听当前配音</strong><small data-mix-voice-status>许念 · 1.00×</small></div></button>
+                </div>
+                <div class="mix-duration-card"><div><span>爆款公式建议时长</span><b>45–60 秒</b></div><i>→</i><div><span>当前配音实际时长</span><b class="primary" data-mix-duration>48.6 秒</b></div><small>最终成片将按当前配音时长编排，不强行拉伸到模板时长。</small></div>
+              </article>
+            </section>
+
+            <section class="mix-step-panel" data-task-step="3" hidden>
+              <div class="mix-step-title"><div><span>STEP 3</span><h3>确认脚本与素材</h3><p>系统已把口播拆到时间轴，并从已选素材中完成镜头匹配与时长处理。</p></div><button class="mix-rematch-all" type="button" data-mix-rematch-all>重新匹配全部</button></div>
+              <div class="mix-summary-grid"><div><span>配音时长</span><b data-mix-script-duration>48.6s</b></div><div><span>内容覆盖</span><b>5 / 5</b></div><div><span>素材覆盖</span><b class="success">100%</b></div><div><span>使用素材</span><b data-mix-used-count>6 个</b></div><div><span>待处理问题</span><b class="success">0 项</b></div></div>
+              <div class="mix-script-list">
+                <article class="mix-script-card" data-mix-script-row="0"><header><div><b>00:00–00:04</b><strong>结果钩子</strong><span>4.0s</span></div><button type="button" data-mix-toggle-row>收起</button></header><div class="mix-script-body"><div class="mix-script-copy"><span>配音</span><p>刚换的床单，看起来干净，床垫深处却可能还藏着毛发和碎屑。</p></div><div class="mix-shot-task"><span>画面任务</span><p>先展示尘杯脏污结果，再硬切床垫表面推进。</p></div><div class="mix-assigned-material"><div class="mini-cover tone-1">尘杯特写</div><div><strong data-mix-material-name>透明尘杯脏污特写</strong><small>素材 00:00.4–00:02.4 · 使用 2.0s</small></div><em>必用</em></div><div class="mix-edit-result"><span>裁切 2.0s</span><span>＋ 床垫推进 2.0s</span><span>硬切</span><span>正常速度</span></div><footer><button type="button" data-mix-preview-row>▶ 预览本段</button><button type="button" data-mix-replace-row>替换素材</button><button type="button" data-mix-rematch-row>重新匹配</button><button type="button" data-mix-lock-row>锁定</button></footer></div></article>
+                <article class="mix-script-card" data-mix-script-row="1"><header><div><b>00:04–00:12</b><strong>痛点解释</strong><span>8.0s</span></div><button type="button" data-mix-toggle-row>展开</button></header><div class="mix-script-body" hidden><div class="mix-script-copy"><span>配音</span><p>先别听我讲参数，直接看轻净 Pro 走完一遍后的透明尘杯。</p></div><div class="mix-shot-task"><span>画面任务</span><p>床垫纤维近景衔接尘杯结果，强化“看得见”的证据。</p></div><div class="mix-assigned-material"><div class="mini-cover tone-2">床垫推进</div><div><strong data-mix-material-name>床垫表面推进清洁</strong><small>素材 00:01.0–00:07.6 · 使用 6.6s</small></div><em>已匹配</em></div><div class="mix-edit-result"><span>轻微减速 0.95×</span><span>短定帧 0.4s</span></div><footer><button type="button" data-mix-preview-row>▶ 预览本段</button><button type="button" data-mix-replace-row>替换素材</button><button type="button" data-mix-rematch-row>重新匹配</button><button type="button" data-mix-lock-row>锁定</button></footer></div></article>
+                <article class="mix-script-card" data-mix-script-row="2"><header><div><b>00:12–00:28</b><strong>产品演示</strong><span>16.0s</span></div><button type="button" data-mix-toggle-row>展开</button></header><div class="mix-script-body" hidden><div class="mix-script-copy"><span>配音</span><p>拍打和吸尘同步进行，把织物深处的细小脏污带出来，清洁结果当场就能看见。</p></div><div class="mix-shot-task"><span>画面任务</span><p>拍打头、产品推进、脏污吸入和尘杯变化连续硬切。</p></div><div class="mix-assigned-material"><div class="mini-cover tone-3">动作特写</div><div><strong data-mix-material-name>拍打吸尘动作特写</strong><small>2 段素材 · 合计使用 16.0s</small></div><em>已匹配</em></div><div class="mix-edit-result"><span>3 段硬切</span><span>其中 1 段加速 1.12×</span></div><footer><button type="button" data-mix-preview-row>▶ 预览本段</button><button type="button" data-mix-replace-row>替换素材</button><button type="button" data-mix-rematch-row>重新匹配</button><button type="button" data-mix-lock-row>锁定</button></footer></div></article>
+                <article class="mix-script-card" data-mix-script-row="3"><header><div><b>00:28–00:42</b><strong>多场景证明</strong><span>14.0s</span></div><button type="button" data-mix-toggle-row>展开</button></header><div class="mix-script-body" hidden><div class="mix-script-copy"><span>配音</span><p>卧室床垫、客厅沙发和其他布艺都能使用，用完后尘杯还可以拆下来水洗。</p></div><div class="mix-shot-task"><span>画面任务</span><p>卧室与沙发场景交替，结尾接尘杯拆洗过程。</p></div><div class="mix-assigned-material"><div class="mini-cover tone-4">多场景</div><div><strong data-mix-material-name>卧室床垫清洁全景</strong><small>3 段素材 · 合计使用 14.0s</small></div><em>已匹配</em></div><div class="mix-edit-result"><span>卧室 / 沙发硬切</span><span>正常速度</span></div><footer><button type="button" data-mix-preview-row>▶ 预览本段</button><button type="button" data-mix-replace-row>替换素材</button><button type="button" data-mix-rematch-row>重新匹配</button><button type="button" data-mix-lock-row>锁定</button></footer></div></article>
+                <article class="mix-script-card" data-mix-script-row="4"><header><div><b>00:42–00:49</b><strong>行动引导</strong><span>6.6s</span></div><button type="button" data-mix-toggle-row>展开</button></header><div class="mix-script-body" hidden><div class="mix-script-copy"><span>配音</span><p>想看完整实测过程，点击商品了解更多。</p></div><div class="mix-shot-task"><span>画面任务</span><p>产品定帧与手持展示，稳定镜头收尾。</p></div><div class="mix-assigned-material"><div class="mini-cover tone-6">产品收口</div><div><strong data-mix-material-name>产品定帧与购买引导</strong><small>素材 00:00–00:04 · 使用 4.0s</small></div><em>已匹配</em></div><div class="mix-edit-result"><span>定帧 0.6s</span><span>正常速度</span></div><footer><button type="button" data-mix-preview-row>▶ 预览本段</button><button type="button" data-mix-replace-row>替换素材</button><button type="button" data-mix-rematch-row>重新匹配</button><button type="button" data-mix-lock-row>锁定</button></footer></div></article>
+              </div>
+            </section>
+
+            <section class="mix-step-panel" data-task-step="4" hidden>
+              <div class="mix-step-title"><div><span>STEP 4</span><h3>生成视频</h3><p>最后检查本次输入，确认后将使用已有素材完成裁切拼接。</p></div><span class="mix-ready-badge">已就绪</span></div>
+              <article class="mix-block mix-generation-summary"><div><span>产品</span><b>轻净 Pro 除螨仪</b></div><div><span>成片时长</span><b data-mix-final-duration>48.6 秒</b></div><div><span>配音</span><b data-mix-final-voice>许念 · 1.00×</b></div><div><span>使用素材</span><b data-mix-final-materials>6 个</b></div><div><span>输出规格</span><b>9:16 · 1080×1920 · 30fps</b></div></article>
+              <article class="mix-block mix-checklist"><strong>生成前检查</strong><p><span>✓</span> 文案与配音已确认</p><p><span>✓</span> 5 个脚本段落已确认</p><p><span>✓</span> 所有时间段均已匹配已有素材</p><p><span>✓</span> 未使用原声、字幕、特效或转场</p></article>
+              <div class="mix-generation-host" data-mix-generation-host><div class="mix-generation-placeholder"><span>▶</span><strong>等待生成视频</strong><small>预计约 40 秒完成演示生成</small></div></div>
+            </section>
+          </div>
         `,
         result: `
           <div class="mix-preview">
@@ -4193,7 +4239,7 @@
       "image-detail": ["产品与详情页模块", "画面约束", "选择模型", "确认生成"],
       script: ["文案信息", "脚本策略", "AI 生成脚本"],
       "script-copy": ["参考脚本", "重构策略", "确认生成"],
-      mix: ["脚本与素材", "成片策略", "选择模型", "确认生成"],
+      mix: ["创作方案", "文案与配音", "脚本与素材", "生成视频"],
     };
     const agentGreetings = {
       original: "我是智能文案 Agent。我会基于产品事实、目标人群和内容设定生成千川口播文案。请先确认左侧产品信息。",
@@ -4203,7 +4249,7 @@
       "image-detail": "我是商品详情页 Agent。我会把产品卖点拆成有阅读顺序、可继续编辑的详情页图片模块。",
       script: "我是智能脚本 Agent。我会基于已确认口播文案、产品事实和素材库,输出可人工审核的结构化分镜脚本与推荐素材方案。",
       "script-copy": "我是爆款脚本仿写 Agent。我会借鉴参考脚本的节奏与镜头逻辑，为当前产品重新设计。",
-      mix: "我是智能混剪 Agent。我会依据脚本匹配素材，并标出需要补拍的镜头。"
+      mix: "我是智能混剪 Agent。我会使用你已有的创作素材，先协助确认文案与 AI 配音，再完成镜头匹配、裁切拼接和成片质检。"
     };
     let taskStep = 1;
     let taskCompleted = false;
@@ -4211,6 +4257,222 @@
     let originalTaskAssetIds = [];
     let originalCopyTargetId = "";
     let scriptTargetId = "";
+    const mixReplacementNames = ["床垫纤维与碎屑特写", "沙发表面拍打吸尘", "儿童房床垫深度清洁", "尘杯拆卸水洗过程"];
+
+    function mixSelectedMaterialIds() {
+      return [...dynamicForm.querySelectorAll("[data-mix-material].selected")].map(card => card.dataset.mixMaterial);
+    }
+
+    function updateMixMaterialSummary() {
+      const count = mixSelectedMaterialIds().length;
+      dynamicForm.querySelector("[data-mix-selected-count]")?.replaceChildren(String(count));
+      dynamicForm.querySelector("[data-mix-used-count]")?.replaceChildren(`${count} 个`);
+      dynamicForm.querySelector("[data-mix-final-materials]")?.replaceChildren(`${count} 个`);
+    }
+
+    function syncMixDuration() {
+      const copy = dynamicForm.querySelector("[data-mix-copy]");
+      const speed = Number(dynamicForm.querySelector("[data-mix-speed]")?.value || 1);
+      const count = String(copy?.value || "").replace(/\s/g, "").length;
+      const duration = Math.max(4, count / 4.03 / speed);
+      const durationText = `${duration.toFixed(1)} 秒`;
+      dynamicForm.querySelector("[data-mix-copy-count]")?.replaceChildren(String(count));
+      dynamicForm.querySelector("[data-mix-speed-label]")?.replaceChildren(`${speed.toFixed(2)}×`);
+      dynamicForm.querySelector("[data-mix-duration]")?.replaceChildren(durationText);
+      dynamicForm.querySelector("[data-mix-script-duration]")?.replaceChildren(`${duration.toFixed(1)}s`);
+      dynamicForm.querySelector("[data-mix-final-duration]")?.replaceChildren(durationText);
+      const voice = dynamicForm.querySelector("[data-mix-voice]")?.value.split(" · ")[0] || "许念";
+      dynamicForm.querySelector("[data-mix-final-voice]")?.replaceChildren(`${voice} · ${speed.toFixed(2)}×`);
+      const status = dynamicForm.querySelector("[data-mix-voice-status]");
+      if (status) status.textContent = `${voice} · ${speed.toFixed(2)}×`;
+    }
+
+    function renderMixPlanContext(mode) {
+      const host = dynamicForm.querySelector("[data-mix-plan-context]");
+      const badge = dynamicForm.querySelector("[data-mix-source-badge]");
+      if (!host) return;
+      const contexts = {
+        ai: `<span class="mix-plan-icon">✦</span><div><strong>AI 将自主组织内容</strong><small>结合产品卖点、目标人群和已有素材，先生成一版可编辑文案。</small></div>`,
+        reference: `<span class="mix-plan-icon">热</span><div class="mix-context-main"><strong>参考已解析的爆款内容结构</strong><small>只借鉴结构与镜头方法，不复用参考视频画面和原句。</small><div class="mix-reference-row"><select data-mix-reference-source><option>从成品视频选择</option><option>从外部参考视频选择</option><option>上传爆款视频</option><option>输入视频链接解析</option></select><select><option>除螨仪｜结果前置·痛点解决·行动引导</option><option>床褥清洁｜问题冲突·演示证明·CTA</option></select></div></div>`,
+        copy: `<span class="mix-plan-icon">文</span><div class="mix-context-main"><strong>已选择文案：除螨仪暑期口播</strong><small>将把文案完整带入下一步，可直接二次编辑并重新配音。</small><select data-mix-existing-copy><option>除螨仪暑期口播｜48 秒</option><option>养宠家庭清洁口播｜36 秒</option></select></div>`,
+        script: `<span class="mix-plan-icon">稿</span><div class="mix-context-main"><strong>已选择脚本：除螨仪主视频脚本</strong><small>将带入口播与原分镜，再按当前配音和已选素材重新校准。</small><select data-mix-existing-script><option>除螨仪主视频脚本｜5 段</option><option>床褥清洁实测脚本｜6 段</option></select></div>`
+      };
+      host.innerHTML = contexts[mode] || contexts.ai;
+      if (badge) badge.textContent = { ai:"AI 自主创作", reference:"参考爆款视频", copy:"已有文案", script:"已有脚本" }[mode] || "AI 自主创作";
+    }
+
+    function syncMixMaterialSelection(ids) {
+      const selectedIds = new Set(ids);
+      const grid = dynamicForm.querySelector("[data-mix-material-grid]");
+      dynamicForm.querySelectorAll("[data-mix-material]").forEach(card => {
+        const selected = selectedIds.has(card.dataset.mixMaterial);
+        card.classList.toggle("selected", selected);
+        const select = card.querySelector(".mix-material-select");
+        if (select) select.textContent = selected ? "✓" : "";
+      });
+      ids.forEach((id, index) => {
+        if (dynamicForm.querySelector(`[data-mix-material="${id}"]`)) return;
+        const item = findScriptMaterial(id);
+        if (!item || !grid) return;
+        grid.insertAdjacentHTML("beforeend", `<article class="mix-material-card selected" data-mix-material="${escapeHtml(id)}"><button class="mix-material-select" type="button">✓</button><button class="mix-material-must" type="button" title="设为必用">设为必用</button><div class="mix-material-cover tone-${index % 6 + 1}"><span>${escapeHtml(item.name)}</span><em>00:${String(Math.round(item.duration || 3)).padStart(2,"0")}</em></div><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.scene)} · 已分析</small></article>`);
+      });
+      updateMixMaterialSummary();
+    }
+
+    function validateMixStep(step) {
+      setFormFeedback("");
+      if (step === 1) {
+        if (!dynamicForm.querySelector("[data-mix-product]")?.value) {
+          setFormFeedback("请先选择产品，系统才能带入对应的创作素材。", "error");
+          dynamicForm.querySelector("[data-mix-product]")?.focus();
+          return false;
+        }
+        if (!mixSelectedMaterialIds().length) {
+          setFormFeedback("请至少选择 1 个已分析的创作素材。", "error");
+          return false;
+        }
+      }
+      if (step === 2) {
+        const copy = dynamicForm.querySelector("[data-mix-copy]");
+        if (!copy?.value.trim()) {
+          setFormFeedback("口播文案不能为空。", "error");
+          copy?.focus();
+          return false;
+        }
+        if (copy.value.includes("100%除螨")) {
+          setFormFeedback("文案包含产品禁用话术“100%除螨”，请修改后继续。", "error");
+          copy.focus();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function bindMixAgentEvents() {
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      if (!root || root.dataset.bound === "true") return;
+      root.dataset.bound = "true";
+      root.addEventListener("click", event => {
+        const plan = event.target.closest("[data-mix-plan]");
+        if (plan) {
+          root.querySelectorAll("[data-mix-plan]").forEach(button => button.classList.toggle("active", button === plan));
+          renderMixPlanContext(plan.dataset.mixPlan);
+          return;
+        }
+        const materialSelect = event.target.closest(".mix-material-select");
+        if (materialSelect) {
+          const card = materialSelect.closest("[data-mix-material]");
+          card.classList.toggle("selected");
+          materialSelect.textContent = card.classList.contains("selected") ? "✓" : "";
+          updateMixMaterialSummary();
+          return;
+        }
+        const must = event.target.closest(".mix-material-must");
+        if (must) {
+          const card = must.closest("[data-mix-material]");
+          card.classList.toggle("must");
+          must.textContent = card.classList.contains("must") ? "必用" : "设为必用";
+          showToast(card.classList.contains("must") ? "已设为必用素材" : "已取消必用标记");
+          return;
+        }
+        if (event.target.closest("[data-mix-show-facts]")) {
+          showToast("核心卖点：深层清洁、拍打吸尘同步；信任依据：真实使用过程与透明尘杯；禁用：100%除螨");
+          return;
+        }
+        if (event.target.closest("[data-mix-add-material]")) {
+          openScriptMaterialPicker({
+            title:"关联创作素材到本次混剪",
+            selectedIds:mixSelectedMaterialIds(),
+            onConfirm:syncMixMaterialSelection
+          });
+          return;
+        }
+        if (event.target.closest("[data-mix-regenerate-copy]")) {
+          const copy = root.querySelector("[data-mix-copy]");
+          copy.value = "床单刚换，看着干净，不代表床垫深处没有毛发和碎屑。先看轻净 Pro 除螨仪走完一遍后的透明尘杯：拍打和吸尘同步进行，把织物深处的细小脏污带出来，结果不用猜。床垫、沙发和其他布艺都能使用，尘杯用完还能拆下来水洗。家里有孩子或宠物，日常清洁别只停留在表面。点击商品，查看完整实测过程。";
+          syncMixDuration();
+          showToast("已重新生成一版文案，可继续编辑");
+          return;
+        }
+        const speedDelta = event.target.closest("[data-mix-speed-minus]") ? -0.05 : event.target.closest("[data-mix-speed-plus]") ? 0.05 : 0;
+        if (speedDelta) {
+          const input = root.querySelector("[data-mix-speed]");
+          input.value = Math.max(.8, Math.min(1.3, Number(input.value) + speedDelta)).toFixed(2);
+          syncMixDuration();
+          return;
+        }
+        const previewVoice = event.target.closest("[data-mix-voice-preview]");
+        if (previewVoice) {
+          const playing = previewVoice.classList.toggle("playing");
+          previewVoice.querySelector("span").textContent = playing ? "■" : "▶";
+          previewVoice.querySelector("strong").textContent = playing ? "正在试听…" : "试听当前配音";
+          if (playing) setTimeout(() => {
+            previewVoice.classList.remove("playing");
+            previewVoice.querySelector("span").textContent = "▶";
+            previewVoice.querySelector("strong").textContent = "试听当前配音";
+          }, 2400);
+          return;
+        }
+        const toggleRow = event.target.closest("[data-mix-toggle-row]");
+        if (toggleRow) {
+          const body = toggleRow.closest(".mix-script-card").querySelector(".mix-script-body");
+          body.hidden = !body.hidden;
+          toggleRow.textContent = body.hidden ? "展开" : "收起";
+          return;
+        }
+        const previewRow = event.target.closest("[data-mix-preview-row]");
+        if (previewRow) {
+          const playing = previewRow.classList.toggle("active");
+          previewRow.textContent = playing ? "■ 停止预览" : "▶ 预览本段";
+          showToast(playing ? "正在预览当前口播与镜头拼接" : "已停止预览");
+          return;
+        }
+        const replace = event.target.closest("[data-mix-replace-row]");
+        if (replace) {
+          const row = replace.closest("[data-mix-script-row]");
+          const name = row.querySelector("[data-mix-material-name]");
+          const current = Number(row.dataset.replaceIndex || 0);
+          row.dataset.replaceIndex = String(current + 1);
+          name.textContent = mixReplacementNames[current % mixReplacementNames.length];
+          showToast("素材已替换，裁切区间和时长已自动校准");
+          return;
+        }
+        const rematch = event.target.closest("[data-mix-rematch-row]");
+        if (rematch) {
+          const row = rematch.closest("[data-mix-script-row]");
+          row.classList.add("is-rematching");
+          rematch.textContent = "匹配中…";
+          setTimeout(() => { row.classList.remove("is-rematching"); rematch.textContent = "重新匹配"; showToast("已按语义与时长重新匹配本段素材"); }, 700);
+          return;
+        }
+        const lock = event.target.closest("[data-mix-lock-row]");
+        if (lock) {
+          const locked = lock.classList.toggle("active");
+          lock.textContent = locked ? "✓ 已锁定" : "锁定";
+          showToast(locked ? "本段已锁定，重新匹配时将保持不变" : "已解除本段锁定");
+          return;
+        }
+        if (event.target.closest("[data-mix-rematch-all]")) {
+          root.querySelectorAll("[data-mix-script-row]").forEach(row => row.classList.add("is-rematching"));
+          setTimeout(() => { root.querySelectorAll("[data-mix-script-row]").forEach(row => row.classList.remove("is-rematching")); showToast("未锁定段落已重新匹配完成"); }, 800);
+        }
+      });
+      root.addEventListener("input", event => {
+        if (event.target.matches("[data-mix-copy], [data-mix-speed]")) syncMixDuration();
+      });
+      root.addEventListener("change", event => {
+        if (event.target.matches("[data-mix-product]")) {
+          const hasProduct = Boolean(event.target.value);
+          root.querySelector("[data-mix-product-facts]").hidden = !hasProduct;
+          root.querySelector("[data-mix-material-grid]").hidden = !hasProduct;
+          root.querySelector("[data-mix-empty-material]").hidden = hasProduct;
+          if (!hasProduct) syncMixMaterialSelection([]);
+        }
+        if (event.target.matches("[data-mix-voice]")) syncMixDuration();
+      });
+      updateMixMaterialSummary();
+      syncMixDuration();
+    }
 
     function taskSteps() { return agentStepPlans[activeType] || ["基础信息", "创作设置", "确认生成"]; }
 
@@ -4244,8 +4506,8 @@
         renderTaskModelStep();
         return;
       }
-      // 智能脚本 Agent:3 步定制流程,form 内已带 data-task-step="1/2/3",跳过通用 model-card / confirm-card
-      if (activeType === "script") {
+      // 智能脚本与智能混剪使用各自的定制流程，不追加通用模型与确认步骤。
+      if (activeType === "script" || activeType === "mix") {
         dynamicForm.querySelectorAll(".task-model-card").forEach(node => node.remove());
         return;
       }
@@ -4330,9 +4592,11 @@
       const next = document.createElement("button");
       next.className = "primary-btn";
       next.type = "button";
-      // 智能脚本 Agent:步骤 2 的按钮叫"生成脚本",步骤 3 是结果页(无下一步)
+      // 智能脚本与智能混剪使用定制按钮文案和校验。
       if (activeType === "script") {
         next.textContent = taskStep === 2 ? "生成脚本" : "下一步";
+      } else if (activeType === "mix") {
+        next.textContent = ["确认方案", "确认文案与配音", "确认脚本", taskCompleted ? "重新生成视频" : "生成视频"][taskStep - 1];
       } else if (isStructuredCopyFlow()) {
         next.textContent = taskStep === 1 ? "下一步" : "生成文案";
       } else {
@@ -4341,6 +4605,14 @@
           : "下一步";
       }
       next.addEventListener("click", () => {
+        if (activeType === "mix") {
+          if (taskStep < 4) {
+            if (!validateMixStep(taskStep)) return;
+            return setTaskStep(taskStep + 1);
+          }
+          if (!validateMixStep(2)) return;
+          return submitMixGeneration();
+        }
         if (activeType === "script") {
           if (taskStep === 1) {
             if (!validateScriptStep(1)) return;
@@ -4377,7 +4649,9 @@
       });
       taskActionButtons.append(next);
       updateAdvancedFooterToggle();
-      taskActionNote.textContent = activeType === "script"
+      taskActionNote.textContent = activeType === "mix"
+        ? taskStep === 4 ? "仅使用已确认素材，生成后可局部重剪" : ""
+        : activeType === "script"
         ? ""
         : isStructuredCopyFlow() ? "" : taskStep === steps.length
           ? "生成后可在右侧继续对话修改"
@@ -4546,6 +4820,7 @@
       appendTaskGreeting();
       prepareTaskForm();
       if (activeType === "script") bindScriptAgentEvents();
+      if (activeType === "mix") bindMixAgentEvents();
       taskShell.classList.add("show");
       taskShell.classList.remove("is-complete");
       setTaskChatCollapsed(true);
@@ -4641,6 +4916,44 @@
       modelTrigger.disabled = false;
       renderTaskStepper();
       requestAnimationFrame(renderConversationLocator);
+    }
+
+    function showMixTaskResult() {
+      taskCompleted = true;
+      taskEditing = false;
+      taskStep = 4;
+      taskFormScroll.hidden = true;
+      taskFormActions.hidden = true;
+      taskResultHost.hidden = false;
+      const duration = dynamicForm.querySelector("[data-mix-final-duration]")?.textContent || "48.6 秒";
+      const voice = dynamicForm.querySelector("[data-mix-final-voice]")?.textContent || "许念 · 1.00×";
+      const materialCount = mixSelectedMaterialIds().length || 6;
+      taskResultHost.innerHTML = `
+        <div class="mix-result-page">
+          <div class="task-result-top"><div><strong>混剪视频已生成</strong><small>全部画面来自已确认的创作素材，可继续检查或局部重剪。</small></div><span class="mix-result-status">✓ 自动质检通过</span></div>
+          <div class="mix-result-hero">
+            <div class="mix-video-player" data-mix-video-player><div class="mix-video-stage"><span class="mix-video-product">轻净 Pro</span><button type="button" data-mix-result-play>▶</button><div><strong>床垫深层清洁实测</strong><small>9:16 · ${escapeHtml(duration)}</small></div></div><div class="mix-player-bar"><span data-mix-player-time>00:00</span><div><i></i></div><span>${escapeHtml(duration.replace(" 秒", ""))}</span></div></div>
+            <div class="mix-result-insight"><div class="mix-result-metrics"><div><span>实际时长</span><b>${escapeHtml(duration)}</b></div><div><span>配音</span><b>${escapeHtml(voice)}</b></div><div><span>素材使用</span><b>${materialCount} 个</b></div><div><span>阻断问题</span><b class="success">0 项</b></div></div><div class="mix-result-quality"><strong>自动质检</strong><p><span>✓</span> 画面已覆盖全部配音时间段</p><p><span>✓</span> 无黑帧、静音或异常变速</p><p><span>✓</span> 产品事实与禁用话术校验通过</p></div></div>
+          </div>
+          <article class="mix-result-timeline"><header><strong>成片时间轴</strong><small>点击任一段定位预览</small></header><div class="mix-timeline-track"><button style="flex:4" data-mix-seek="00:00">结果钩子<small>4s</small></button><button style="flex:8" data-mix-seek="00:04">痛点解释<small>8s</small></button><button style="flex:16" data-mix-seek="00:12">产品演示<small>16s</small></button><button style="flex:14" data-mix-seek="00:28">多场景证明<small>14s</small></button><button style="flex:7" data-mix-seek="00:42">行动引导<small>6.6s</small></button></div><div class="mix-result-operations"><span>裁切 8 处</span><span>硬切 7 处</span><span>轻微变速 2 处</span><span>短定帧 2 处</span><span>无转场 / 字幕 / 特效</span></div></article>
+          <div class="mix-result-actions"><button class="ghost-btn" type="button" data-mix-result-action="back-script">返回修改脚本</button><button class="ghost-btn" type="button" data-mix-result-action="remix">局部重新混剪</button><button class="soft-btn" type="button" data-mix-result-action="save">保存到成片视频库</button><button class="primary-btn" type="button" data-mix-result-action="download">下载视频</button></div>
+        </div>`;
+      taskShell.classList.add("is-complete");
+      setTaskChatCollapsed(false);
+      document.getElementById("taskChatSubtitle").textContent = "可继续用自然语言修改本次成片";
+      promptInput.disabled = false;
+      promptInput.placeholder = "例如：把第 3 段换成沙发清洁素材，结尾定帧延长 0.5 秒";
+      sendPromptButton.disabled = false;
+      agentPillButton.disabled = false;
+      renderTaskStepper();
+      showToast("智能混剪已完成，可播放预览或局部调整");
+    }
+
+    function submitMixGeneration() {
+      const host = dynamicForm.querySelector("[data-mix-generation-host]");
+      if (host) host.innerHTML = `<div class="mix-generating"><span class="spinner"></span><strong>正在生成混剪视频…</strong><small>正在裁切素材、校准配音时间轴并完成质量检查</small><div><i></i></div></div>`;
+      taskActionButtons.querySelector(".primary-btn")?.setAttribute("disabled", "disabled");
+      setTimeout(showMixTaskResult, 1200);
     }
 
     // 智能脚本 Agent 多版本 Tab 渲染
@@ -6661,6 +6974,54 @@
     });
 
     taskResultHost.addEventListener("click", event => {
+      const playButton = event.target.closest("[data-mix-result-play]");
+      if (playButton) {
+        const playing = playButton.classList.toggle("playing");
+        playButton.textContent = playing ? "■" : "▶";
+        taskResultHost.querySelector(".mix-video-stage")?.classList.toggle("playing", playing);
+        showToast(playing ? "正在播放成片预览" : "已暂停预览");
+        return;
+      }
+      const seek = event.target.closest("[data-mix-seek]");
+      if (seek) {
+        taskResultHost.querySelectorAll("[data-mix-seek]").forEach(button => button.classList.toggle("active", button === seek));
+        const time = taskResultHost.querySelector("[data-mix-player-time]");
+        if (time) time.textContent = seek.dataset.mixSeek;
+        showToast(`已定位到 ${seek.dataset.mixSeek} · ${seek.firstChild?.textContent?.trim() || "当前片段"}`);
+        return;
+      }
+      const mixAction = event.target.closest("[data-mix-result-action]");
+      if (mixAction) {
+        const action = mixAction.dataset.mixResultAction;
+        if (action === "back-script" || action === "remix") {
+          setTaskStep(3);
+          if (action === "remix") {
+            const row = dynamicForm.querySelector('[data-mix-script-row="2"]');
+            const body = row?.querySelector(".mix-script-body");
+            if (body) body.hidden = false;
+            const toggle = row?.querySelector("[data-mix-toggle-row]");
+            if (toggle) toggle.textContent = "收起";
+            showToast("已返回产品演示段，可替换素材后重新生成");
+          }
+          return;
+        }
+        if (action === "save") {
+          mixAction.textContent = "✓ 已保存到成片视频库";
+          mixAction.disabled = true;
+          showToast("已保存到资产库 · 视频库 · 成片视频");
+          return;
+        }
+        if (action === "download") {
+          mixAction.textContent = "正在准备…";
+          mixAction.disabled = true;
+          setTimeout(() => {
+            mixAction.textContent = "下载视频";
+            mixAction.disabled = false;
+            showToast("成片导出任务已创建，可在下载中心查看");
+          }, 700);
+          return;
+        }
+      }
       const continueButton = event.target.closest("[data-original-continue]");
       if (continueButton) {
         appendOriginalCopyBatch(continueButton);
@@ -7199,7 +7560,7 @@
         }
         card.classList.remove("is-parsing");
         const partial = lowerLink.includes("partial");
-        card.innerHTML = `<span class="card-menu-wrap"><span class="card-menu-trigger" role="button" tabindex="0" data-toggle-card-menu aria-label="产品操作">···</span><span class="card-action-menu" role="menu"><span role="menuitem" data-delete-product>删除</span></span></span><div class="product-market-image blend"><span class="image-label">${partial ? "待补充" : "厨房电器"}</span><div class="product-visual"></div></div><div class="product-market-body"><div class="product-market-title"><strong>${escapeHtml(name)}</strong></div>${partial ? '<div class="parse-state partial"><strong>部分完成</strong><span>品牌、类目待补充</span></div>' : '<div class="parse-state success"><strong>解析完成</strong><span>产品信息已识别</span></div>'}<div class="product-market-price"><small>¥</small>199</div><div class="product-market-assets"><span>文案 0</span><span>脚本 0</span><span>素材 0</span><span>视频 0</span></div></div>`;
+        card.innerHTML = `<span class="card-menu-wrap"><span class="card-menu-trigger" role="button" tabindex="0" data-toggle-card-menu aria-label="产品操作">···</span><span class="card-action-menu" role="menu"><span role="menuitem" data-delete-product>删除</span></span></span><div class="product-market-image blend"><span class="image-label">${partial ? "待补充" : "厨房电器"}</span><div class="product-visual"></div></div><div class="product-market-body"><div class="product-market-title"><strong>${escapeHtml(name)}</strong></div>${partial ? '<div class="parse-state partial"><strong>部分完成</strong><span>品牌、类目待补充</span></div>' : '<div class="parse-state success"><strong>解析完成</strong><span>产品信息已识别</span></div>'}<div class="product-market-price-row"><div class="product-market-price"><small>¥</small>199</div><small class="asset-card-audit" title="最近修改：嗡大发 · 08/11 10:26">嗡大发 · 08/11 10:26</small></div><div class="product-market-assets"><span>文案 0</span><span>脚本 0</span><span>素材 0</span><span>视频 0</span></div></div>`;
         productDetailData[productId] = { id:productId, name, brand:partial ? "" : "已识别品牌", category:partial ? "" : "厨房电器", price:"¥199", currencyCode:"CNY", links:[{ platform:detectProductPlatform(link), url:link }], description:"商品链接解析生成，产品参数待确认", core:"核心卖点待确认", secondary:"", difference:"", trust:"", forbidden:"" };
         productCatalog[productId] = { name, core:"核心卖点待确认", secondary:"", difference:"", audiences:[], psychology:[], facts:"已通过商品链接解析，缺失字段需人工确认" };
         syncProductToCreationSelectors(productId, name);
@@ -7279,7 +7640,7 @@
       manualCard.type = "button";
       manualCard.className = "product-market-card";
       manualCard.dataset.productId = id;
-      manualCard.innerHTML = `<span class="card-menu-wrap"><span class="card-menu-trigger" role="button" tabindex="0" data-toggle-card-menu aria-label="产品操作">···</span><span class="card-action-menu" role="menu"><span role="menuitem" data-delete-product>删除</span></span></span><div class="product-market-image"><span class="image-label">${escapeHtml(category)}</span><div class="product-visual"></div></div><div class="product-market-body"><div class="product-market-title"><strong>${escapeHtml(name)}</strong></div><div class="product-market-price"><small>${currencySymbol}</small>${escapeHtml(price)}</div><div class="product-market-assets"><span>文案 0</span><span>脚本 0</span><span>素材 0</span><span>视频 0</span></div></div>`;
+      manualCard.innerHTML = `<span class="card-menu-wrap"><span class="card-menu-trigger" role="button" tabindex="0" data-toggle-card-menu aria-label="产品操作">···</span><span class="card-action-menu" role="menu"><span role="menuitem" data-delete-product>删除</span></span></span><div class="product-market-image"><span class="image-label">${escapeHtml(category)}</span><div class="product-visual"></div></div><div class="product-market-body"><div class="product-market-title"><strong>${escapeHtml(name)}</strong></div><div class="product-market-price-row"><div class="product-market-price"><small>${currencySymbol}</small>${escapeHtml(price)}</div><small class="asset-card-audit" title="最近修改：嗡大发 · 08/11 10:26">嗡大发 · 08/11 10:26</small></div><div class="product-market-assets"><span>文案 0</span><span>脚本 0</span><span>素材 0</span><span>视频 0</span></div></div>`;
       productDetailData[id] = { id, name, brand, category, price:`${currencySymbol}${price}`, currencyCode, links:linkResult.links, description, core, secondary, difference, trust, forbidden };
       productCatalog[id] = { name, core:core.split(/\n+/)[0] || core, secondary:secondary.split(/\n+/)[0] || "", difference:difference.split(/\n+/)[0] || "", audiences:[], psychology:[], facts:`已读取产品档案、${linkResult.links.length} 条商品链接和禁用表达` };
       syncProductToCreationSelectors(id, name);
@@ -8389,7 +8750,7 @@
       scope.querySelectorAll("[data-lib-panel]").forEach(panel => panel.classList.toggle("active", panel.dataset.libPanel === button.dataset.libTab));
     }));
 
-    /* ── 爆款文案结构：千川学习 / 自建结构、详情与 Agent 调用 ── */
+    /* ── 爆款内容结构：千川学习 / 自建结构、详情与 Agent 调用 ── */
     const copyStructureTbody = document.getElementById("copyStructureTbody");
     const copyStructureEmpty = document.getElementById("copyStructureEmpty");
     const copyStructureDetailModal = document.getElementById("copyStructureDetailModal");
@@ -8468,7 +8829,7 @@
     function openCopyStructureEditor(id = "", clone = false) {
       const source = copyStructureCatalog.find(item => item.id === id);
       editingCopyStructureId = clone ? "" : (source?.source === "custom" ? id : "");
-      document.getElementById("copyStructureEditorTitle").textContent = editingCopyStructureId ? "编辑爆款文案结构" : (source ? "复制为自建结构" : "新建爆款文案结构");
+      document.getElementById("copyStructureEditorTitle").textContent = editingCopyStructureId ? "编辑爆款内容结构" : (source ? "复制为自建结构" : "新建爆款内容结构");
       document.getElementById("copyStructureNameInput").value = source ? `${source.name}${clone ? "（副本）" : ""}` : "";
       document.getElementById("copyStructureFormulaInput").value = source?.formula || "";
       const productInput = document.getElementById("copyStructureProductInput");
@@ -8903,20 +9264,23 @@
         const sourceLabel = r.source === "AI" ? "AI生成" : r.source;
         const sourceTag = '<span class="cl-source-tag ' + (isAI ? 'ai' : 'import') + '">' + sourceLabel + '</span>';
         const editBtn = '<button class="cl-act-btn" onclick="clEditText(\'' + r.id + '\')">编辑</button>';
-        const locateBtn = isAI ? '<button class="cl-act-btn" onclick="clLocate(\'' + r.id + '\')">定位至会话</button>' : '';
-        const aiDropBtn = '<div class="cl-ai-drop"><button class="cl-ai-btn" onclick="clToggleAIMenu(event)">AI <span style="font-size:8px;">▼</span></button><div class="cl-ai-menu"><button onclick="clAIAction(&quot;rewrite&quot;,&quot;' + r.id + '&quot;)">智能改写</button><button onclick="clAIAction(&quot;clone&quot;,&quot;' + r.id + '&quot;)">爆款仿写</button><button onclick="clAIAction(&quot;script&quot;,&quot;' + r.id + '&quot;)">智能脚本</button><button onclick="clAIAction(&quot;remix&quot;,&quot;' + r.id + '&quot;)">智能混剪</button></div></div>';
-        const delBtn = '<button class="cl-act-btn danger" onclick="clDelete(&quot;' + r.id + '&quot;)">删除</button>';
-        const actBtns = [editBtn, aiDropBtn, delBtn, locateBtn].filter(Boolean).join('');
-        const escapedText = r.text.replace(/"/g, '&quot;');
+        const aiDropBtn = '<div class="cl-ai-drop"><button class="cl-ai-btn" onclick="clToggleAIMenu(event)">AI <span class="cl-ai-caret">▼</span></button><div class="cl-ai-menu"><button onclick="clAIAction(&quot;rewrite&quot;,&quot;' + r.id + '&quot;)">智能改写</button><button onclick="clAIAction(&quot;clone&quot;,&quot;' + r.id + '&quot;)">爆款仿写</button><button onclick="clAIAction(&quot;script&quot;,&quot;' + r.id + '&quot;)">智能脚本</button><button onclick="clAIAction(&quot;remix&quot;,&quot;' + r.id + '&quot;)">智能混剪</button></div></div>';
+        const delBtn = '<button class="cl-act-btn cl-act-danger" onclick="clDelete(&quot;' + r.id + '&quot;)">删除</button>';
+        const moreItems = [];
+        if (isAI) moreItems.push('<button onclick="clLocate(\'' + r.id + '\')">定位至会话</button>');
+        moreItems.push('<button onclick="AssetAudit.showHistory(\'文案\',\'' + r.product.replace(/'/g, "") + '文案\')">查看变更</button>');
+        const moreBtn = '<div class="cl-more-drop"><button class="cl-act-btn cl-more-btn" onclick="clToggleMoreMenu(event)" title="更多操作">⋯</button><div class="cl-more-menu">' + moreItems.join('') + '</div></div>';
+        const actBtns = editBtn + aiDropBtn + delBtn + moreBtn;
         return '<tr>'
-          + '<td class="cl-col-text"><span class="cl-copy-text" data-id="' + r.id + '" style="color:var(--ink)">' + r.text + '</span></td>'
+          + '<td class="cl-col-text"><span class="cl-copy-text" data-id="' + r.id + '" title="' + escapeHtml(r.text) + '">' + r.text + '</span></td>'
           + '<td>' + sourceTag + '</td>'
           + '<td>' + r.product + '</td>'
           + '<td>' + r.crowd + '</td>'
           + '<td class="cl-col-struct">' + chips + '</td>'
           + '<td class="cl-col-chars">' + r.chars + '字/' + r.duration + 's</td>'
-          + '<td style="font-size:12px;">' + r.updated + '</td>'
-          + '<td class="cl-col-act"><div style="display:flex;gap:6px;align-items:center;">' + actBtns + '</div></td>'
+          + '<td class="asset-audit-cell"><b>' + (r.createdBy || '嗡大发') + '</b><small>' + (r.createdAt || '08/01 10:20') + '</small></td>'
+          + '<td class="asset-audit-cell"><b>' + (r.updatedBy || '嗡大发') + '</b><small>' + r.updated.replace(/-/g, '/') .replace(/:([0-9]{2})$/, '') + '</small></td>'
+          + '<td class="cl-col-act"><div class="cl-act-group">' + actBtns + '</div></td>'
           + '</tr>';
       }).join("");
     }
@@ -8931,12 +9295,12 @@
       clEditingId = id;
       // 填充字段
       document.getElementById("clEditProduct").value = item.product || "";
-      document.getElementById("clEditCrowd").value = item.crowd || "";
       document.getElementById("clEditText").value = item.text || "";
       // 元信息(只读)
       document.getElementById("clEditMetaSource").textContent = item.source || "—";
       document.getElementById("clEditMetaChars").textContent = (item.chars || item.text.length) + "字 / " + (item.duration || "—") + "s";
       document.getElementById("clEditMetaUpdated").textContent = item.updated || "—";
+      clHydrateEditPersona(item);
       // 清除校验态
       clClearEditValidation();
       clUpdateEditCounter();
@@ -8965,29 +9329,139 @@
       clEditingId = null;
     }
 
+    function clHydrateEditPersona(item) {
+      const snapshot = item.personaSnapshot || {};
+      const mode = snapshot.source || (item.personaTemplateId ? "template" : "manual");
+      clSetEditAudienceMode(mode);
+      clSetEditAudienceValues(snapshot.audiences?.length ? snapshot.audiences : (item.crowd ? [item.crowd] : []));
+      clSetEditSingleChoice("gender", snapshot.gender || "不限");
+      clSetEditAge(snapshot.age || "");
+      document.getElementById("clEditPersonaPain").value = Array.isArray(snapshot.pain) ? snapshot.pain.join("\n") : "";
+      document.getElementById("clEditPersonaScenes").value = Array.isArray(snapshot.scenes) ? snapshot.scenes.join("\n") : "";
+      if (mode === "template") clSetEditPersonaTemplate(snapshot.templateId || item.personaTemplateId || "", !item.personaSnapshot);
+    }
+
+    function clSetEditAudienceMode(mode, openTemplatePicker = false) {
+      const templateMode = mode === "template";
+      clEditModal.dataset.audienceMode = mode;
+      clEditModal.querySelectorAll("[data-cl-audience-mode]").forEach(button => button.classList.toggle("active", button.dataset.clAudienceMode === mode));
+      clEditModal.querySelector("[data-cl-audience-template]").hidden = !templateMode;
+      if (!templateMode) {
+        delete clEditModal.dataset.personaTemplateId;
+        clEditModal.querySelector("[data-cl-persona-selected]").textContent = "选择人群画像模板";
+        window.CreationPersonaPicker?.close();
+      } else if (openTemplatePicker) {
+        clOpenEditPersonaTemplatePicker();
+      }
+    }
+
+    function clSetEditAudienceValues(values) {
+      const selected = new Set(values || []);
+      clEditModal.querySelectorAll("[data-cl-audience]").forEach(button => button.classList.toggle("active", selected.has(button.dataset.clAudience)));
+    }
+
+    function clSetEditSingleChoice(type, value) {
+      const selector = type === "gender" ? "[data-cl-gender]" : "[data-cl-age]";
+      clEditModal.querySelectorAll(selector).forEach(button => button.classList.toggle("active", button.dataset[type === "gender" ? "clGender" : "clAge"] === value));
+    }
+
+    function clSetEditAge(value) {
+      const age = value === "51+" ? "50+" : value;
+      const standard = [...clEditModal.querySelectorAll("[data-cl-age]")].some(button => button.dataset.clAge === age);
+      clSetEditSingleChoice("age", standard ? age : (age ? "custom" : ""));
+      const custom = clEditModal.querySelector("[data-cl-custom-age]");
+      custom.hidden = standard || !age;
+      if (!standard && age) {
+        const [min, max] = age.split(/[–-]/);
+        document.getElementById("clEditAgeMin").value = min || "";
+        document.getElementById("clEditAgeMax").value = max || "";
+      } else {
+        document.getElementById("clEditAgeMin").value = "";
+        document.getElementById("clEditAgeMax").value = "";
+      }
+    }
+
+    function clSetEditPersonaTemplate(id, applyFields = true) {
+      const persona = personaCatalog.find(item => item.id === id);
+      const label = clEditModal.querySelector("[data-cl-persona-selected]");
+      if (!persona) {
+        delete clEditModal.dataset.personaTemplateId;
+        label.textContent = "选择人群画像模板";
+        return;
+      }
+      clEditModal.dataset.personaTemplateId = persona.id;
+      label.textContent = persona.name;
+      if (!applyFields) return;
+      clSetEditAudienceValues([persona.audience]);
+      clSetEditSingleChoice("gender", persona.gender || "不限");
+      clSetEditAge(persona.age || "");
+      document.getElementById("clEditPersonaPain").value = (persona.pain || []).join("\n");
+      document.getElementById("clEditPersonaScenes").value = (persona.scenes || []).join("\n");
+    }
+
+    function clOpenEditPersonaTemplatePicker() {
+      if (!window.CreationPersonaPicker) return showToast("人群模板选择器加载失败，请刷新页面后重试。");
+      const product = document.getElementById("clEditProduct").value.trim();
+      window.CreationPersonaPicker.open({
+        items: personaCatalog.map(persona => ({ ...persona, recommended:persona.product === product })),
+        selectedId:clEditModal.dataset.personaTemplateId || "",
+        onConfirm(persona) { clSetEditPersonaTemplate(persona?.id || ""); }
+      });
+    }
+
+    function clReadEditPersona() {
+      const audiences = [...clEditModal.querySelectorAll("[data-cl-audience].active")].map(button => button.dataset.clAudience);
+      const gender = clEditModal.querySelector("[data-cl-gender].active")?.dataset.clGender || "不限";
+      const ageChoice = clEditModal.querySelector("[data-cl-age].active")?.dataset.clAge || "";
+      const age = ageChoice === "custom"
+        ? [document.getElementById("clEditAgeMin").value.trim(), document.getElementById("clEditAgeMax").value.trim()].filter(Boolean).join("–")
+        : ageChoice;
+      const splitLines = id => document.getElementById(id).value.split("\n").map(value => value.trim()).filter(Boolean);
+      return {
+        source:clEditModal.dataset.audienceMode || "manual",
+        templateId:clEditModal.dataset.personaTemplateId || "",
+        audiences,
+        gender,
+        age,
+        pain:splitLines("clEditPersonaPain"),
+        scenes:splitLines("clEditPersonaScenes")
+      };
+    }
+
+    function clApplyEditAiSuggestion(type) {
+      const product = document.getElementById("clEditProduct").value.trim() || "产品";
+      const samples = type === "pain"
+        ? [[`担心${product}使用效果不稳定`, "不想花太多时间处理日常麻烦"], ["希望一次解决核心问题", "更在意使用过程是否省心"]]
+        : [[`${product}的日常使用场景`, "需要快速处理问题的即时场景"], ["周末集中使用场景", "家人共同使用的生活场景"]];
+      const key = type === "pain" ? "painSuggestionIndex" : "sceneSuggestionIndex";
+      const index = Number(clEditModal.dataset[key] || 0) % samples.length;
+      document.getElementById(type === "pain" ? "clEditPersonaPain" : "clEditPersonaScenes").value = samples[index].join("\n");
+      clEditModal.dataset[key] = String(index + 1);
+    }
+
     function clSaveEditModal() {
       if (!clEditingId) return;
       const product = document.getElementById("clEditProduct").value.trim();
-      const crowd = document.getElementById("clEditCrowd").value.trim();
+      const persona = clReadEditPersona();
       const text = document.getElementById("clEditText").value.trim();
       // 校验
       clClearEditValidation();
       let firstInvalid = null;
-      const mark = function(elId) {
-        const el = document.getElementById(elId);
+      const mark = function(el) {
         const field = el.closest(".cl-edit-field");
         if (field) field.classList.add("invalid");
         if (!firstInvalid) firstInvalid = el;
       };
-      if (!product) mark("clEditProduct");
-      if (!crowd) mark("clEditCrowd");
-      if (text.length < 5 || text.length > 500) mark("clEditText");
+      if (!product) mark(document.getElementById("clEditProduct"));
+      if (!persona.audiences.length || (persona.source === "template" && !persona.templateId)) mark(document.getElementById("clEditPersonaField"));
+      if (text.length < 5 || text.length > 500) mark(document.getElementById("clEditText"));
       if (firstInvalid) {
         const err = document.getElementById("clEditModalError");
         err.hidden = false;
         const msgs = [];
         if (!product) msgs.push("关联产品");
-        if (!crowd) msgs.push("目标人群");
+        if (!persona.audiences.length) msgs.push("核心目标人群");
+        else if (persona.source === "template" && !persona.templateId) msgs.push("人群画像模板");
         if (text.length < 5) msgs.push("文案不能少于 5 字");
         else if (text.length > 500) msgs.push("文案不能超过 500 字");
         err.textContent = "请检查：" + msgs.join("、");
@@ -8998,7 +9472,14 @@
       if (!item) { clCloseEditModal(); return; }
       item.text = text;
       item.product = product;
-      item.crowd = crowd;
+      item.crowd = persona.audiences.join("、");
+      const previousPersonaId = item.personaTemplateId || "";
+      item.personaTemplateId = persona.templateId;
+      item.personaSnapshot = persona;
+      if (item.personaTemplateId && item.personaTemplateId !== previousPersonaId) {
+        const persona = personaCatalog.find(entry => entry.id === item.personaTemplateId);
+        if (persona) persona.usage += 1;
+      }
       item.chars = text.length;
       item.updated = new Intl.DateTimeFormat("zh-CN", { month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false }).format(new Date()).replaceAll("/", "-");
       clCloseEditModal();
@@ -9010,6 +9491,23 @@
     if (clEditModal) {
       clEditModal.addEventListener("click", function(e) {
         if (e.target === clEditModal) clCloseEditModal();
+        const modeButton = e.target.closest("[data-cl-audience-mode]");
+        if (modeButton) {
+          clSetEditAudienceMode(modeButton.dataset.clAudienceMode, modeButton.dataset.clAudienceMode === "template");
+          return;
+        }
+        if (e.target.closest("[data-cl-persona-trigger]")) clOpenEditPersonaTemplatePicker();
+        const audienceButton = e.target.closest("[data-cl-audience]");
+        if (audienceButton) audienceButton.classList.toggle("active");
+        const genderButton = e.target.closest("[data-cl-gender]");
+        if (genderButton) clSetEditSingleChoice("gender", genderButton.dataset.clGender);
+        const ageButton = e.target.closest("[data-cl-age]");
+        if (ageButton) {
+          clSetEditSingleChoice("age", ageButton.dataset.clAge);
+          clEditModal.querySelector("[data-cl-custom-age]").hidden = ageButton.dataset.clAge !== "custom";
+        }
+        const aiSuggest = e.target.closest("[data-cl-ai-suggest]");
+        if (aiSuggest) clApplyEditAiSuggestion(aiSuggest.dataset.clAiSuggest);
       });
       document.querySelectorAll("[data-close-cl-edit]").forEach(function(b) { b.addEventListener("click", clCloseEditModal); });
       document.getElementById("clEditSave")?.addEventListener("click", clSaveEditModal);
@@ -9022,17 +9520,37 @@
       });
     }
 
+    function clCloseActionMenus() {
+      document.querySelectorAll(".cl-ai-menu.show, .cl-more-menu.show").forEach(m => m.classList.remove("show"));
+      document.querySelectorAll(".cl-col-act.cl-menu-open").forEach(cell => cell.classList.remove("cl-menu-open"));
+    }
+
     function clToggleAIMenu(e) {
       e.stopPropagation();
-      document.querySelectorAll(".cl-ai-menu.show").forEach(m => m.classList.remove("show"));
       const menu = e.target.closest(".cl-ai-drop").querySelector(".cl-ai-menu");
-      menu.classList.toggle("show");
+      const shouldOpen = !menu.classList.contains("show");
+      clCloseActionMenus();
+      if (shouldOpen) {
+        menu.classList.add("show");
+        menu.closest(".cl-col-act")?.classList.add("cl-menu-open");
+      }
+    }
+
+    function clToggleMoreMenu(e) {
+      e.stopPropagation();
+      const menu = e.target.closest(".cl-more-drop").querySelector(".cl-more-menu");
+      const shouldOpen = !menu.classList.contains("show");
+      clCloseActionMenus();
+      if (shouldOpen) {
+        menu.classList.add("show");
+        menu.closest(".cl-col-act")?.classList.add("cl-menu-open");
+      }
     }
 
     function clAIAction(action, id) {
       const labels = {rewrite:"智能改写", clone:"爆款仿写", script:"智能脚本", remix:"智能混剪"};
       showToast('「' + (labels[action]||action) + '」已创建任务，跳转至 AI 创作...');
-      document.querySelectorAll(".cl-ai-menu.show").forEach(m => m.classList.remove("show"));
+      clCloseActionMenus();
       setTimeout(function() { document.querySelector('.nav-item[data-page="creation"]').click(); }, 600);
     }
 
@@ -9076,12 +9594,15 @@
       clRender(clData);
     })();
 
-    document.addEventListener("click", function() {
-      document.querySelectorAll(".cl-ai-menu.show").forEach(function(m) { m.classList.remove("show"); });
-    });
+    document.addEventListener("click", clCloseActionMenus);
     const clCreateModal = document.getElementById("clCreateModal");
     const clParseStatus = document.getElementById("clParseStatus");
     let clCreateSource = "manual";
+    const clCreateTextState = {
+      manual:{ text:"", parse:null },
+      library:{ text:"", parse:null },
+      upload:{ text:"", parse:null }
+    };
     const clVideoCopyMap = {
       "7553983811703193643":"你以为床垫看着干净就够了吗？实际走一遍才知道，藏在纤维深处的细小灰尘根本不是换床单能解决的。轻净 Pro 除螨仪拍打和吸尘同步进行，透明尘杯里吸出了什么，清洁结果当场就能看见。床垫、沙发和布艺都能用，尘杯还能拆下来清洗。想看完整清洁过程，点进商品看实测。",
       "7553983811703197228":"下班回家不想守在厨房，就把食材放进轻享空气炸锅 A8。可视窗口能直接看到上色情况，不用反复开盖，家庭容量一次就能做够。炸篮用完可以拆洗，今晚直播间还有配套赠品，具体优惠以页面展示为准。"
@@ -9090,6 +9611,12 @@
       "7553983811703193643":{ audience:"精致妈妈", gender:"女性", age:"24–30", pain:"床垫深处灰尘难以日常清理\n孩子接触织物后容易敏感", scenes:"宝宝家庭的床垫日常清洁\n布艺沙发与毛绒玩具清洁" },
       "7553983811703197228":{ audience:"新锐白领", gender:"不限", age:"24–30", pain:"下班后做饭时间不足\n传统烹饪需要反复看守", scenes:"工作日晚餐快速制作\n周末家庭小食制作" }
     };
+    const clCreateVideoFallback = [
+      { id:"7553983811703193643", source:"finished", title:"除螨仪结果冲击型主视频", channel:"历史投放", product:"轻净 Pro 除螨仪", duration:"00:32", origin:"千川素材", status:"已分析", updated:"08-04 14:20", tags:["结果前置","清洁演示"], auxiliary:"素材 ID 7553983811703193643", transcript:clVideoCopyMap["7553983811703193643"] },
+      { id:"7553983811703197228", source:"finished", title:"空气炸锅晚餐场景视频", channel:"历史投放", product:"轻享空气炸锅 A8", duration:"00:28", origin:"千川素材", status:"已分析", updated:"08-04 11:07", tags:["晚餐场景","效率卖点"], auxiliary:"素材 ID 7553983811703197228", transcript:clVideoCopyMap["7553983811703197228"] },
+      { id:"ref-clean-001", source:"external", title:"床褥清洁结果型参考视频", channel:"抖音", product:"未关联产品", duration:"00:36", origin:"外部参考", status:"已分析", updated:"08-03 18:30", tags:["痛点冲突","结果证明"], auxiliary:"拉片版本 V3", transcript:"床褥表面看着干净，深层问题却常常被忽略。先解决核心问题，再展示实际清洁结果，整个过程更有说服力。" },
+      { id:"ref-kitchen-002", source:"external", title:"一人食效率场景参考视频", channel:"抖音", product:"未关联产品", duration:"00:24", origin:"外部参考", status:"已分析", updated:"08-02 12:08", tags:["场景开场","节奏紧凑"], auxiliary:"拉片版本 V2", transcript:"下班回家时间有限，做饭最怕步骤复杂。用更简单的方式把晚餐安排好，日常才更轻松。" }
+    ];
 
     function setClAudienceChoice(group, value) {
       const host = clCreateModal.querySelector(`[data-cl-choice-group="${group}"]`);
@@ -9111,25 +9638,198 @@
       document.getElementById("clCreateScenes").value = "";
     }
 
-    function setClCreateSource(source) {
+    function setClCreatePersonaMode(mode, openTemplatePicker = false) {
+      const templateMode = mode === "template";
+      clCreateModal.dataset.personaMode = mode;
+      clCreateModal.querySelectorAll("[data-cl-create-persona-mode]").forEach(button => button.classList.toggle("active", button.dataset.clCreatePersonaMode === mode));
+      clCreateModal.querySelector("[data-cl-create-template-select]").hidden = !templateMode;
+      if (!templateMode) {
+        delete clCreateModal.dataset.personaTemplateId;
+        clCreateModal.querySelector("[data-cl-create-persona-selected]").textContent = "选择人群画像模板";
+        window.CreationPersonaPicker?.close();
+      } else if (openTemplatePicker) {
+        openClCreatePersonaTemplatePicker();
+      }
+    }
+
+    function setClCreatePersonaTemplate(id) {
+      const persona = personaCatalog.find(item => item.id === id);
+      const label = clCreateModal.querySelector("[data-cl-create-persona-selected]");
+      if (!persona) {
+        delete clCreateModal.dataset.personaTemplateId;
+        label.textContent = "选择人群画像模板";
+        return;
+      }
+      clCreateModal.dataset.personaTemplateId = persona.id;
+      label.textContent = persona.name;
+      setClAudienceChoice("audience", persona.audience || "");
+      setClAudienceChoice("gender", persona.gender || "不限");
+      const age = persona.age === "50+" ? "51+" : persona.age;
+      const standard = [...clCreateModal.querySelectorAll('[data-cl-choice-group="age"] .cl-audience-chip')].some(button => button.dataset.value === age);
+      setClAudienceChoice("age", standard ? age : "custom");
+      if (!standard) {
+        const [min, max] = String(persona.age || "").split(/[–-]/);
+        document.getElementById("clAgeMin").value = min || "";
+        document.getElementById("clAgeMax").value = max || "";
+      }
+      document.getElementById("clCreatePain").value = (persona.pain || []).join("\n");
+      document.getElementById("clCreateScenes").value = (persona.scenes || []).join("\n");
+    }
+
+    function openClCreatePersonaTemplatePicker() {
+      if (!window.CreationPersonaPicker) return showToast("人群模板选择器加载失败，请刷新页面后重试。");
+      const product = productCatalog[document.getElementById("clCreateProduct").value]?.name || "";
+      window.CreationPersonaPicker.open({
+        items:personaCatalog.map(persona => ({ ...persona, recommended:persona.product === product })),
+        selectedId:clCreateModal.dataset.personaTemplateId || "",
+        onConfirm(persona) { setClCreatePersonaTemplate(persona?.id || ""); }
+      });
+    }
+
+    function applyClCreateAiSuggestion(type) {
+      const product = productCatalog[document.getElementById("clCreateProduct").value]?.name || "产品";
+      const samples = type === "pain"
+        ? [[`担心${product}实际效果不稳定`, "不想为日常问题反复花时间"], ["希望一次解决核心问题", "更在意使用过程是否省心"]]
+        : [[`${product}的日常使用场景`, "需要快速处理问题的即时场景"], ["周末集中使用场景", "家人共同使用的生活场景"]];
+      const key = type === "pain" ? "painSuggestionIndex" : "sceneSuggestionIndex";
+      const index = Number(clCreateModal.dataset[key] || 0) % samples.length;
+      document.getElementById(type === "pain" ? "clCreatePain" : "clCreateScenes").value = samples[index].join("\n");
+      clCreateModal.dataset[key] = String(index + 1);
+    }
+
+    function getClCreateVideoItems() {
+      const catalog = typeof readReferenceVideoCatalog === "function" ? readReferenceVideoCatalog() : [];
+      const ids = new Set(catalog.map(item => item.id));
+      return [...catalog, ...clCreateVideoFallback.filter(item => !ids.has(item.id))];
+    }
+
+    function setClCreateProduct(productId, product = productCatalog[productId]) {
+      const input = document.getElementById("clCreateProduct");
+      const label = clCreateModal.querySelector("[data-cl-create-product-label]");
+      if (!input || !label) return;
+      input.value = productId || "";
+      label.textContent = product?.name || "选择产品";
+      label.classList.toggle("placeholder", !product?.name);
+    }
+
+    function openClCreateProductPicker() {
+      if (!window.CreationProductPicker) return showToast("产品选择器加载失败，请刷新页面后重试。");
+      window.CreationProductPicker.open({
+        items:Object.entries(productCatalog).map(([id, product]) => ({ id, ...product })),
+        selectedId:document.getElementById("clCreateProduct").value,
+        onConfirm(productId, product) {
+          setClCreateProduct(productId, product);
+        }
+      });
+    }
+
+    function getClCreateTextState(source = clCreateSource) {
+      return clCreateTextState[source] || (clCreateTextState[source] = { text:"", parse:null });
+    }
+
+    function storeClCreateText(source = clCreateSource) {
+      const field = document.getElementById("clCreateText");
+      if (field) getClCreateTextState(source).text = field.value;
+    }
+
+    function renderClCreateParseState(source = clCreateSource) {
+      const state = getClCreateTextState(source);
+      const parse = state.parse;
+      if (!parse) {
+        clParseStatus.hidden = true;
+        clParseStatus.classList.remove("is-parsing");
+        return;
+      }
+      clParseStatus.hidden = false;
+      clParseStatus.classList.toggle("is-parsing", parse.status === "parsing");
+      clParseStatus.querySelector("b").textContent = parse.status === "parsing" ? "" : "✓";
+      clParseStatus.querySelector("span").textContent = parse.message;
+    }
+
+    function startClCreateParse(source, label, text) {
+      const state = getClCreateTextState(source);
+      const parseToken = `${Date.now()}-${Math.random()}`;
+      state.text = "";
+      state.parseToken = parseToken;
+      state.parse = { status:"parsing", message:`正在解析“${label}”的口播文案…` };
+      if (clCreateSource === source) {
+        document.getElementById("clCreateText").value = "";
+        renderClCreateParseState(source);
+      }
+      window.setTimeout(() => {
+        if (state.parseToken !== parseToken) return;
+        state.text = text;
+        state.parse = { status:"done", message:`“${label}”口播识别完成，可继续修改后保存。` };
+        if (clCreateSource === source) {
+          document.getElementById("clCreateText").value = text;
+          renderClCreateParseState(source);
+        }
+        showToast("视频口播识别完成");
+      }, 700);
+    }
+
+    function applyClCreateVideo(video) {
+      if (!video) return;
+      const matchedProduct = Object.entries(productCatalog).find(([, product]) => product.name === video.product);
+      if (matchedProduct) setClCreateProduct(matchedProduct[0], matchedProduct[1]);
+      const audience = clVideoAudienceMap[video.id];
+      if (audience) {
+        setClAudienceChoice("audience", audience.audience);
+        setClAudienceChoice("gender", audience.gender);
+        setClAudienceChoice("age", audience.age);
+        document.getElementById("clCreatePain").value = audience.pain;
+        document.getElementById("clCreateScenes").value = audience.scenes;
+      }
+      setClCreatePersonaMode("manual");
+      const trigger = clCreateModal.querySelector("[data-cl-create-video-trigger-text]");
+      trigger.textContent = "重新选择视频";
+      const selected = clCreateModal.querySelector("[data-cl-create-selected-video]");
+      selected.hidden = false;
+      selected.innerHTML = `<strong>${escapeHtml(video.title || "已选视频")}</strong><span>${escapeHtml(video.source === "external" ? "外部参考视频" : "成片视频")} · ${escapeHtml(video.channel || "—")} · ${escapeHtml(video.duration || "—")}</span>`;
+      clCreateModal.dataset.selectedVideoId = video.id || "";
+      const state = getClCreateTextState("library");
+      state.videoId = video.id || "";
+      startClCreateParse("library", video.title || "已选视频", video.transcript || clVideoCopyMap[video.id] || "该视频已完成口播解析，请根据识别结果补充或调整文案内容。");
+    }
+
+    function openClCreateVideoPicker() {
+      if (!window.CreationVideoPicker) return showToast("视频选择器加载失败，请刷新页面后重试。");
+      window.CreationVideoPicker.open({
+        items:getClCreateVideoItems(),
+        selectedId:clCreateModal.dataset.selectedVideoId || "",
+        onConfirm(video) { applyClCreateVideo(video); }
+      });
+    }
+
+    function setClCreateSource(source, openVideoPicker = false) {
+      storeClCreateText(clCreateSource);
       clCreateSource = source;
       clCreateModal.querySelectorAll("[data-cl-create-source]").forEach(button => button.classList.toggle("active", button.dataset.clCreateSource === source));
       clCreateModal.querySelectorAll("[data-cl-create-panel]").forEach(panel => { panel.hidden = panel.dataset.clCreatePanel !== source; });
-      if (source === "manual") clParseStatus.hidden = true;
+      document.getElementById("clCreateText").value = getClCreateTextState(source).text;
+      renderClCreateParseState(source);
+      if (source === "library" && openVideoPicker) openClCreateVideoPicker();
     }
 
     function openClCreateModal() {
       clCreateModal.querySelectorAll("input:not([type=file]), textarea").forEach(field => { field.value = ""; });
-      document.getElementById("clCreateProduct").value = "";
-      clCreateModal.querySelectorAll("[data-cl-video-id]").forEach(item => item.classList.remove("active"));
-      clParseStatus.hidden = true;
+      Object.keys(clCreateTextState).forEach(source => { clCreateTextState[source] = { text:"", parse:null }; });
+      document.getElementById("clVideoUploadInput").value = "";
+      setClCreateProduct("");
+      delete clCreateModal.dataset.selectedVideoId;
+      const videoTrigger = clCreateModal.querySelector("[data-cl-create-video-trigger-text]");
+      if (videoTrigger) videoTrigger.textContent = "从视频库选择";
+      const selectedVideo = clCreateModal.querySelector("[data-cl-create-selected-video]");
+      if (selectedVideo) { selectedVideo.hidden = true; selectedVideo.innerHTML = ""; }
+      renderClCreateParseState("manual");
       resetClAudienceFields();
+      setClCreatePersonaMode("manual");
       setClCreateSource("manual");
       clCreateModal.classList.add("show");
       setTimeout(() => {
         const body = clCreateModal.querySelector(".modal-body");
         if (body) body.scrollTop = 0;
-        document.getElementById("clCreateProduct")?.focus();
+        clCreateModal.querySelector("[data-cl-create-product-picker]")?.focus();
       }, 0);
     }
 
@@ -9138,42 +9838,33 @@
     clCreateModal?.addEventListener("click", event => {
       if (event.target === clCreateModal) return clCreateModal.classList.remove("show");
       const source = event.target.closest("[data-cl-create-source]");
-      if (source) return setClCreateSource(source.dataset.clCreateSource);
+      if (source) return setClCreateSource(source.dataset.clCreateSource, source.dataset.clCreateSource === "library" && !clCreateModal.dataset.selectedVideoId);
+      if (event.target.closest("[data-cl-create-video-picker]")) return openClCreateVideoPicker();
+      if (event.target.closest("[data-cl-create-product-picker]")) return openClCreateProductPicker();
+      const personaMode = event.target.closest("[data-cl-create-persona-mode]");
+      if (personaMode) return setClCreatePersonaMode(personaMode.dataset.clCreatePersonaMode, personaMode.dataset.clCreatePersonaMode === "template");
+      if (event.target.closest("[data-cl-create-persona-trigger]")) return openClCreatePersonaTemplatePicker();
+      const aiSuggest = event.target.closest("[data-cl-create-ai-suggest]");
+      if (aiSuggest) return applyClCreateAiSuggestion(aiSuggest.dataset.clCreateAiSuggest);
       const choice = event.target.closest(".cl-audience-chip");
       if (choice) {
         const group = choice.closest("[data-cl-choice-group]")?.dataset.clChoiceGroup;
         if (group) setClAudienceChoice(group, choice.dataset.value);
         return;
       }
-      const video = event.target.closest("[data-cl-video-id]");
-      if (video) {
-        clCreateModal.querySelectorAll("[data-cl-video-id]").forEach(item => item.classList.toggle("active", item === video));
-        document.getElementById("clCreateProduct").value = video.dataset.product;
-        document.getElementById("clCreateText").value = clVideoCopyMap[video.dataset.clVideoId] || "";
-        const audience = clVideoAudienceMap[video.dataset.clVideoId];
-        if (audience) {
-          setClAudienceChoice("audience", audience.audience);
-          setClAudienceChoice("gender", audience.gender);
-          setClAudienceChoice("age", audience.age);
-          document.getElementById("clCreatePain").value = audience.pain;
-          document.getElementById("clCreateScenes").value = audience.scenes;
-        }
-        clParseStatus.hidden = false;
-        clParseStatus.querySelector("span").textContent = `素材 ${video.dataset.clVideoId} 口播识别完成，可继续修改后保存。`;
-        showToast("视频口播识别完成");
-      }
     });
     document.getElementById("clVideoUploadTrigger")?.addEventListener("click", () => document.getElementById("clVideoUploadInput").click());
     document.getElementById("clVideoUploadInput")?.addEventListener("change", event => {
       const file = event.target.files?.[0];
       if (!file) return;
-      document.getElementById("clCreateText").value = "先别只看表面，真正影响使用体验的是核心问题有没有被解决。这个产品通过实际操作完成主要处理，并把结果直接展示出来；日常使用步骤更少，后续整理也更方便。想看完整使用过程，可以继续查看产品演示。";
-      clParseStatus.hidden = false;
-      clParseStatus.querySelector("span").textContent = `“${file.name}”口播识别完成；请补充关联产品并确认识别文案。`;
-      showToast("视频上传并识别完成");
+      startClCreateParse("upload", file.name, "先别只看表面，真正影响使用体验的是核心问题有没有被解决。这个产品通过实际操作完成主要处理，并把结果直接展示出来；日常使用步骤更少，后续整理也更方便。想看完整使用过程，可以继续查看产品演示。");
+    });
+    document.getElementById("clCreateText")?.addEventListener("input", event => {
+      getClCreateTextState().text = event.target.value;
     });
     document.getElementById("clCreateSave")?.addEventListener("click", () => {
-      const product = document.getElementById("clCreateProduct").value;
+      const productId = document.getElementById("clCreateProduct").value;
+      const product = productCatalog[productId]?.name || "";
       const audience = getClAudienceChoice("audience");
       const gender = getClAudienceChoice("gender");
       let age = getClAudienceChoice("age");
@@ -9187,12 +9878,19 @@
       const pain = document.getElementById("clCreatePain").value.trim();
       const scenes = document.getElementById("clCreateScenes").value.trim();
       const text = document.getElementById("clCreateText").value.trim();
-      if (!product) return showToast("请选择关联产品");
+      if (getClCreateTextState().parse?.status === "parsing") return showToast("视频口播正在解析，请完成后再保存");
+      if (!productId) return showToast("请选择关联产品");
       if (!audience || !gender || !age) return showToast("请完整选择目标人群、性别和年龄");
+      if (clCreateModal.dataset.personaMode === "template" && !clCreateModal.dataset.personaTemplateId) return showToast("请从模板库选择人群画像");
       if (!text) return showToast("请填写或识别文案内容");
       const chars = text.replace(/\s/g, "").length;
       const now = new Intl.DateTimeFormat("zh-CN", { month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false }).format(new Date()).replaceAll("/", "-");
-      clData.unshift({ id:`cl-${Date.now()}`, text, product, crowd, pain, scenes, structure:[{t:"hook",l:"钩子"},{t:"sell",l:"卖点"},{t:"cta",l:"行动引导"}], chars, duration:Math.max(1,Math.round(chars/4)), updated:now, source:clCreateSource === "manual" ? "手工新增" : "视频识别" });
+      const personaSnapshot = { source:clCreateModal.dataset.personaMode || "manual", templateId:clCreateModal.dataset.personaTemplateId || "", audiences:[audience], gender, age, pain:pain.split("\n").map(value => value.trim()).filter(Boolean), scenes:scenes.split("\n").map(value => value.trim()).filter(Boolean) };
+      if (personaSnapshot.templateId) {
+        const persona = personaCatalog.find(item => item.id === personaSnapshot.templateId);
+        if (persona) persona.usage += 1;
+      }
+      clData.unshift({ id:`cl-${Date.now()}`, text, product, crowd, pain, scenes, personaTemplateId:personaSnapshot.templateId, personaSnapshot, structure:[{t:"hook",l:"钩子"},{t:"sell",l:"卖点"},{t:"cta",l:"行动引导"}], chars, duration:Math.max(1,Math.round(chars/4)), updated:now, source:clCreateSource === "manual" ? "手工新增" : "视频识别" });
       clCreateModal.classList.remove("show");
       document.getElementById("clSourceFilter").value = "all";
       document.getElementById("clSearchInput").value = "";

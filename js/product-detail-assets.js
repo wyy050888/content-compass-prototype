@@ -117,13 +117,9 @@
         {id:'tc1', name:'清洁电器 TVC 画板模板', node:'18 个节点', updated:'08/08 10:20'},
         {id:'tc2', name:'结果证明短视频画板', node:'12 个节点', updated:'08/06 16:08'}
       ],
-      'copy-structure':[
-        {id:'ts1', name:'结果冲击型 30 秒口播结构', source:'千川学习', scene:'清洁电器', updated:'08/08 11:30'},
-        {id:'ts2', name:'痛点钩子＋演示证明', source:'自建', scene:'家居清洁', updated:'08/07 18:40'}
-      ],
-      'video-structure':[
-        {id:'tv1', name:'实拍演示型爆款视频结构', duration:'30s', shots:'7个分镜', updated:'08/08 15:10'},
-        {id:'tv2', name:'多场景快切结构', duration:'20s', shots:'6个分镜', updated:'08/06 17:22'}
+      'content-structure':[
+        {id:'ts1', name:'结果前置·实拍证明型', source:'千川学习', formula:'结果钩子 → 痛点解释 → 产品演示 → 效果证明 → 行动引导', duration:'30–45 秒', stages:'5 个阶段', updated:'08/10 16:42'},
+        {id:'ts2', name:'反差开场·实测证明型', source:'自建', formula:'反差开场 → 过程实测 → 结果证明 → 行动引导', duration:'15–30 秒', stages:'4 个阶段', updated:'08/11 09:16'}
       ]
     }
   };
@@ -149,7 +145,7 @@
 
   function renderCopy() {
     const rows=filtered(data.copy,['text','source','crowd','structure']);
-    $('#pdaCopyContent').innerHTML=rows.length?`<div class="pda-table-wrap"><table class="pda-table"><colgroup><col style="width:31%"><col style="width:9%"><col style="width:12%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:10%"><col style="width:13%"></colgroup><thead><tr><th>文案详情</th><th>来源</th><th>产品</th><th>人群</th><th>结构</th><th>字数</th><th>更新时间</th><th>操作</th></tr></thead><tbody>${rows.map(x=>`<tr><td><div class="pda-clamp" title="${esc(x.text)}">${esc(x.text)}</div></td><td>${esc(x.source)}</td><td><strong>${esc(x.product)}</strong></td><td>${esc(x.crowd)}</td><td>${esc(x.structure)}</td><td>${x.chars}</td><td>${x.updated}</td><td><div class="pda-actions"><button class="pda-link" data-pda-action="edit-copy" data-id="${x.id}">编辑</button><span class="pda-ai-wrap"><button class="pda-link" data-pda-menu-toggle>AI ▾</button><span class="pda-menu" hidden>${['智能改写','爆款仿写','智能脚本','智能混剪'].map(a=>`<button data-pda-action="ai" data-value="${a}" data-id="${x.id}">${a}</button>`).join('')}</span></span><button class="pda-link" data-pda-action="delete" data-kind="copy" data-id="${x.id}">删除</button></div></td></tr>`).join('')}</tbody></table></div>`:empty('关联文案');
+    $('#pdaCopyContent').innerHTML=rows.length?`<div class="pda-table-wrap"><table class="pda-table"><colgroup><col style="width:25%"><col style="width:8%"><col style="width:10%"><col style="width:8%"><col style="width:9%"><col style="width:5%"><col style="width:10%"><col style="width:10%"><col style="width:15%"></colgroup><thead><tr><th>文案详情</th><th>来源</th><th>产品</th><th>人群</th><th>结构</th><th>字数</th><th>创建</th><th>最近修改</th><th>操作</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td><div class="pda-clamp" title="${esc(x.text)}">${esc(x.text)}</div></td><td>${esc(x.source)}</td><td><strong>${esc(x.product)}</strong></td><td>${esc(x.crowd)}</td><td>${esc(x.structure)}</td><td>${x.chars}</td><td>嗡大发<br><small>08/04 14:20</small></td><td>${i%2?'李四':'嗡大发'}<br><small>${x.updated}</small></td><td><div class="pda-actions"><button class="pda-link" data-pda-action="history" data-kind="copy" data-id="${x.id}">查看变更</button><button class="pda-link" data-pda-action="edit-copy" data-id="${x.id}">编辑</button><span class="pda-ai-wrap"><button class="pda-link" data-pda-menu-toggle>AI ▾</button><span class="pda-menu" hidden>${['智能改写','爆款仿写','智能脚本','智能混剪'].map(a=>`<button data-pda-action="ai" data-value="${a}" data-id="${x.id}">${a}</button>`).join('')}</span></span><button class="pda-link" data-pda-action="delete" data-kind="copy" data-id="${x.id}">删除</button></div></td></tr>`).join('')}</tbody></table></div>`:empty('关联文案');
   }
   function renderImages() {
     const items=filtered(data.image.filter(x=>x.linked),['name','type','desc']);
@@ -157,7 +153,7 @@
   }
   function renderScripts() {
     const rows=filtered(data.script,['name','copy','strategy','material']);
-    $('#pdaScriptContent').innerHTML=rows.length?`<div class="pda-table-wrap"><table class="pda-table"><colgroup><col style="width:21%"><col style="width:14%"><col style="width:25%"><col style="width:14%"><col style="width:12%"><col style="width:12%"><col style="width:16%"></colgroup><thead><tr><th>脚本名称</th><th>对应产品</th><th>生成文案</th><th>规格</th><th>素材策略</th><th>最近更新</th><th>操作</th></tr></thead><tbody>${rows.map(x=>`<tr><td><strong>${esc(x.name)}</strong></td><td>${esc(x.product)}</td><td><div class="pda-clamp" title="${esc(x.copy)}">${esc(x.copy)}</div></td><td>${esc(x.spec)}</td><td>${esc(x.strategy)}</td><td>${x.updated}</td><td><div class="pda-actions">${['查看','编辑','复制','下载','删除'].map(a=>`<button class="pda-link" data-pda-action="script-${a}" data-id="${x.id}">${a}</button>`).join('')}</div></td></tr>`).join('')}</tbody></table></div>`:empty('关联脚本');
+    $('#pdaScriptContent').innerHTML=rows.length?`<div class="pda-table-wrap"><table class="pda-table"><colgroup><col style="width:17%"><col style="width:11%"><col style="width:20%"><col style="width:11%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:12%"></colgroup><thead><tr><th>脚本名称</th><th>对应产品</th><th>生成文案</th><th>规格</th><th>素材策略</th><th>创建</th><th>最近修改</th><th>操作</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td><strong>${esc(x.name)}</strong></td><td>${esc(x.product)}</td><td><div class="pda-clamp" title="${esc(x.copy)}">${esc(x.copy)}</div></td><td>${esc(x.spec)}</td><td>${esc(x.strategy)}</td><td>嗡大发<br><small>08/04 14:20</small></td><td>${i%2?'李四':'嗡大发'}<br><small>${x.updated}</small></td><td><div class="pda-actions"><button class="pda-link" data-pda-action="history" data-kind="script" data-id="${x.id}">查看变更</button>${['查看','编辑','复制','下载','删除'].map(a=>`<button class="pda-link" data-pda-action="script-${a}" data-id="${x.id}">${a}</button>`).join('')}</div></td></tr>`).join('')}</tbody></table></div>`:empty('关联脚本');
   }
 
   function mediaPage(kind) { return kind === 'material' ? 'creation-videos' : kind === 'video' ? 'finished-videos' : 'reference-videos'; }
@@ -252,13 +248,12 @@
   }
 
   function renderTemplates() {
-    const type=state.template, items=filtered(data.template[type],['name','agent','text','scene','source']);
+    const type=state.template, items=filtered(data.template[type],['name','agent','text','scene','source','formula','duration']);
     let html='';
     if(type==='prompt') html=`<div class="pda-template-grid">${items.map(x=>`<article class="pda-template-card"><div class="pda-tags"><span class="pda-tag">${esc(x.agent)}</span>${x.isDefault?'<span class="pda-tag">默认</span>':''}</div><h4>${esc(x.name)}</h4><p>${esc(x.text)}</p><div class="pda-template-actions"><button class="pda-link" data-pda-action="prompt-default" data-id="${x.id}">设为默认</button><button class="pda-link" data-pda-action="use-image" data-id="${x.id}">用于生图</button><button class="pda-link" data-pda-action="template-edit" data-kind="prompt" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="template-delete" data-kind="prompt" data-id="${x.id}">删除</button></div></article>`).join('')}</div>`;
     if(type==='persona') html=tableTemplate(['画像名称','年龄','核心场景','核心痛点','更新时间','操作'],items,x=>`<td><strong>${esc(x.name)}</strong></td><td>${x.age}</td><td>${esc(x.scene)}</td><td>${esc(x.pain)}</td><td>${x.updated}</td><td><div class="pda-actions"><button class="pda-link" data-pda-action="template-edit" data-kind="persona" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="history" data-kind="persona" data-id="${x.id}">编辑历史</button><button class="pda-link" data-pda-action="template-copy" data-kind="persona" data-id="${x.id}">复制</button><button class="pda-link" data-pda-action="template-delete" data-kind="persona" data-id="${x.id}">删除</button></div></td>`);
     if(type==='canvas') html=`<div class="pda-template-grid">${items.map(x=>`<article class="pda-template-card" data-pda-canvas="${x.id}"><div class="pda-canvas-thumb">点击预览画板</div><h4>${esc(x.name)}</h4><div class="pda-meta"><span>${x.node}</span><span>${x.updated}</span></div></article>`).join('')}</div>`;
-    if(type==='copy-structure') html=tableTemplate(['结构名称','来源','适用场景','更新时间','操作'],items,x=>`<td><strong>${esc(x.name)}</strong></td><td>${x.source}</td><td>${esc(x.scene)}</td><td>${x.updated}</td><td><div class="pda-actions"><button class="pda-link" data-pda-action="history" data-kind="copy-structure" data-id="${x.id}">查看详情</button>${x.source==='千川学习'?`<button class="pda-link" data-pda-action="template-copy" data-kind="copy-structure" data-id="${x.id}">复制为自建</button>`:`<button class="pda-link" data-pda-action="template-edit" data-kind="copy-structure" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="template-copy" data-kind="copy-structure" data-id="${x.id}">复制</button><button class="pda-link" data-pda-action="template-delete" data-kind="copy-structure" data-id="${x.id}">删除</button>`}</div></td>`);
-    if(type==='video-structure') html=tableTemplate(['结构名称','时长','分镜数','更新时间','操作'],items,x=>`<td><strong>${esc(x.name)}</strong></td><td>${x.duration}</td><td>${x.shots}</td><td>${x.updated}</td><td><div class="pda-actions"><button class="pda-link" data-pda-action="template-edit" data-kind="video-structure" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="template-delete" data-kind="video-structure" data-id="${x.id}">删除</button></div></td>`);
+    if(type==='content-structure') html=tableTemplate(['结构名称','来源','内容公式','适用时长','结构阶段','更新时间','操作'],items,x=>`<td><strong>${esc(x.name)}</strong></td><td>${x.source}</td><td>${esc(x.formula)}</td><td>${x.duration}</td><td>${x.stages}</td><td>${x.updated}</td><td><div class="pda-actions"><button class="pda-link" data-pda-action="history" data-kind="content-structure" data-id="${x.id}">查看详情</button>${x.source==='自建'?`<button class="pda-link" data-pda-action="template-edit" data-kind="content-structure" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="template-delete" data-kind="content-structure" data-id="${x.id}">删除</button>`:''}</div></td>`);
     $('#pdaTemplateContent').innerHTML=items.length?html:empty('模板');
   }
   function tableTemplate(head,items,row){return `<div class="pda-table-wrap"><table class="pda-table"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${items.map(x=>`<tr>${row(x)}</tr>`).join('')}</tbody></table></div>`}
@@ -443,8 +438,8 @@
       fields=field('千川素材 ID', current, 'qianchuan', '请输入一个千川素材 ID');
     }
     if(mode==='edit-copy') fields=area('文案内容',item.text,'text');
-    if(mode==='template-edit') fields=field('名称',item.name,'name')+area('内容',item.text||item.pain||item.scene||'', 'text');
-    if(mode==='history') fields=`<div class="pda-history"><b>${esc(item.name)}</b><p>当前版本:V3 最近更新:${esc(item.updated||'08/08 12:00')}</p><p>V2 优化结构字段与适用场景</p><p>V1 创建资产</p></div>`;
+    if(mode==='template-edit') fields=field('名称',item.name,'name')+(item.formula?area('内容公式',item.formula,'formula')+field('适用时长',item.duration||'30–45 秒','duration'):area('内容',item.text||item.pain||item.scene||'', 'text'));
+    if(mode==='history') fields=item.formula?`<div class="pda-history"><b>${esc(item.name)}</b><p>来源：${esc(item.source||'自建')} · 建议时长：${esc(item.duration||'—')} · ${esc(item.stages||'')}</p><p>内容公式：${esc(item.formula)}</p><p>完整阶段要求请在模板库「爆款内容结构」中查看。</p></div>`:`<div class="pda-history"><b>${esc(item.name)}</b><p>当前版本:V3 最近更新:${esc(item.updated||'08/08 12:00')}</p><p>V2 优化结构字段与适用场景</p><p>V1 创建资产</p></div>`;
     $('#pdaEditFields').innerHTML=fields;$('#pdaEditForm').querySelector('button[type="submit"]').hidden=mode==='history';open('pdaEditModal')}
   function field(label,value,name,placeholder=''){return `<div class="pda-field"><label>${label}</label><input name="${name}" value="${esc(value)}" placeholder="${placeholder}" required></div>`}
   function area(label,value,name){return `<div class="pda-field"><label>${label}</label><textarea name="${name}" required>${esc(value)}</textarea></div>`}

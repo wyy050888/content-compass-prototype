@@ -13,7 +13,7 @@
 .sl-table tbody tr { transition:background .15s; }
 .sl-table tbody tr:hover { background:#fcfbff; }
 .sl-table tbody tr:last-child td { border-bottom:0; }
-.sl-table th:nth-child(1) { width:175px; }.sl-table th:nth-child(2) { width:118px; }.sl-table th:nth-child(3) { width:220px; }.sl-table th:nth-child(4) { width:104px; }.sl-table th:nth-child(5) { width:108px; }.sl-table th:nth-child(6) { width:116px; }.sl-table th:nth-child(7) { width:155px; }
+.sl-table th:nth-child(1){width:14%}.sl-table th:nth-child(2){width:10%}.sl-table th:nth-child(3){width:18%}.sl-table th:nth-child(4){width:9%}.sl-table th:nth-child(5){width:10%}.sl-table th:nth-child(6){width:10%}.sl-table th:nth-child(7){width:11%}.sl-table th:nth-child(8){width:18%}
 .sl-name { display:block; overflow:hidden; color:#302a39; font-size:13px; font-weight:650; line-height:20px; text-overflow:ellipsis; white-space:nowrap; }
 .sl-product { display:inline-flex; align-items:center; gap:6px; min-width:0; }.sl-product::before { width:18px; height:18px; border-radius:6px; background:linear-gradient(145deg,#765bea,#b18ee3); content:""; }.sl-product span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .sl-source { position:relative; display:block; overflow:hidden; color:#756d7f; line-height:20px; text-overflow:ellipsis; white-space:nowrap; cursor:default; }

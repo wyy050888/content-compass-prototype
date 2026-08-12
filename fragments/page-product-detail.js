@@ -7,9 +7,18 @@
             <div class="detail-product-image"><div class="product-visual"></div></div>
             <div class="product-detail-summary">
               <h1 id="pageDetailName">轻净 Pro 除螨仪</h1>
-              <div class="product-summary-line"><span class="summary-chip" id="pageDetailBrand">轻净</span><span class="summary-chip" id="pageDetailCategory">清洁电器</span><strong class="summary-price" id="pageDetailPrice">¥399</strong><span>最近更新：今天 10:26</span></div>
+              <div class="product-summary-line"><span class="summary-chip" id="pageDetailBrand">轻净</span><span class="summary-chip" id="pageDetailCategory">清洁电器</span><strong class="summary-price" id="pageDetailPrice">¥399</strong><span class="summary-audit">创建：嗡大发 · 08/01 10:00 <i class="audit-sep">｜</i> 最近修改：嗡大发 · 08/11 10:26</span></div>
             </div>
-            <div class="product-detail-actions"><button class="ghost-btn danger-btn" type="button" data-delete-current-product>删除产品</button><div class="product-creation-picker" id="productCreationPicker"><button class="primary-btn" type="button" id="productCreationTrigger">用此产品创作⌄</button><div class="product-creation-options"><button type="button" data-product-agent="original">智能文案</button><button type="button" data-product-agent="copy">爆款文案仿写</button><button type="button" data-product-agent="image-main">商品主图</button><button type="button" data-product-agent="image-detail">商品详情页</button><button type="button" data-product-agent="script">智能脚本</button><button type="button" data-product-agent="mix">智能混剪</button></div></div></div>
+            <div class="product-detail-actions">
+              <div class="product-detail-actions-primary">
+                <div class="product-creation-picker" id="productCreationPicker"><button class="primary-btn" type="button" id="productCreationTrigger">用此产品创作 ⌄</button><div class="product-creation-options"><button type="button" data-product-agent="original">智能文案</button><button type="button" data-product-agent="copy">爆款文案仿写</button><button type="button" data-product-agent="image-main">商品主图</button><button type="button" data-product-agent="image-detail">商品详情页</button><button type="button" data-product-agent="script">智能脚本</button><button type="button" data-product-agent="mix">智能混剪</button></div></div>
+              </div>
+              <div class="product-detail-actions-secondary">
+                <button class="link-btn" type="button" data-asset-history="产品" data-asset-title="轻净 Pro 除螨仪">查看变更</button>
+                <span class="action-divider" aria-hidden="true"></span>
+                <button class="link-btn danger-link" type="button" data-delete-current-product>删除产品</button>
+              </div>
+            </div>
           </section>
 
           <div class="product-detail-layout">
@@ -90,8 +99,7 @@
                   <button class="active" type="button" data-pda-template="prompt">提示词模板</button>
                   <button type="button" data-pda-template="persona">人群画像</button>
                   <button type="button" data-pda-template="canvas">无限画板模板</button>
-                  <button type="button" data-pda-template="copy-structure">爆款文案结构</button>
-                  <button type="button" data-pda-template="video-structure">爆款视频结构</button>
+                  <button type="button" data-pda-template="content-structure">爆款内容结构</button>
                 </div>
                 <div id="pdaTemplateContent"></div>
               </div>

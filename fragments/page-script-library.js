@@ -12,7 +12,7 @@
         </div>
         <div class="sl-table-scroll">
           <table class="sl-table">
-            <thead><tr><th>脚本名称</th><th>对应产品</th><th>生成文案</th><th>规格</th><th>素材策略</th><th>最近更新</th><th>操作</th></tr></thead>
+            <thead><tr><th>脚本名称</th><th>对应产品</th><th>生成文案</th><th>规格</th><th>素材策略</th><th>创建</th><th>最近修改</th><th>操作</th></tr></thead>
             <tbody id="slTbody"></tbody>
           </table>
           <div class="sl-empty" id="slEmpty" hidden>暂无匹配脚本</div>

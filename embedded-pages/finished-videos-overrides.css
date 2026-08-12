@@ -1,0 +1,11 @@
+/* 历史记录列表：HTML 实际只有 2 个子元素（div + p），无 icon span；
+   因此把 grid 列数从 3 列改为 2 列，移除多余的 42px 列。 */
+.fv-history-item { grid-template-columns: 1fr; align-items: stretch; gap: 8px; padding: 12px 14px; }
+.fv-history-item > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.fv-history-item b { font-size: 13px; font-weight: 600; color: #1a1d2a; white-space: nowrap; }
+.fv-history-item small { color: #8e93a1; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+.fv-history-item p { display: flex; align-items: center; gap: 8px; margin: 0; color: #6b7180; flex-wrap: wrap; line-height: 1.5; }
+.fv-history-item em,
+.fv-history-item strong { padding: 5px 9px; border-radius: 6px; font-size: 12px; font-style: normal; font-weight: 500; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fv-history-item em { background: #f5f6f9; color: #8e93a1; }
+.fv-history-item strong { background: #efedff; color: #5f52dc; }

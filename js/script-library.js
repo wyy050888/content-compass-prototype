@@ -4,7 +4,11 @@
   const $ = (selector, scope = root) => scope.querySelector(selector);
   const escapeHtml = value => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" }[char]));
   const clone = value => JSON.parse(JSON.stringify(value));
-  const now = () => "刚刚";
+  const now = () => {
+    const d = new Date();
+    const pad = value => String(value).padStart(2, "0");
+    return `${d.getFullYear() === 2026 ? "" : `${d.getFullYear()}/`}${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
 
   const baseRows = (mode = "depend") => [
     { id:1, time:"00—03s", voice:"刚换的床单，也能吸出一杯脏东西。", shotType:"特写", cameraMove:"固定", visual:"透明尘杯脏污特写，0.8 秒后切换至整洁床面，形成结果反差。", material:"M-CL-101 · 2s", videoPrompt:"透明尘杯脏污特写，毛发碎屑清晰可见，自然光，竖屏 9:16，固定镜头，3 秒。" },
@@ -14,10 +18,10 @@
   ].map(row => ({ ...row, material: mode === "depend" ? row.material : "" }));
 
   let scripts = [
-    { id:"sl-001", name:"轻净 Pro 除螨仪_脚本_20260807", product:"轻净 Pro 除螨仪", source:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。", sourceFull:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。轻净 Pro 边拍边吸，脏东西直接进尘杯，用完还能拆下水洗。", duration:60, ratio:"9:16", materialMode:"depend", materialStatus:"8/8 已匹配", updated:"今天 14:32", rows:baseRows("depend") },
-    { id:"sl-002", name:"轻净 Pro 除螨仪_脚本_20260806", product:"轻净 Pro 除螨仪", source:"床单刚换一周，第一遍照样能吸出碎屑和毛发。", sourceFull:"床单刚换一周，第一遍照样能吸出碎屑和毛发。床垫深处的脏东西，普通清理根本触达不到。轻净 Pro 拍打吸尘同步完成，尘杯可水洗。", duration:30, ratio:"9:16", materialMode:"free", materialStatus:"已生成提示词", updated:"昨天 18:16", rows:baseRows("free") },
-    { id:"sl-003", name:"净味空气炸锅_快手晚餐脚本", product:"净味空气炸锅", source:"下班回家不想洗一堆锅，晚饭就用这一台解决。", sourceFull:"下班回家不想洗一堆锅，晚饭就用这一台解决。食材放进去，定好时间，外酥里嫩的一餐就能直接上桌。", duration:45, ratio:"9:16", materialMode:"depend", materialStatus:"6/6 已匹配", updated:"2026-08-05 10:20", rows:baseRows("depend") },
-    { id:"sl-004", name:"清洁洗地机_夏季清爽脚本", product:"清洁洗地机", source:"地上看着干净，拖一遍才知道脏东西有多少。", sourceFull:"地上看着干净，拖一遍才知道脏东西有多少。清洁洗地机洗拖同步，把日常地面清洁变成一件更省心的事。", duration:30, ratio:"16:9", materialMode:"free", materialStatus:"已生成提示词", updated:"2026-08-03 16:08", rows:baseRows("free") }
+    { id:"sl-001", name:"轻净 Pro 除螨仪_脚本_20260807", product:"轻净 Pro 除螨仪", source:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。", sourceFull:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。轻净 Pro 边拍边吸，脏东西直接进尘杯，用完还能拆下水洗。", duration:60, ratio:"9:16", materialMode:"depend", materialStatus:"8/8 已匹配", updated:"08/11 14:32", rows:baseRows("depend") },
+    { id:"sl-002", name:"轻净 Pro 除螨仪_脚本_20260806", product:"轻净 Pro 除螨仪", source:"床单刚换一周，第一遍照样能吸出碎屑和毛发。", sourceFull:"床单刚换一周，第一遍照样能吸出碎屑和毛发。床垫深处的脏东西，普通清理根本触达不到。轻净 Pro 拍打吸尘同步完成，尘杯可水洗。", duration:30, ratio:"9:16", materialMode:"free", materialStatus:"已生成提示词", updated:"08/10 18:16", rows:baseRows("free") },
+    { id:"sl-003", name:"净味空气炸锅_快手晚餐脚本", product:"净味空气炸锅", source:"下班回家不想洗一堆锅，晚饭就用这一台解决。", sourceFull:"下班回家不想洗一堆锅，晚饭就用这一台解决。食材放进去，定好时间，外酥里嫩的一餐就能直接上桌。", duration:45, ratio:"9:16", materialMode:"depend", materialStatus:"6/6 已匹配", updated:"08/05 10:20", rows:baseRows("depend") },
+    { id:"sl-004", name:"清洁洗地机_夏季清爽脚本", product:"清洁洗地机", source:"地上看着干净，拖一遍才知道脏东西有多少。", sourceFull:"地上看着干净，拖一遍才知道脏东西，清洁洗地机洗拖同步，把日常地面清洁变成一件更省心的事。", duration:30, ratio:"16:9", materialMode:"free", materialStatus:"已生成提示词", updated:"08/03 16:08", rows:baseRows("free") }
   ];
 
   const modal = (title, subtitle, body, footer = "", small = false) => {
@@ -53,19 +57,21 @@
       return (!keyword || haystack.includes(keyword)) && (mode === "all" || script.materialMode === mode);
     });
     const tbody = $("#slTbody");
-    tbody.innerHTML = list.map(script => `<tr data-script-id="${escapeHtml(script.id)}">
+    tbody.innerHTML = list.map((script, index) => `<tr data-script-id="${escapeHtml(script.id)}">
       <td><span class="sl-name">${escapeHtml(script.name)}</span></td>
       <td><span class="sl-product"><span>${escapeHtml(script.product)}</span></span></td>
       <td><span class="sl-source" data-full="${escapeHtml(script.sourceFull)}">${escapeHtml(script.source)}</span></td>
       <td><span class="sl-spec">${escapeHtml(specs(script))}</span></td>
       <td><span class="sl-chip ${script.materialMode}">${modeText(script.materialMode)}</span></td>
-      <td><span class="sl-time">${escapeHtml(script.updated)}</span></td>
-      <td><div class="sl-actions"><button data-sl-action="view">查看</button><button data-sl-action="edit">编辑</button><button data-sl-action="copy">复制</button><button data-sl-action="download">下载</button><button class="danger" data-sl-action="delete">删除</button></div></td>
+      <td class="asset-audit-cell"><b>${index % 2 ? '李四' : '嗡大发'}</b><small>${index % 2 ? '08/03 11:07' : '08/04 14:20'}</small></td>
+      <td class="asset-audit-cell"><b>${index % 2 ? '李四' : '嗡大发'}</b><small>${escapeHtml(script.updated)}</small></td>
+      <td><div class="sl-actions"><button data-sl-action="view">查看</button><button data-sl-action="edit">编辑</button><button data-sl-action="history">查看变更</button><button data-sl-action="copy">复制</button><button data-sl-action="download">下载</button><button class="danger" data-sl-action="delete">删除</button></div></td>
     </tr>`).join("");
     $("#slEmpty").hidden = Boolean(list.length);
     $("#slResultCount").textContent = `共 ${list.length} 条脚本`;
     tbody.querySelectorAll("[data-sl-action]").forEach(button => button.addEventListener("click", () => {
       const script = scripts.find(item => item.id === button.closest("tr").dataset.scriptId);
+      if (button.dataset.slAction === 'history') return window.AssetAudit?.showHistory('脚本', script.name);
       ({ view:openView, edit:openEdit, copy:openCopy, download:downloadScript, delete:confirmDelete })[button.dataset.slAction](script);
     }));
   }

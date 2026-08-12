@@ -3,7 +3,7 @@
       <section class="page" id="page-brand-detail">
         <div class="brand-detail-page">
           <button class="ghost-btn product-detail-back" type="button" data-back-brands>← 返回品牌库</button>
-          <section class="brand-detail-banner"><div class="brand-detail-logo" id="brandDetailLogo">轻</div><div class="brand-detail-summary"><h1 id="brandDetailName">轻净</h1><p id="brandDetailIntro">面向精致家庭的专业清洁电器品牌，用可验证的清洁效果降低家庭清洁焦虑。</p></div><div class="brand-detail-actions"><button class="ghost-btn danger-btn" type="button" data-delete-current-brand>删除品牌</button></div></section>
+          <section class="brand-detail-banner"><div class="brand-detail-logo" id="brandDetailLogo">轻</div><div class="brand-detail-summary"><h1 id="brandDetailName">轻净</h1><p id="brandDetailIntro">面向精致家庭的专业清洁电器品牌，用可验证的清洁效果降低家庭清洁焦虑。</p><div class="asset-detail-audit">创建：嗡大发 · 08/01 10:00 <i>｜</i> 最近修改：嗡大发 · 08/11 10:26 <button class="asset-history-link" type="button" data-asset-history="品牌" data-asset-title="轻净">查看变更</button></div></div><div class="brand-detail-actions"><button class="ghost-btn danger-btn" type="button" data-delete-current-brand>删除品牌</button></div></section>
           <div class="brand-detail-grid">
             <section class="brand-info-card"><div class="brand-info-card-head"><h3>品牌信息</h3><span class="sync-hint">修改后自动同步创作上下文</span></div>
               <div class="brand-field" data-brand-field="name"><label>品牌名称</label><span class="brand-value">轻净</span><input value="轻净"><button class="brand-field-edit" type="button">编辑</button></div>

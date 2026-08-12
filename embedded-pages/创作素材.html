@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>创作素材 · 内容罗盘</title>
 <link rel="stylesheet" href="../css/main.css">
-<link rel="stylesheet" href="creation-material.css?v=20260811a">
+<link rel="stylesheet" href="creation-material.css?v=20260811b">
 <link rel="stylesheet" href="host-embed.css?v=20260808">
 </head>
 <body>
@@ -456,11 +456,12 @@
     <div class="material-preview-body">
       <div class="material-preview-stage" id="materialPreviewStage"></div>
       <section class="material-preview-meta">
-        <div class="preview-meta-top"><div class="preview-statuses"><span class="preview-status" id="materialPreviewType">视频素材</span><span class="preview-status" id="materialPreviewStatus"></span></div><button class="preview-edit" id="materialPreviewEdit" type="button">编辑</button></div>
+        <div class="preview-meta-top"><div class="preview-statuses"><span class="preview-status" id="materialPreviewType">视频素材</span><span class="preview-status" id="materialPreviewStatus"></span></div><div style="display:flex;gap:8px"><button class="preview-edit" id="materialPreviewHistory" type="button">查看变更</button><button class="preview-edit" id="materialPreviewEdit" type="button">编辑</button></div></div>
         <div class="preview-meta-grid">
           <div class="preview-meta-cell"><span class="label">关联产品</span><strong class="value" id="materialPreviewProduct"></strong></div><div class="preview-meta-cell"><span class="label">所属素材文件夹</span><strong class="value" id="materialPreviewFolder"></strong></div>
           <div class="preview-meta-cell"><span class="label">文件名称</span><strong class="value" id="materialPreviewName"></strong></div><div class="preview-meta-cell"><span class="label">时长 / 大小</span><strong class="value" id="materialPreviewDurationSize"></strong></div>
-          <div class="preview-meta-cell"><span class="label">创建时间</span><strong class="value" id="materialPreviewCreated"></strong></div><div class="preview-meta-cell"><span class="label">素材类型</span><strong class="value" id="materialPreviewKind"></strong></div>
+          <div class="preview-meta-cell"><span class="label">上传</span><strong class="value" id="materialPreviewCreated"></strong></div><div class="preview-meta-cell"><span class="label">素材类型</span><strong class="value" id="materialPreviewKind"></strong></div>
+          <div class="preview-meta-cell"><span class="label">最近修改</span><strong class="value" id="materialPreviewUpdated"></strong></div>
         </div>
         <div class="preview-tag-row"><div><div class="preview-tag-title">素材标签</div><div class="preview-tag-list" id="materialPreviewTags"></div></div><button class="preview-add-tag" id="materialPreviewAddTag" type="button">＋ 添加标签</button></div>
       </section>
@@ -472,6 +473,15 @@
         <button class="primary-btn" id="materialPreviewDownload">下载素材</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ============ 素材修改记录 ============ -->
+<div class="modal-backdrop" id="materialHistoryModal" role="dialog" aria-modal="true" aria-labelledby="materialHistoryTitle">
+  <div class="modal" style="width:min(620px,100%);height:auto;max-height:72vh;">
+    <div class="modal-head"><div><span class="badge">修改记录</span><h3 id="materialHistoryTitle">素材修改记录</h3><p id="materialHistoryMeta" style="margin:5px 0 0;color:#8a8fa1;font-size:12px;"></p></div><button class="close-btn" type="button" data-close-material-history aria-label="关闭">×</button></div>
+    <div class="modal-body" id="materialHistoryBody"></div>
+    <div class="modal-foot"><span></span><div class="modal-foot-actions"><button class="primary-btn" type="button" data-close-material-history>确定</button></div></div>
   </div>
 </div>
 
@@ -536,12 +546,12 @@
           <div class="ic-body">
             <div class="info-row">
               <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7" cy="8" r="1.5" fill="currentColor"/></svg>标签</div>
-              <div class="value empty">暂无标签</div>
+              <div class="value empty" id="drawerTagsValue">暂无标签</div>
               <span class="add-pill" data-open-modal="tagFilter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>添加标签</span>
             </div>
             <div class="info-row">
               <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>所在素材组</div>
-              <div class="value empty">未归入素材组</div>
+              <div class="value empty" id="drawerFolderValue">未归入素材组</div>
               <span class="add-pill" data-open-modal="move"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>添加分组</span>
             </div>
             <div class="info-row" id="drawerProductRow">
@@ -552,13 +562,19 @@
           </div>
         </section>
 
-        <!-- 2. AI 描述 -->
+        <!-- 2. 分析提醒：仅在存在明确分析问题时显示 -->
+        <section class="analysis-alert" id="analysisAlert" hidden>
+          <span class="analysis-alert-icon">!</span>
+          <div><strong>分析提醒</strong><p id="analysisAlertText"></p></div>
+        </section>
+
+        <!-- 3. AI 描述 -->
         <section class="info-card">
           <header class="ic-head">
             <span class="ic-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h12l4 4v12a2 2 0 01-2 2H4z"/><path d="M16 4v4h4M8 13h8M8 17h5"/></svg></span>
             <span class="ic-title">AI 描述</span>
           </header>
-          <div class="ic-body desc">在这段8.2秒的视频中，我们看到一位年轻女性在现代公寓的明亮客厅中，关注地阅读，展现出一种悠闲的生活方式。随着一台黑色手洗地机的高效运作，地面上的顽固紫色污渍被迅速清除，瓷砖恢复了光洁如新的状态。清洁完成后，女性兴奋地从沙发上起身，走到干净的地板中央，随即躺下并伸展双臂，尽情享受这份清新与舒适。整个场景不仅展示了现代居家生活的美学，还突显了高效清洁工具带来的便捷与轻松，营造出一种愉悦的居家氛围。</div>
+          <div class="ic-body desc" id="drawerAiDescription">在这段8.2秒的视频中，一台黑色洗地机在明亮客厅中快速清理白色瓷砖上的紫色污渍。清洁完成后，女性从沙发起身并躺到地板中央，以夸张动作展示地面干净、光滑的结果。画面完整包含产品操作过程与人物结果反馈，可用于功能演示及清洁效果证明。</div>
         </section>
 
         <!-- 4. 文件信息 -->
@@ -568,15 +584,17 @@
             <span class="ic-title">文件信息</span>
           </header>
           <div class="ic-body">
-            <div class="info-row"><div class="label">文件名</div><div class="value" style="display:flex; align-items:center; justify-content:space-between;">自牵引AI.mp4 <button data-tip="复制文件名" style="border:0; background:transparent; color:#8a8fa1; cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg></button></div></div>
-            <div class="info-row"><div class="label">格式</div><div class="value" style="text-align:right;">MP4</div></div>
-            <div class="info-row"><div class="label">大小</div><div class="value" style="text-align:right;">10.07 MB</div></div>
-            <div class="info-row"><div class="label">时长</div><div class="value" style="text-align:right;">0:08</div></div>
-            <div class="info-row"><div class="label">分辨率</div><div class="value" style="text-align:right;">1080 × 1920</div></div>
-            <div class="info-row"><div class="label">MIME</div><div class="value" style="text-align:right;">video/mp4</div></div>
-            <div class="info-row"><div class="label">上传时间</div><div class="value" style="text-align:right;">2026-08-07 17:35</div></div>
-            <div class="info-row"><div class="label">上传者</div><div class="value" style="text-align:right;">嗡大发</div></div>
-            <div class="info-row"><div class="label">MD5</div><div class="value" style="text-align:right; font-family:monospace; font-size:11px; color:#8a8fa1;">a1b2c3d4e5f6...</div></div>
+            <div class="info-row"><div class="label">文件名</div><div class="value" style="display:flex; align-items:center; justify-content:space-between;"><span id="drawerFileName">自牵引AI.mp4</span><button type="button" data-copy-filename data-tip="复制文件名" style="border:0; background:transparent; color:#8a8fa1; cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg></button></div></div>
+            <div class="info-row"><div class="label">格式</div><div class="value" id="drawerFileFormat" style="text-align:right;">MP4</div></div>
+            <div class="info-row"><div class="label">大小</div><div class="value" id="drawerFileSize" style="text-align:right;">10.07 MB</div></div>
+            <div class="info-row"><div class="label">时长</div><div class="value" id="drawerFileDuration" style="text-align:right;">0:08</div></div>
+            <div class="info-row"><div class="label">分辨率</div><div class="value" id="drawerFileResolution" style="text-align:right;">1080 × 1920</div></div>
+            <div class="info-row"><div class="label">MIME</div><div class="value" id="drawerFileMime" style="text-align:right;">video/mp4</div></div>
+            <div class="info-row"><div class="label">上传时间</div><div class="value" id="drawerFileCreated" style="text-align:right;">2026-08-07 17:35</div></div>
+            <div class="info-row"><div class="label">上传者</div><div class="value" id="drawerFileOwner" style="text-align:right;">嗡大发</div></div>
+            <div class="info-row"><div class="label">最近修改人</div><div class="value" id="drawerFileUpdatedBy" style="text-align:right;">嗡大发</div></div>
+            <div class="info-row"><div class="label">最近修改时间</div><div class="value" id="drawerFileUpdated" style="text-align:right;">08/11 14:20:36</div></div>
+            <div class="info-row"><div class="label">MD5</div><div class="value" id="drawerFileMd5" style="text-align:right; font-family:monospace; font-size:11px; color:#8a8fa1;">a1b2c3d4e5f6...</div></div>
           </div>
         </section>
       </div>
@@ -607,7 +625,7 @@
               <div class="item"><div class="it-label">总体客观描述</div><div class="it-text">在现代明亮客厅中，一台黑色手洗地机迅速清理掉白色瓷砖地面上大片紫色污渍。清洁完成后地面光洁如新，一位穿紫色长裙的女性从沙发起身，走到地板中央顺势躺下，展示地面的干净与光滑。</div></div>
               <div class="item"><div class="it-label">人物</div><div class="it-text">年轻女性，穿紫色连衣裙，长发，起初坐在沙发上看书，后起身在地板中央躺下并伸展双臂</div></div>
               <div class="item"><div class="it-label">场景</div><div class="it-text">现代高层公寓客厅，大面积落地窗可见城市天际线，白色光洁瓷砖地面，自然光线明亮充足</div></div>
-              <div class="item"><div class="it-label">产品</div><div class="it-text">黑色手洗洗地机，正在清理地面紫色污渍，机身带有黄色细节装饰</div></div>
+              <div class="item"><div class="it-label">产品</div><div class="it-text">黑色洗地机，正在清理地面紫色污渍，机身带有黄色细节装饰</div></div>
               <div class="item"><div class="it-label">动作</div><div class="it-text">洗地机前后推拉迅速清理紫色污渍；女性看书、放下书本起身、走到地板中央、滑倒/躺下并伸展双臂</div></div>
               <div class="item"><div class="it-label">镜头</div><div class="it-text">固定机位全景，视角略高，完整记录清洁过程、地面反光效果及人物互动</div></div>
             </div>
@@ -627,7 +645,7 @@
             <div class="sec-head" data-toggle-section><span class="sec-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 017 7c0 3-2 5-3 6-1 1-1 2-1 3H9c0-1 0-2-1-3-1-1-3-3-3-6a7 7 0 017-7z"/></svg></span>功能层<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span></div>
             <div class="sec-body">
               <div class="item"><div class="it-label">叙事功能</div><div class="it-text">直观展示洗地机强大的去污能力和清洁效率，通过女性清洁后直接在地板躺下的夸张动作，极致化表达清洁后地面干净无尘、可随意席地而坐的产品卖点，强化视觉冲击力。</div></div>
-              <div class="item"><div class="it-label">使用方式</div><div class="it-text">作为核心功能演示的高潮部分，前段展示去污过程（可加速处理），后段展示人物在干净地板上躺下的成果，建议叠加文字"一拖即净""光脚自由""席地而坐"等。</div></div>
+              <div class="item"><div class="it-label">使用方式</div><div class="it-text">作为核心功能演示的高潮部分，前段完整展示去污过程，等待段可轻微加速；后段保留人物在干净地板上躺下的成果动作，用于承接清洁结果口播。</div></div>
               <div class="item"><div class="it-label">推荐时机</div><div class="it-text">当 ASR 提到"一拖就干净""去污力强""光脚踩""席地而坐""懒人必备""一推一拉"时插入</div></div>
               <div class="item"><div class="it-label">框架阶段</div><div class="chip-list"><span class="chip purple">功能使用</span> → <span class="chip purple">成果展示</span></div></div>
             </div>
@@ -650,6 +668,6 @@
   </div>
   <div class="uq-list" id="uqList"></div>
 </div>
-<script src="creation-material.js?v=20260811a"></script>
+<script src="creation-material.js?v=20260811c"></script>
 </body>
 </html>

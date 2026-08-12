@@ -15,7 +15,7 @@
                 <button class="create-agent-option" type="button" data-create-agent-type="image-detail" data-category="image"><span class="create-agent-dot"></span><span><strong>商品详情页</strong><small>生成可继续编辑的详情页图文模块</small></span><span class="create-agent-arrow">›</span></button>
                 <div class="create-agent-group">视频生产</div>
                 <button class="create-agent-option" type="button" data-create-agent-type="script" data-category="video"><span class="create-agent-dot"></span><span><strong>智能脚本</strong><small>把文案转为可拍摄、可混剪的分镜脚本</small></span><span class="create-agent-arrow">›</span></button>
-                <button class="create-agent-option" type="button" data-create-agent-type="mix" data-category="video"><span class="create-agent-dot"></span><span><strong>智能混剪</strong><small>匹配内部素材并生成完整成片</small></span><span class="create-agent-arrow">›</span></button>
+                <button class="create-agent-option" type="button" data-create-agent-type="mix" data-category="video"><span class="create-agent-dot"></span><span><strong>智能混剪</strong><small>确认文案配音，用已有素材生成成片</small></span><span class="create-agent-arrow">›</span></button>
                 <div class="create-agent-group">视频分析</div>
                 <button class="create-agent-option" type="button" data-create-page="pull-entry" data-category="analysis"><span class="create-agent-dot"></span><span><strong>智能拉片</strong><small>独立拆解视频口播、分镜与镜头语言</small></span><span class="create-agent-arrow">›</span></button>
               </div>
@@ -94,7 +94,7 @@
               <button class="agent-card" data-agent="智能混剪 Agent" data-type="mix" data-category="video">
                 <span class="agent-icon">剪</span>
                 <strong>智能混剪</strong>
-                <small>根据结构化脚本找镜头，自动完成字幕、配音和包装</small>
+                <small>确认文案与 AI 配音，用已有素材完成裁切拼接</small>
                 <span class="agent-foot"><span class="agent-chip">镜头匹配</span><span class="agent-chip">字幕配音</span><span class="agent-chip">可提审成片</span></span>
               </button>
               <button class="agent-card tool-card" id="openPullTool" type="button" data-category="analysis">
@@ -158,7 +158,7 @@
                         <button class="agent-option" type="button" data-agent-type="image-detail"><span class="agent-option-icon">详</span><span class="agent-option-copy"><strong>商品详情页</strong><small>按卖点和模块生成可继续编辑的详情页图文</small></span><span class="agent-option-check"></span></button>
                         <div class="agent-group-title">视频生产</div>
                         <button class="agent-option" type="button" data-agent-type="script"><span class="agent-option-icon">导</span><span class="agent-option-copy"><strong>智能脚本</strong><small>生成可拍摄、可驱动混剪的完整分镜</small></span><span class="agent-option-check"></span></button>
-                        <button class="agent-option" type="button" data-agent-type="mix"><span class="agent-option-icon">剪</span><span class="agent-option-copy"><strong>智能混剪</strong><small>按脚本匹配内部素材并生成完整成片</small></span><span class="agent-option-check"></span></button>
+                        <button class="agent-option" type="button" data-agent-type="mix"><span class="agent-option-icon">剪</span><span class="agent-option-copy"><strong>智能混剪</strong><small>确认文案配音，用已有素材生成成片</small></span><span class="agent-option-check"></span></button>
                       </div>
                     </div>
                     <div class="model-picker" id="modelPicker">

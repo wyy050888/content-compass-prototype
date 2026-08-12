@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="../css/lapan-detail.css?v=20260808">
   <link rel="stylesheet" href="finished-videos.css?v=20260811f">
+  <link rel="stylesheet" href="finished-videos-overrides.css?v=20260811a">
 </head>
 <body class="fv-body">
   <main class="fv-app" id="finishedVideoApp">
@@ -47,6 +48,14 @@
                   <button type="button" data-status="running">分析中</button>
                   <button type="button" data-status="done">已分析</button>
                   <button type="button" data-status="failed">分析失败</button>
+                </div>
+              </div>
+              <div class="fv-filter-select-wrap">
+                <button class="fv-filter-trigger" id="fvQcFilter" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12l3-3 4 4 5-5 6 6"/><circle cx="20" cy="6" r="2.5" fill="currentColor" stroke="none"/></svg><span id="fvQcFilterText">全部关联</span></button>
+                <div class="fv-toolbar-menu" id="fvQcDropdown" hidden>
+                  <button type="button" data-qc="all">全部关联</button>
+                  <button type="button" data-qc="linked">已关联千川</button>
+                  <button type="button" data-qc="unlinked">未关联千川</button>
                 </div>
               </div>
             </div>
@@ -108,11 +117,11 @@
               <span class="fv-tag fv-tag-neutral" id="fvDetailQianchuanTag">未关联千川</span>
               </div>
             </div>
-            <div class="fv-detail-info"><span id="fvDetailFolderPath">所属文件夹：—</span><i></i><span id="fvDetailCreated">创建时间：—</span><i id="fvDetailTagsDivider"></i><span class="fv-detail-video-tags" id="fvDetailVideoTags"></span></div>
+            <div class="fv-detail-info"><span id="fvDetailFolderPath">所属文件夹：—</span><i></i><span id="fvDetailCreated">创建：—</span><i></i><span id="fvDetailUpdated">最近修改：—</span><i id="fvDetailTagsDivider"></i><span class="fv-detail-video-tags" id="fvDetailVideoTags"></span></div>
           </div>
         </div>
         <div class="fv-detail-actions">
-          <button class="fv-btn fv-btn-secondary" id="fvEditDetailInfo" type="button">编辑信息</button>
+          <button class="fv-btn fv-btn-secondary" id="fvDetailHistory" type="button">查看变更</button><button class="fv-btn fv-btn-secondary" id="fvEditDetailInfo" type="button">编辑信息</button>
           <button class="fv-btn fv-btn-primary" id="fvReanalyze" type="button">重新分析</button>
         </div>
       </header>
@@ -287,11 +296,11 @@
         <div class="fv-preview-layout">
           <div class="fv-preview-video" id="fvPreviewVideo"><video id="fvPreviewNative" controls playsinline hidden></video><div class="fv-preview-poster"><span>▶</span><strong id="fvPreviewPosterName">视频预览</strong></div></div>
           <aside class="fv-preview-info" aria-label="视频信息">
-            <div class="fv-preview-info-head"><div class="fv-preview-info-tags"><span class="fv-tag" id="fvPreviewSourceTag">来源</span><span class="fv-preview-status-tag" id="fvPreviewStatusTag">待分析</span><span class="fv-tag fv-tag-neutral" id="fvPreviewQianchuanTag">未关联千川</span></div><button class="fv-btn fv-btn-secondary small" id="fvPreviewEditInfo" type="button">编辑</button></div>
+            <div class="fv-preview-info-head"><div class="fv-preview-info-tags"><span class="fv-tag" id="fvPreviewSourceTag">来源</span><span class="fv-preview-status-tag" id="fvPreviewStatusTag">待分析</span><span class="fv-tag fv-tag-neutral" id="fvPreviewQianchuanTag">未关联千川</span></div><div><button class="fv-btn fv-btn-secondary small" id="fvPreviewHistory" type="button">查看变更</button><button class="fv-btn fv-btn-secondary small" id="fvPreviewEditInfo" type="button">编辑</button></div></div>
             <dl>
               <div><dt>对应产品</dt><dd id="fvPreviewProduct">—</dd></div><div><dt>所属文件夹</dt><dd id="fvPreviewFolder">—</dd></div>
               <div><dt>文件名称</dt><dd id="fvPreviewFile">—</dd></div><div><dt>时长 / 大小</dt><dd id="fvPreviewDuration">—</dd></div>
-              <div class="full"><dt>创建时间</dt><dd id="fvPreviewCreated">—</dd></div>
+              <div class="full"><dt>创建</dt><dd id="fvPreviewCreated">—</dd></div><div class="full"><dt>最近修改</dt><dd id="fvPreviewUpdated">—</dd></div>
               <div class="full"><dt>千川素材 ID</dt><dd id="fvPreviewQianchuanId">未关联</dd></div>
             </dl>
             <section class="fv-preview-tag-module" aria-label="视频标签">
@@ -352,7 +361,15 @@
     </section>
   </div>
 
-  <script src="js/finished-videos.js?v=20260811g"></script>
+  <div class="fv-modal-backdrop" id="fvAssetHistoryModal" hidden>
+    <section class="fv-modal" role="dialog" aria-modal="true" aria-labelledby="fvAssetHistoryTitle">
+      <header><div><span class="fv-modal-kicker">修改记录</span><h2 id="fvAssetHistoryTitle">视频修改记录</h2><p id="fvAssetHistoryMeta"></p></div><button type="button" data-close-modal="fvAssetHistoryModal" aria-label="关闭">×</button></header>
+      <div class="fv-modal-body"><div class="fv-history-list" id="fvAssetHistoryList"></div></div>
+      <footer><button class="fv-btn fv-btn-primary" type="button" data-close-modal="fvAssetHistoryModal">确定</button></footer>
+    </section>
+  </div>
+
+  <script src="js/finished-videos.js?v=20260812a"></script>
   <script src="../js/lapan-detail.js?v=20260808"></script>
 </body>
 </html>

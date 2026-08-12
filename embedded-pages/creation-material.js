@@ -1,12 +1,12 @@
 /* ============ 数据 ============ */
 const materials = [
   { id: 1, name: 'cove...4256.png', type: 'image', sizeLabel: '4.48 MB', duration: '', status: 'fail', folderId: 'all', product: '', created: '2026-08-08 09:14:23' },
-  { id: 2, name: '自牵引AI.mp4', type: 'video', sizeLabel: '10.07 MB', duration: '0:08', status: 'ok', folderId: 'f1-1', product: '轻净 Pro 除螨仪', created: '2026-08-07 17:35:08' },
+  { id: 2, name: '自牵引AI.mp4', type: 'video', sizeLabel: '10.07 MB', duration: '0:08', status: 'ok', folderId: 'f1-1', product: '净界洗地机 S5', resolution:'1080 × 1920', md5:'a1b2c3d4e5f6...', analysisDescription:'在这段 8 秒的视频中，一台黑色洗地机在明亮客厅中快速清理白色瓷砖上的紫色污渍。清洁完成后，女性从沙发起身并躺到地板中央，以夸张动作展示地面干净、光滑的结果。画面完整包含产品操作过程与人物结果反馈，可用于功能演示及清洁效果证明。', created: '2026-08-07 17:35:08' },
   { id: 3, name: '旋转变形3....mp4', type: 'video', sizeLabel: '1.32 MB', duration: '0:05', status: 'analyzing', folderId: 'f1-2', product: '净澈洗地机', created: '2026-08-08 10:22:41' },
   { id: 4, name: '生...景的图片.png', type: 'image', sizeLabel: '4.47 MB', duration: '', status: 'ok', folderId: 'f1', product: '', created: '2026-08-06 16:11:55' },
-  { id: 5, name: '黑泥浆走-竹.mp4', type: 'video', sizeLabel: '1006.95 KB', duration: '0:05', status: 'ok', folderId: 'f2', product: '净澈洗地机', created: '2026-08-05 11:08:02' },
+  { id: 5, name: '黑泥浆走-竹.mp4', type: 'video', sizeLabel: '1006.95 KB', duration: '0:05', status: 'ok', folderId: 'f2', product: '净界洗地机 S5', resolution:'1080 × 1920', md5:'01f932fa62d8...', analysisWarning:'片段后半段存在明显抖动；该问题已标记在分析结果中，使用时建议优先截取前 3.6 秒。', analysisDescription:'固定近景记录洗地机经过大面积深色污渍并将其清理干净的过程。产品推进动作、污渍消失和清洁后地面均清晰可见，可用于表达去污能力和一遍清洁的结果。', created: '2026-08-05 11:08:02' },
   { id: 6, name: '工具转-竹.mp4', type: 'video', sizeLabel: '1016.61 KB', duration: '0:05', status: 'pending', folderId: 'f2', product: '', created: '2026-08-08 08:42:19' },
-  { id: 7, name: '大灰尘走-竹.mp4', type: 'video', sizeLabel: '885.96 KB', duration: '0:05', status: 'ok', folderId: 'f2', product: '净澈洗地机', created: '2026-08-05 13:27:34' },
+  { id: 7, name: '大灰尘走-竹.mp4', type: 'video', sizeLabel: '885.96 KB', duration: '0:05', status: 'ok', folderId: 'f2', product: '净界洗地机 S5', resolution:'1080 × 1920', md5:'7dd20f11a8c9...', analysisDescription:'固定近景记录洗地机经过大颗粒灰尘并将其吸走的过程。产品、灰尘和清洁路径清晰可见，动作起止完整，可用于表达大颗粒垃圾吸除能力。', created: '2026-08-05 13:27:34' },
   { id: 8, name: 'm18洗地机.mp4', type: 'video', sizeLabel: '4.31 MB', duration: '0:02', status: 'ok', folderId: 'f3', product: '净澈洗地机', created: '2026-08-08 07:58:47' },
   { id: 9, name: 'jimen...视....mp4', type: 'video', sizeLabel: '3.49 MB', duration: '0:04', status: 'analyzing', folderId: 'f1', product: '', created: '2026-08-08 11:03:12' },
   { id: 10, name: 'jimen...小....mp4', type: 'video', sizeLabel: '4.18 MB', duration: '0:05', status: 'ok', folderId: 'f1', product: '', created: '2026-08-07 09:45:36' },
@@ -63,10 +63,17 @@ let materialTagEditorId = null;
 let materialTagDraft = new Set();
 
 // 产品选项（与成片视频的 productOptions 同源）
-const productOptions = ['轻净 Pro 除螨仪', '轻享空气炸锅', '净澈洗地机'];
+const productOptions = ['轻净 Pro 除螨仪', '轻享空气炸锅 A8', '净界洗地机 S5'];
 
 const $ = (s, p) => (p || document).querySelector(s);
 const $$ = (s, p) => Array.from((p || document).querySelectorAll(s));
+const formatAuditTime = (value, detailed = false) => {
+  const match = String(value || '').match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (!match) return value || '--';
+  const [, year, month, day, hour, minute, second = '00'] = match;
+  return `${year === '2026' ? '' : `${year}/`}${month}/${day} ${hour}:${minute}${detailed ? `:${second}` : ''}`;
+};
+const materialAudit = material => ({ uploader: material.uploader || '嗡大发', updatedBy: material.updatedBy || '嗡大发', updatedAt: material.updatedAt || material.created });
 function toast(text, type) {
   const el = $('#toast');
   el.textContent = text;
@@ -139,6 +146,41 @@ function openDrawer(m) {
       productBtnText.textContent = '关联产品';
     }
   }
+  const materialTags = (m.tags || []).map(value => tagLibrary.find(tag => tag.id === value || tag.name === value)?.name || value).filter(Boolean);
+  const tagsValue = $('#drawerTagsValue');
+  if (tagsValue) {
+    tagsValue.classList.toggle('empty', materialTags.length === 0);
+    tagsValue.innerHTML = materialTags.length ? materialTags.map(tag => `<span class="chip">${escapeHtml(tag)}</span>`).join(' ') : '暂无标签';
+  }
+  const folderValue = $('#drawerFolderValue');
+  if (folderValue) {
+    const folder = previewFolderLabel(m.folderId);
+    folderValue.textContent = folder;
+    folderValue.classList.toggle('empty', folder === '未归入素材组');
+  }
+  const warning = $('#analysisAlert');
+  if (warning) {
+    warning.hidden = !m.analysisWarning;
+    $('#analysisAlertText').textContent = m.analysisWarning || '';
+  }
+  const aiDescription = $('#drawerAiDescription');
+  if (aiDescription) aiDescription.textContent = m.analysisDescription || `${m.name} 已完成离线画面理解。画面主体为${m.product || '当前内容对象'}，包含可识别的场景、人物或产品动作，可在镜头拆分中查看客观层、语义层和功能层分析。`;
+  const extension = (m.name.split('.').pop() || (isImage ? 'png' : 'mp4')).toUpperCase();
+  const mimeExtension = extension.toLowerCase() === 'jpg' ? 'jpeg' : extension.toLowerCase();
+  const drawerFields = {
+    drawerFileName:m.name,
+    drawerFileFormat:extension,
+    drawerFileSize:m.sizeLabel || '—',
+    drawerFileDuration:isImage ? '—' : (m.duration || '—'),
+    drawerFileResolution:m.resolution || (isImage ? '2048 × 2048' : '1080 × 1920'),
+    drawerFileMime:`${isImage ? 'image' : 'video'}/${mimeExtension}`,
+    drawerFileCreated:formatAuditTime(m.created, true),
+    drawerFileOwner:materialAudit(m).uploader,
+    drawerFileUpdatedBy:materialAudit(m).updatedBy,
+    drawerFileUpdated:formatAuditTime(materialAudit(m).updatedAt, true),
+    drawerFileMd5:m.md5 || `asset-${String(m.id).padStart(6,'0')}...`
+  };
+  Object.entries(drawerFields).forEach(([id, value]) => { const element = $('#' + id); if (element) element.textContent = value; });
   drawer.classList.add('show');
   $('#drawerMask').classList.add('show');
   const drawerBody = drawer.querySelector('.drawer-body');
@@ -178,7 +220,9 @@ function openMaterialPreview(m) {
   $('#materialPreviewFolder').textContent = previewFolderLabel(m.folderId);
   $('#materialPreviewKind').textContent = isImage ? '图片' : '视频';
   $('#materialPreviewDurationSize').textContent = `${isImage ? '—' : (m.duration || '—')} / ${m.sizeLabel || '—'}`;
-  $('#materialPreviewCreated').textContent = m.created || '--';
+  const audit = materialAudit(m);
+  $('#materialPreviewCreated').textContent = `${audit.uploader} · ${formatAuditTime(m.created, true)}`;
+  $('#materialPreviewUpdated').textContent = `${audit.updatedBy} · ${formatAuditTime(audit.updatedAt, true)}`;
   const tags = (m.tags || []).map(value => tagLibrary.find(t => t.id === value || t.name === value)).filter(Boolean);
   $('#materialPreviewTags').innerHTML = tags.length ? tags.map(t => `<span class="preview-tag">${escapeHtml(t.name)}</span>`).join('') : '<span class="preview-no-tag">暂无标签</span>';
   const stage = $('#materialPreviewStage');
@@ -225,6 +269,18 @@ $('#materialPreviewEdit').addEventListener('click', () => {
   $('#materialInfoEditModal').classList.add('preview-child-layer');
   openModal('materialInfoEditModal');
 });
+$('#materialPreviewHistory').addEventListener('click', () => {
+  const m = materials.find(x => x.id === previewMaterialId); if (!m) return;
+  openMaterialHistory(m);
+});
+function openMaterialHistory(m) {
+  const audit = materialAudit(m);
+  $('#materialHistoryTitle').textContent = `“${m.name}”修改记录`;
+  $('#materialHistoryMeta').textContent = `上传：${audit.uploader} · ${formatAuditTime(m.created, true)}　｜　最近修改：${audit.updatedBy} · ${formatAuditTime(audit.updatedAt, true)}`;
+  $('#materialHistoryBody').innerHTML = `<div class="asset-history-list"><article><div><b>关联产品</b><span>${audit.updatedBy} · ${formatAuditTime(audit.updatedAt, true)}</span></div><p><em>未关联产品</em><i>→</i><strong>${escapeHtml(m.product || '未关联产品')}</strong></p></article><article><div><b>素材标签</b><span>嗡大发 · ${formatAuditTime(m.created, true)}</span></div><p><em>暂无标签</em><i>→</i><strong>${escapeHtml((m.tags || []).join('、') || '暂无标签')}</strong></p></article></div>`;
+  openModal('materialHistoryModal');
+}
+$$('[data-close-material-history]').forEach(button => button.addEventListener('click', () => closeModal('materialHistoryModal')));
 $('#saveMaterialInfoEdit').addEventListener('click', () => {
   const m = materials.find(x => x.id === previewMaterialId);
   if (!m) return;
@@ -233,6 +289,8 @@ $('#saveMaterialInfoEdit').addEventListener('click', () => {
   m.name = name;
   m.product = $('#materialInfoEditProduct').value;
   m.folderId = $('#materialInfoEditFolder').value;
+  m.updatedBy = '嗡大发';
+  m.updatedAt = '2026-08-11 14:20:36';
   closeModal('materialInfoEditModal');
   $('#materialInfoEditModal').classList.remove('preview-child-layer');
   renderGrid();
@@ -291,7 +349,7 @@ function renderGrid() {
           <div class="mat-product-line"><span class="mat-card-product${m.product ? '' : ' is-empty'}" data-tip="${m.product ? '已关联产品' : '未关联产品'}">${escapeHtml(m.product || '未关联产品')}</span></div>
           <span class="mat-type">${m.type === 'video' ? '视频' : '图片'}</span>
         </div>
-        <div class="mat-card-created" title="${escapeHtml(m.created || '')}">${m.created ? `${m.created.slice(5, 7)}/${m.created.slice(8, 10)} ${m.created.slice(11, 19)}` : ''}</div>
+        <div class="mat-card-created" title="最近修改：${escapeHtml(materialAudit(m).updatedBy)} · ${escapeHtml(formatAuditTime(materialAudit(m).updatedAt, true))}">${m.created ? `${escapeHtml(materialAudit(m).updatedBy)} · ${formatAuditTime(materialAudit(m).updatedAt)}` : ''}</div>
       </div>
     </div>
   `;}).join('');
@@ -694,6 +752,11 @@ $$('[data-open-modal]').forEach(b => b.addEventListener('click', () => openModal
 $('#drawerProductBtn')?.addEventListener('click', () => {
   if (!activeMaterialId) return;
   openBatchEdit('product', [activeMaterialId]);
+});
+document.querySelector('[data-copy-filename]')?.addEventListener('click', async () => {
+  const name = $('#drawerFileName')?.textContent || '';
+  try { await navigator.clipboard.writeText(name); } catch (_) { /* 本地文件环境下仍保留交互反馈 */ }
+  toast(`已复制文件名：${name}`, 'success');
 });
 $$('.modal-backdrop').forEach(m => m.addEventListener('click', (e) => {
   if (e.target !== m) return;

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="内容罗盘——面向兴趣电商团队的 AI 内容生产与经营增长平台产品原型">
   <title>内容罗盘 · AI经营增长平台</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20260811i">
   <link rel="stylesheet" href="host-embed.css">
 </head>
 <body>
@@ -1012,7 +1012,7 @@
               </div>
 
               <div class="product-asset-panel" data-product-asset-panel="template">
-                <div class="template-tabs"><button class="active" type="button" data-template-tab="prompt">提示词</button><button type="button" data-template-tab="persona">人群画像</button><button type="button" data-template-tab="canvas">无限画板模板</button><button type="button" data-template-tab="copy-structure">爆款文案结构</button><button type="button" data-template-tab="video-structure">爆款视频结构</button></div>
+                <div class="template-tabs"><button class="active" type="button" data-template-tab="prompt">提示词</button><button type="button" data-template-tab="persona">人群画像</button><button type="button" data-template-tab="canvas">无限画板模板</button><button type="button" data-template-tab="content-structure">爆款内容结构</button></div>
                 <div class="template-panel active" data-template-panel="prompt"><div class="prompt-agent-list"><button class="active" type="button" data-prompt-agent="original">智能文案</button><button type="button" data-prompt-agent="copy">爆款文案仿写</button><button type="button" data-prompt-agent="rewrite">智能改写</button><button type="button" data-prompt-agent="script">智能脚本</button><button type="button" data-prompt-agent="mix">智能混剪</button></div><div class="prompt-agent-panel active" data-prompt-agent-panel="original"><article class="template-card editable-surface"><h4>清洁电器高转化口播提示词</h4><p class="editable-view">先读取产品事实与禁用话术；优先使用结果可视化钩子；按“痛点—产品能力—使用证明—多场景—CTA”生成 3 条单变量文案。</p><div class="editable-editor"><textarea>先读取产品事实与禁用话术；优先使用结果可视化钩子；按“痛点—产品能力—使用证明—多场景—CTA”生成 3 条单变量文案。</textarea></div><div class="surface-actions"><button class="surface-cancel" type="button" data-cancel-inline>取消</button><button type="button" data-inline-edit>编辑</button></div></article></div><div class="prompt-agent-panel" data-prompt-agent-panel="copy"><article class="template-card editable-surface"><h4>爆款结构原创映射提示词</h4><p class="editable-view">提取参考文案的钩子、节奏、卖点顺序与 CTA，仅复用结构，将所有商品事实重新映射为当前产品。</p><div class="editable-editor"><textarea>提取参考文案的钩子、节奏、卖点顺序与 CTA，仅复用结构，将所有商品事实重新映射为当前产品。</textarea></div><div class="surface-actions"><button class="surface-cancel" type="button" data-cancel-inline>取消</button><button type="button" data-inline-edit>编辑</button></div></article></div><div class="prompt-agent-panel" data-prompt-agent-panel="rewrite"><article class="template-card"><h4>暂无保存的提示词</h4><p>该 Agent 还没有针对当前产品保存专属提示词。</p></article></div><div class="prompt-agent-panel" data-prompt-agent-panel="script"><article class="template-card"><h4>结构化脚本生成提示词</h4><p>按口播节奏拆分时间轴，为每个分镜输出口播、画面任务、素材要求、字幕重点和混剪指令。</p></article></div><div class="prompt-agent-panel" data-prompt-agent-panel="mix"><article class="template-card"><h4>素材命中优先混剪提示词</h4><p>优先使用产品素材库镜头；缺失镜头标记待拍摄或视频创作，自动生成字幕、配音、转场和包装指令。</p></article></div></div>
                 <div class="template-panel" data-template-panel="persona"><div class="scenario-editor" id="scenarioEditor"><article class="scenario-group" data-scenario-group><div class="scenario-display"><div class="scenario-audience">宝妈家庭</div><div class="scenario-tag-list"><span class="scenario-tag">床垫清洁</span><span class="scenario-tag">卧室日常</span><span class="scenario-tag">布艺沙发</span></div></div><div class="scenario-edit-form"><label>目标人群</label><input value="宝妈家庭"><label>使用场景</label><textarea placeholder="一行一个使用场景">床垫清洁
 卧室日常
@@ -1025,17 +1025,11 @@
 可视化结果
 多空间使用
 品牌收束</textarea></div><div class="surface-actions"><button class="surface-cancel" type="button" data-cancel-inline>取消</button><button type="button" data-inline-edit>编辑</button></div></article></div>
-                <div class="template-panel" data-template-panel="copy-structure"><article class="template-card editable-surface"><h4>结果冲击型 30 秒口播结构</h4><p class="editable-view">0–3 秒展示“吸出一杯灰”；3–10 秒解释拍吸能力；10–20 秒用透明尘杯证明；20–26 秒覆盖床垫、沙发与毛绒玩具；26–30 秒给出行动引导。</p><div class="editable-editor"><textarea>0–3 秒：展示“吸出一杯灰”
-3–10 秒：解释拍吸能力
-10–20 秒：用透明尘杯证明
-20–26 秒：覆盖多种使用场景
-26–30 秒：行动引导</textarea></div><div class="surface-actions"><button class="surface-cancel" type="button" data-cancel-inline>取消</button><button type="button" data-inline-edit>编辑</button></div></article></div>
-                <div class="template-panel" data-template-panel="video-structure"><article class="template-card editable-surface"><h4>实拍演示型爆款视频结构</h4><p class="editable-view">镜头节奏：结果特写 2 秒 → 真人操作 6 秒 → 产品特写 4 秒 → 清洁前后对比 6 秒 → 多场景快切 8 秒 → 商品与 CTA 4 秒。</p><div class="editable-editor"><textarea>结果特写 2 秒
-真人操作 6 秒
-产品特写 4 秒
-清洁前后对比 6 秒
-多场景快切 8 秒
-商品与 CTA 4 秒</textarea></div><div class="surface-actions"><button class="surface-cancel" type="button" data-cancel-inline>取消</button><button type="button" data-inline-edit>编辑</button></div></article></div>
+                <div class="template-panel" data-template-panel="content-structure"><article class="template-card editable-surface"><h4>结果前置·实拍证明型</h4><p class="editable-view">内容公式：结果钩子 → 痛点解释 → 产品演示 → 效果证明 → 行动引导。每个阶段同步定义口播表达、画面任务与基础剪辑要求，供智能文案、脚本和混剪共用。</p><div class="editable-editor"><textarea>结果钩子：先说可见结果｜尘杯特写｜1–2 个短镜头硬切
+痛点解释：说明深层脏污｜床垫纤维与毛发碎屑｜跟随信息点硬切
+产品演示：解释边拍边吸｜完整操作与产品特写｜动作连续，可轻微加速
+效果证明：强化真实结果｜尘杯与前后对比｜结果画面短暂停留
+行动引导：引导查看实测｜产品全貌｜稳定镜头收尾</textarea></div><div class="surface-actions"><button class="surface-cancel" type="button" data-cancel-inline>取消</button><button type="button" data-inline-edit>编辑</button></div></article></div>
               </div>
             </section>
           </div>
@@ -1179,8 +1173,7 @@
             <button class="active" type="button" data-lib-tab="prompt">提示词模板</button>
             <button type="button" data-lib-tab="persona">人群画像</button>
             <button type="button" data-lib-tab="canvas">无限画板模板</button>
-            <button type="button" data-lib-tab="copy-structure">爆款文案结构</button>
-            <button type="button" data-lib-tab="video-structure">爆款视频结构</button>
+            <button type="button" data-lib-tab="content-structure">爆款内容结构</button>
           </div>
 
           <!-- Tab 1: 提示词模板 -->
@@ -1199,13 +1192,15 @@
               <table class="lib-table persona-library-table">
                 <thead>
                   <tr>
-                    <th style="width:17%;">画像名称</th>
-                    <th style="width:14%;">人群属性</th>
-                    <th style="width:17%;">核心痛点</th>
-                    <th style="width:16%;">使用场景</th>
-                    <th style="width:12%;">适用范围</th>
-                    <th style="width:7%;">调用</th>
-                    <th style="width:17%;">操作</th>
+                    <th style="width:14%;">画像名称</th>
+                    <th style="width:11%;">人群属性</th>
+                    <th style="width:14%;">核心痛点</th>
+                    <th style="width:13%;">使用场景</th>
+                    <th style="width:9%;">适用范围</th>
+                    <th style="width:9%;">创建</th>
+                    <th style="width:10%;">最近修改</th>
+                    <th style="width:5%;">调用</th>
+                    <th style="width:15%;">操作</th>
                   </tr>
                 </thead>
                 <tbody id="personaLibraryTbody"></tbody>
@@ -1256,141 +1251,33 @@
             </div>
           </div>
 
-          <!-- Tab 4: 爆款文案结构 - 表格 -->
-          <div class="template-panel" data-lib-panel="copy-structure">
+          <!-- Tab 4: 爆款内容结构 - 同时沉淀说什么、拍什么、怎么剪 -->
+          <div class="template-panel" data-lib-panel="content-structure">
             <div class="lib-filter-row">
-              <input type="text" class="lib-search" placeholder="搜索结构名称、结构公式或关联产品">
-              <select class="lib-filter-select" id="clStructureSourceFilter"><option>全部来源</option><option>千川</option><option>自建</option></select>
-              <select class="lib-filter-select" id="clStructureTagFilter"><option>全部结构标签</option><option>通用结构</option><option>产品级结构</option></select>
+              <input type="text" class="lib-search" id="clStructureSearch" placeholder="搜索结构名称、公式、产品或参考视频">
+              <select class="lib-filter-select" id="clStructureSourceFilter"><option>全部来源</option><option>千川学习</option><option>自建</option></select>
+              <select class="lib-filter-select" id="clStructureTagFilter"><option>全部适用范围</option><option>通用结构</option><option>产品级结构</option></select>
               <div class="cl-filter-actions">
-                <button class="cl-new-btn" type="button" data-cl-action="new">+ 新建结构</button>
+                <button class="cl-new-btn" type="button" data-cl-action="new">+ 新建内容结构</button>
               </div>
             </div>
             <div class="lib-table-wrap">
               <table class="lib-table">
                 <thead>
                   <tr>
-                    <th style="width:13%;">结构名称</th>
-                    <th style="width:28%;">结构公式</th>
-                    <th style="width:7%;">来源</th>
-                    <th style="width:11%;">结构标签</th>
-                    <th style="width:14%;">关联产品</th>
-                    <th style="width:9%;">更新时间</th>
-                    <th style="width:18%;">操作</th>
+                    <th style="width:15%;">结构名称</th>
+                    <th style="width:24%;">内容公式</th>
+                    <th style="width:8%;">来源</th>
+                    <th style="width:10%;">适用范围</th>
+                    <th style="width:9%;">适用时长</th>
+                    <th style="width:11%;">关联产品</th>
+                    <th style="width:8%;">更新时间</th>
+                    <th style="width:15%;">操作</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>结果前置·痛点解决·行动引导型</strong></td>
-                    <td><span class="cl-formula-text">结果前置 → 痛点放大 → 能力证明 → 行动引导</span></td>
-                    <td><span class="cl-source-qc">千川</span></td>
-                    <td><span class="cl-struct-tag cl-struct-tag-product">产品级结构</span></td>
-                    <td>轻净 Pro 除螨仪</td>
-                    <td>08-05 10:32</td>
-                    <td>
-                      <span class="cl-actions-inline">
-                        <button class="cl-action-btn" type="button" data-cl-action="view">查看</button>
-                        <button class="cl-action-btn" type="button" data-cl-action="copy">复制</button>
-                      </span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><strong>场景代入·功能证明·优惠收口型</strong></td>
-                    <td><span class="cl-formula-text">场景代入 → 问题呈现 → 功能证明 → 优惠收口</span></td>
-                    <td><span class="cl-source-qc">千川</span></td>
-                    <td><span class="cl-struct-tag cl-struct-tag-product">产品级结构</span></td>
-                    <td>轻享空气炸锅 A8</td>
-                    <td>08-05 09:48</td>
-                    <td>
-                      <span class="cl-actions-inline">
-                        <button class="cl-action-btn" type="button" data-cl-action="view">查看</button>
-                        <button class="cl-action-btn" type="button" data-cl-action="copy">复制</button>
-                      </span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><strong>人群点名·卖点展开·产品推荐型</strong></td>
-                    <td><span class="cl-formula-text">人群点名 → 需求唤醒 → 卖点展开 → 产品推荐</span></td>
-                    <td><span class="cl-source-qc">千川</span></td>
-                    <td><span class="cl-struct-tag cl-struct-tag-general">通用结构</span></td>
-                    <td>通用</td>
-                    <td>08-04 18:20</td>
-                    <td>
-                      <span class="cl-actions-inline">
-                        <button class="cl-action-btn" type="button" data-cl-action="view">查看</button>
-                        <button class="cl-action-btn" type="button" data-cl-action="copy">复制</button>
-                      </span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><strong>反差开场·实测证明·行动引导型</strong></td>
-                    <td><span class="cl-formula-text">反差开场 → 过程实测 → 结果证明 → 行动引导</span></td>
-                    <td><span class="cl-source-custom">自建</span></td>
-                    <td><span class="cl-struct-tag cl-struct-tag-general">通用结构</span></td>
-                    <td>通用</td>
-                    <td>08-03 15:16</td>
-                    <td>
-                      <span class="cl-actions-inline">
-                        <button class="cl-action-btn" type="button" data-cl-action="view">查看</button>
-                        <button class="cl-action-btn" type="button" data-cl-action="edit">编辑</button>
-                        <button class="cl-action-btn" type="button" data-cl-action="copy">复制</button>
-                        <button class="cl-action-btn danger" type="button" data-cl-action="delete">删除</button>
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
+                <tbody id="contentStructureTbody"></tbody>
               </table>
-            </div>
-          </div>
-
-          <!-- Tab 5: 爆款视频结构 - 表格 -->
-          <div class="template-panel" data-lib-panel="video-structure">
-            <div class="lib-filter-row">
-              <input type="text" class="lib-search" placeholder="搜索结构名称、时长">
-              <select class="lib-filter-select"><option>全部时长</option><option>15s 以下</option><option>15-30s</option><option>30s 以上</option></select>
-            </div>
-            <div class="lib-table-wrap">
-              <table class="lib-table">
-                <thead>
-                  <tr>
-                    <th style="width:16%;">结构名称</th>
-                    <th style="width:8%;">总时长</th>
-                    <th style="width:46%;">分镜节奏</th>
-                    <th style="width:18%;">适用场景</th>
-                    <th style="width:12%;">操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>实拍演示型</td>
-                    <td>30s</td>
-                    <td class="lib-cell-text">结果特写 2s → 真人操作 6s → 产品特写 4s → 清洁前后对比 6s → 多场景快切 8s → 商品与 CTA 4s</td>
-                    <td>实拍商品 / 测评</td>
-                    <td><a class="lib-link">编辑</a> · <a class="lib-link danger">删除</a></td>
-                  </tr>
-                  <tr>
-                    <td>场景快切型</td>
-                    <td>15s</td>
-                    <td class="lib-cell-text">多场景拼贴 3s → 产品特写 2s → 效果展示 5s → 行动引导 5s</td>
-                    <td>快节奏 / 短剧风</td>
-                    <td><a class="lib-link">编辑</a> · <a class="lib-link danger">删除</a></td>
-                  </tr>
-                  <tr>
-                    <td>生活流型</td>
-                    <td>45s</td>
-                    <td class="lib-cell-text">早晨场景 5s → 痛点出现 8s → 解决方案 12s → 多人证言 10s → 行动引导 10s</td>
-                    <td>生活场景 / 慢节奏</td>
-                    <td><a class="lib-link">编辑</a> · <a class="lib-link danger">删除</a></td>
-                  </tr>
-                  <tr>
-                    <td>教程拆解型</td>
-                    <td>60s</td>
-                    <td class="lib-cell-text">钩子 3s → 步骤演示 25s → 注意事项 15s → 总结回顾 10s → 行动引导 7s</td>
-                    <td>教程 / 知识科普</td>
-                    <td><a class="lib-link">编辑</a> · <a class="lib-link danger">删除</a></td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="persona-library-empty" id="contentStructureEmpty" hidden>没有符合条件的爆款内容结构</div>
             </div>
           </div>
         </div>
@@ -1457,7 +1344,7 @@
         </div>
       </section>
 
-      <!-- 爆款文案结构 - 删除确认模态框 -->
+      <!-- 爆款内容结构 - 删除确认模态框 -->
       <div class="modal-backdrop" id="clDeleteModal">
         <div class="modal cl-modal-compact cl-confirm-modal">
           <div class="modal-head" style="display:block;padding:18px 22px 14px;">
@@ -1479,17 +1366,42 @@
         </div>
       </div>
 
-      <!-- 爆款文案结构 - 新建模态框 + 复制模态框 + 详情抽屉 -->
+      <!-- 爆款内容结构 - 新建模态框 + 复制模态框 + 详情抽屉 -->
       <div class="modal-backdrop" id="clNewModal">
-        <div class="modal cl-modal-compact">
+        <div class="modal cl-modal-content">
           <div class="modal-head" style="display:block;padding:18px 22px 14px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-              <div class="cl-modal-head-row"><span class="cl-modal-icon">构</span><h3 id="clNewModalTitle">新建爆款文案结构</h3></div>
+              <div class="cl-modal-head-row"><span class="cl-modal-icon">构</span><h3 id="clNewModalTitle">新建爆款内容结构</h3></div>
               <button class="close-btn" type="button" data-cl-close="new">✕</button>
             </div>
-            <p class="cl-modal-subtitle" id="clNewModalSubtitle">保存后可在智能文案创作时直接调用</p>
+            <p class="cl-modal-subtitle" id="clNewModalSubtitle">同时定义每个阶段说什么、拍什么、怎么剪，供智能文案、脚本和混剪调用</p>
           </div>
           <div class="modal-body">
+            <div id="clCreateSourceStep">
+              <div class="cl-create-step-title"><span>1</span><div><strong>选择创建方式</strong><p>推荐从一条参考视频提炼，AI 会自动生成内容公式和各阶段要求。</p></div></div>
+              <div class="cl-create-mode-grid">
+                <button class="cl-create-mode selected" type="button" data-cl-create-mode="video">
+                  <span class="cl-mode-icon">▶</span><div><strong>从视频提炼</strong><small>上传、粘贴链接，或从已有视频中选择</small></div><em>推荐</em>
+                </button>
+                <button class="cl-create-mode" type="button" data-cl-create-mode="manual">
+                  <span class="cl-mode-icon">✎</span><div><strong>手动创建</strong><small>适合已有成熟方法论，直接定义各阶段</small></div>
+                </button>
+              </div>
+              <div class="cl-video-source-picker" id="clVideoSourcePicker">
+                <div class="cl-create-step-title compact"><span>2</span><div><strong>选择参考视频</strong><p>解析结果仅作为自建结构草稿，保存前可继续修改。</p></div></div>
+                <div class="cl-video-source-tabs" id="clVideoSourceTabs">
+                  <button type="button" data-cl-video-source="finished">成品视频</button>
+                  <button class="active" type="button" data-cl-video-source="external">外部参考视频</button>
+                  <button type="button" data-cl-video-source="upload">上传视频</button>
+                  <button type="button" data-cl-video-source="link">视频链接</button>
+                </div>
+                <div class="cl-video-source-content" id="clVideoSourceContent"></div>
+                <div class="cl-parse-actions"><span id="clParseHint">请选择一条视频</span><button class="primary-btn" type="button" id="clParseVideo" disabled>解析并生成结构</button></div>
+              </div>
+            </div>
+
+            <div id="clStructureFormStep" hidden>
+              <div class="cl-ai-draft-note" id="clAiDraftNote" hidden><span>AI</span><div><strong>已从参考视频生成结构草稿</strong><p>请确认内容公式以及每个阶段的“说什么、拍什么、怎么剪”，确认后再保存。</p></div></div>
             <div class="cl-modal-section">
               <label class="field-title">结构名称</label>
               <input type="text" id="clNewName" placeholder="例如：结果前置·痛点解决·行动引导型">
@@ -1497,6 +1409,25 @@
             <div class="cl-modal-section">
               <label class="field-title">结构公式</label>
               <input type="text" id="clNewFormula" placeholder="例如：结果前置 → 痛点放大 → 能力证明 → 行动引导">
+            </div>
+            <div class="cl-modal-two-col">
+              <div class="cl-modal-section">
+                <label class="field-title">适用时长</label>
+                <select id="clNewDuration"><option>不限</option><option>15–30 秒</option><option selected>30–45 秒</option><option>45–60 秒</option><option>60 秒以上</option><option value="custom">自定义</option></select>
+                <div class="cl-custom-duration" id="clCustomDuration" hidden>
+                  <label><input type="number" id="clDurationMin" min="1" max="600" value="30"><span>秒</span></label>
+                  <i>至</i>
+                  <label><input type="number" id="clDurationMax" min="1" max="600" value="45"><span>秒</span></label>
+                </div>
+              </div>
+              <div class="cl-modal-section">
+                <label class="field-title">创建方式</label>
+                <select id="clNewMethod" disabled><option value="manual">手动创建</option><option value="reference">从参考视频提炼</option></select>
+              </div>
+            </div>
+            <div class="cl-modal-section" id="clNewReferenceWrap" hidden>
+              <label class="field-title">参考视频</label>
+              <input type="text" id="clNewReference" placeholder="选择成品视频或输入临时上传文件名">
             </div>
             <div class="cl-modal-section">
               <label class="field-title">结构标签<span class="req">*</span></label>
@@ -1509,52 +1440,18 @@
               <label class="field-title">关联产品</label>
               <select id="clNewProduct" disabled><option>通用结构（不限定产品）</option></select>
             </div>
+            <div class="cl-modal-section">
+              <div class="cl-stage-editor-head"><label class="field-title">结构阶段<span class="req">*</span></label><button class="cl-action-btn" type="button" id="clAddStage">＋ 添加阶段</button></div>
+              <div class="cl-stage-editor-labels"><span>阶段</span><span>说什么</span><span>拍什么</span><span>怎么剪</span><span></span></div>
+              <div class="cl-stage-editor" id="clStageEditor"></div>
+            </div>
+            </div>
           </div>
           <div class="cl-modal-foot-stack">
+            <button class="ghost-btn" type="button" id="clBackSource" hidden>上一步</button>
+            <span class="cl-modal-foot-spacer"></span>
             <button class="ghost-btn" type="button" data-cl-close="new">取消</button>
-            <button class="primary-btn" type="button" id="clNewSave"><span id="clNewSaveText">保存结构</span></button>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-backdrop" id="clCopyModal">
-        <div class="modal cl-modal-compact">
-          <div class="modal-head" style="display:block;padding:18px 22px 14px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-              <div class="cl-modal-head-row"><span class="cl-modal-icon">构</span><h3>复制结构</h3></div>
-              <button class="close-btn" type="button" data-cl-close="copy">✕</button>
-            </div>
-            <p class="cl-modal-subtitle">保存后可在智能文案创作时直接调用</p>
-          </div>
-          <div class="modal-body">
-            <div class="cl-modal-section">
-              <label class="field-title">结构名称</label>
-              <input type="text" id="clCopyName">
-            </div>
-            <div class="cl-modal-section">
-              <label class="field-title">结构公式</label>
-              <input type="text" id="clCopyFormula">
-            </div>
-            <div class="cl-modal-section">
-              <label class="field-title">结构标签<span class="req">*</span></label>
-              <div class="cl-tag-cards" id="clCopyTagCards">
-                <div class="cl-tag-card" data-cl-tag="general"><span class="cl-tag-card-icon">通</span><div class="cl-tag-card-body"><div class="cl-tag-card-title">通用结构</div><div class="cl-tag-card-desc">可供不同产品创作时复用</div></div><span class="cl-tag-card-check">✓</span></div>
-                <div class="cl-tag-card selected" data-cl-tag="product"><span class="cl-tag-card-icon">品</span><div class="cl-tag-card-body"><div class="cl-tag-card-title">产品级结构</div><div class="cl-tag-card-desc">仅在关联产品创作时优先调用</div></div><span class="cl-tag-card-check">✓</span></div>
-              </div>
-            </div>
-            <div class="cl-modal-section">
-              <label class="field-title">关联产品</label>
-              <select id="clCopyProduct">
-                <option>轻净 Pro 除螨仪</option>
-                <option>轻享空气炸锅 A8</option>
-                <option>净界洗地机 S5</option>
-                <option>随行榨汁杯 Mini</option>
-              </select>
-            </div>
-          </div>
-          <div class="cl-modal-foot-stack">
-            <button class="ghost-btn" type="button" data-cl-close="copy">取消</button>
-            <button class="primary-btn" type="button" id="clCopySave">保存结构</button>
+            <button class="primary-btn" type="button" id="clNewSave" hidden><span id="clNewSaveText">保存结构</span></button>
           </div>
         </div>
       </div>
@@ -1567,7 +1464,6 @@
             <h2 id="clDrawerTitle">结果前置·痛点解决·行动引导型</h2>
           </div>
           <div class="cl-drawer-actions">
-            <button class="cl-action-btn primary" type="button" id="clDrawerCopy">复制</button>
             <button class="close-btn" type="button" data-cl-close="drawer">✕</button>
           </div>
         </div>
@@ -1575,47 +1471,32 @@
           <div class="cl-drawer-info">
             <div class="cl-drawer-info-item"><label>结构名称</label><div class="cl-drawer-info-val" id="clDrawerName">结果前置·痛点解决·行动引导型</div></div>
             <div class="cl-drawer-info-item"><label>结构公式</label><div class="cl-drawer-info-val" id="clDrawerFormula">结果前置 → 痛点放大 → 能力证明 → 行动引导</div></div>
-            <div class="cl-drawer-info-item"><label>结构标签</label><div class="cl-drawer-info-val" id="clDrawerTag"><span class="cl-struct-tag cl-struct-tag-product">产品级结构</span></div></div>
+            <div class="cl-drawer-info-item"><label>适用范围</label><div class="cl-drawer-info-val" id="clDrawerTag"><span class="cl-struct-tag cl-struct-tag-product">产品级结构</span></div></div>
             <div class="cl-drawer-info-item"><label>关联产品</label><div class="cl-drawer-info-val" id="clDrawerProduct">轻净 Pro 除螨仪</div></div>
+            <div class="cl-drawer-info-item"><label>适用时长</label><div class="cl-drawer-info-val" id="clDrawerDuration">30–45 秒</div></div>
+            <div class="cl-drawer-info-item"><label>创建方式</label><div class="cl-drawer-info-val" id="clDrawerMethod">平台数据学习</div></div>
           </div>
-          <div class="cl-drawer-section">
-            <div class="cl-drawer-section-head">
-              <span class="ico">荐</span>
-              <div><h3>高消耗素材示例</h3><p>为快速判断，仅展示命中该结构且消耗显著的前 20 条素材，按消耗从高到低排列。</p></div>
-            </div>
-            <div class="cl-drawer-toolbar">
-              <div class="left">相关千川文案与视频<span class="count">展示 2 条</span></div>
-              <input type="text" placeholder="搜索产品、视频名称、素材 ID 或文案">
-            </div>
-            <div class="cl-video-card">
-              <div class="cl-video-thumb"></div>
-              <div class="cl-video-body">
-                <div class="cl-video-head">
-                  <div><div class="cl-video-title">轻净 Pro 除螨仪｜结果冲击型</div><div class="cl-video-meta">轻净 Pro 除螨仪 · 素材 ID 7553983811703193643</div></div>
-                  <span class="cl-consume-chip">消耗 ¥328,460</span>
-                </div>
-                <div class="cl-video-content">你以为床垫看着干净就够了吗？实际走一遍才知道，藏在纤维深处的细小灰尘根本不是换床单能解决的。轻净 Pro 除螨仪拍打和吸尘同步进行，透明尘杯里吸出了什么，清洁结果当场就能看见。床垫、沙发和布艺都能用，尘杯还能拆下来清洗。想看完整清洁过程，点进商品看实测。</div>
-                <div class="cl-video-actions">
-                  <button class="cl-action-btn" type="button">展开全文</button>
-                  <button class="cl-action-btn" type="button">复制文案</button>
-                  <button class="cl-action-btn" type="button">播放视频</button>
-                </div>
+          <div class="cl-reference-note" id="clDrawerReference" hidden></div>
+          <div class="cl-detail-tabs" id="clDetailTabs">
+            <button class="active" type="button" data-cl-detail-tab="stages">结构阶段 <span id="clStageTabCount">0</span></button>
+            <button type="button" data-cl-detail-tab="examples">参考成品 <span id="clExampleTabCount">0</span></button>
+          </div>
+          <div class="cl-detail-panel active" data-cl-detail-panel="stages">
+            <div class="cl-drawer-section">
+              <div class="cl-drawer-section-head">
+                <span class="ico">阶</span>
+                <div><h3>结构阶段</h3><p>一套结构同时约束内容表达、画面匹配与基础剪辑，实际时长由文案配音和已有素材共同校准。</p></div>
               </div>
+              <div class="cl-stage-cards" id="clDrawerStages"></div>
             </div>
-            <div class="cl-video-card">
-              <div class="cl-video-thumb"></div>
-              <div class="cl-video-body">
-                <div class="cl-video-head">
-                  <div><div class="cl-video-title">床褥清洁前后对比｜主视频</div><div class="cl-video-meta">轻净 Pro 除螨仪 · 素材 ID 7553983811703195012</div></div>
-                  <span class="cl-consume-chip">消耗 ¥271,930</span>
-                </div>
-                <div class="cl-video-content">刚换完床单，不代表床垫深处真的干净。先别听我讲参数，直接看轻净 Pro 除螨仪走完一遍后的尘杯。它通过高频拍打把深处碎屑带出来，再同步吸走，清洁前后差别不用猜。家里有孩子或者宠物，床垫和沙发都可以定期这样处理。</div>
-                <div class="cl-video-actions">
-                  <button class="cl-action-btn" type="button">展开全文</button>
-                  <button class="cl-action-btn" type="button">复制文案</button>
-                  <button class="cl-action-btn" type="button">播放视频</button>
-                </div>
+          </div>
+          <div class="cl-detail-panel" data-cl-detail-panel="examples">
+            <div class="cl-drawer-section">
+              <div class="cl-drawer-section-head">
+                <span class="ico">荐</span>
+                <div><h3>参考成品</h3><p>用于说明该结构如何落到文案与画面；平台学习结构展示代表性高消耗成品，自建结构展示提炼来源。</p></div>
               </div>
+              <div id="clDrawerExamples"></div>
             </div>
           </div>
         </div>
@@ -2740,7 +2621,7 @@
           <div class="relation-panel" data-relation-panel="material"><div class="relation-row"><i></i><div><strong>床垫拍打吸尘实拍镜头</strong><small>创作素材 · 00:05</small></div><button type="button" data-toast="已打开素材">查看</button></div><div class="relation-row"><i></i><div><strong>透明尘杯脏污特写</strong><small>历史素材拆分 · 00:03</small></div><button type="button" data-toast="已打开素材">查看</button></div></div>
           <div class="relation-panel" data-relation-panel="script"><div class="relation-row"><i></i><div><strong>深层清洁演示主视频脚本</strong><small>智能脚本 · 8 个分镜 · 已生成视频</small></div><button type="button" data-toast="已打开该脚本生成的视频">查看生成视频</button></div></div>
           <div class="relation-panel" data-relation-panel="video"><div class="relation-row"><i></i><div><strong>除螨仪主视频 30s</strong><small>智能混剪 · 已关联结构化脚本</small></div><button type="button" data-toast="已打开视频脚本">查看脚本</button></div></div>
-          <div class="relation-panel" data-relation-panel="template"><div class="relation-row"><i></i><div><strong>清洁电器高点击口播提示词</strong><small>Agent 提示词 · 智能文案</small></div><button type="button" data-toast="已打开提示词模板">查看</button></div><div class="relation-row"><i></i><div><strong>结果冲击型 3 秒钩子</strong><small>爆款文案结构</small></div><button type="button" data-toast="已打开文案结构">查看</button></div><div class="relation-row"><i></i><div><strong>实拍演示主视频结构</strong><small>爆款视频结构</small></div><button type="button" data-toast="已打开视频结构">查看</button></div><div class="relation-row"><i></i><div><strong>清洁品类 TVC 策划画布</strong><small>无限画板模板</small></div><button type="button" data-toast="已打开无限画板模板">查看</button></div></div>
+          <div class="relation-panel" data-relation-panel="template"><div class="relation-row"><i></i><div><strong>清洁电器高点击口播提示词</strong><small>Agent 提示词 · 智能文案</small></div><button type="button" data-toast="已打开提示词模板">查看</button></div><div class="relation-row"><i></i><div><strong>结果前置·实拍证明型</strong><small>爆款内容结构 · 说什么 / 拍什么 / 怎么剪</small></div><button type="button" data-toast="已打开内容结构">查看</button></div><div class="relation-row"><i></i><div><strong>清洁品类 TVC 策划画布</strong><small>无限画板模板</small></div><button type="button" data-toast="已打开无限画板模板">查看</button></div></div>
         </section>
       </div>
       <div class="modal-foot"><button class="ghost-btn" type="button" data-close-product-detail>关闭</button><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-toast="已进入编辑产品信息">编辑产品</button><button class="primary-btn" type="button" data-open-product-creation>用此产品创作</button></div></div>
@@ -3539,7 +3420,7 @@
   <script src="js/core.js"></script>
   <script src="js/pull.js"></script>
   <script src="js/business.js"></script>
-  <script src="js/misc.js"></script>
+  <script src="js/misc.js?v=20260811h"></script>
   <script>
     (function activateEmbeddedEntry(){
       var entry=new URLSearchParams(location.search).get('entry')||'image-library';

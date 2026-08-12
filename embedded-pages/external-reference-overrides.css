@@ -60,6 +60,7 @@
 .rv-relation-value{color:#4f43d3}
 .rv-detail-product{color:#565a69;font-weight:650}
 .rv-field-hint{display:block;margin-top:7px;color:#969aaa;font-size:11px;line-height:1.5}
+.rv-history-list article{padding:14px 0;border-bottom:1px solid #eef0f4}.rv-history-list article:last-child{border-bottom:0}.rv-history-list article>div{display:flex;justify-content:space-between;gap:12px;align-items:baseline}.rv-history-list article b{white-space:nowrap;font-size:13px;font-weight:600;color:#1a1d2a}.rv-history-list article span{color:#8e93a1;font-size:12px;white-space:nowrap;flex-shrink:0}.rv-history-list article p{display:flex;align-items:center;gap:8px;margin:10px 0 0;color:#6b7180;flex-wrap:wrap}.rv-history-list em,.rv-history-list strong{padding:5px 8px;border-radius:6px;font-size:12px;font-style:normal;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rv-history-list em{background:#f5f6f9;color:#8e93a1}.rv-history-list strong{background:#efedff;color:#5f52dc}
 @media(max-width:1120px){.rv-toolbar{flex-wrap:wrap}.rv-search{order:5;flex-basis:calc(100% - 86px)}}
 
 /* 产品详情复用时只暴露原交互层，不显示外部参考视频列表页。 */

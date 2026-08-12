@@ -81,7 +81,7 @@
   publishFinishedVideoCatalog();
 
   const state = {
-    folder: 'all', source: 'all', status: 'all', tags: new Set(), sort: 'time-desc', search: '',
+    folder: 'all', source: 'all', status: 'all', qianchuan: 'all', tags: new Set(), sort: 'time-desc', search: '',
     selected: new Set(), expanded: new Set(['brand', 'campaign', 'mix', 'mite']),
     currentVideo: null, currentAd: null, range: '7', metric: 'clicks', playing: false, importFileValid: false, importFile: null, importMeta: null,
     timer: null, playTime: 0, folderAction: null, assetAction: null, batchAction: null, tagModal: null, tagGroup: 'all', analyzeTargets: [], menuVideo: null, importTags: []
@@ -170,9 +170,11 @@
       const inFolder = state.folder === 'all' || currentFolderIds().includes(video.folder);
       const inSource = state.source === 'all' || video.source === state.source;
       const inStatus = state.status === 'all' || video.status === state.status;
+      const isLinked = (video.ads || []).length > 0;
+      const inQc = state.qianchuan === 'all' || (state.qianchuan === 'linked' ? isLinked : !isLinked);
       const inTags = !state.tags.size || [...state.tags].every((tag) => (video.tags || []).includes(tag));
       const searchable = [video.name, video.file, video.product, ...(video.tags || []), ...(video.ads || []).map((ad) => ad.id)].join(' ').toLowerCase();
-      return inFolder && inSource && inStatus && inTags && (!query || searchable.includes(query));
+      return inFolder && inSource && inStatus && inQc && inTags && (!query || searchable.includes(query));
     }).sort((a, b) => {
       if (state.sort === 'time-asc') return a.created.localeCompare(b.created);
       if (state.sort === 'name') return a.file.localeCompare(b.file, 'zh-CN');
@@ -183,8 +185,21 @@
   }
 
   const statusLabel = (status) => ({ done: '已分析', pending: '待分析', running: '分析中', failed: '分析失败' }[status] || '待分析');
+  const auditTime = (value, detailed = false) => {
+    const match = String(value || '').match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?/); if (!match) return value || '—';
+    const [, year, month, day, hour, minute, second = '00'] = match;
+    return `${year === '2026' ? '' : `${year}/`}${month}/${day} ${hour}:${minute}${detailed ? `:${second}` : ''}`;
+  };
+  const auditMeta = video => ({ creator: video.creator || '嗡大发', updatedBy: video.updatedBy || '嗡大发', updatedAt: video.updatedAt || video.created });
+  function openAssetHistory(video) {
+    const meta = auditMeta(video);
+    byId('fvAssetHistoryTitle').textContent = `“${video.name}”修改记录`;
+    byId('fvAssetHistoryMeta').textContent = `创建：${meta.creator} · ${auditTime(video.created, true)}　｜　最近修改：${meta.updatedBy} · ${auditTime(meta.updatedAt, true)}`;
+    byId('fvAssetHistoryList').innerHTML = `<article class="fv-history-item"><div><b>视频标签</b><small>${meta.updatedBy} · ${auditTime(meta.updatedAt, true)}</small></div><p>未设置 → ${(video.tags || []).join('、') || '暂无标签'}</p></article><article class="fv-history-item"><div><b>所属文件夹</b><small>${meta.creator} · ${auditTime(video.created, true)}</small></div><p>未归档 → ${folderPath(video.folder).join(' / ')}</p></article>`;
+    openModal('fvAssetHistoryModal');
+  }
   function videoCard(video) {
-    const cardTime = `${video.created.slice(5, 7)}/${video.created.slice(8, 10)} ${video.created.slice(11)}:00`;
+    const cardTime = `${auditMeta(video).updatedBy} · ${auditTime(auditMeta(video).updatedAt)}`;
     const selected = state.selected.has(video.id);
     const source = sourceMeta[video.source] || sourceMeta.local;
     const qianchuan = video.ads?.length ? '<span class="fv-product-tag fv-qianchuan-tag">已关联千川</span>' : '';
@@ -606,7 +621,8 @@
     byId('fvPreviewFolder').textContent = folderPath(video.folder).join(' / ');
     byId('fvPreviewFile').textContent = video.file;
     byId('fvPreviewDuration').textContent = `${formatTime(video.duration)} / ${video.size || 0} MB`;
-    byId('fvPreviewCreated').textContent = video.created;
+    byId('fvPreviewCreated').textContent = `${auditMeta(video).creator} · ${auditTime(video.created, true)}`;
+    byId('fvPreviewUpdated').textContent = `${auditMeta(video).updatedBy} · ${auditTime(auditMeta(video).updatedAt, true)}`;
     renderPreviewTags(video);
     const nativeVideo = byId('fvPreviewNative');
     if (video.url) { nativeVideo.src = video.url; nativeVideo.hidden = false; $('.fv-preview-poster', byId('fvPreviewVideo')).hidden = true; }
@@ -636,7 +652,8 @@
     byId('fvListView').hidden = true; byId('fvDetailView').hidden = false;
     byId('fvDetailTitle').textContent = video.name;
     byId('fvDetailFolderPath').textContent = `所属文件夹：${folderPath(video.folder).join(' / ')}`;
-    byId('fvDetailCreated').textContent = `创建时间：${video.created}`;
+    byId('fvDetailCreated').textContent = `创建：${auditMeta(video).creator} · ${auditTime(video.created, true)}`;
+    byId('fvDetailUpdated').textContent = `最近修改：${auditMeta(video).updatedBy} · ${auditTime(auditMeta(video).updatedAt, true)}`;
     const videoTags = video.tags || [];
     byId('fvDetailVideoTags').innerHTML = videoTags.length
       ? `<em>标签：</em>${videoTags.map((tag) => `<b>${escapeHtml(tag)}</b>`).join('')}`
@@ -843,7 +860,7 @@
 
   document.addEventListener('click', (event) => {
     const target = event.target.closest('button, article[data-video-id], [data-preview-area], [data-detail-area], circle[data-chart-time], .fv-video-progress');
-    if (!target) { hideMenu(); byId('fvStatusDropdown').hidden = true; byId('fvSortDropdown').hidden = true; return; }
+    if (!target) { hideMenu(); byId('fvStatusDropdown').hidden = true; byId('fvQcDropdown').hidden = true; byId('fvSortDropdown').hidden = true; return; }
     if (target.dataset.closeModal) { closeModal(target.dataset.closeModal); return; }
     if (target.dataset.folderSelect) { selectFolder(target.dataset.folderSelect); return; }
     if (target.dataset.folderToggle) { const id = target.dataset.folderToggle; state.expanded.has(id) ? state.expanded.delete(id) : state.expanded.add(id); renderFolderTree(); return; }
@@ -865,6 +882,7 @@
     if (target.dataset.tagGroup) { state.tagGroup = target.dataset.tagGroup; renderTagModal(); return; }
     if (target.dataset.tagOption) { const tag = target.dataset.tagOption; state.tagModal.draft.has(tag) ? state.tagModal.draft.delete(tag) : state.tagModal.draft.add(tag); renderTagModal(); return; }
     if (target.dataset.status) { state.status = target.dataset.status; byId('fvStatusFilterText').textContent = target.textContent; $$('[data-status]', byId('fvStatusDropdown')).forEach((button) => button.classList.toggle('active', button.dataset.status === state.status)); byId('fvStatusDropdown').hidden = true; renderVideos(); return; }
+    if (target.dataset.qc) { state.qianchuan = target.dataset.qc; byId('fvQcFilterText').textContent = target.textContent; $$('[data-qc]', byId('fvQcDropdown')).forEach((button) => button.classList.toggle('active', button.dataset.qc === state.qianchuan)); byId('fvQcDropdown').hidden = true; renderVideos(); return; }
     if (target.dataset.sort) { state.sort = target.dataset.sort; byId('fvSortDropdown').hidden = true; renderVideos(); toast(`已按「${target.textContent}」排序`, 'success'); return; }
     if (target.dataset.selectVideo) { event.stopPropagation(); toggleSelection(target.dataset.selectVideo); return; }
     if (target.dataset.previewArea) { openPreview(target.dataset.previewArea); return; }
@@ -910,8 +928,9 @@
   byId('fvClearTag').addEventListener('click', () => { if (!state.tagModal) return; state.tagModal.draft.clear(); renderTagModal(); });
   byId('fvConfirmTag').addEventListener('click', confirmTagModal);
   byId('fvConfirmBatchEdit').addEventListener('click', confirmBatchEdit);
-  byId('fvStatusFilter').addEventListener('click', () => { $$('[data-status]', byId('fvStatusDropdown')).forEach((button) => button.classList.toggle('active', button.dataset.status === state.status)); byId('fvStatusDropdown').hidden = !byId('fvStatusDropdown').hidden; byId('fvSortDropdown').hidden = true; });
-  byId('fvSortBtn').addEventListener('click', () => { byId('fvSortDropdown').hidden = !byId('fvSortDropdown').hidden; byId('fvStatusDropdown').hidden = true; });
+  byId('fvStatusFilter').addEventListener('click', () => { $$('[data-status]', byId('fvStatusDropdown')).forEach((button) => button.classList.toggle('active', button.dataset.status === state.status)); byId('fvStatusDropdown').hidden = !byId('fvStatusDropdown').hidden; byId('fvQcDropdown').hidden = true; byId('fvSortDropdown').hidden = true; });
+  byId('fvQcFilter').addEventListener('click', () => { $$('[data-qc]', byId('fvQcDropdown')).forEach((button) => button.classList.toggle('active', button.dataset.qc === state.qianchuan)); byId('fvQcDropdown').hidden = !byId('fvQcDropdown').hidden; byId('fvStatusDropdown').hidden = true; byId('fvSortDropdown').hidden = true; });
+  byId('fvSortBtn').addEventListener('click', () => { byId('fvSortDropdown').hidden = !byId('fvSortDropdown').hidden; byId('fvStatusDropdown').hidden = true; byId('fvQcDropdown').hidden = true; });
   byId('fvRefreshBtn').addEventListener('click', () => { renderAll(); toast('列表已刷新', 'success'); });
 
   // 批量操作栏(底栏) — 数据批量动作
@@ -929,9 +948,12 @@
   byId('fvStartAnalyze').addEventListener('click', startAnalyze);
   byId('fvAssetModalConfirm').addEventListener('click', confirmAssetAction);
   byId('fvClearSearch').addEventListener('click', () => { state.search = ''; byId('fvSearch').value = ''; renderVideos(); });
-  byId('fvResetFilters').addEventListener('click', () => { state.search = ''; state.source = 'all'; state.status = 'all'; state.tags.clear(); byId('fvSearch').value = ''; byId('fvStatusFilterText').textContent = '全部状态'; $$('.fv-source-tabs button').forEach((button) => button.classList.toggle('active', button.dataset.value === 'all')); renderVideos(); });
+  byId('fvResetFilters').addEventListener('click', () => { state.search = ''; state.source = 'all'; state.status = 'all'; state.qianchuan = 'all'; state.tags.clear(); byId('fvSearch').value = ''; byId('fvStatusFilterText').textContent = '全部状态'; byId('fvQcFilterText').textContent = '全部关联'; $$('.fv-source-tabs button').forEach((button) => button.classList.toggle('active', button.dataset.value === 'all')); renderVideos(); });
   byId('fvBackToList').addEventListener('click', closeDetail);
   byId('fvEditDetailInfo').addEventListener('click', () => { if (state.currentVideo) openAssetAction('info', state.currentVideo); });
+  [byId('fvPreviewHistory'), byId('fvDetailHistory')].forEach(button => button?.addEventListener('click', () => {
+    const video = videos.find(item => item.id === state.currentVideo); if (video) openAssetHistory(video);
+  }));
   byId('fvPlayBtn').addEventListener('click', togglePlayback);
   byId('fvReanalyze').addEventListener('click', () => requestAnalyze([state.currentVideo]));
   ['fvRangeStart', 'fvRangeEnd'].forEach((id) => byId(id).addEventListener('change', applyCustomRange));
@@ -994,9 +1016,10 @@
       || videos.find((item) => item.file === request.file || item.name === request.name);
     if (!video) { toast('未找到对应成片视频', 'warning'); notifyPdaOverlayIfIdle(); return; }
     pdaOverlayAssetId = video.id;
-    state.folder = 'all'; state.source = 'all'; state.status = 'all'; state.tags.clear(); state.search = '';
+    state.folder = 'all'; state.source = 'all'; state.status = 'all'; state.qianchuan = 'all'; state.tags.clear(); state.search = '';
     byId('fvSearch').value = '';
     byId('fvStatusFilterText').textContent = '全部状态';
+    byId('fvQcFilterText').textContent = '全部关联';
     $$('.fv-source-tabs button').forEach((button) => button.classList.toggle('active', button.dataset.value === 'all'));
     byId('fvListView').hidden = false; byId('fvDetailView').hidden = true;
     renderAll();

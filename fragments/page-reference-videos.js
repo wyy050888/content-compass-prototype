@@ -1,6 +1,6 @@
 (function(){
   var s=document.currentScript;if(!s)return;
-  s.insertAdjacentHTML('beforebegin',`<section class="page embedded-library-page" id="page-reference-videos"><iframe class="embedded-library-frame" src="embedded-pages/外部参考视频.html?v=20260811m" title="外部参考视频"></iframe></section>`);
+  s.insertAdjacentHTML('beforebegin',`<section class="page embedded-library-page" id="page-reference-videos"><iframe class="embedded-library-frame" src="embedded-pages/外部参考视频.html?v=20260812a" title="外部参考视频"></iframe></section>`);
   var frame=document.querySelector('#page-reference-videos iframe');
   window.addEventListener('message',function(event){
     if(event.source!==frame?.contentWindow||event.data?.type!=='rv-request-products')return;

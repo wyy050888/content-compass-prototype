@@ -26,6 +26,7 @@
     };
     const personaFieldLabels = { name:"画像名称", brand:"适用品牌", category:"适用类目", product:"适用产品", audience:"抖音八大人群", gender:"性别", age:"年龄", pain:"人群核心痛点", scenes:"使用场景" };
     const personaTbody = document.getElementById("personaLibraryTbody");
+    const personaTime = (value, detailed = false) => { const match=String(value||"").match(/(?:(\d{4})[-/])?(\d{2})[-/](\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?/); if(!match)return value||"—"; const [,year,month,day,hour,minute,second="00"]=match; return `${year&&Number(year)!==2026?`${year}/`:""}${month}/${day} ${hour}:${minute}${detailed?`:${second}`:""}`; };
     const personaEmpty = document.getElementById("personaLibraryEmpty");
     const personaModal = document.getElementById("personaTemplateModal");
     const personaHistoryModal = document.getElementById("personaHistoryModal");
@@ -49,13 +50,15 @@
         return (!keyword || haystack.includes(keyword)) && (product === "all" || persona.product === product);
       });
       personaTbody.innerHTML = rows.map(persona => `<tr data-persona-row="${persona.id}">
-        <td class="persona-name-cell"><strong>${escapeHtml(persona.name)}</strong><small>更新于 ${escapeHtml(persona.updated)}</small></td>
+        <td class="persona-name-cell"><strong>${escapeHtml(persona.name)}</strong></td>
         <td><span class="persona-attribute-summary">${escapeHtml(persona.audience)}<br>${escapeHtml(persona.gender)} · ${escapeHtml(persona.age)}岁</span></td>
         <td class="lib-cell-text">${personaCellHtml(persona.pain)}</td>
         <td class="lib-cell-text">${personaCellHtml(persona.scenes)}</td>
         <td><span class="persona-scope-tag">${escapeHtml(personaScope(persona))}</span></td>
+        <td><span class="persona-attribute-summary">嗡大发<br>${escapeHtml(personaTime(persona.created || '08/01 10:20'))}</span></td>
+        <td><span class="persona-attribute-summary">嗡大发<br>${escapeHtml(personaTime(persona.updated))}</span></td>
         <td>${persona.usage} 次</td>
-        <td><div class="persona-row-actions"><button class="lib-link" type="button" data-persona-edit="${persona.id}">编辑</button><button class="lib-link" type="button" data-persona-history="${persona.id}">编辑记录</button><button class="lib-link" type="button" data-persona-copy="${persona.id}">复制</button><button class="lib-link danger" type="button" data-persona-delete="${persona.id}">删除</button></div></td>
+        <td><div class="persona-row-actions"><button class="lib-link" type="button" data-persona-edit="${persona.id}">编辑</button><button class="lib-link" type="button" data-persona-history="${persona.id}">查看变更</button><button class="lib-link" type="button" data-persona-copy="${persona.id}">复制</button><button class="lib-link danger" type="button" data-persona-delete="${persona.id}">删除</button></div></td>
       </tr>`).join("");
       if (personaEmpty) personaEmpty.hidden = rows.length > 0;
     }
@@ -136,9 +139,9 @@
     function openPersonaHistory(id) {
       const persona = personaCatalog.find(item => item.id === id);
       if (!persona) return;
-      document.getElementById("personaHistoryTitle").textContent = `“${persona.name}”编辑记录`;
+      document.getElementById("personaHistoryTitle").textContent = `“${persona.name}”修改记录`;
       const history = personaHistories[id] || [];
-      document.getElementById("personaHistoryList").innerHTML = history.length ? history.map(item => `<article class="persona-history-item"><div class="persona-history-meta"><span>${escapeHtml(item.time)} · ${escapeHtml(item.user)}</span><span>${escapeHtml(item.field)}</span></div><div class="persona-history-change"><strong>${escapeHtml(item.field)}</strong><span>${escapeHtml(item.before)}</span><i>→</i><span>${escapeHtml(item.after)}</span></div></article>`).join("") : `<div class="persona-library-empty">暂无编辑记录</div>`;
+      document.getElementById("personaHistoryList").innerHTML = `<p class="persona-history-owner">创建：嗡大发 · ${escapeHtml(personaTime(persona.created || '08/01 10:20', true))}　｜　最近修改：嗡大发 · ${escapeHtml(personaTime(persona.updated, true))}</p>` + (history.length ? history.map(item => `<article class="persona-history-item"><div class="persona-history-meta"><span>${escapeHtml(personaTime(item.time, true))} · ${escapeHtml(item.user)}</span><span>${escapeHtml(item.field)}</span></div><div class="persona-history-change"><strong>${escapeHtml(item.field)}</strong><span>${escapeHtml(item.before)}</span><i>→</i><span>${escapeHtml(item.after)}</span></div></article>`).join("") : `<div class="persona-library-empty">暂无修改记录</div>`);
       personaHistoryModal?.classList.add("show");
     }
     function copyPersona(id) {
@@ -469,22 +472,31 @@
           + '<td class="cl-col-struct">' + chips + '</td>'
           + '<td class="cl-col-chars">' + r.chars + '字/' + r.duration + 's</td>'
           + '<td style="font-size:12px;">' + r.updated + '</td>'
-          + '<td class="cl-col-act"><div style="display:flex;gap:6px;align-items:center;">' + actBtns + '</div></td>'
+          + '<td class="cl-col-act"><div class="cl-act-group">' + actBtns + '</div></td>'
           + '</tr>';
       }).join("");
     }
 
+    function clCloseActionMenus() {
+      document.querySelectorAll(".cl-ai-menu.show").forEach(m => m.classList.remove("show"));
+      document.querySelectorAll(".cl-col-act.cl-menu-open").forEach(cell => cell.classList.remove("cl-menu-open"));
+    }
+
     function clToggleAIMenu(e) {
       e.stopPropagation();
-      document.querySelectorAll(".cl-ai-menu.show").forEach(m => m.classList.remove("show"));
       const menu = e.target.closest(".cl-ai-drop").querySelector(".cl-ai-menu");
-      menu.classList.toggle("show");
+      const shouldOpen = !menu.classList.contains("show");
+      clCloseActionMenus();
+      if (shouldOpen) {
+        menu.classList.add("show");
+        menu.closest(".cl-col-act")?.classList.add("cl-menu-open");
+      }
     }
 
     function clAIAction(action, id) {
       const labels = {rewrite:"智能改写", clone:"爆款仿写", script:"智能脚本", remix:"智能混剪"};
       showToast('「' + (labels[action]||action) + '」已创建任务，跳转至 AI 创作...');
-      document.querySelectorAll(".cl-ai-menu.show").forEach(m => m.classList.remove("show"));
+      clCloseActionMenus();
       setTimeout(function() { document.querySelector('.nav-item[data-page="creation"]').click(); }, 600);
     }
 
@@ -527,9 +539,7 @@
       clRender(clData);
     })();
 
-    document.addEventListener("click", function() {
-      document.querySelectorAll(".cl-ai-menu.show").forEach(function(m) { m.classList.remove("show"); });
-    });
+    document.addEventListener("click", clCloseActionMenus);
     const clImportBtn = document.getElementById("clImportBtn");
     if (clImportBtn) clImportBtn.addEventListener("click", () => showToast("导入文案功能开发中..."));
 
@@ -2198,78 +2208,280 @@
     [competitorEntryModal, competitorReportModal, competitorDeleteModal, competitorImageModal].forEach(modal => modal?.addEventListener("click", event => { if (event.target === modal) toggleCompetitorModal(modal, false); }));
     updateCompetitorCounts();
 
-    /* ── 爆款文案结构：模态框/抽屉/双卡选择 ── */
+    /* ── 爆款内容结构：统一管理说什么、拍什么、怎么剪 ── */
     const clNewModal = document.getElementById("clNewModal");
-    const clCopyModal = document.getElementById("clCopyModal");
     const clDeleteModal = document.getElementById("clDeleteModal");
     const clDetailDrawer = document.getElementById("clDetailDrawer");
     const clDrawerOverlay = document.getElementById("clDrawerOverlay");
+    const clProducts = ["轻净 Pro 除螨仪", "轻享空气炸锅 A8", "净界洗地机 S5", "随行榨汁杯 Mini"];
+    const clEscape = value => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" }[char]));
+
+    let contentStructures = [
+      {
+        id: 1, name: "结果前置·实拍证明型", formula: "结果钩子 → 痛点解释 → 产品演示 → 效果证明 → 行动引导",
+        source: "千川学习", scope: "产品级结构", product: "轻净 Pro 除螨仪", duration: "30–45 秒", method: "平台数据学习", updated: "08-10 16:42",
+        stages: [
+          { name:"结果钩子", say:"先抛出清洁后的反差结果，让用户立刻知道视频能解决什么问题。", visual:"尘杯灰尘特写或床褥清洁前后对比，产品不必完整出镜。", edit:"1–2 个近景；单镜 1–2 秒；结果画面直接硬切进入。" },
+          { name:"痛点解释", say:"说明肉眼看着干净，不代表纤维深处没有毛发、碎屑和灰尘。", visual:"床垫纤维、毛发碎屑、手拍扬尘等问题证据。", edit:"2–3 个细节镜头；正常速度；随信息点硬切。" },
+          { name:"产品演示", say:"表达高频拍打与同步吸尘如何把深层脏污带出来。", visual:"产品在床垫上推进、拍打头工作、尘杯积尘过程。", edit:"3–4 个动作镜头；保留完整关键动作；可轻微加速。" },
+          { name:"效果证明", say:"用可见结果强化清洁能力和真实可信感。", visual:"透明尘杯结果、清洁前后对比、用户查看结果。", edit:"2 个结果镜头；结果特写可短暂停留；前后硬切。" },
+          { name:"行动引导", say:"引导进入商品页查看完整实测与产品信息。", visual:"产品正面、收纳或用户持机展示。", edit:"1–2 个稳定镜头；正常速度；画面留足口播时间。" }
+        ],
+        example:{ title:"轻净 Pro 除螨仪｜床褥结果冲击型", meta:"代表性高消耗成品 · 素材 ID 7553983811703193643", badge:"消耗 ¥328,460", copy:"你以为床垫看着干净就够了吗？实际走一遍才知道，藏在纤维深处的细小灰尘根本不是换床单能解决的。轻净 Pro 边拍边吸，尘杯里的结果当场就能看见。" }
+      },
+      {
+        id: 2, name: "场景代入·功能证明型", formula: "生活场景 → 问题出现 → 功能演示 → 成品证明 → 优惠收口",
+        source: "千川学习", scope: "产品级结构", product: "轻享空气炸锅 A8", duration: "45–60 秒", method: "平台数据学习", updated: "08-09 14:28",
+        stages: [
+          { name:"生活场景", say:"从下班晚、做饭麻烦的真实场景切入。", visual:"下班回家、厨房台面、准备食材。", edit:"2–3 个环境与人物镜头；正常速度；硬切。" },
+          { name:"问题出现", say:"点出传统烹饪耗时、油烟和看火的问题。", visual:"锅具、油烟、等待过程或凌乱台面。", edit:"2–3 个问题镜头；单镜 1–2 秒。" },
+          { name:"功能演示", say:"说明快速升温、少油烹饪和可视窗口。", visual:"放入食材、设定时间、窗口观察、开锅。", edit:"4–6 个完整操作镜头；等待过程可加速。" },
+          { name:"成品证明", say:"描述外酥里嫩和省时结果。", visual:"成品拉近特写、掰开食物、家庭试吃。", edit:"2–3 个近景；结果特写短暂停留。" },
+          { name:"优惠收口", say:"说明当前权益并引导查看商品。", visual:"产品全貌与成品同框。", edit:"稳定镜头承接口播；末尾硬切结束。" }
+        ],
+        example:{ title:"空气炸锅 A8｜下班晚餐场景", meta:"代表性高消耗成品 · 素材 ID 7553983811703195882", badge:"消耗 ¥216,780", copy:"下班晚又不想点外卖，把腌好的鸡翅放进去，选好时间就不用守着。可视窗口能直接看熟度，少油也能烤出焦脆表面。" }
+      },
+      {
+        id: 3, name: "人群点名·卖点展开型", formula: "人群点名 → 需求唤醒 → 核心卖点 → 证明补充 → 产品推荐",
+        source: "千川学习", scope: "通用结构", product: "通用", duration: "30–60 秒", method: "平台数据学习", updated: "08-08 18:20",
+        stages: [
+          { name:"人群点名", say:"直接点名最容易产生共鸣的一类目标用户。", visual:"目标人群在典型生活场景中的状态。", edit:"1–2 个人物或场景镜头；快速进入主题。" },
+          { name:"需求唤醒", say:"说明这类人经常遇到的具体问题与损失。", visual:"问题发生过程和细节证据。", edit:"2–3 个问题镜头；跟随信息点硬切。" },
+          { name:"核心卖点", say:"围绕一个核心卖点解释产品如何解决问题。", visual:"产品完整操作和关键功能特写。", edit:"3–5 个动作镜头；动作连续；必要时轻微加速。" },
+          { name:"证明补充", say:"用结果、参数事实或使用反馈补足可信度。", visual:"结果对比、细节特写或真实使用反应。", edit:"2–3 个证据镜头；结果画面短暂停留。" },
+          { name:"产品推荐", say:"总结适合谁，并引导查看产品。", visual:"产品全貌、使用完成或收纳画面。", edit:"1–2 个稳定收尾镜头。" }
+        ],
+        example:{ title:"通用结构示例｜家庭清洁人群", meta:"平台学习样例 · 已脱敏", badge:"高转化", copy:"家里有孩子或者宠物的，日常清洁最怕看不见的残留。与其反复打扫，不如直接看一遍完整实测，再决定这类产品适不适合你。" }
+      },
+      {
+        id: 4, name: "反差开场·实测证明型", formula: "反差开场 → 过程实测 → 结果证明 → 行动引导",
+        source: "自建", scope: "产品级结构", product: "净界洗地机 S5", duration: "15–30 秒", method: "从参考视频提炼", reference:"洗地机紫色污渍实测_成品01.mp4", updated: "08-11 09:16",
+        stages: [
+          { name:"反差开场", say:"先说一遍就干净的强结果，制造预期反差。", visual:"大面积紫色污渍与洗净地面的前后同场对比。", edit:"前后画面直接硬切；开场 2 秒内给结果。" },
+          { name:"过程实测", say:"描述推拉一次完成吸污与清洁。", visual:"洗地机经过污渍、污水被吸走的完整动作。", edit:"保留动作起止；等待段可 1.1–1.3 倍加速。" },
+          { name:"结果证明", say:"强调地面无明显残留、干净可见。", visual:"地面反光特写、人物走过或躺下展示。", edit:"结果镜头 2–3 个；稳定画面可短暂停留。" },
+          { name:"行动引导", say:"邀请用户进入商品页看完整实测。", visual:"产品与清洁后地面同框。", edit:"1 个稳定收尾镜头。" }
+        ],
+        example:{ title:"洗地机紫色污渍实测_成品01.mp4", meta:"自建结构提炼来源 · 成品视频库", badge:"参考视频", copy:"这么大一片污渍，推过去没有反复拖，一遍就被吸走了。清洁后的地面没有明显水痕，结果直接看得到。" }
+      }
+    ];
 
     function clOpenModal(modal) { if (modal) modal.classList.add("show"); }
     function clCloseModal(modal) { if (modal) modal.classList.remove("show"); }
     function clOpenDrawer() { if (clDetailDrawer) { clDetailDrawer.classList.add("show"); if (clDrawerOverlay) clDrawerOverlay.classList.add("show"); } }
     function clCloseDrawer() { if (clDetailDrawer) { clDetailDrawer.classList.remove("show"); if (clDrawerOverlay) clDrawerOverlay.classList.remove("show"); } }
 
-    // 状态：编辑/删除目标行
-    let clEditingRow = null;
-    let clDeletingRow = null;
+    let clEditingId = null;
+    let clDeletingId = null;
     let clDeleteTargetName = "";
 
-    // 重置 clNewModal 为「新建」状态
-    function clResetNewModalMode() {
-      const titleEl = document.getElementById("clNewModalTitle");
-      const subEl = document.getElementById("clNewModalSubtitle");
-      const saveText = document.getElementById("clNewSaveText");
-      if (titleEl) titleEl.textContent = "新建爆款文案结构";
-      if (subEl) subEl.textContent = "保存后可在智能文案创作时直接调用";
-      if (saveText) saveText.textContent = "保存结构";
-      clEditingRow = null;
+    function clNow() {
+      const date = new Date();
+      return `${String(date.getMonth() + 1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")} ${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`;
+    }
+    function clProductOptions(selected = "") {
+      return clProducts.map(name => `<option${name === selected ? " selected" : ""}>${clEscape(name)}</option>`).join("");
+    }
+    function clScopeCard(containerId, scope) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.querySelectorAll(".cl-tag-card").forEach(card => card.classList.toggle("selected", card.dataset.clTag === (scope === "产品级结构" ? "product" : "general")));
+    }
+    function clSelectedScope(containerId) {
+      return document.querySelector(`#${containerId} .cl-tag-card.selected`)?.dataset.clTag === "product" ? "产品级结构" : "通用结构";
+    }
+    function clRenderTable() {
+      const tbody = document.getElementById("contentStructureTbody");
+      if (!tbody) return;
+      const query = document.getElementById("clStructureSearch")?.value.trim().toLowerCase() || "";
+      const source = document.getElementById("clStructureSourceFilter")?.value || "全部来源";
+      const scope = document.getElementById("clStructureTagFilter")?.value || "全部适用范围";
+      const filtered = contentStructures.filter(item => {
+        const haystack = [item.name, item.formula, item.product, item.reference].join(" ").toLowerCase();
+        return (!query || haystack.includes(query)) && (source === "全部来源" || item.source === source) && (scope === "全部适用范围" || item.scope === scope);
+      });
+      tbody.innerHTML = filtered.map(item => `
+        <tr data-cl-id="${item.id}">
+          <td><strong>${clEscape(item.name)}</strong><small class="cl-row-sub">${item.stages.length} 个阶段</small></td>
+          <td><span class="cl-formula-text">${clEscape(item.formula)}</span></td>
+          <td><span class="${item.source === "自建" ? "cl-source-custom" : "cl-source-qc"}">${clEscape(item.source)}</span></td>
+          <td><span class="cl-struct-tag ${item.scope === "产品级结构" ? "cl-struct-tag-product" : "cl-struct-tag-general"}">${clEscape(item.scope)}</span></td>
+          <td>${clEscape(item.duration)}</td><td>${clEscape(item.product)}</td><td>${clEscape(item.updated)}</td>
+          <td><span class="cl-table-actions"><button class="cl-table-action primary" type="button" data-cl-action="view">查看</button>${item.source === "自建" ? '<button class="cl-table-action" type="button" data-cl-action="edit">编辑</button><button class="cl-table-action danger" type="button" data-cl-action="delete">删除</button>' : ""}</span></td>
+        </tr>`).join("");
+      document.getElementById("contentStructureEmpty").hidden = filtered.length > 0;
     }
 
-    // 打开编辑模态框(复用 clNewModal,改为编辑模式)
-    function clOpenEditModal(name, formula, sourceText, tagText, productText, row) {
-      const titleEl = document.getElementById("clNewModalTitle");
-      const subEl = document.getElementById("clNewModalSubtitle");
-      const saveText = document.getElementById("clNewSaveText");
-      if (titleEl) titleEl.textContent = "编辑爆款文案结构";
-      if (subEl) subEl.textContent = "保存后将在原行更新,仅自建结构可编辑";
-      if (saveText) saveText.textContent = "保存修改";
-
-      const nameInput = document.getElementById("clNewName");
-      const formulaInput = document.getElementById("clNewFormula");
-      if (nameInput) nameInput.value = name;
-      if (formulaInput) formulaInput.value = formula;
-
-      const isProduct = tagText === "产品级结构";
-      const cards = document.getElementById("clNewTagCards");
-      if (cards) {
-        cards.querySelectorAll(".cl-tag-card").forEach(c => c.classList.remove("selected"));
-        const target = cards.querySelector(`[data-cl-tag='${isProduct ? "product" : "general"}']`);
-        if (target) target.classList.add("selected");
+    function clStageRow(stage = {}) {
+      return `<div class="cl-stage-editor-row"><input data-stage-field="name" value="${clEscape(stage.name || "新阶段")}" aria-label="阶段名称"><textarea data-stage-field="say" rows="2" aria-label="说什么">${clEscape(stage.say || "")}</textarea><textarea data-stage-field="visual" rows="2" aria-label="拍什么">${clEscape(stage.visual || "")}</textarea><textarea data-stage-field="edit" rows="2" aria-label="怎么剪">${clEscape(stage.edit || "")}</textarea><button class="cl-stage-remove" type="button" data-remove-stage title="删除阶段">×</button></div>`;
+    }
+    function clRenderStageEditor(stages) {
+      const editor = document.getElementById("clStageEditor");
+      if (editor) editor.innerHTML = stages.map(clStageRow).join("");
+    }
+    function clReadStages() {
+      return Array.from(document.querySelectorAll("#clStageEditor .cl-stage-editor-row")).map(row => ({
+        name: row.querySelector('[data-stage-field="name"]')?.value.trim() || "",
+        say: row.querySelector('[data-stage-field="say"]')?.value.trim() || "",
+        visual: row.querySelector('[data-stage-field="visual"]')?.value.trim() || "",
+        edit: row.querySelector('[data-stage-field="edit"]')?.value.trim() || ""
+      })).filter(stage => stage.name);
+    }
+    function clToggleReference() {
+      const isReference = document.getElementById("clNewMethod")?.value === "reference";
+      const wrap = document.getElementById("clNewReferenceWrap");
+      if (wrap) wrap.hidden = !isReference;
+    }
+    function clToggleCustomDuration() {
+      const isCustom = document.getElementById("clNewDuration")?.value === "custom";
+      const custom = document.getElementById("clCustomDuration");
+      if (custom) custom.hidden = !isCustom;
+    }
+    function clSetDurationValue(duration = "30–45 秒") {
+      const select = document.getElementById("clNewDuration");
+      if (!select) return;
+      const standard = Array.from(select.options).some(option => option.value === duration && option.value !== "custom");
+      if (standard) {
+        select.value = duration;
+      } else {
+        select.value = "custom";
+        const values = String(duration).match(/\d+/g)?.map(Number) || [30,45];
+        document.getElementById("clDurationMin").value = values[0] || 30;
+        document.getElementById("clDurationMax").value = values[1] || values[0] || 45;
       }
+      clToggleCustomDuration();
+    }
+    function clGetDurationValue() {
+      const select = document.getElementById("clNewDuration");
+      if (!select || select.value !== "custom") return select?.value || "不限";
+      const min = Number(document.getElementById("clDurationMin").value);
+      const max = Number(document.getElementById("clDurationMax").value);
+      if (!Number.isFinite(min) || !Number.isFinite(max) || min < 1 || max < min) return "";
+      return min === max ? `${min} 秒` : `${min}–${max} 秒`;
+    }
 
-      const productSel = document.getElementById("clNewProduct");
-      if (productSel) {
-        if (isProduct) {
-          productSel.disabled = false;
-          productSel.innerHTML = `<option>${productText || "轻净 Pro 除螨仪"}</option><option>轻享空气炸锅 A8</option><option>净界洗地机 S5</option><option>随行榨汁杯 Mini</option>`;
-          if (productText) productSel.value = productText;
-        } else {
-          productSel.disabled = true;
-          productSel.innerHTML = "<option>通用结构（不限定产品）</option>";
-        }
+    const clVideoSourceCatalog = {
+      finished: [
+        { id:"finished-1", name:"轻净 Pro 除螨仪｜床褥结果冲击型", meta:"成品视频库 · 00:36 · 已分析", profileId:1 },
+        { id:"finished-2", name:"空气炸锅 A8｜下班晚餐场景", meta:"成品视频库 · 00:52 · 已分析", profileId:2 }
+      ],
+      external: [
+        { id:"external-1", name:"洗地机紫色污渍实测_成品01.mp4", meta:"外部参考视频 · 00:28 · 已分析", profileId:4 },
+        { id:"external-2", name:"清洁电器人群痛点参考.mp4", meta:"外部参考视频 · 00:41 · 已分析", profileId:3 }
+      ]
+    };
+    let clActiveVideoSource = "external";
+    let clSelectedVideoRef = null;
+    let clParseRunId = 0;
+
+    function clUpdateParseState() {
+      const button = document.getElementById("clParseVideo");
+      const hint = document.getElementById("clParseHint");
+      if (!button || !hint) return;
+      button.textContent = "解析并生成结构";
+      button.disabled = !clSelectedVideoRef;
+      hint.textContent = clSelectedVideoRef ? `已选择：${clSelectedVideoRef.name}` : "请选择一条视频";
+    }
+    function clRenderVideoSource() {
+      const content = document.getElementById("clVideoSourceContent");
+      if (!content) return;
+      clSelectedVideoRef = null;
+      if (clActiveVideoSource === "finished" || clActiveVideoSource === "external") {
+        content.innerHTML = `<div class="cl-video-source-list">${clVideoSourceCatalog[clActiveVideoSource].map(video => `<button class="cl-source-video-card" type="button" data-cl-video-id="${video.id}"><span class="cl-source-video-thumb">▶</span><span><strong>${clEscape(video.name)}</strong><small>${clEscape(video.meta)}</small></span><span class="cl-source-video-check">✓</span></button>`).join("")}</div>`;
+      } else if (clActiveVideoSource === "upload") {
+        content.innerHTML = `<div class="cl-source-input-panel"><input type="file" id="clVideoUploadInput" accept="video/*" hidden><button class="cl-action-btn primary" type="button" id="clChooseVideoFile">选择本地视频</button><p id="clUploadFileName">支持 MP4、MOV，单文件不超过 500MB</p></div>`;
+      } else {
+        content.innerHTML = `<div class="cl-source-input-panel"><p>粘贴抖音、快手或其他可访问的视频链接</p><div class="cl-source-link-row"><input type="url" id="clVideoLinkInput" placeholder="https://..."><button class="cl-action-btn" type="button" id="clClearVideoLink">清空</button></div><p>解析成功后将在内容结构中记录该提炼来源</p></div>`;
       }
+      clUpdateParseState();
+    }
+    function clShowSourceStep() {
+      document.getElementById("clCreateSourceStep").hidden = false;
+      document.getElementById("clStructureFormStep").hidden = true;
+      document.getElementById("clNewSave").hidden = true;
+      document.getElementById("clBackSource").hidden = true;
+      document.getElementById("clAiDraftNote").hidden = true;
+      document.querySelectorAll("[data-cl-create-mode]").forEach(button => button.classList.toggle("selected", button.dataset.clCreateMode === "video"));
+      document.getElementById("clVideoSourcePicker").hidden = false;
+      clActiveVideoSource = "external";
+      document.querySelectorAll("[data-cl-video-source]").forEach(button => button.classList.toggle("active", button.dataset.clVideoSource === clActiveVideoSource));
+      clRenderVideoSource();
+    }
+    function clShowStructureForm(isAiDraft, allowBack = true) {
+      document.getElementById("clCreateSourceStep").hidden = true;
+      document.getElementById("clStructureFormStep").hidden = false;
+      document.getElementById("clNewSave").hidden = false;
+      document.getElementById("clBackSource").hidden = !allowBack;
+      document.getElementById("clAiDraftNote").hidden = !isAiDraft;
+      document.getElementById("clNewModalSubtitle").textContent = isAiDraft ? "AI 已完成结构提炼，请确认后保存为自建内容结构" : "同时定义每个阶段说什么、拍什么、怎么剪，供智能文案、脚本和混剪调用";
+      clNewModal?.querySelector(".modal-body")?.scrollTo?.({ top:0, behavior:"auto" });
+    }
+    function clApplyVideoDraft(reference) {
+      const source = contentStructures.find(item => item.id === (reference.profileId || 1)) || contentStructures[0];
+      document.getElementById("clNewName").value = source.name.replace(/（自建）$/, "") + "（自建）";
+      document.getElementById("clNewFormula").value = source.formula;
+      clSetDurationValue(source.duration);
+      document.getElementById("clNewMethod").value = "reference";
+      document.getElementById("clNewReference").value = reference.name;
+      clScopeCard("clNewTagCards", source.scope);
+      const product = document.getElementById("clNewProduct");
+      product.disabled = source.scope !== "产品级结构";
+      product.innerHTML = source.scope === "产品级结构" ? clProductOptions(source.product) : "<option>通用结构（不限定产品）</option>";
+      clRenderStageEditor(source.stages.map(stage => ({...stage})));
+      clToggleReference();
+      clShowStructureForm(true, true);
+    }
+    function clApplyManualDefaults() {
+      document.getElementById("clNewName").value = "";
+      document.getElementById("clNewFormula").value = "";
+      clSetDurationValue("30–45 秒");
+      document.getElementById("clNewMethod").value = "manual";
+      document.getElementById("clNewReference").value = "";
+      clScopeCard("clNewTagCards", "通用结构");
+      const product = document.getElementById("clNewProduct");
+      product.disabled = true; product.innerHTML = "<option>通用结构（不限定产品）</option>";
+      clRenderStageEditor([
+        { name:"开场钩子", say:"用一句结果或问题抓住注意力", visual:"最有冲击力的结果或问题画面", edit:"1–2 个短镜头，直接硬切" },
+        { name:"产品证明", say:"说明产品如何解决问题", visual:"完整产品操作与结果特写", edit:"按口播信息点裁切拼接" },
+        { name:"行动引导", say:"总结价值并引导查看商品", visual:"产品全貌或使用完成画面", edit:"稳定镜头收尾" }
+      ]);
+      clToggleReference();
+    }
 
-      clEditingRow = row;
+    function clResetNewModalMode() {
+      clParseRunId += 1;
+      document.getElementById("clNewModalTitle").textContent = "新建爆款内容结构";
+      document.getElementById("clNewModalSubtitle").textContent = "优先从一条参考视频提炼，也支持手动创建";
+      document.getElementById("clNewSaveText").textContent = "保存结构";
+      clApplyManualDefaults();
+      clEditingId = null;
+      clShowSourceStep();
+    }
+
+    function clOpenEditModal(item) {
+      clResetNewModalMode();
+      document.getElementById("clNewModalTitle").textContent = "编辑爆款内容结构";
+      document.getElementById("clNewModalSubtitle").textContent = "仅自建结构可编辑；保存后调用方将使用最新结构";
+      document.getElementById("clNewSaveText").textContent = "保存修改";
+      document.getElementById("clNewName").value = item.name;
+      document.getElementById("clNewFormula").value = item.formula;
+      clSetDurationValue(item.duration);
+      document.getElementById("clNewMethod").value = item.reference ? "reference" : "manual";
+      document.getElementById("clNewReference").value = item.reference || "";
+      clScopeCard("clNewTagCards", item.scope);
+      const product = document.getElementById("clNewProduct");
+      product.disabled = item.scope !== "产品级结构";
+      product.innerHTML = item.scope === "产品级结构" ? clProductOptions(item.product) : "<option>通用结构（不限定产品）</option>";
+      clRenderStageEditor(item.stages);
+      clEditingId = item.id;
+      clToggleReference();
+      clShowStructureForm(false, false);
       clOpenModal(clNewModal);
     }
 
-    // 打开删除确认模态框
-    function clOpenDeleteModal(name, row) {
-      const nameEl = document.getElementById("clDeleteName");
-      if (nameEl) nameEl.textContent = name;
-      clDeletingRow = row;
-      clDeleteTargetName = name;
+    function clOpenDeleteModal(item) {
+      document.getElementById("clDeleteName").textContent = item.name;
+      clDeletingId = item.id; clDeleteTargetName = item.name;
       clOpenModal(clDeleteModal);
     }
 
@@ -2284,165 +2496,182 @@
           if (productSelect) {
             const isGeneral = card.dataset.clTag === "general";
             productSelect.disabled = isGeneral;
-            if (isGeneral) {
-              productSelect.innerHTML = "<option>通用结构（不限定产品）</option>";
-            } else {
-              productSelect.innerHTML = `
-                <option>轻净 Pro 除螨仪</option>
-                <option>轻享空气炸锅 A8</option>
-                <option>净界洗地机 S5</option>
-                <option>随行榨汁杯 Mini</option>`;
-            }
+            productSelect.innerHTML = isGeneral ? "<option>通用结构（不限定产品）</option>" : clProductOptions();
           }
         });
       });
     }
     clBindTagCards("clNewTagCards", "clNewProduct");
-    clBindTagCards("clCopyTagCards", "clCopyProduct");
 
-    document.querySelectorAll("[data-cl-action='new']").forEach(btn => btn.addEventListener("click", () => {
-      clResetNewModalMode();
-      const nameInput = document.getElementById("clNewName");
-      const formulaInput = document.getElementById("clNewFormula");
-      if (nameInput) nameInput.value = "";
-      if (formulaInput) formulaInput.value = "";
-      const cards = document.getElementById("clNewTagCards");
-      if (cards) {
-        cards.querySelectorAll(".cl-tag-card").forEach(c => c.classList.remove("selected"));
-        const general = cards.querySelector("[data-cl-tag='general']");
-        if (general) general.classList.add("selected");
-      }
-      const productSel = document.getElementById("clNewProduct");
-      if (productSel) { productSel.disabled = true; productSel.innerHTML = "<option>通用结构（不限定产品）</option>"; }
-      clOpenModal(clNewModal);
-    }));
+    function clSetDetailTab(tabName = "stages") {
+      document.querySelectorAll("#clDetailTabs [data-cl-detail-tab]").forEach(button => button.classList.toggle("active", button.dataset.clDetailTab === tabName));
+      document.querySelectorAll("#clDetailDrawer [data-cl-detail-panel]").forEach(panel => panel.classList.toggle("active", panel.dataset.clDetailPanel === tabName));
+      const body = clDetailDrawer?.querySelector(".cl-drawer-body");
+      if (body) body.scrollTop = 0;
+    }
+    function clOpenDetail(item) {
+      document.getElementById("clDrawerTitle").textContent = item.name;
+      document.getElementById("clDrawerName").textContent = item.name;
+      document.getElementById("clDrawerFormula").textContent = item.formula;
+      document.getElementById("clDrawerProduct").textContent = item.product;
+      document.getElementById("clDrawerDuration").textContent = item.duration;
+      document.getElementById("clDrawerMethod").textContent = item.method;
+      const source = document.getElementById("clDrawerSource");
+      source.className = item.source === "自建" ? "cl-source-custom" : "cl-source-qc"; source.textContent = item.source;
+      document.getElementById("clDrawerTag").innerHTML = `<span class="cl-struct-tag ${item.scope === "产品级结构" ? "cl-struct-tag-product" : "cl-struct-tag-general"}">${clEscape(item.scope)}</span>`;
+      const reference = document.getElementById("clDrawerReference");
+      reference.hidden = !item.reference;
+      reference.innerHTML = item.reference ? `<strong>提炼来源：</strong>${clEscape(item.reference)}<span>保存后已作为自建结构独立维护，不与原视频自动同步。</span>` : "";
+      document.getElementById("clDrawerStages").innerHTML = item.stages.map((stage, index) => `<article class="cl-stage-card"><div class="cl-stage-card-top"><span>${String(index + 1).padStart(2,"0")}</span><strong>${clEscape(stage.name)}</strong></div><dl><div><dt>说什么</dt><dd>${clEscape(stage.say)}</dd></div><div><dt>拍什么</dt><dd>${clEscape(stage.visual)}</dd></div><div><dt>怎么剪</dt><dd>${clEscape(stage.edit)}</dd></div></dl></article>`).join("");
+      const example = item.example;
+      document.getElementById("clDrawerExamples").innerHTML = `<div class="cl-video-card"><div class="cl-video-thumb"></div><div class="cl-video-body"><div class="cl-video-head"><div><div class="cl-video-title">${clEscape(example.title)}</div><div class="cl-video-meta">${clEscape(example.meta)}</div></div><span class="cl-consume-chip">${clEscape(example.badge)}</span></div><div class="cl-video-content">${clEscape(example.copy)}</div><div class="cl-video-actions"><button class="cl-action-btn" type="button" data-cl-example="copy">复制示例文案</button><button class="cl-action-btn" type="button" data-cl-example="play">播放视频</button></div></div></div>`;
+      document.getElementById("clStageTabCount").textContent = item.stages.length;
+      document.getElementById("clExampleTabCount").textContent = example ? 1 : 0;
+      clSetDetailTab("stages");
+      clOpenDrawer();
+    }
 
-    document.querySelectorAll("[data-cl-action='copy'], [data-cl-action='view'], [data-cl-action='edit'], [data-cl-action='delete']").forEach(btn => {
-      btn.addEventListener("click", event => {
-        const action = btn.dataset.clAction;
-        const row = btn.closest("tr");
-        if (!row) return;
-        const cells = row.querySelectorAll("td");
-        const name = cells[0]?.textContent.trim() || "";
-        const formula = cells[1]?.textContent.trim() || "";
-        const sourceText = cells[2]?.textContent.trim() || "";
-        const tagText = cells[3]?.textContent.trim() || "";
-        const productText = cells[4]?.textContent.trim() || "";
-
-        if (action === "view") {
-          const titleEl = document.getElementById("clDrawerTitle");
-          const nameEl = document.getElementById("clDrawerName");
-          const formulaEl = document.getElementById("clDrawerFormula");
-          const productEl = document.getElementById("clDrawerProduct");
-          const sourceEl = document.getElementById("clDrawerSource");
-          const tagEl = document.getElementById("clDrawerTag");
-          if (titleEl) titleEl.textContent = name;
-          if (nameEl) nameEl.textContent = name;
-          if (formulaEl) formulaEl.textContent = formula;
-          if (productEl) productEl.textContent = productText;
-          if (sourceEl) {
-            sourceEl.className = sourceText === "自建" ? "cl-source-custom" : "cl-source-qc";
-            sourceEl.textContent = sourceText;
-          }
-          if (tagEl) {
-            const isProduct = tagText === "产品级结构";
-            tagEl.innerHTML = `<span class="cl-struct-tag ${isProduct ? "cl-struct-tag-product" : "cl-struct-tag-general"}">${tagText}</span>`;
-          }
-          clOpenDrawer();
-        } else if (action === "copy") {
-          const copyName = document.getElementById("clCopyName");
-          const copyFormula = document.getElementById("clCopyFormula");
-          const copyProduct = document.getElementById("clCopyProduct");
-          if (copyName) copyName.value = name + "（副本）";
-          if (copyFormula) copyFormula.value = formula;
-          if (copyProduct) {
-            const isGeneric = productText === "通用";
-            if (isGeneric) {
-              copyProduct.innerHTML = "<option>轻净 Pro 除螨仪</option><option>轻享空气炸锅 A8</option><option>净界洗地机 S5</option><option>随行榨汁杯 Mini</option>";
-            } else {
-              copyProduct.innerHTML = `<option>${productText}</option><option>轻享空气炸锅 A8</option><option>净界洗地机 S5</option><option>随行榨汁杯 Mini</option>`;
-            }
-          }
-          const cards = document.getElementById("clCopyTagCards");
-          if (cards) {
-            cards.querySelectorAll(".cl-tag-card").forEach(c => c.classList.remove("selected"));
-            const product = cards.querySelector("[data-cl-tag='product']");
-            if (product) product.classList.add("selected");
-          }
-          clOpenModal(clCopyModal);
-        } else if (action === "edit") {
-          clOpenEditModal(name, formula, sourceText, tagText, productText, row);
-        } else if (action === "delete") {
-          clOpenDeleteModal(name, row);
+    document.querySelector("[data-lib-panel='content-structure']")?.addEventListener("click", event => {
+      const button = event.target.closest("[data-cl-action]");
+      if (!button) return;
+      if (button.dataset.clAction === "new") { clResetNewModalMode(); return clOpenModal(clNewModal); }
+      const item = contentStructures.find(entry => entry.id === Number(button.closest("tr")?.dataset.clId));
+      if (!item) return;
+      if (button.dataset.clAction === "view") clOpenDetail(item);
+      if (button.dataset.clAction === "edit") clOpenEditModal(item);
+      if (button.dataset.clAction === "delete") clOpenDeleteModal(item);
+    });
+    document.getElementById("clCreateSourceStep")?.addEventListener("click", event => {
+      const mode = event.target.closest("[data-cl-create-mode]");
+      if (mode) {
+        document.querySelectorAll("[data-cl-create-mode]").forEach(button => button.classList.toggle("selected", button === mode));
+        if (mode.dataset.clCreateMode === "manual") {
+          clApplyManualDefaults();
+          clShowStructureForm(false, true);
+        } else {
+          document.getElementById("clVideoSourcePicker").hidden = false;
         }
-        event.stopPropagation();
-      });
+        return;
+      }
+      const sourceTab = event.target.closest("[data-cl-video-source]");
+      if (sourceTab) {
+        clActiveVideoSource = sourceTab.dataset.clVideoSource;
+        document.querySelectorAll("[data-cl-video-source]").forEach(button => button.classList.toggle("active", button === sourceTab));
+        clRenderVideoSource();
+        return;
+      }
+      const videoCard = event.target.closest("[data-cl-video-id]");
+      if (videoCard) {
+        document.querySelectorAll("[data-cl-video-id]").forEach(card => card.classList.toggle("selected", card === videoCard));
+        clSelectedVideoRef = clVideoSourceCatalog[clActiveVideoSource].find(video => video.id === videoCard.dataset.clVideoId) || null;
+        clUpdateParseState();
+        return;
+      }
+      if (event.target.closest("#clChooseVideoFile")) return document.getElementById("clVideoUploadInput")?.click();
+      if (event.target.closest("#clClearVideoLink")) {
+        const input = document.getElementById("clVideoLinkInput");
+        if (input) input.value = "";
+        clSelectedVideoRef = null; clUpdateParseState();
+      }
+    });
+    document.getElementById("clCreateSourceStep")?.addEventListener("change", event => {
+      if (event.target.id !== "clVideoUploadInput") return;
+      const file = event.target.files?.[0];
+      clSelectedVideoRef = file ? { id:"upload", name:file.name, meta:`本地上传 · ${(file.size / 1024 / 1024).toFixed(1)}MB`, profileId:1 } : null;
+      const label = document.getElementById("clUploadFileName");
+      if (label && file) { label.textContent = `已选择：${file.name}`; label.classList.add("cl-upload-selected"); }
+      clUpdateParseState();
+    });
+    document.getElementById("clCreateSourceStep")?.addEventListener("input", event => {
+      if (event.target.id !== "clVideoLinkInput") return;
+      const link = event.target.value.trim();
+      clSelectedVideoRef = /^https?:\/\//i.test(link) ? { id:"link", name:link, meta:"视频链接", profileId:1 } : null;
+      clUpdateParseState();
+    });
+    document.getElementById("clParseVideo")?.addEventListener("click", () => {
+      if (!clSelectedVideoRef) return showToast("请先选择视频或输入有效链接");
+      const button = document.getElementById("clParseVideo");
+      const hint = document.getElementById("clParseHint");
+      const reference = {...clSelectedVideoRef};
+      const runId = ++clParseRunId;
+      button.disabled = true; button.textContent = "正在解析…";
+      hint.textContent = "正在识别口播、镜头和内容节奏";
+      setTimeout(() => {
+        if (runId !== clParseRunId || !clNewModal?.classList.contains("show")) return;
+        button.textContent = "解析并生成结构";
+        clApplyVideoDraft(reference);
+        showToast("视频解析完成，已生成结构草稿");
+      }, 900);
+    });
+    document.getElementById("clBackSource")?.addEventListener("click", () => {
+      if (clEditingId) return;
+      document.getElementById("clNewModalSubtitle").textContent = "优先从一条参考视频提炼，也支持手动创建";
+      clShowSourceStep();
+    });
+    ["clStructureSearch", "clStructureSourceFilter", "clStructureTagFilter"].forEach(id => document.getElementById(id)?.addEventListener(id === "clStructureSearch" ? "input" : "change", clRenderTable));
+    document.getElementById("clNewMethod")?.addEventListener("change", clToggleReference);
+    document.getElementById("clNewDuration")?.addEventListener("change", clToggleCustomDuration);
+    document.getElementById("clAddStage")?.addEventListener("click", () => document.getElementById("clStageEditor")?.insertAdjacentHTML("beforeend", clStageRow()));
+    document.getElementById("clStageEditor")?.addEventListener("click", event => {
+      const remove = event.target.closest("[data-remove-stage]");
+      if (!remove) return;
+      if (document.querySelectorAll("#clStageEditor .cl-stage-editor-row").length <= 2) return showToast("内容结构至少保留 2 个阶段");
+      remove.closest(".cl-stage-editor-row")?.remove();
     });
 
     document.querySelectorAll("[data-cl-close='new']").forEach(btn => btn.addEventListener("click", () => { clCloseModal(clNewModal); clResetNewModalMode(); }));
-    document.querySelectorAll("[data-cl-close='copy']").forEach(btn => btn.addEventListener("click", () => clCloseModal(clCopyModal)));
-    document.querySelectorAll("[data-cl-close='delete']").forEach(btn => btn.addEventListener("click", () => { clDeletingRow = null; clDeleteTargetName = ""; clCloseModal(clDeleteModal); }));
+    document.querySelectorAll("[data-cl-close='delete']").forEach(btn => btn.addEventListener("click", () => { clDeletingId = null; clDeleteTargetName = ""; clCloseModal(clDeleteModal); }));
     document.querySelectorAll("[data-cl-close='drawer']").forEach(btn => btn.addEventListener("click", clCloseDrawer));
     if (clDrawerOverlay) clDrawerOverlay.addEventListener("click", clCloseDrawer);
     if (clNewModal) clNewModal.addEventListener("click", e => { if (e.target === clNewModal) { clCloseModal(clNewModal); clResetNewModalMode(); } });
-    if (clCopyModal) clCopyModal.addEventListener("click", e => { if (e.target === clCopyModal) clCloseModal(clCopyModal); });
-    if (clDeleteModal) clDeleteModal.addEventListener("click", e => { if (e.target === clDeleteModal) { clDeletingRow = null; clDeleteTargetName = ""; clCloseModal(clDeleteModal); } });
+    if (clDeleteModal) clDeleteModal.addEventListener("click", e => { if (e.target === clDeleteModal) { clDeletingId = null; clDeleteTargetName = ""; clCloseModal(clDeleteModal); } });
 
     document.getElementById("clNewSave")?.addEventListener("click", () => {
-      const nameInput = document.getElementById("clNewName");
-      const formulaInput = document.getElementById("clNewFormula");
-      const newName = nameInput ? nameInput.value.trim() : "";
-      const newFormula = formulaInput ? formulaInput.value.trim() : "";
+      const newName = document.getElementById("clNewName").value.trim();
+      const newFormula = document.getElementById("clNewFormula").value.trim();
       if (!newName) { showToast("请填写结构名称"); return; }
-      if (clEditingRow) {
-        // 编辑模式:更新原行
-        const cells = clEditingRow.querySelectorAll("td");
-        if (cells[0]) cells[0].textContent = newName;
-        if (cells[1]) cells[1].textContent = newFormula;
-        // 更新关联产品列(第 5 列,索引 4)
-        const productSel = document.getElementById("clNewProduct");
-        if (cells[4] && productSel) {
-          const selectedCard = document.querySelector("#clNewTagCards .cl-tag-card.selected");
-          const isGeneral = selectedCard && selectedCard.dataset.clTag === "general";
-          cells[4].textContent = isGeneral ? "通用" : (productSel.value || productSel.options[0]?.text || "");
-        }
-        showToast("已保存修改");
-      } else {
-        // 新建模式
-        showToast("已保存新结构");
-      }
+      if (!newFormula) { showToast("请填写结构公式"); return; }
+      const stages = clReadStages();
+      if (stages.length < 2 || stages.some(stage => !stage.say || !stage.visual || !stage.edit)) { showToast("请至少完整填写 2 个结构阶段"); return; }
+      const duration = clGetDurationValue();
+      if (!duration) { showToast("请填写有效的适用时长，最长时长不能小于最短时长"); return; }
+      const scope = clSelectedScope("clNewTagCards");
+      const reference = document.getElementById("clNewMethod").value === "reference" ? document.getElementById("clNewReference").value.trim() : "";
+      if (document.getElementById("clNewMethod").value === "reference" && !reference) { showToast("请选择或填写参考视频"); return; }
+      const existing = contentStructures.find(item => item.id === clEditingId);
+      const next = {
+        ...(existing || {}), id: existing?.id || Date.now(), name:newName, formula:newFormula, source:"自建", scope,
+        product:scope === "产品级结构" ? document.getElementById("clNewProduct").value : "通用",
+        duration,
+        method:reference ? "从参考视频提炼" : "手动创建", reference, stages, updated:clNow(),
+        example:existing?.example || { title:`${newName}｜创作示例`, meta:"自建内容结构 · 暂无投放数据", badge:"自建", copy:stages.map(stage => stage.say).join(" ") }
+      };
+      if (existing) Object.assign(existing, next); else contentStructures.unshift(next);
+      showToast(existing ? "已保存修改" : "已保存自建内容结构");
       clCloseModal(clNewModal);
       clResetNewModalMode();
+      clRenderTable();
     });
-    document.getElementById("clCopySave")?.addEventListener("click", () => { clCloseModal(clCopyModal); showToast("已保存为自建结构"); });
     document.getElementById("clDeleteConfirm")?.addEventListener("click", () => {
-      if (clDeletingRow && clDeletingRow.parentNode) {
-        clDeletingRow.parentNode.removeChild(clDeletingRow);
-      }
-      clDeletingRow = null;
+      contentStructures = contentStructures.filter(item => item.id !== clDeletingId);
+      clDeletingId = null;
       clCloseModal(clDeleteModal);
+      clRenderTable();
       showToast(`已删除「${clDeleteTargetName}」`);
     });
-    document.getElementById("clDrawerCopy")?.addEventListener("click", () => {
-      clCloseDrawer();
-      const title = document.getElementById("clDrawerTitle")?.textContent || "";
-      const formula = document.getElementById("clDrawerFormula")?.textContent || "";
-      const product = document.getElementById("clDrawerProduct")?.textContent || "";
-      const copyName = document.getElementById("clCopyName");
-      const copyFormula = document.getElementById("clCopyFormula");
-      const copyProduct = document.getElementById("clCopyProduct");
-      if (copyName) copyName.value = title + "（副本）";
-      if (copyFormula) copyFormula.value = formula;
-      if (copyProduct) copyProduct.innerHTML = `<option>${product}</option><option>轻净 Pro 除螨仪</option><option>轻享空气炸锅 A8</option><option>净界洗地机 S5</option><option>随行榨汁杯 Mini</option>`;
-      const cards = document.getElementById("clCopyTagCards");
-      if (cards) {
-        cards.querySelectorAll(".cl-tag-card").forEach(c => c.classList.remove("selected"));
-        const productCard = cards.querySelector("[data-cl-tag='product']");
-        if (productCard) productCard.classList.add("selected");
-      }
-      clOpenModal(clCopyModal);
+    document.getElementById("clDrawerExamples")?.addEventListener("click", event => {
+      const button = event.target.closest("[data-cl-example]");
+      if (!button) return;
+      if (button.dataset.clExample === "copy") showToast("示例文案已复制");
+      if (button.dataset.clExample === "play") { button.textContent = button.textContent === "播放视频" ? "暂停演示" : "播放视频"; showToast(button.textContent === "暂停演示" ? "正在播放参考成品" : "已暂停播放"); }
+    });
+    document.getElementById("clDetailTabs")?.addEventListener("click", event => {
+      const button = event.target.closest("[data-cl-detail-tab]");
+      if (button) clSetDetailTab(button.dataset.clDetailTab);
     });
 
+    clRenderTable();
+
     document.addEventListener("keydown", e => {
-      if (e.key === "Escape") { clCloseModal(clNewModal); clCloseModal(clCopyModal); clCloseModal(clDeleteModal); clDeletingRow = null; clResetNewModalMode(); clCloseDrawer(); }
+      if (e.key === "Escape") { clCloseModal(clNewModal); clCloseModal(clDeleteModal); clDeletingId = null; clResetNewModalMode(); clCloseDrawer(); }
     });

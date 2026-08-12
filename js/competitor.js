@@ -283,7 +283,7 @@
       },true);
 
       const cardObserver=new MutationObserver(() => renderAllCards());
-      cardObserver.observe(grid,{childList:true,subtree:false});
+      if(grid) cardObserver.observe(grid,{childList:true,subtree:false});
       renderAllCards(); renderCompetitorPanel();
 
       const taskShell=document.getElementById("agentTaskShell");
@@ -314,4 +314,3 @@
         setChatCollapsed(true);
       }
     })();
-  

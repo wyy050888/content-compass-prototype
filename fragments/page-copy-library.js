@@ -19,14 +19,15 @@
               <table class="cl-table" id="clTable">
                 <thead>
                   <tr>
-                    <th style="width:22%;">文案详情</th>
-                    <th style="width:7%;">来源</th>
-                    <th style="width:9%;">产品</th>
-                    <th style="width:8%;">人群</th>
-                    <th style="width:18%;">结构</th>
-                    <th style="width:7%;">字数</th>
-                    <th style="width:13%;">更新时间</th>
-                    <th class="cl-col-act" style="width:16%;">操作</th>
+                    <th style="width:27%;">文案详情</th>
+                    <th style="width:6%;">来源</th>
+                    <th style="width:8%;">产品</th>
+                    <th style="width:7%;">人群</th>
+                    <th style="width:15%;">结构</th>
+                    <th style="width:6%;">字数</th>
+                    <th style="width:8%;">创建</th>
+                    <th style="width:9%;">最近修改</th>
+                    <th class="cl-col-act" style="width:14%;">操作</th>
                   </tr>
                 </thead>
                 <tbody id="clTbody"></tbody>

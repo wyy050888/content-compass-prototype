@@ -1,9 +1,9 @@
 (function(){var s=document.currentScript;if(!s)return;s.insertAdjacentHTML('beforebegin',`
-  <!-- 爆款文案结构：详情及自建结构编辑 -->
+  <!-- 爆款内容结构：详情及自建结构编辑 -->
   <div class="modal-backdrop" id="copyStructureDetailModal" role="dialog" aria-modal="true">
     <div class="modal copy-structure-detail">
       <div class="modal-head">
-        <div><span class="badge" id="copyStructureDetailSource">千川</span><h3 id="copyStructureDetailTitle">爆款文案结构</h3></div>
+        <div><span class="badge" id="copyStructureDetailSource">千川学习</span><h3 id="copyStructureDetailTitle">爆款内容结构</h3></div>
         <div class="copy-structure-head-actions"><button class="primary-btn" type="button" id="copyStructureCloneFromDetail">复制为自建</button><button class="close-btn" type="button" data-close-copy-structure-detail aria-label="关闭">×</button></div>
       </div>
       <div class="modal-body">
@@ -20,7 +20,7 @@
 
   <div class="modal-backdrop" id="copyStructureEditorModal" role="dialog" aria-modal="true">
     <div class="modal copy-structure-editor-modal">
-      <div class="modal-head"><div class="modal-head-title"><i>构</i><div><h3 id="copyStructureEditorTitle">新建爆款文案结构</h3><small>保存后可在智能文案创作时直接调用</small></div></div><button class="close-btn" type="button" data-close-copy-structure-editor aria-label="关闭">×</button></div>
+      <div class="modal-head"><div class="modal-head-title"><i>构</i><div><h3 id="copyStructureEditorTitle">新建爆款内容结构</h3><small>保存后可在智能文案、脚本与混剪中调用</small></div></div><button class="close-btn" type="button" data-close-copy-structure-editor aria-label="关闭">×</button></div>
       <div class="modal-body">
         <div class="copy-structure-editor-grid">
           <label class="full">结构名称<input id="copyStructureNameInput" maxlength="40" placeholder="例如：结果前置·痛点解决·行动引导型"></label>
@@ -36,7 +36,7 @@
   <!-- 文案库：新增文案 -->
   <div class="modal-backdrop" id="clCreateModal" role="dialog" aria-modal="true">
     <div class="modal cl-create-modal">
-      <div class="modal-head"><div class="modal-head-title"><i>文</i><div><h3>新增文案</h3><small>手工录入或从视频识别口播，保存后统一进入文案库</small></div></div><button class="close-btn" type="button" data-close-cl-create aria-label="关闭">×</button></div>
+      <div class="modal-head"><div class="modal-head-title"><i>文</i><h3>新增文案</h3></div><button class="close-btn" type="button" data-close-cl-create aria-label="关闭">×</button></div>
       <div class="modal-body">
         <div class="cl-create-tabs" role="tablist">
           <button class="active" type="button" data-cl-create-source="manual"><i>✎</i><span>手工录入<small>直接填写已有口播文案</small></span></button>
@@ -44,28 +44,27 @@
           <button type="button" data-cl-create-source="upload"><i>↑</i><span>上传视频识别<small>上传本地视频自动转写</small></span></button>
         </div>
         <div class="cl-create-panel" data-cl-create-panel="manual"></div>
-        <div class="cl-create-panel" data-cl-create-panel="library" hidden>
-          <div class="cl-video-source-list">
-            <button class="cl-video-source-option" type="button" data-cl-video-id="7553983811703193643" data-product="轻净 Pro 除螨仪" data-crowd="精致妈妈"><i class="cl-video-source-cover">▶</i><span><strong>除螨仪结果冲击型主视频</strong><small>历史投放 · 00:32 · 素材 ID 7553983811703193643</small></span></button>
-            <button class="cl-video-source-option" type="button" data-cl-video-id="7553983811703197228" data-product="轻享空气炸锅 A8" data-crowd="新锐白领"><i class="cl-video-source-cover">▶</i><span><strong>空气炸锅晚餐场景视频</strong><small>历史投放 · 00:28 · 素材 ID 7553983811703197228</small></span></button>
-          </div>
-        </div>
+        <div class="cl-create-panel" data-cl-create-panel="library" hidden><button class="cl-create-video-picker-trigger" type="button" data-cl-create-video-picker><span data-cl-create-video-trigger-text>从视频库选择</span><b>›</b></button><div class="cl-create-selected-video" data-cl-create-selected-video hidden></div></div>
         <div class="cl-create-panel" data-cl-create-panel="upload" hidden>
           <input type="file" id="clVideoUploadInput" accept="video/*" hidden>
           <button class="cl-upload-video" type="button" id="clVideoUploadTrigger"><span><strong>点击选择视频</strong><span>上传后自动识别音频中的口播文案</span></span></button>
         </div>
         <div class="cl-parse-status" id="clParseStatus" hidden><b>✓</b><span>口播识别完成，可继续修改后保存到文案库。</span></div>
-        <section class="cl-create-section"><div class="cl-create-section-head"><div><h4>基础信息</h4><p>关联产品，并补充文案对应的人群信息</p></div></div><div class="cl-create-form">
-          <label class="cl-create-field"><span>关联产品 <b style="color:#e14b53;">*</b></span><select id="clCreateProduct"><option value="">请选择产品</option><option>轻净 Pro 除螨仪</option><option>轻享空气炸锅 A8</option><option>净界洗地机 S5</option><option>随行榨汁杯 Mini</option></select></label>
+        <section class="cl-create-section cl-create-copy-section"><div class="cl-create-form"><label class="cl-create-field full"><span>文案内容 <b style="color:#e14b53;">*</b></span><textarea id="clCreateText" placeholder="请输入完整口播文案"></textarea></label></div></section>
+        <section class="cl-create-section"><div class="cl-create-section-head"><div><h4>产品基础信息</h4><p>关联产品，并补充文案对应的人群信息</p></div></div><div class="cl-create-form">
+          <label class="cl-create-field"><span>关联产品 <b style="color:#e14b53;">*</b></span><button class="cl-create-product-trigger" type="button" data-cl-create-product-picker aria-haspopup="dialog"><span class="placeholder" data-cl-create-product-label>选择产品</span><b>⌄</b></button><input type="hidden" id="clCreateProduct"></label>
           <div></div>
           <div class="cl-audience-block">
-            <div class="cl-audience-line"><span>抖音八大人群 <b style="color:#e14b53;">*</b></span><div class="cl-audience-chips" data-cl-choice-group="audience"><button class="cl-audience-chip active" type="button" data-value="精致妈妈">精致妈妈</button><button class="cl-audience-chip" type="button" data-value="新锐白领">新锐白领</button><button class="cl-audience-chip" type="button" data-value="资深中产">资深中产</button><button class="cl-audience-chip" type="button" data-value="Z世代">Z世代</button><button class="cl-audience-chip" type="button" data-value="小镇青年">小镇青年</button><button class="cl-audience-chip" type="button" data-value="小镇中老年">小镇中老年</button><button class="cl-audience-chip" type="button" data-value="都市蓝领">都市蓝领</button><button class="cl-audience-chip" type="button" data-value="都市银发">都市银发</button></div></div>
+            <div class="cl-create-persona-title">人群画像</div>
+            <div class="cl-create-persona-source" role="group" aria-label="人群画像来源"><button class="active" type="button" data-cl-create-persona-mode="manual">自行输入</button><button type="button" data-cl-create-persona-mode="template">从模板库选择</button></div>
+            <div class="cl-create-template-select" data-cl-create-template-select hidden><button type="button" data-cl-create-persona-trigger><span data-cl-create-persona-selected>选择人群画像模板</span><i>⌄</i></button></div>
+            <div class="cl-audience-core-title">核心目标人群 <b style="color:#e14b53;">*</b></div>
+            <div class="cl-audience-line"><span>抖音八大人群</span><div class="cl-audience-chips" data-cl-choice-group="audience"><button class="cl-audience-chip active" type="button" data-value="精致妈妈">精致妈妈</button><button class="cl-audience-chip" type="button" data-value="新锐白领">新锐白领</button><button class="cl-audience-chip" type="button" data-value="资深中产">资深中产</button><button class="cl-audience-chip" type="button" data-value="Z世代">Z世代</button><button class="cl-audience-chip" type="button" data-value="小镇青年">小镇青年</button><button class="cl-audience-chip" type="button" data-value="小镇中老年">小镇中老年</button><button class="cl-audience-chip" type="button" data-value="都市蓝领">都市蓝领</button><button class="cl-audience-chip" type="button" data-value="都市银发">都市银发</button></div></div>
             <div class="cl-audience-line"><span>性别 <b style="color:#e14b53;">*</b></span><div class="cl-audience-chips" data-cl-choice-group="gender"><button class="cl-audience-chip active" type="button" data-value="不限">不限</button><button class="cl-audience-chip" type="button" data-value="女性">女性</button><button class="cl-audience-chip" type="button" data-value="男性">男性</button></div></div>
             <div class="cl-audience-line"><span>年龄 <b style="color:#e14b53;">*</b></span><div class="cl-audience-chips" data-cl-choice-group="age"><button class="cl-audience-chip" type="button" data-value="18–23">18–23</button><button class="cl-audience-chip active" type="button" data-value="24–30">24–30</button><button class="cl-audience-chip" type="button" data-value="31–40">31–40</button><button class="cl-audience-chip" type="button" data-value="41–50">41–50</button><button class="cl-audience-chip" type="button" data-value="51+">51+</button><button class="cl-audience-chip" type="button" data-value="custom">自定义</button><div class="cl-custom-age" id="clCustomAge"><input type="number" id="clAgeMin" min="1" max="99" placeholder="最小"><span>至</span><input type="number" id="clAgeMax" min="1" max="99" placeholder="最大"></div></div></div>
-            <div class="cl-audience-text-grid"><label class="cl-create-field"><span>人群核心痛点</span><textarea id="clCreatePain" placeholder="一行一个人群核心痛点"></textarea></label><label class="cl-create-field"><span>使用场景</span><textarea id="clCreateScenes" placeholder="一行一个使用场景"></textarea></label></div>
+            <div class="cl-audience-text-grid"><label class="cl-create-field"><span>人群核心痛点 <button class="cl-create-ai-action" type="button" data-cl-create-ai-suggest="pain">AI 换一组</button></span><textarea id="clCreatePain" placeholder="一行一个人群核心痛点"></textarea></label><label class="cl-create-field"><span>使用场景 <button class="cl-create-ai-action" type="button" data-cl-create-ai-suggest="scene">AI 换一组</button></span><textarea id="clCreateScenes" placeholder="一行一个使用场景"></textarea></label></div>
           </div>
         </div></section>
-        <section class="cl-create-section"><div class="cl-create-section-head"><div><h4>文案内容</h4><p>视频识别结果会自动填入，保存前可继续修改</p></div></div><div class="cl-create-form"><label class="cl-create-field full"><span>文案内容 <b style="color:#e14b53;">*</b></span><textarea id="clCreateText" placeholder="请输入完整口播文案"></textarea></label></div></section>
       </div>
       <div class="modal-foot"><div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-cl-create>取消</button><button class="primary-btn" type="button" id="clCreateSave">新增文案</button></div></div>
     </div>
@@ -74,7 +73,7 @@
   <!-- 文案库：编辑文案 -->
   <div class="modal-backdrop" id="clEditModal" role="dialog" aria-modal="true">
     <div class="modal cl-edit-modal">
-      <div class="modal-head"><div class="modal-head-title"><i>编</i><div><h3>编辑文案</h3><small>修改文案内容、关联产品或目标人群，保存后立即生效</small></div></div><button class="close-btn" type="button" data-close-cl-edit aria-label="关闭">×</button></div>
+      <div class="modal-head"><div class="modal-head-title"><i>编</i><div><h3>编辑文案</h3></div></div><button class="close-btn" type="button" data-close-cl-edit aria-label="关闭">×</button></div>
       <div class="modal-body">
         <div class="cl-edit-meta" id="clEditMeta">
           <span class="cl-edit-meta-item"><label>来源</label><b id="clEditMetaSource">—</b></span>
@@ -82,19 +81,31 @@
           <span class="cl-edit-meta-item"><label>最后更新</label><b id="clEditMetaUpdated">—</b></span>
         </div>
         <section class="cl-edit-section">
-          <div class="cl-edit-section-head"><h4>基础信息</h4><p>关联产品与目标人群会用于后续 AI 创作匹配</p></div>
+          <div class="cl-edit-section-head"><h4>基础信息</h4></div>
           <div class="cl-edit-form">
-            <label class="cl-edit-field"><span>关联产品 <b style="color:#e14b53;">*</b></span><input type="text" id="clEditProduct" placeholder="如：除螨仪、空气炸锅"></label>
-            <label class="cl-edit-field"><span>目标人群 <b style="color:#e14b53;">*</b></span><input type="text" id="clEditCrowd" placeholder="如：宝妈/家庭、年轻白领"></label>
+            <label class="cl-edit-field full"><span>关联产品 <b style="color:#e14b53;">*</b></span><input type="text" id="clEditProduct" placeholder="如：除螨仪、空气炸锅"></label>
+            <div class="cl-edit-field cl-edit-persona-field full" id="clEditPersonaField">
+              <span>人群画像</span>
+              <div class="cl-edit-persona-source" role="group" aria-label="人群画像来源"><button class="active" type="button" data-cl-audience-mode="manual">自行输入</button><button type="button" data-cl-audience-mode="template">从模板库选择</button></div>
+              <div class="cl-edit-template-select" data-cl-audience-template hidden><button type="button" data-cl-persona-trigger><span data-cl-persona-selected>选择人群画像模板</span><i>⌄</i></button></div>
+              <div class="cl-edit-audience-block">
+                <div class="cl-edit-audience-label">核心目标人群 <b style="color:#e14b53;">*</b></div>
+                <div class="cl-edit-audience-row"><span>抖音八大人群</span><div class="cl-edit-choice-row" data-cl-audience-box><button type="button" data-cl-audience="精致妈妈">精致妈妈</button><button type="button" data-cl-audience="新锐白领">新锐白领</button><button type="button" data-cl-audience="资深中产">资深中产</button><button type="button" data-cl-audience="Z世代">Z世代</button><button type="button" data-cl-audience="小镇青年">小镇青年</button><button type="button" data-cl-audience="小镇中老年">小镇中老年</button><button type="button" data-cl-audience="都市蓝领">都市蓝领</button><button type="button" data-cl-audience="都市银发">都市银发</button></div></div>
+                <div class="cl-edit-audience-row"><span>性别</span><div class="cl-edit-choice-row" data-cl-single="gender"><button type="button" data-cl-gender="不限">不限</button><button type="button" data-cl-gender="女性">女性</button><button type="button" data-cl-gender="男性">男性</button></div></div>
+                <div class="cl-edit-audience-row"><span>年龄</span><div class="cl-edit-choice-row" data-cl-single="age"><button type="button" data-cl-age="18–23">18–23</button><button type="button" data-cl-age="24–30">24–30</button><button type="button" data-cl-age="31–40">31–40</button><button type="button" data-cl-age="41–50">41–50</button><button type="button" data-cl-age="50+">50+</button><button type="button" data-cl-age="custom">自定义</button><span class="cl-edit-custom-age" data-cl-custom-age hidden><input type="number" id="clEditAgeMin" min="1" max="99" placeholder="25"><i>至</i><input type="number" id="clEditAgeMax" min="1" max="99" placeholder="40"></span></div></div>
+              </div>
+              <label class="cl-edit-field"><div class="cl-edit-field-title"><span>人群核心痛点</span><button class="cl-edit-ai-action" type="button" data-cl-ai-suggest="pain">AI 换一组</button></div><textarea id="clEditPersonaPain" rows="3" placeholder="一行一个人群核心痛点"></textarea></label>
+              <label class="cl-edit-field"><div class="cl-edit-field-title"><span>使用场景</span><button class="cl-edit-ai-action" type="button" data-cl-ai-suggest="scene">AI 换一组</button></div><textarea id="clEditPersonaScenes" rows="3" placeholder="一行一个使用场景"></textarea></label>
+            </div>
           </div>
         </section>
         <section class="cl-edit-section">
-          <div class="cl-edit-section-head"><h4>文案内容</h4><p>支持 5–500 字，Enter 换行不保存</p></div>
+          <div class="cl-edit-section-head"><h4>文案内容</h4></div>
           <label class="cl-edit-field full"><span>文案详情 <b style="color:#e14b53;">*</b></span><textarea id="clEditText" rows="6" placeholder="请输入完整口播文案"></textarea><small class="cl-edit-counter" id="clEditCounter">0 / 500 字</small></label>
         </section>
         <div class="cl-edit-error" id="clEditModalError" hidden></div>
       </div>
-      <div class="modal-foot"><div class="cl-edit-foot-info" id="clEditFootInfo">编辑后立即同步到文案库</div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-cl-edit>取消</button><button class="primary-btn" type="button" id="clEditSave">保存修改</button></div></div>
+      <div class="modal-foot"><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-cl-edit>取消</button><button class="primary-btn" type="button" id="clEditSave">保存修改</button></div></div>
     </div>
   </div>
 
