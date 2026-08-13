@@ -229,9 +229,40 @@
     notifyChange();
     toast("已重新匹配当前产品素材");
   }
+  function pick(options = {}) {
+    let selectedId = options.selectedId || "";
+    let keyword = "";
+    const host = modal(
+      "选择脚本",
+      "从脚本库选择一个结构化脚本；将只带入口播和分镜信息的本次副本。",
+      `<div class="lib-picker-toolbar"><input class="lib-pick-search" type="search" placeholder="搜索脚本名称或产品"></div><div class="lib-pick-list" data-script-pick-list></div>`,
+      `<button class="sl-btn" data-close>取消</button><button class="sl-btn primary" data-script-pick-confirm disabled>确认选择</button>`
+    );
+    const list = host.querySelector("[data-script-pick-list]");
+    const confirm = host.querySelector("[data-script-pick-confirm]");
+    const renderPicker = () => {
+      const visible = scripts.filter(script => `${script.name} ${script.product} ${script.sourceFull}`.toLowerCase().includes(keyword.toLowerCase()));
+      list.innerHTML = visible.length ? visible.map(script => {
+        const selected = script.id === selectedId;
+        return `<article class="lib-pick-card${selected ? " selected" : ""}" data-script-pick-id="${escapeHtml(script.id)}"><i class="lib-pick-check">${selected ? "✓" : ""}</i><p class="lib-pick-content"><b>${escapeHtml(script.name)}</b><br>${escapeHtml(script.source)}</p><div class="lib-pick-tags"><div class="lib-pick-tag-group"><b>产品</b><div><span class="lib-pick-tag">${escapeHtml(script.product)}</span></div></div><div class="lib-pick-tag-group"><b>规格</b><div><span class="lib-pick-tag">${escapeHtml(specs(script))}</span></div></div><div class="lib-pick-tag-group"><b>素材策略</b><div><span class="lib-pick-tag">${escapeHtml(modeText(script.materialMode))}</span></div></div></div></article>`;
+      }).join("") : '<div class="lib-pick-empty">未找到匹配的脚本</div>';
+      list.querySelectorAll("[data-script-pick-id]").forEach(card => card.addEventListener("click", () => { selectedId = card.dataset.scriptPickId; renderPicker(); }));
+      confirm.disabled = !selectedId;
+      confirm.textContent = selectedId ? "确认选择" : "请选择脚本";
+    };
+    host.querySelector(".lib-pick-search").addEventListener("input", event => { keyword = event.target.value.trim(); renderPicker(); });
+    confirm.addEventListener("click", () => {
+      const selected = scripts.find(script => script.id === selectedId);
+      if (!selected) return;
+      options.onConfirm?.(clone(selected));
+      host.remove();
+    });
+    renderPicker();
+  }
   window.addEventListener("script-library:sync", event => { const { action, asset } = event.detail || {}; if (!asset) return; const id = `asset-${asset.id}`; if (action === "remove") scripts = scripts.filter(script => script.id !== id); else { const normalized = normalizeAsset(asset); scripts = [normalized, ...scripts.filter(script => script.id !== id)]; } render(); notifyChange(); });
   window.ContentCompassScriptLibrary = {
     list() { return scripts; },
+    pick,
     open(script, action, callbacks = {}) {
       if (!script) return;
       const actions = { "查看":openView, "编辑":openEdit, "定位至会话":locateSession, "下载":downloadScript, "删除":confirmDelete, "重新匹配素材":rematch };

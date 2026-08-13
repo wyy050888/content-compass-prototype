@@ -1674,7 +1674,6 @@
         form: `
           <div class="mix-flow-form">
             <section class="mix-step-panel" data-task-step="1">
-              <div class="mix-step-title"><div><span>STEP 1</span><h3>确认本次创作输入</h3><p>先选择从什么内容开始，再确定目标产品、视频时长和可用素材。</p></div><span class="mix-fixed-spec">1 条视频 · 9:16 · 1080P</span></div>
               <article class="mix-block">
                 <div class="mix-block-head"><div><strong>创作方案</strong><small>选择起点，后续步骤只确认本次结果，不会再次选择文案或脚本。</small></div></div>
                 <div class="mix-plan-tabs" role="tablist">
@@ -1688,7 +1687,7 @@
                 <div class="mix-block-head"><div><strong>目标产品与视频要求</strong><small data-mix-product-origin>自主创作需选择目标产品；产品事实用于约束文案和素材范围。</small></div></div>
                 <div class="mix-three-col">
                   <label class="mix-field"><span>目标产品</span><select data-mix-product><option value="mite-pro">轻净 Pro 除螨仪</option><option value="washer-s5">净界洗地机 S5</option><option value="air-a8">轻享空气炸锅 A8</option><option value="">不选择产品</option></select></label>
-                  <label class="mix-field"><span>目标人群</span><select data-mix-audience><option>精致妈妈 · 母婴清洁</option><option>养宠家庭 · 毛发清洁</option><option>自定义人群</option></select></label>
+                  <label class="mix-field"><span>目标人群</span><input type="hidden" value="精致妈妈 · 母婴清洁" data-mix-audience><button class="mix-picker-trigger" type="button" data-mix-pick-audience><span data-mix-audience-label>精致妈妈 · 母婴清洁</span><i>›</i></button></label>
                   <label class="mix-field"><span>视频生成时长</span><span class="mix-duration-input"><input type="number" min="10" max="180" step="1" value="60" data-mix-target-duration><i>秒</i></span></label>
                 </div>
                 <div class="mix-duration-presets"><span>快捷选择</span><button type="button" data-mix-duration-preset="15">15秒</button><button type="button" data-mix-duration-preset="30">30秒</button><button type="button" data-mix-duration-preset="45">45秒</button><button class="active" type="button" data-mix-duration-preset="60">60秒</button><small>支持输入 10–180 秒</small></div>
@@ -3195,7 +3194,7 @@
               <button type="button" data-scope="mine">我创建的</button>
               <button type="button" data-scope="team">我的团队</button>
             </div>
-            <input type="text" class="lib-pick-search" placeholder="搜索文案内容 / 产品 / 适用人群">
+            <input type="text" class="lib-pick-search" placeholder="搜索文案内容或产品">
           </div>
           <div class="lib-pick-list" data-lib-pick-list></div>
           <footer class="modal-foot">
@@ -3308,7 +3307,7 @@
       let searchText = "";
       let typeFilter = "all";
       let statusFilter = "all";
-      const materialItems = allScriptMaterials();
+      const materialItems = allScriptMaterials().filter(item => !options.productName || !item.product || item.product === options.productName);
       const statusLabels = { ok:"已分析", pending:"待分析", analyzing:"分析中", fail:"分析失败" };
       const typeLabels = { video:"视频", image:"图片" };
 
@@ -3318,17 +3317,17 @@
       overlay.innerHTML = `
         <div class="modal-card material-picker-modal" role="dialog" aria-label="从素材库选择素材">
           <header class="modal-head">
-            <div><strong>${options.title || "从素材库选择素材"}</strong><small>可多选；支持按文件夹、类型和分析状态筛选，产品可直接搜索</small></div>
+            <div><strong>${options.title || "从素材库选择素材"}</strong><small>${options.productName ? `已按“${escapeHtml(options.productName)}”筛选关联素材；` : "可多选；"}支持按文件夹、类型和分析状态筛选</small></div>
             <button class="modal-close" type="button" data-modal-close>×</button>
           </header>
           <div class="lib-picker">
             <aside class="lib-folder-tree" data-lib-folder-tree>
-              <button type="button" class="lib-folder-item material-folder-all active" data-group="all"><span class="folder-icon">▣</span><span class="label">全部素材</span><span class="count">${allScriptMaterials().length}</span></button>
-              ${SCRIPT_MATERIAL_FOLDERS.map(folder => `<div class="material-folder-root"><button type="button" class="lib-folder-item material-folder-parent" data-group="${escapeHtml(folder.children.join("|"))}"><span class="folder-icon">▰</span><span class="label">${escapeHtml(folder.name)}</span><span class="count">${folder.children.reduce((sum, name) => sum + SCRIPT_MATERIAL_CATALOG[name].length, 0)}</span></button><div class="material-folder-children">${folder.children.map(name => `<button type="button" class="lib-folder-item sub" data-group="${escapeHtml(name)}"><span class="folder-icon">⌞</span><span class="label">${escapeHtml(name)}</span><span class="count">${SCRIPT_MATERIAL_CATALOG[name].length}</span></button>`).join("")}</div></div>`).join("")}
+              <button type="button" class="lib-folder-item material-folder-all active" data-group="all"><span class="folder-icon">▣</span><span class="label">全部素材</span><span class="count">${materialItems.length}</span></button>
+              ${SCRIPT_MATERIAL_FOLDERS.map(folder => `<div class="material-folder-root"><button type="button" class="lib-folder-item material-folder-parent" data-group="${escapeHtml(folder.children.join("|"))}"><span class="folder-icon">▰</span><span class="label">${escapeHtml(folder.name)}</span><span class="count">${materialItems.filter(item => folder.children.includes(item.group)).length}</span></button><div class="material-folder-children">${folder.children.map(name => `<button type="button" class="lib-folder-item sub" data-group="${escapeHtml(name)}"><span class="folder-icon">⌞</span><span class="label">${escapeHtml(name)}</span><span class="count">${materialItems.filter(item => item.group === name).length}</span></button>`).join("")}</div></div>`).join("")}
             </aside>
             <section class="lib-content">
               <div class="lib-toolbar">
-                <input type="text" class="lib-pick-search" placeholder="搜索素材名称、产品、标签或素材 ID">
+                <input type="text" class="lib-pick-search" placeholder="搜索素材名称、产品或素材 ID">
                 <select class="script-material-filter" data-material-filter="type" aria-label="素材类型"><option value="all">全部类型</option><option value="video">视频</option><option value="image">图片</option></select>
                 <select class="script-material-filter" data-material-filter="status" aria-label="分析状态"><option value="all">全部状态</option><option value="ok">已分析</option><option value="pending">待分析</option><option value="analyzing">分析中</option><option value="fail">分析失败</option></select>
                 <button class="material-picker-select-all" type="button" data-lib-material-select-all>全选当前结果</button>
@@ -4590,21 +4589,21 @@
       if (root) root.dataset.mixPlanMode = mode;
       const contexts = {
         ai: `<span class="mix-plan-icon">✦</span><div class="mix-context-main"><strong>内容结构</strong><small>默认由系统从千川训练验证的爆款结构库中自动匹配。</small><div class="mix-structure-mode"><button class="active" type="button" data-mix-structure-mode="auto"><b>AI 智能匹配</b><small>推荐 · 根据产品、素材与投放数据选择</small></button><button type="button" data-mix-structure-mode="manual"><b>手工指定</b><small>从模板库选择一个结构</small></button></div><div data-mix-auto-structure-panel class="mix-auto-structure"><span>系统将综合</span><b>品类与卖点</b><b>目标人群</b><b>视频时长</b><b>素材表达能力</b><b>千川历史表现</b></div><div data-mix-manual-structure-panel hidden><select data-mix-content-structure><option value="result">结果前置·痛点解决·行动引导型</option><option value="contrast">问题冲突·产品演示·对比证明型</option><option value="scene">人群点名·场景扩展·信任收口型</option></select><div class="mix-structure-preview" data-mix-structure-preview><b>结构公式</b><span>结果钩子 → 痛点解释 → 产品演示 → 效果证明 → 行动引导</span><em>通用结构 · 5 个阶段 · 2 条参考成品</em></div></div><label class="mix-content-supplement"><span>补充内容素材（选填）</span><textarea data-mix-content-supplement placeholder="可粘贴内容要点或参考文案。AI只提取有效信息，不保留原句和顺序。"></textarea><small>补充内容服从产品事实和最终采用的爆款结构。</small></label></div>`,
-        copy: `<span class="mix-plan-icon">文</span><div class="mix-context-main"><strong>选择已有文案</strong><small>文案将完整带入第二步，仅修改本次任务副本。</small><select data-mix-existing-copy><option value="copy-mite" data-product="mite-pro">除螨仪暑期口播｜轻净 Pro｜约48秒</option><option value="copy-pet" data-product="mite-pro">养宠家庭清洁口播｜轻净 Pro｜约36秒</option><option value="copy-washer" data-product="washer-s5">洗地机家庭清洁口播｜净界 S5｜约45秒</option></select><div class="mix-source-asset-info" data-mix-source-asset-info><b>关联产品：轻净 Pro 除螨仪</b><span>内容：结果钩子 → 产品演示 → 使用便利 → CTA</span><em>✓ 与当前目标产品一致，可直接使用</em></div><div class="mix-source-conflict" data-mix-source-conflict hidden></div></div>`,
-        script: `<span class="mix-plan-icon">稿</span><div class="mix-context-main"><strong>选择已有脚本</strong><small>脚本口播在第二步确认；原分镜在第三步按当前素材和配音重新校准。</small><select data-mix-existing-script><option value="script-mite" data-product="mite-pro">除螨仪主视频脚本｜轻净 Pro｜5段</option><option value="script-test" data-product="mite-pro">床褥清洁实测脚本｜轻净 Pro｜6段</option><option value="script-air" data-product="air-a8">空气炸锅测评脚本｜轻享 A8｜5段</option></select><div class="mix-source-asset-info" data-mix-source-asset-info><b>关联产品：轻净 Pro 除螨仪</b><span>来源文案：除螨仪暑期口播 · 已确认5个分镜段</span><em>✓ 与当前目标产品一致，可直接使用</em></div><div class="mix-source-conflict" data-mix-source-conflict hidden></div></div>`
+        copy: `<span class="mix-plan-icon">文</span><div class="mix-context-main"><strong>选择已有文案</strong><small>文案将完整带入第二步，仅修改本次任务副本。</small><select data-mix-existing-copy hidden><option value="">请选择文案</option></select><button class="mix-picker-trigger mix-source-picker" type="button" data-mix-pick-copy><span data-mix-source-picker-label>选择文案</span><i>›</i></button><div class="mix-source-asset-info" data-mix-source-asset-info><b>尚未选择文案</b><span>选择后将带入关联产品与内容摘要。</span><em>请选择一条文案继续</em></div><div class="mix-source-conflict" data-mix-source-conflict hidden></div></div>`,
+        script: `<span class="mix-plan-icon">稿</span><div class="mix-context-main"><strong>选择已有脚本</strong><small>脚本口播在第二步确认；原分镜在第三步按当前素材和配音重新校准。</small><select data-mix-existing-script hidden><option value="">请选择脚本</option></select><button class="mix-picker-trigger mix-source-picker" type="button" data-mix-pick-script><span data-mix-source-picker-label>选择脚本</span><i>›</i></button><div class="mix-source-asset-info" data-mix-source-asset-info><b>尚未选择脚本</b><span>选择后将带入关联产品、口播与分镜信息。</span><em>请选择一个脚本继续</em></div><div class="mix-source-conflict" data-mix-source-conflict hidden></div></div>`
       };
       host.innerHTML = contexts[mode] || contexts.ai;
       if (root && mode === "ai") root.dataset.mixStructureMode = "auto";
       if (badge) badge.textContent = { ai:"AI 生成", copy:"已有文案", script:"已有脚本" }[mode] || "AI 生成";
       const product = dynamicForm.querySelector("[data-mix-product]");
       const origin = dynamicForm.querySelector("[data-mix-product-origin]");
-      const followsAsset = mode === "copy" || mode === "script";
+      const sourceSelect = host.querySelector("[data-mix-existing-copy], [data-mix-existing-script]");
+      const followsAsset = (mode === "copy" || mode === "script") && Boolean(sourceSelect?.value);
       if (product) product.disabled = followsAsset;
       if (origin) origin.textContent = followsAsset
         ? `目标产品已从所选${mode === "copy" ? "文案" : "脚本"}自动带入；如需更换产品，应改为参考内容重新创作。`
-        : "AI生成需选择目标产品；系统将据此匹配爆款结构、校验文案并限定素材范围。";
-      const sourceSelect = host.querySelector("[data-mix-existing-copy], [data-mix-existing-script]");
-      if (sourceSelect) updateMixSourceAsset(sourceSelect);
+        : mode === "ai" ? "AI生成需选择目标产品；系统将据此匹配爆款结构、校验文案并限定素材范围。" : `请先选择${mode === "copy" ? "文案" : "脚本"}，系统将自动带入关联产品。`;
+      if (sourceSelect?.value) updateMixSourceAsset(sourceSelect);
     }
 
     const mixProductNames = { "mite-pro":"轻净 Pro 除螨仪", "washer-s5":"净界洗地机 S5", "air-a8":"轻享空气炸锅 A8" };
@@ -4679,6 +4678,47 @@
         if (conflict) conflict.hidden = true;
         dynamicForm.querySelector(".mix-flow-form").dataset.mixSourceConflict = "false";
       }
+    }
+
+    function setMixSourceSelection(kind, item) {
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      const source = root?.querySelector(kind === "script" ? "[data-mix-existing-script]" : "[data-mix-existing-copy]");
+      if (!source || !item) return;
+      const productId = item.productId || Object.entries(mixProductNames).find(([, name]) => name === item.product)?.[0] || "";
+      const label = kind === "script"
+        ? `${item.name}｜${item.product}｜${item.rows?.length || 0} 段`
+        : `${mixProductNames[productId] || "通用文案"}｜约${Math.max(1, Math.round((item.text || "").replace(/\s/g, "").length / 4))}秒`;
+      source.innerHTML = `<option value="${escapeHtml(item.id)}" data-product="${escapeHtml(productId)}">${escapeHtml(label)}</option>`;
+      source.value = item.id;
+      root[kind === "script" ? "_mixExternalScript" : "_mixExternalCopy"] = item;
+      const trigger = root.querySelector(kind === "script" ? "[data-mix-pick-script]" : "[data-mix-pick-copy]");
+      trigger?.querySelector("[data-mix-source-picker-label]")?.replaceChildren(label);
+      const productSelect = root.querySelector("[data-mix-product]");
+      if (productId && productSelect) {
+        productSelect.value = productId;
+        productSelect.disabled = true;
+        syncMixProductMaterials(productId);
+        root.querySelector("[data-mix-product-origin]")?.replaceChildren(`目标产品已从所选${kind === "script" ? "脚本" : "文案"}自动带入；如需更换产品，应改为参考内容重新创作。`);
+      }
+      updateMixSourceAsset(source);
+    }
+
+    function openMixAudiencePicker(root) {
+      if (!window.CreationPersonaPicker) return showToast("人群画像选择器加载失败，请刷新页面后重试。");
+      const productId = root.querySelector("[data-mix-product]")?.value || "";
+      const productName = mixProductNames[productId] || "";
+      const current = root.querySelector("[data-mix-audience]")?.dataset.personaId || "";
+      window.CreationPersonaPicker.open({
+        items: personaCatalog.map(item => ({ ...item, recommended:item.product === productName })),
+        selectedId:current,
+        onConfirm(persona) {
+          const input = root.querySelector("[data-mix-audience]");
+          const label = root.querySelector("[data-mix-audience-label]");
+          if (input) { input.value = persona.audience; input.dataset.personaId = persona.id; }
+          if (label) label.textContent = `${persona.audience} · ${persona.name.split("—").pop()}`;
+          showToast(`已应用人群画像：${persona.name}`);
+        }
+      });
     }
 
     function syncMixStructureDecision() {
@@ -4806,6 +4846,17 @@
     function validateMixStep(step) {
       setFormFeedback("");
       if (step === 1) {
+        const mixPlan = dynamicForm.querySelector(".mix-flow-form")?.dataset.mixPlanMode || "ai";
+        if (mixPlan === "copy" && !dynamicForm.querySelector("[data-mix-existing-copy]")?.value) {
+          setFormFeedback("请先从文案库选择一条文案。", "error");
+          dynamicForm.querySelector("[data-mix-pick-copy]")?.focus();
+          return false;
+        }
+        if (mixPlan === "script" && !dynamicForm.querySelector("[data-mix-existing-script]")?.value) {
+          setFormFeedback("请先从脚本库选择一个脚本。", "error");
+          dynamicForm.querySelector("[data-mix-pick-script]")?.focus();
+          return false;
+        }
         const targetDuration = Number(dynamicForm.querySelector("[data-mix-target-duration]")?.value || 0);
         if (targetDuration < 10 || targetDuration > 180) {
           setFormFeedback("视频生成时长需设置在 10–180 秒之间。", "error");
@@ -4859,6 +4910,26 @@
         if (plan) {
           root.querySelectorAll("[data-mix-plan]").forEach(button => button.classList.toggle("active", button === plan));
           renderMixPlanContext(plan.dataset.mixPlan);
+          return;
+        }
+        if (event.target.closest("[data-mix-pick-copy]")) {
+          const selectedId = root.querySelector("[data-mix-existing-copy]")?.value || "";
+          openScriptLibraryPicker({
+            title:"选择文案",
+            subtitle:"从文案库选择一条文案，本次只创建副本，不修改原文案。",
+            selectedId,
+            onConfirm:item => setMixSourceSelection("copy", item)
+          });
+          return;
+        }
+        if (event.target.closest("[data-mix-pick-script]")) {
+          const selectedId = root.querySelector("[data-mix-existing-script]")?.value || "";
+          if (!window.ContentCompassScriptLibrary?.pick) return showToast("脚本库选择器加载失败，请刷新页面后重试。");
+          window.ContentCompassScriptLibrary.pick({ selectedId, onConfirm:item => setMixSourceSelection("script", item) });
+          return;
+        }
+        if (event.target.closest("[data-mix-pick-audience]")) {
+          openMixAudiencePicker(root);
           return;
         }
         const structureMode = event.target.closest("button[data-mix-structure-mode]");
@@ -4953,6 +5024,7 @@
           openScriptMaterialPicker({
             title:"关联创作素材到本次混剪",
             selectedIds:mixSelectedMaterialIds(),
+            productName:mixProductNames[root.querySelector("[data-mix-product]")?.value] || "",
             onConfirm:syncMixMaterialSelection
           });
           return;

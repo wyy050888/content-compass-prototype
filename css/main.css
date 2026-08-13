@@ -6763,7 +6763,7 @@
     .mix-step-panel[data-task-step="1"] > .mix-block:nth-of-type(1),
     .mix-step-panel[data-task-step="1"] > .mix-block:nth-of-type(2),
     .mix-step-panel[data-task-step="1"] > .mix-requirement { grid-column:1; }
-    .mix-step-panel[data-task-step="1"] > [data-mix-material-block] { grid-column:2; grid-row:2 / span 3; position:sticky; top:0; }
+    .mix-step-panel[data-task-step="1"] > [data-mix-material-block] { grid-column:2; grid-row:1 / span 3; position:sticky; top:0; }
     .mix-step-title { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; padding-bottom:16px; border-bottom:1px solid #e5e7ee; }
     .mix-step-title > div > span { color:#7052dc; font-size:10px; font-weight:800; letter-spacing:.12em; }
     .mix-step-title h3 { margin:4px 0 5px; color:#262833; font-size:19px; }
@@ -6782,6 +6782,11 @@
     .mix-field { display:grid; gap:7px; color:#565a68; font-size:12px; }
     .mix-field select { width:100%; min-height:39px; padding:0 32px 0 10px; border:1px solid #dfe1e9; border-radius:9px; color:#333642; background:#fff; font:inherit; }
     .mix-field select:disabled { color:#5d5868; background:#f4f3f7; cursor:not-allowed; }
+    .mix-picker-trigger { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:39px; padding:0 10px; border:1px solid #dfe1e9; border-radius:9px; color:#333642; background:#fff; font:inherit; text-align:left; cursor:pointer; }
+    .mix-picker-trigger:hover { border-color:#a995e8; background:#fbfaff; }
+    .mix-picker-trigger span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .mix-picker-trigger i { flex:0 0 auto; color:#817b93; font-size:17px; font-style:normal; line-height:1; }
+    .mix-source-picker { margin-top:9px; min-height:34px; border-radius:8px; color:#5442a6; font-size:11px; }
     .mix-duration-input { display:grid; grid-template-columns:minmax(0,1fr) 28px; align-items:center; min-height:39px; border:1px solid #dfe1e9; border-radius:9px; background:#fff; overflow:hidden; }
     .mix-duration-input input { min-width:0; height:37px; padding:0 4px 0 10px; border:0; outline:0; font:inherit; }
     .mix-duration-input i { color:#8c909d; font-size:11px; font-style:normal; }
