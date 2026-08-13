@@ -19,7 +19,7 @@
           <button type="button" class="creation-persona-picker-close" data-persona-modal-close aria-label="关闭">×</button>
         </header>
         <div class="creation-persona-picker-toolbar">
-          <label class="creation-persona-search"><span>⌕</span><input type="search" data-persona-modal-search placeholder="搜索画像名称、人群、痛点、场景或适用产品"></label>
+          <label class="creation-persona-search"><span>⌕</span><input type="search" data-persona-modal-search placeholder="搜索产品名称、画像名称或人群"></label>
         </div>
         <div class="creation-persona-picker-summary"><span data-persona-modal-count></span></div>
         <div class="creation-persona-picker-grid" data-persona-modal-grid></div>

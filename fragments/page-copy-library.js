@@ -12,7 +12,7 @@
             </div>
           </div>
             <div class="cl-filter-row">
-              <input type="text" id="clSearchInput" placeholder="搜索文案 / 产品 / 人群 / 卖点">
+              <input type="text" id="clSearchInput" placeholder="搜索文案或产品">
               <select id="clSourceFilter"><option value="all">全部来源</option><option value="AI">AI生成</option><option value="手工新增">手工新增</option><option value="视频识别">视频识别</option></select>
             </div>
             <div class="cl-table-wrap">

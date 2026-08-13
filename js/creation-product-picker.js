@@ -18,7 +18,7 @@
           <button type="button" class="creation-product-picker-close" data-picker-close aria-label="关闭">×</button>
         </header>
         <div class="creation-product-picker-toolbar">
-          <label class="creation-product-search"><span>⌕</span><input type="search" data-picker-search placeholder="搜索产品名称、品牌、类目或卖点"></label>
+          <label class="creation-product-search"><span>⌕</span><input type="search" data-picker-search placeholder="搜索产品名称"></label>
           <select data-picker-brand aria-label="筛选品牌"></select>
           <select data-picker-category aria-label="筛选类目"></select>
         </div>

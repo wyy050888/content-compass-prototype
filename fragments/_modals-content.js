@@ -20,7 +20,7 @@
           <div class="copy-related-rank-note"><i>榜</i><div><strong>高消耗参考成品</strong><span>展示命中该结构且消耗较高的成品，用于核对结构来源和实际表达。</span></div></div>
           <div class="copy-related-toolbar">
             <div><strong>相关千川文案与视频</strong><small id="copyStructureRelatedCount" style="margin-left:8px;color:#999aa4;"></small></div>
-            <input type="search" id="copyStructureRelatedSearch" placeholder="搜索产品、视频名称、素材 ID 或文案">
+            <input type="search" id="copyStructureRelatedSearch" placeholder="搜索资产名称或素材 ID">
           </div>
           <div class="copy-related-list" id="copyStructureRelatedList"></div>
         </section>

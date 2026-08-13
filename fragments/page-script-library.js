@@ -6,7 +6,7 @@
       </div>
       <section class="sl-panel" aria-label="脚本列表">
         <div class="sl-toolbar">
-          <label class="sl-search"><span>⌕</span><input id="slSearch" type="search" placeholder="搜索脚本名称、产品或生成文案"></label>
+          <label class="sl-search"><span>⌕</span><input id="slSearch" type="search" placeholder="搜索脚本名称或产品"></label>
           <select id="slMaterialFilter" aria-label="筛选素材策略"><option value="all">全部素材策略</option><option value="depend">依赖素材库</option><option value="free">不依赖素材库</option></select>
           <span class="sl-result-count" id="slResultCount"></span>
         </div>

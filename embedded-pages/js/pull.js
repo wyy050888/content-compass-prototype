@@ -2424,7 +2424,7 @@
           <div class="persona-template-select" data-persona-template-select hidden>
             <button class="persona-picker-trigger" type="button" data-persona-trigger><span data-persona-selected>搜索或选择人群画像</span><small>⌄</small></button>
             <div class="persona-picker-dropdown" data-persona-dropdown hidden>
-              <input class="persona-picker-search" data-persona-search placeholder="搜索画像名称、人群、痛点或场景">
+              <input class="persona-picker-search" data-persona-search placeholder="搜索产品名称、画像名称或人群">
               <div class="persona-picker-options" data-persona-options></div>
             </div>
             <div class="persona-applied" data-persona-applied hidden><span></span><button type="button" data-persona-clear>改为自行输入</button></div>

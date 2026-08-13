@@ -20,7 +20,7 @@
                 <button class="tab">视频库</button>
                 <button class="tab">图片库</button>
               </div>
-              <input class="search" id="assetSearch" placeholder="搜索产品、标签或资产名称">
+              <input class="search" id="assetSearch" placeholder="搜索资产名称或产品">
               <select class="filter-select"><option>全部状态</option><option>可复用</option><option>待审核</option></select>
             </div>
             <div class="asset-grid" id="assetGrid">

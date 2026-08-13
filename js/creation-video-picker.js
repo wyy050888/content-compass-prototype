@@ -51,7 +51,7 @@
         <button class="creation-video-tag-trigger" type="button" data-cvp-tag-filter>◇<span>${filters.tags.length ? `已选 ${filters.tags.length} 标签` : "视频标签"}</span></button>
         ${filterMenu("status", filters.status === "all" ? "全部状态" : filters.status, [["all", "全部状态"], ...statuses.filter(status => status !== "all").map(status => [status, status])])}
         ${filterMenu("relation", filters.relation === "all" ? "全部关联" : filters.relation === "linked" ? "已关联千川" : "未关联千川", [["all", "全部关联"], ["linked", "已关联千川"], ["unlinked", "未关联千川"]])}
-        <label class="creation-video-search">⌕<input type="search" data-cvp-query placeholder="搜索视频名称、产品名称、视频标签或千川素材 ID" value="${escapeHtml(filters.query)}"></label>
+        <label class="creation-video-search">⌕<input type="search" data-cvp-query placeholder="搜索视频名称、产品或素材 ID" value="${escapeHtml(filters.query)}"></label>
       </div>`;
     }
     const items = sourceItems();
@@ -61,7 +61,7 @@
       ${filterMenu("channel", filters.channel === "all" ? "全部平台" : filters.channel, platforms.map(platform => [platform, platform === "all" ? "全部平台" : platform]))}
       <button class="creation-video-tag-trigger" type="button" data-cvp-tag-filter>◇<span>${filters.tags.length ? `已选 ${filters.tags.length} 标签` : "视频标签"}</span></button>
       ${filterMenu("status", filters.status === "all" ? "全部状态" : filters.status, [["all", "全部状态"], ...statuses.filter(status => status !== "all").map(status => [status, status])])}
-      <label class="creation-video-search">⌕<input type="search" data-cvp-query placeholder="搜索视频名称、关联产品或视频标签" value="${escapeHtml(filters.query)}"></label>
+      <label class="creation-video-search">⌕<input type="search" data-cvp-query placeholder="搜索视频名称或关联产品" value="${escapeHtml(filters.query)}"></label>
     </div>`;
   }
   function renderCard(item, index) {

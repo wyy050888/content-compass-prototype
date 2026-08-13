@@ -54,7 +54,7 @@
                 <option>推直播间</option>
                 <option>推商品</option>
               </select>
-              <input type="text" id="planSearch" placeholder="搜索计划名/抖音号/商品/账户">
+              <input type="text" id="planSearch" placeholder="搜索计划名称或账户">
               <div class="right">
                 <label class="text-btn" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
                   <input type="checkbox" id="planOnlyLow"> ⚠ 仅低效
@@ -115,7 +115,7 @@
                 <option>已通过</option>
                 <option>已驳回</option>
               </select>
-              <input type="text" id="matSearch" placeholder="搜索素材/产品/账户">
+              <input type="text" id="matSearch" placeholder="搜索素材名称或产品">
               <div class="right">
                 <label class="text-btn" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
                   <input type="checkbox" id="matOnlyRejected"> ⚠ 仅驳回

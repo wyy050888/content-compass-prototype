@@ -18,7 +18,7 @@
           <section class="card">
             <div class="filter-bar">
               <div class="tabs"><button class="tab active">达人寻源</button><button class="tab">线索管理</button><button class="tab">建联记录</button></div>
-              <input class="search" placeholder="搜索达人昵称、类目或产品">
+              <input class="search" placeholder="搜索达人昵称或产品">
               <select class="filter-select"><option>匹配分 ≥ 80</option><option>全部达人</option></select>
             </div>
             <div class="table-wrap">
