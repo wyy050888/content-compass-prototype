@@ -951,6 +951,21 @@
     const newCreateButton = document.querySelector(".new-chat");
     const newCreatePopover = document.getElementById("newCreatePopover");
     const newCreateOptions = [...document.querySelectorAll("[data-create-agent-type], [data-create-page]")];
+    const creationShell = document.querySelector("#page-creation .ai-shell");
+    const conversationPanelToggle = document.getElementById("conversationPanelToggle");
+
+    function setConversationPanelCollapsed(collapsed) {
+      if (!creationShell || !conversationPanelToggle) return;
+      creationShell.classList.toggle("conversation-collapsed", collapsed);
+      conversationPanelToggle.textContent = collapsed ? "›" : "‹";
+      conversationPanelToggle.setAttribute("aria-expanded", String(!collapsed));
+      conversationPanelToggle.setAttribute("aria-label", collapsed ? "展开创作列表" : "收起创作列表");
+      conversationPanelToggle.title = collapsed ? "展开创作列表" : "收起创作列表";
+    }
+
+    conversationPanelToggle?.addEventListener("click", () => {
+      setConversationPanelCollapsed(!creationShell?.classList.contains("conversation-collapsed"));
+    });
 
     function filterAgents(category) {
       let visibleCount = 0;

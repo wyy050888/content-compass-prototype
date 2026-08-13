@@ -36,6 +36,7 @@
               </div>
             </div>
           </aside>
+          <button class="conversation-panel-toggle" id="conversationPanelToggle" type="button" aria-expanded="true" aria-label="收起创作列表" title="收起创作列表">‹</button>
 
           <div class="creation-stage home-mode">
             <button class="asset-toggle" id="assetToggle">会话资产 <span class="badge gray" id="assetToggleCount">0</span></button>

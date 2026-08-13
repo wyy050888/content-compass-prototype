@@ -388,16 +388,28 @@
 
     /* AI 创建 */
     .ai-shell {
+      --conversation-panel-width: 220px;
       height: 100vh;
+      position: relative;
       display: grid;
-      grid-template-columns: 220px minmax(480px, 1fr);
+      grid-template-columns: var(--conversation-panel-width) minmax(480px, 1fr);
       overflow: hidden;
       background: #f7f8fb;
     }
 
     .conversation-panel, .asset-panel { height: 100vh; background: #fff; }
 
-    .conversation-panel { overflow-y: auto; border-right: 1px solid var(--line); padding: 18px 13px; }
+    .conversation-panel { min-width:0; overflow-y: auto; border-right: 1px solid var(--line); padding: 18px 13px; }
+    .conversation-panel-toggle {
+      position:absolute; z-index:15; top:28px; left:calc(var(--conversation-panel-width) - 38px);
+      display:grid; place-items:center; width:24px; height:24px; padding:0;
+      border:1px solid #e2e2e6; border-radius:7px; background:#fff;
+      color:#74747c; font-size:15px; line-height:1; cursor:pointer; transition:left .22s ease, color .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .conversation-panel-toggle:hover,.conversation-panel-toggle:focus-visible { border-color:#cbcbcf; color:#202126; background:#f2f2f4; outline:0; }
+    .ai-shell.conversation-collapsed { --conversation-panel-width:0px; }
+    .ai-shell.conversation-collapsed .conversation-panel { overflow:hidden; padding-left:0; padding-right:0; border-right:0; }
+    .ai-shell.conversation-collapsed .conversation-panel-toggle { left:8px; }
     .asset-panel {
       position: fixed;
       z-index: 52;
@@ -4037,7 +4049,7 @@
     }
 
     @media (max-width: 1180px) {
-      .ai-shell { grid-template-columns: 190px minmax(430px, 1fr); }
+      .ai-shell { --conversation-panel-width:190px; grid-template-columns: var(--conversation-panel-width) minmax(430px, 1fr); }
       .pull-grid { grid-template-columns: 280px 1fr; }
       .analysis-stack { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); }
       .asset-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -4059,7 +4071,7 @@
       .mobile-toggle { display: inline-grid; place-items: center; }
       .page-pad { padding: 20px 16px 34px; }
       .ai-shell { display: block; }
-      .conversation-panel { display: none; }
+      .conversation-panel,.conversation-panel-toggle { display: none; }
       .creation-stage { height: 100vh; min-height: 0; padding: 20px 16px; }
       .asset-panel { width: min(440px, 94vw); }
       .asset-backdrop { left: 0; }
