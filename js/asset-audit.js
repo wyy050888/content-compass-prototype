@@ -67,7 +67,7 @@
   document.addEventListener("click", event => { const trigger = event.target.closest("[data-asset-history]"); if (trigger) showHistory(trigger.dataset.assetHistory, trigger.dataset.assetTitle); });
   const auditObserver = new MutationObserver(enhanceTables);
   const startAuditObserver = () => {
-    if (document.body?.nodeType === 1) auditObserver.observe(document.body, { childList:true, subtree:true });
+    try { if (document.body instanceof Node) auditObserver.observe(document.body, { childList:true, subtree:true }); } catch (_) {}
   };
   if (document.body?.nodeType === 1) startAuditObserver();
   else document.addEventListener("DOMContentLoaded", startAuditObserver, { once:true });

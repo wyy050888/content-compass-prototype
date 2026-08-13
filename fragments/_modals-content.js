@@ -8,12 +8,22 @@
       </div>
       <div class="modal-body">
         <div class="copy-structure-detail-summary" id="copyStructureDetailSummary"></div>
-        <div class="copy-related-rank-note"><i>榜</i><div><strong>高消耗素材示例</strong><span>为便于快速判断，仅展示命中该结构且消耗最高的前 20 条素材，按消耗从高到低排列。</span></div></div>
-        <div class="copy-related-toolbar">
-          <div><strong>相关千川文案与视频</strong><small id="copyStructureRelatedCount" style="margin-left:8px;color:#999aa4;"></small></div>
-          <input type="search" id="copyStructureRelatedSearch" placeholder="搜索产品、视频名称、素材 ID 或文案">
+        <div class="copy-structure-formula-card" id="copyStructureFormulaCard"></div>
+        <div class="copy-structure-detail-tabs" role="tablist">
+          <button class="active" type="button" data-copy-detail-tab="stages">结构阶段</button>
+          <button type="button" data-copy-detail-tab="references">参考成品 <span id="copyStructureReferenceTabCount">0</span></button>
         </div>
-        <div class="copy-related-list" id="copyStructureRelatedList"></div>
+        <section class="copy-structure-detail-panel active" data-copy-detail-panel="stages">
+          <div class="copy-stage-list" id="copyStructureStageList"></div>
+        </section>
+        <section class="copy-structure-detail-panel" data-copy-detail-panel="references">
+          <div class="copy-related-rank-note"><i>榜</i><div><strong>高消耗参考成品</strong><span>展示命中该结构且消耗较高的成品，用于核对结构来源和实际表达。</span></div></div>
+          <div class="copy-related-toolbar">
+            <div><strong>相关千川文案与视频</strong><small id="copyStructureRelatedCount" style="margin-left:8px;color:#999aa4;"></small></div>
+            <input type="search" id="copyStructureRelatedSearch" placeholder="搜索产品、视频名称、素材 ID 或文案">
+          </div>
+          <div class="copy-related-list" id="copyStructureRelatedList"></div>
+        </section>
       </div>
     </div>
   </div>

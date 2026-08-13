@@ -57,16 +57,14 @@
     return list.map(n => `<option value="${esc(n)}" ${n===current?'selected':''}>${esc(n)}</option>`).join('');
   };
 
-  const state = { tab:'copy', template:'prompt', search:'', preview:null, edit:null, confirm:null, overlayRequest:null, associate:null };
+  const state = { tab:'copy', template:'prompt', search:'', templatePromptType:'商品主图', templateQuery:'', preview:null, edit:null, confirm:null, overlayRequest:null, associate:null };
   // 状态枚举与源页对齐:
   //   创作素材 status: ok / fail / pending / analyzing
   //   成片视频 status: done / pending / running / failed
   // 时长单位:成片视频用秒数(经 fvTime 转换);创作素材用 "0:05" 字符串,源页已如此
   const data = {
-    copy: [
-      {id:'c1', text:'床单刚换一周，第一遍照样能吸出碎屑和毛发。床垫深处的脏东西，普通清理根本触达不到。轻净 Pro 拍打吸尘同步完成，尘杯可水洗。', source:'智能文案', product:'轻净 Pro 除螨仪', crowd:'年轻父母', structure:'痛点钩子型', chars:61, updated:'08/08 14:32:16'},
-      {id:'c2', text:'看得见的是表面，看不见的都藏在床垫深处。高频拍打先松尘，再用大吸力带走灰尘与毛发，清洁结果在透明尘杯里一目了然。', source:'爆款仿写', product:'轻净 Pro 除螨仪', crowd:'养宠家庭', structure:'结果直给型', chars:58, updated:'08/07 18:20:05'}
-    ],
+    // 文案不在产品详情维护副本，统一读取 ContentCompassCopyLibrary。
+    copy: [],
     image: [
       {id:'i1', name:'卧室深层清洁主图.png', type:'主图', desc:'床褥深处的脏东西，一吸就看得见', tags:['产品特写','结果直给'], resolution:'1080×1080', size:'2.8 MB', linked:true},
       {id:'i2', name:'拍打吸尘场景图.png', type:'场景图', desc:'拍打松尘，再强力吸走', tags:['卧室','使用场景'], resolution:'1242×1660', size:'3.4 MB', linked:true},
@@ -106,20 +104,20 @@
     ],
     template: {
       prompt:[
-        {id:'tp1', name:'清洁电器高转化口播提示词', agent:'智能文案', text:'读取产品事实与禁用话术，按痛点、产品能力、使用证明、多场景和行动引导生成文案。', isDefault:true},
-        {id:'tp2', name:'除螨结果直给提示词', agent:'爆款文案仿写', text:'复用参考文案的节奏与钩子，不复用事实，将卖点替换为当前产品事实。', isDefault:false}
+        {id:'prompt-main-clean', name:'清洁电器结果型商品主图', category:'商品主图', description:'适用于除螨仪、吸尘器等清洁电器的结果可视化主图', agent:'商品主图 Agent', text:'突出深层清洁、拍吸同步和透明尘杯结果可视化。', tags:['基础描述','构图方式','场景描述','反向提示词'], createdAt:'2026-08-05', isDefault:true},
+        {id:'prompt-detail-function', name:'功能拆解型详情页提示词', category:'商品详情图', description:'适合按功能模块生成电商详情页图片', agent:'商品详情图 Agent', text:'首屏海报图、核心卖点图与细节特写图三个模块。', tags:['首屏海报图','核心卖点图','细节特写图'], createdAt:'2026-08-04', isDefault:true}
       ],
       persona:[
-        {id:'ta1', name:'养宠清洁家庭', age:'25–40岁', scene:'床垫、沙发、宠物活动区', pain:'毛发碎屑与深层灰尘', updated:'08/08 12:15'},
-        {id:'ta2', name:'年轻父母', age:'25–38岁', scene:'卧室、儿童房', pain:'看不见的床褥脏污', updated:'08/07 09:40'}
+        {id:'persona-mom', name:'精致妈妈—母婴清洁人群', audience:'精致妈妈 · 女性', age:'24–30岁', scene:'宝宝家庭的床垫日常清洁；毛绒玩具和布艺沙发清洁', pain:'孩子接触床褥后容易敏感不适；床单刚换仍担心深层毛发碎屑', scope:'轻净 Pro 除螨仪', created:'嗡大发 · 08/01 10:20', updated:'嗡大发 · 08/04 15:30', usage:36},
+        {id:'persona-pet', name:'精致妈妈—养宠清洁人群', audience:'精致妈妈 · 不限', age:'31–40岁', scene:'宠物活动区日常清洁；换季掉毛期的床褥与沙发清洁', pain:'宠物掉毛进入沙发和床褥缝隙；表面清理后仍有毛发碎屑', scope:'轻净 Pro 除螨仪', created:'嗡大发 · 08/01 10:20', updated:'嗡大发 · 08/04 11:18', usage:24}
       ],
       canvas:[
-        {id:'tc1', name:'清洁电器 TVC 画板模板', node:'18 个节点', updated:'08/08 10:20'},
-        {id:'tc2', name:'结果证明短视频画板', node:'12 个节点', updated:'08/06 16:08'}
+        {id:'builtin-1', name:'清洁电器 TVC 画板', type:'TVC', node:'8 节点 · 12 镜头', usage:38, updated:'08/08 10:20'},
+        {id:'builtin-2', name:'横评对比画板', type:'测评', node:'6 节点 · 9 镜头', usage:22, updated:'08/06 16:08'}
       ],
       'content-structure':[
-        {id:'ts1', name:'结果前置·实拍证明型', source:'千川学习', formula:'结果钩子 → 痛点解释 → 产品演示 → 效果证明 → 行动引导', duration:'30–45 秒', stages:'5 个阶段', updated:'08/10 16:42'},
-        {id:'ts2', name:'反差开场·实测证明型', source:'自建', formula:'反差开场 → 过程实测 → 结果证明 → 行动引导', duration:'15–30 秒', stages:'4 个阶段', updated:'08/11 09:16'}
+        {id:'1', name:'结果前置·实拍证明型', source:'千川学习', formula:'结果钩子 → 痛点解释 → 产品演示 → 效果证明 → 行动引导', reference:'轻净 Pro 除螨仪｜床褥结果冲击型', status:'学习中', updated:'08/10 16:42'},
+        {id:'4', name:'反差开场·实测证明型', source:'自建', formula:'反差开场 → 过程实测 → 结果证明 → 行动引导', reference:'洗地机紫色污渍实测_成品01.mp4', status:'手动创建', updated:'08/11 09:16'}
       ]
     }
   };
@@ -128,6 +126,23 @@
     esc, cardTime, fvTime, matStatusLabel, matStatusTip, matStatusIco,
     fvStatusLabel, fvSourceLabel, fvSourceClass
   });
+
+  // 脚本库是唯一来源；产品页只按脚本归属产品筛选，不再维护副本。
+  const productScripts = () => (window.ContentCompassScriptLibrary?.list?.() || []).filter(script => script.product === productName());
+  const copyProductIds = { '轻净 Pro 除螨仪':'mite-pro', '净界洗地机 S5':'washer-s5', '轻享空气炸锅 A8':'air-a8' };
+  const copyDuration = copy => Math.max(1, Math.round(String(copy.text || '').replace(/\s/g, '').length / 3.35));
+  const productCopies = () => {
+    const library = window.ContentCompassCopyLibrary?.list?.() || data.copy;
+    const productId = copyProductIds[productName()] || '';
+    return library.filter(copy => productId ? copy.productId === productId : copy.product === productName());
+  };
+  const scriptMixState = script => {
+    const matched = /^(\d+)\/(\d+) 已匹配$/.exec(script.materialStatus || '');
+    const ready = script.materialMode === 'depend' && matched && matched[1] === matched[2];
+    return ready
+      ? { ready:true, label:`${script.materialStatus} · 可混剪`, detail:'已有素材已覆盖全部镜头' }
+      : { ready:false, label:script.materialMode === 'depend' ? (script.materialStatus || '待匹配素材') : '未匹配已有素材', detail:'需先匹配当前产品的创作素材' };
+  };
 
   function toast(message) {
     if (typeof window.showToast === 'function') return window.showToast(message);
@@ -138,22 +153,28 @@
   function filtered(items, fields) { const q=state.search.trim().toLowerCase(); return q ? items.filter(x=>fields.some(f=>String(x[f]||'').toLowerCase().includes(q))) : items; }
   function empty(label) { return `<div class="pda-empty"><div><i>◇</i><strong>暂无${esc(label)}</strong><p>可清空搜索条件后重试</p></div></div>`; }
   function setCounts() {
-    ['copy','image','script'].forEach(k=>$(`[data-pda-count="${k}"]`).textContent=data[k].length);
+    $('[data-pda-count="copy"]').textContent=productCopies().length;
+    $('[data-pda-count="image"]').textContent=data.image.length;
+    $('[data-pda-count="script"]').textContent=productScripts().length;
     ['material','video','reference'].forEach(k=>$(`[data-pda-count="${k}"]`).textContent=data[k].filter(x=>x.linked).length);
     $('[data-pda-count="template"]').textContent=Object.values(data.template).reduce((n,a)=>n+a.length,0);
   }
 
   function renderCopy() {
-    const rows=filtered(data.copy,['text','source','crowd','structure']);
-    $('#pdaCopyContent').innerHTML=rows.length?`<div class="pda-table-wrap"><table class="pda-table"><colgroup><col style="width:25%"><col style="width:8%"><col style="width:10%"><col style="width:8%"><col style="width:9%"><col style="width:5%"><col style="width:10%"><col style="width:10%"><col style="width:15%"></colgroup><thead><tr><th>文案详情</th><th>来源</th><th>产品</th><th>人群</th><th>结构</th><th>字数</th><th>创建</th><th>最近修改</th><th>操作</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td><div class="pda-clamp" title="${esc(x.text)}">${esc(x.text)}</div></td><td>${esc(x.source)}</td><td><strong>${esc(x.product)}</strong></td><td>${esc(x.crowd)}</td><td>${esc(x.structure)}</td><td>${x.chars}</td><td>嗡大发<br><small>08/04 14:20</small></td><td>${i%2?'李四':'嗡大发'}<br><small>${x.updated}</small></td><td><div class="pda-actions"><button class="pda-link" data-pda-action="history" data-kind="copy" data-id="${x.id}">查看变更</button><button class="pda-link" data-pda-action="edit-copy" data-id="${x.id}">编辑</button><span class="pda-ai-wrap"><button class="pda-link" data-pda-menu-toggle>AI ▾</button><span class="pda-menu" hidden>${['智能改写','爆款仿写','智能脚本','智能混剪'].map(a=>`<button data-pda-action="ai" data-value="${a}" data-id="${x.id}">${a}</button>`).join('')}</span></span><button class="pda-link" data-pda-action="delete" data-kind="copy" data-id="${x.id}">删除</button></div></td></tr>`).join('')}</tbody></table></div>`:empty('关联文案');
+    const rows=filtered(productCopies(),['text','source','audience','structure']);
+    $('#pdaCopyContent').innerHTML=rows.length?`<div class="pda-table-wrap"><table class="pda-table pda-copy-table"><colgroup><col style="width:24%"><col style="width:9%"><col style="width:11%"><col style="width:12%"><col style="width:9%"><col style="width:11%"><col style="width:11%"><col style="width:13%"></colgroup><thead><tr><th>文案详情</th><th>来源</th><th>适用人群</th><th>内容结构</th><th>口播时长</th><th>创建</th><th>最近修改</th><th>操作</th></tr></thead><tbody>${rows.map(x=>`<tr><td><div class="pda-clamp" title="${esc(x.text)}">${esc(x.text)}</div></td><td>${esc(x.source || '—')}</td><td>${esc(x.audience || '—')}</td><td>${esc(x.structure || '未标注')}</td><td><span class="pda-copy-duration">约 ${copyDuration(x)} 秒<small>${String(x.text || '').replace(/\s/g, '').length} 字</small></span></td><td><span class="asset-audit-cell"><b>${esc(x.createdBy || '—')}</b><small>${esc(x.createdAt || '—')}</small></span></td><td><span class="asset-audit-cell"><b>${esc(x.updatedBy || x.createdBy || '—')}</b><small>${esc(x.updated || '—')}</small></span></td><td><div class="pda-actions"><button class="pda-link" data-pda-action="copy-view" data-id="${x.id}">查看</button><button class="pda-link" data-pda-action="copy-edit" data-id="${x.id}">编辑</button><span class="pda-ai-wrap"><button class="pda-link" data-pda-action="copy-ai" data-id="${x.id}">AI ▾</button><span class="pda-menu" hidden><button data-pda-action="copy-rewrite" data-id="${x.id}">智能改写</button><button data-pda-action="copy-imitate" data-id="${x.id}">爆款仿写</button><button data-pda-action="copy-script" data-id="${x.id}">智能脚本</button><button data-pda-action="copy-mix" data-id="${x.id}">智能混剪</button></span></span><button class="pda-link" data-pda-action="copy-more" data-id="${x.id}">•••</button><span class="pda-script-more" hidden><button data-pda-action="copy-history" data-id="${x.id}">查看变更</button><button data-pda-action="copy-download" data-id="${x.id}">下载文案</button><button class="danger" data-pda-action="copy-delete" data-id="${x.id}">删除文案</button></span></div></td></tr>`).join('')}</tbody></table></div>`:empty('关联文案');
   }
   function renderImages() {
     const items=filtered(data.image.filter(x=>x.linked),['name','type','desc']);
     $('#pdaImageContent').innerHTML=items.length?`<div class="pda-panel-tools"><div><strong>关联图片</strong><span>${items.length} 项</span></div></div><div class="pda-image-grid">${items.map((x,i)=>`<article class="pda-image-card" data-pda-image="${x.id}"><div class="pda-image-cover ${i%2?'detail':''}"><div><strong>${esc(x.desc)}</strong><small style="display:block;margin-top:8px">点击预览</small></div></div><div class="pda-image-info"><strong>${esc(x.name)}</strong><div class="pda-meta"><span>${x.type} · ${x.resolution}</span><span>${x.size}</span></div></div></article>`).join('')}</div>`:empty('关联图片');
   }
+  function scriptAudit(script) {
+    return { creator:script.createdBy || '—', created:script.createdAt || '—', editor:script.updatedBy || script.createdBy || '—' };
+  }
+
   function renderScripts() {
-    const rows=filtered(data.script,['name','copy','strategy','material']);
-    $('#pdaScriptContent').innerHTML=rows.length?`<div class="pda-table-wrap"><table class="pda-table"><colgroup><col style="width:17%"><col style="width:11%"><col style="width:20%"><col style="width:11%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:12%"></colgroup><thead><tr><th>脚本名称</th><th>对应产品</th><th>生成文案</th><th>规格</th><th>素材策略</th><th>创建</th><th>最近修改</th><th>操作</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td><strong>${esc(x.name)}</strong></td><td>${esc(x.product)}</td><td><div class="pda-clamp" title="${esc(x.copy)}">${esc(x.copy)}</div></td><td>${esc(x.spec)}</td><td>${esc(x.strategy)}</td><td>嗡大发<br><small>08/04 14:20</small></td><td>${i%2?'李四':'嗡大发'}<br><small>${x.updated}</small></td><td><div class="pda-actions"><button class="pda-link" data-pda-action="history" data-kind="script" data-id="${x.id}">查看变更</button>${['查看','编辑','复制','下载','删除'].map(a=>`<button class="pda-link" data-pda-action="script-${a}" data-id="${x.id}">${a}</button>`).join('')}</div></td></tr>`).join('')}</tbody></table></div>`:empty('关联脚本');
+    const rows=filtered(productScripts(),['name','source','materialMode']);
+    $('#pdaScriptContent').innerHTML=rows.length?`<div class="pda-table-wrap"><table class="pda-table pda-script-table"><colgroup><col style="width:18%"><col style="width:25%"><col style="width:10%"><col style="width:12%"><col style="width:10%"><col style="width:11%"><col style="width:14%"></colgroup><thead><tr><th>脚本名称</th><th>生成文案</th><th>规格</th><th>素材策略</th><th>创建</th><th>最近修改</th><th>操作</th></tr></thead><tbody>${rows.map(x=>{const audit=scriptAudit(x);return `<tr><td><strong>${esc(x.name)}</strong></td><td><div class="pda-clamp" title="${esc(x.sourceFull || x.source)}">${esc(x.source)}</div></td><td>${esc(specsOf(x))}</td><td><span class="sl-chip ${x.materialMode==='depend'?'depend':'free'}">${x.materialMode==='depend'?'依赖素材库':'不依赖素材库'}</span></td><td><span class="asset-audit-cell"><b>${esc(audit.creator)}</b><small>${esc(audit.created)}</small></span></td><td><span class="asset-audit-cell"><b>${esc(audit.editor)}</b><small>${esc(x.updated || '—')}</small></span></td><td><div class="pda-actions"><button class="pda-link" data-pda-action="script-view" data-id="${x.id}">查看</button><button class="pda-link" data-pda-action="script-edit" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="script-locate" data-id="${x.id}">定位会话</button><button class="pda-link" data-pda-action="script-more" data-id="${x.id}">•••</button><span class="pda-script-more" hidden><button data-pda-action="script-history" data-id="${x.id}">查看变更</button><button data-pda-action="script-download" data-id="${x.id}">下载脚本</button><button class="danger" data-pda-action="script-delete" data-id="${x.id}">删除脚本</button></span></div></td></tr>`;}).join('')}</tbody></table></div>`:empty('关联脚本');
   }
 
   function mediaPage(kind) { return kind === 'material' ? 'creation-videos' : kind === 'video' ? 'finished-videos' : 'reference-videos'; }
@@ -302,12 +323,14 @@
   }
 
   function renderTemplates() {
-    const type=state.template, items=filtered(data.template[type],['name','agent','text','scene','source','formula','duration']);
+    const type=state.template;
+    const items=filtered(data.template[type],['name','agent','text','scene','source','formula','duration']);
+    const promptItems=items.filter(item => item.category === state.templatePromptType && (!state.templateQuery || `${item.name} ${item.description} ${item.text}`.toLowerCase().includes(state.templateQuery.toLowerCase())));
     let html='';
-    if(type==='prompt') html=`<div class="pda-template-grid">${items.map(x=>`<article class="pda-template-card"><div class="pda-tags"><span class="pda-tag">${esc(x.agent)}</span>${x.isDefault?'<span class="pda-tag">默认</span>':''}</div><h4>${esc(x.name)}</h4><p>${esc(x.text)}</p><div class="pda-template-actions"><button class="pda-link" data-pda-action="prompt-default" data-id="${x.id}">设为默认</button><button class="pda-link" data-pda-action="use-image" data-id="${x.id}">用于生图</button><button class="pda-link" data-pda-action="template-edit" data-kind="prompt" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="template-delete" data-kind="prompt" data-id="${x.id}">删除</button></div></article>`).join('')}</div>`;
-    if(type==='persona') html=tableTemplate(['画像名称','年龄','核心场景','核心痛点','更新时间','操作'],items,x=>`<td><strong>${esc(x.name)}</strong></td><td>${x.age}</td><td>${esc(x.scene)}</td><td>${esc(x.pain)}</td><td>${x.updated}</td><td><div class="pda-actions"><button class="pda-link" data-pda-action="template-edit" data-kind="persona" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="history" data-kind="persona" data-id="${x.id}">编辑历史</button><button class="pda-link" data-pda-action="template-copy" data-kind="persona" data-id="${x.id}">复制</button><button class="pda-link" data-pda-action="template-delete" data-kind="persona" data-id="${x.id}">删除</button></div></td>`);
-    if(type==='canvas') html=`<div class="pda-template-grid">${items.map(x=>`<article class="pda-template-card" data-pda-canvas="${x.id}"><div class="pda-canvas-thumb">点击预览画板</div><h4>${esc(x.name)}</h4><div class="pda-meta"><span>${x.node}</span><span>${x.updated}</span></div></article>`).join('')}</div>`;
-    if(type==='content-structure') html=tableTemplate(['结构名称','来源','内容公式','适用时长','结构阶段','更新时间','操作'],items,x=>`<td><strong>${esc(x.name)}</strong></td><td>${x.source}</td><td>${esc(x.formula)}</td><td>${x.duration}</td><td>${x.stages}</td><td>${x.updated}</td><td><div class="pda-actions"><button class="pda-link" data-pda-action="history" data-kind="content-structure" data-id="${x.id}">查看详情</button>${x.source==='自建'?`<button class="pda-link" data-pda-action="template-edit" data-kind="content-structure" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="template-delete" data-kind="content-structure" data-id="${x.id}">删除</button>`:''}</div></td>`);
+    if(type==='prompt') html=`<div class="pda-template-toolbar"><div class="pda-prompt-type-tabs"><button class="${state.templatePromptType==='商品主图'?'active':''}" type="button" data-pda-prompt-type="商品主图">主图模板</button><button class="${state.templatePromptType==='商品详情图'?'active':''}" type="button" data-pda-prompt-type="商品详情图">详情图模板</button></div><button class="pda-btn primary" type="button" data-pda-open-template-library="prompt">＋ 关联提示词模板</button></div><div class="pda-prompt-library-panel"><div class="pda-prompt-filter"><span>当前展示已关联当前产品的模板</span><input data-pda-prompt-search type="search" placeholder="搜索模板名称、描述或内容" value="${esc(state.templateQuery)}"></div><div class="pda-prompt-grid">${promptItems.map(x=>`<article class="pda-prompt-card"><div class="pda-prompt-head"><div><strong>${esc(x.name)}</strong><small>${esc(x.description || '')} · ${esc(x.createdAt || '刚刚')}</small></div><span class="pda-prompt-category">${esc(x.category || x.agent)}</span></div><div class="pda-prompt-preview">${esc(x.text)}</div><div class="pda-prompt-tags">${(x.tags||[]).map(tag=>`<span>${esc(tag)}</span>`).join('')}</div><footer><label><input type="radio" ${x.isDefault?'checked':''} data-pda-action="prompt-default" data-id="${x.id}"> 默认模板</label><div><button class="pda-link" data-pda-action="use-image" data-id="${x.id}">用于生图</button><button class="pda-link" data-pda-action="template-edit" data-kind="prompt" data-id="${x.id}">编辑</button><button class="pda-link danger" data-pda-action="template-delete" data-kind="prompt" data-id="${x.id}">删除</button></div></footer></article>`).join('')||'<div class="pda-template-empty">暂无已关联的提示词模板</div>'}</div></div>`;
+    if(type==='persona') html=tableTemplate(['画像名称','人群属性','核心痛点','使用场景','适用范围','创建','最近修改','调用','操作'],items,x=>`<td><div class="pda-persona-name"><strong>${esc(x.name)}</strong></div></td><td>${esc(x.audience || '—')}<br><small>${esc(x.age)}</small></td><td>${esc(x.pain)}</td><td>${esc(x.scene)}</td><td><span class="pda-template-usage">${esc(x.scope || productName())}</span></td><td>${esc(x.created || '—')}</td><td>${esc(x.updated)}</td><td>${x.usage||0} 次</td><td><div class="pda-actions"><button class="pda-link" data-pda-action="template-edit" data-kind="persona" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="history" data-kind="persona" data-id="${x.id}">查看变更</button><button class="pda-link" data-pda-action="template-copy" data-kind="persona" data-id="${x.id}">复制</button><button class="pda-link danger" data-pda-action="template-delete" data-kind="persona" data-id="${x.id}">删除</button></div></td>`);
+    if(type==='canvas') html=`<div class="pda-template-toolbar"><span>当前展示已关联当前产品的画板模板</span><button class="pda-btn primary" type="button" data-pda-open-template-library="canvas">＋ 关联无限画板模板</button></div><div class="pda-canvas-grid">${items.map((x,index)=>`<article class="pda-canvas-card" data-pda-canvas="${x.id}"><div class="pda-canvas-visual tone-${index%3+1}"><span>${esc(x.type || 'TVC')}</span></div><div class="pda-canvas-meta"><div><strong>${esc(x.name)}</strong><span>${esc(x.type || 'TVC')}</span></div><p>${index?'开箱、上手、横向对比与推荐结论，适合产品横评创作。':'问题、演示、结果与品牌收口的画板模板，内置产品特写、场景图与分镜节点。'}</p><footer><span>${esc(x.node)}</span><span>使用 ${x.usage||0}</span></footer></div><div class="pda-canvas-actions"><button data-pda-action="template-edit" data-kind="canvas" data-id="${x.id}">编辑</button><button class="danger" data-pda-action="template-delete" data-kind="canvas" data-id="${x.id}">删除</button></div></article>`).join('')}</div>`;
+    if(type==='content-structure') html=`<div class="pda-template-toolbar"><span>当前展示已关联当前产品的爆款内容结构</span><button class="pda-btn primary" type="button" data-pda-open-template-library="content-structure">＋ 关联爆款内容结构</button></div>`+tableTemplate(['结构名称','内容公式','来源','参考成品','状态','操作'],items,x=>`<td><strong>${esc(x.name)}</strong></td><td><span class="pda-template-formula">${esc(x.formula)}</span></td><td><span class="pda-template-source ${x.source==='千川学习'?'learned':'custom'}">${esc(x.source)}</span></td><td><strong>${esc(x.reference || '暂无')}</strong></td><td><span class="pda-template-status ${x.source==='千川学习'?'learning':'enabled'}">${esc(x.status || '已启用')}</span></td><td><div class="pda-actions"><button class="pda-link" data-pda-action="template-view" data-kind="content-structure" data-id="${x.id}">查看</button>${x.source==='自建'?`<button class="pda-link" data-pda-action="template-edit" data-kind="content-structure" data-id="${x.id}">编辑</button><button class="pda-link danger" data-pda-action="template-delete" data-kind="content-structure" data-id="${x.id}">删除</button>`:''}</div></td>`);
     $('#pdaTemplateContent').innerHTML=items.length?html:empty('模板');
   }
   function tableTemplate(head,items,row){return `<div class="pda-table-wrap"><table class="pda-table"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${items.map(x=>`<tr>${row(x)}</tr>`).join('')}</tbody></table></div>`}
@@ -316,7 +339,10 @@
   function find(kind,id) { return kind==='template'?null:(data[kind]||[]).find(x=>x.id===id); }
   function open(id){const el=$(`#${id}`);if(el)el.hidden=false}
   function close(id){const el=$(`#${id}`);if(el)el.hidden=true}
-  function closeMenus(){ closeAllPopovers(); }
+  function closeMenus(){
+    $$('.pda-menu', root).forEach(menu => menu.hidden = true);
+    $$('.pda-script-more', root).forEach(menu => menu.hidden = true);
+  }
   function download(item){
     const fname = item.file || item.name || 'asset.txt';
     const body = `原型文件:${fname}\n产品:${item.product||productName()}\n类型:${item.type||''}\n时长:${item.duration||''}\n创建:${item.created||item.time||''}`;
@@ -481,8 +507,8 @@
     });
   }
 
-  // ============ 旧 openEdit 简版 - 重命名为复用版, 仅服务非脚本/非媒体字段 ============
-  function openEdit(kind,item,mode){state.edit={kind,item,mode};const titles={rename:'重命名',tag:'编辑标签',product:'关联产品',move:'移动至文件夹',qianchuan:'更换千川素材 ID','edit-copy':'编辑文案','template-edit':'编辑模板',history:'详情'};$('#pdaEditTitle').textContent=titles[mode]||'编辑信息';let fields='';
+  // 通用弹层只服务非模板资产；模板统一在模板库原页面维护。
+  function openEdit(kind,item,mode){state.edit={kind,item,mode};const titles={rename:'重命名',tag:'编辑标签',product:'关联产品',move:'移动至文件夹',qianchuan:'更换千川素材 ID','edit-copy':'编辑文案',history:'详情'};$('#pdaEditTitle').textContent=titles[mode]||'编辑信息';let fields='';
     if(mode==='rename') fields=field('文件名称',item.file||item.name,'name');
     if(mode==='tag') fields=field('标签(多个标签用逗号分隔)',(item.tags||[]).join(','),'tags');
     if(mode==='product') fields=`<div class="pda-field"><label>关联产品</label><select name="product"><option>${esc(productName())}</option><option>净澈洗地机</option><option>空气炸锅</option></select><small>更换为其他产品后,该资产将从当前产品的关联资产中移除。</small></div>`;
@@ -492,20 +518,85 @@
       fields=field('千川素材 ID', current, 'qianchuan', '请输入一个千川素材 ID');
     }
     if(mode==='edit-copy') fields=area('文案内容',item.text,'text');
-    if(mode==='template-edit') fields=field('名称',item.name,'name')+(item.formula?area('内容公式',item.formula,'formula')+field('适用时长',item.duration||'30–45 秒','duration'):area('内容',item.text||item.pain||item.scene||'', 'text'));
-    if(mode==='history') fields=item.formula?`<div class="pda-history"><b>${esc(item.name)}</b><p>来源：${esc(item.source||'自建')} · 建议时长：${esc(item.duration||'—')} · ${esc(item.stages||'')}</p><p>内容公式：${esc(item.formula)}</p><p>完整阶段要求请在模板库「爆款内容结构」中查看。</p></div>`:`<div class="pda-history"><b>${esc(item.name)}</b><p>当前版本:V3 最近更新:${esc(item.updated||'08/08 12:00')}</p><p>V2 优化结构字段与适用场景</p><p>V1 创建资产</p></div>`;
+    if(mode==='history') fields=`<div class="pda-history"><b>${esc(item.name)}</b><p>当前版本：V3 · 最近更新：${esc(item.updated||'08/08 12:00')}</p><p>V2 优化结构字段与适用场景</p><p>V1 创建资产</p></div>`;
     $('#pdaEditFields').innerHTML=fields;$('#pdaEditForm').querySelector('button[type="submit"]').hidden=mode==='history';open('pdaEditModal')}
   function field(label,value,name,placeholder=''){return `<div class="pda-field"><label>${label}</label><input name="${name}" value="${esc(value)}" placeholder="${placeholder}" required></div>`}
   function area(label,value,name){return `<div class="pda-field"><label>${label}</label><textarea name="${name}" required>${esc(value)}</textarea></div>`}
 
+  function openNativeTemplate(kind, item, action='view') {
+    const host = document.querySelector('#page-template-library');
+    const frame = document.querySelector('#page-template-library iframe');
+    if (!host || !frame?.contentWindow) return toast('模板库尚未加载，请刷新后重试');
+    host.classList.add('pda-template-operation-host');
+    frame.contentWindow.postMessage({ type:'content-compass-template-operation', kind, action, id:item?.id, name:item?.name }, '*');
+  }
+
+  window.addEventListener('message', event => {
+    const frame = document.querySelector('#page-template-library iframe');
+    if (event.source !== frame?.contentWindow) return;
+    if (event.data?.type === 'content-compass-template-catalog' && event.data.catalog) {
+      Object.keys(data.template).forEach(kind => {
+        const source = Array.isArray(event.data.catalog[kind]) ? event.data.catalog[kind] : [];
+        if (kind === 'persona') {
+          data.template[kind] = source.filter(item => item.scope === productName());
+          return;
+        }
+        const linkedIds = new Set(data.template[kind].map(item => String(item.id)));
+        data.template[kind] = source.filter(item => linkedIds.has(String(item.id)));
+      });
+      setCounts();
+      if (state.tab === 'template') renderTemplates();
+    }
+    if (event.data?.type === 'content-compass-template-operation-close') {
+      document.querySelector('#page-template-library')?.classList.remove('pda-template-operation-host');
+      renderTemplates();
+    }
+  });
+  const templateLibraryFrame = document.querySelector('#page-template-library iframe');
+  const requestTemplateCatalog = () => templateLibraryFrame?.contentWindow?.postMessage({ type:'content-compass-template-catalog-request' }, '*');
+  templateLibraryFrame?.addEventListener('load', requestTemplateCatalog);
+  setTimeout(requestTemplateCatalog, 80);
+
   function renderActive(){render();}
+
+  function runScriptAction(script, action) {
+    const library = window.ContentCompassScriptLibrary;
+    if (!library) return toast('脚本库尚未加载，请刷新后重试');
+    library.open(script, action, { onSaved:render, onDeleted:render });
+  }
+
+  function openCopyView(copy) {
+    const body = `<div class="sl-meta-grid"><div class="sl-meta"><small>适用人群</small><strong>${esc(copy.audience || '—')}</strong></div><div class="sl-meta"><small>内容结构</small><strong>${esc(copy.structure || '未标注')}</strong></div><div class="sl-meta"><small>口播时长</small><strong>约 ${copyDuration(copy)} 秒 · ${String(copy.text || '').replace(/\s/g, '').length} 字</strong></div></div><section class="sl-source-block expanded"><div><span>完整文案</span></div><p>${esc(copy.text)}</p></section>`;
+    const host = slModal('查看文案', `最近修改：${copy.updated || '—'}`, body, `<button class="sl-btn" data-copy-edit>编辑文案</button><button class="sl-btn" data-copy-script>智能脚本</button><button class="sl-btn primary" data-close>关闭</button>`);
+    host.querySelector('[data-copy-edit]').addEventListener('click', () => { host.remove(); openEdit('copy', copy, 'edit-copy'); });
+    host.querySelector('[data-copy-script]').addEventListener('click', () => { host.remove(); window.dispatchEvent(new CustomEvent('content-compass:script-copy', { detail:{ copy:clone(copy) } })); });
+  }
+
+  function downloadCopy(copy) {
+    const blob = new Blob([copy.text || ''], { type:'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url; link.download = `文案_${copy.id}.txt`; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 500);
+    toast('已开始下载文案');
+  }
+
+  function startMixFromScript(script) {
+    window.dispatchEvent(new CustomEvent('content-compass:mix-script', { detail:{ script:clone(script) } }));
+    toast('已带入智能混剪，可继续确认文案与素材');
+  }
 
   root.addEventListener('click',e=>{
     const tab=e.target.closest('[data-pda-tab]');if(tab){state.tab=tab.dataset.pdaTab;state.search='';$('#pdaSearch').value='';$$('[data-pda-tab]',root).forEach(x=>x.classList.toggle('active',x===tab));$$('[data-pda-panel]',root).forEach(x=>x.classList.toggle('active',x.dataset.pdaPanel===state.tab));render();return}
     const tt=e.target.closest('[data-pda-template]');if(tt){state.template=tt.dataset.pdaTemplate;$$('[data-pda-template]',root).forEach(x=>x.classList.toggle('active',x===tt));renderTemplates();return}
+    const promptType=e.target.closest('[data-pda-prompt-type]');if(promptType){state.templatePromptType=promptType.dataset.pdaPromptType;renderTemplates();return}
+    const openTemplateLibrary=e.target.closest('[data-pda-open-template-library]');if(openTemplateLibrary){
+      document.querySelector('[data-page="template-library"]')?.click();
+      return toast('已打开模板库，可继续管理或关联模板');
+    }
     const openLibrary=e.target.closest('[data-pda-open-library]');if(openLibrary){openMediaLibrary(openLibrary.dataset.pdaOpenLibrary);return}
     const img=e.target.closest('[data-pda-image]');if(img){openPreview('image',find('image',img.dataset.pdaImage));return}
-    const canvas=e.target.closest('[data-pda-canvas]');if(canvas){const item=data.template.canvas.find(x=>x.id===canvas.dataset.pdaCanvas);openEdit('template',item,'history');return}
+    const canvas=e.target.closest('[data-pda-canvas]');if(canvas&&!e.target.closest('[data-pda-action]'))return;
     // 卡片样式保留在产品详情；交互统一委托给视频库原页面。
     const toggle=e.target.closest('[data-pda-menu-toggle]');if(toggle){
       const kind=toggle.dataset.kind, id=toggle.dataset.id;
@@ -532,6 +623,7 @@
     const action=e.target.closest('[data-pda-action]');if(action)handleAction(action);
   });
   $('#pdaSearch').addEventListener('input',e=>{state.search=e.target.value;render()});
+  root.addEventListener('input',e=>{if(e.target.matches('[data-pda-prompt-search]')){state.templateQuery=e.target.value;renderTemplates();}});
   $('#pdaAssociateToolbar').addEventListener('input',e=>{if(!state.associate||!e.target.matches('[data-pda-associate-search]'))return;state.associate.search=e.target.value;renderAssociation(false)});
   $('#pdaAssociateToolbar').addEventListener('click',e=>{
     if(!state.associate)return;
@@ -559,7 +651,14 @@
   $('#pdaConfirmAction').addEventListener('click',()=>{const fn=state.confirm;close('pdaConfirmModal');state.confirm=null;if(fn)fn()});
   $('#pdaPreviewDownload').addEventListener('click',()=>state.preview&&download(state.preview.item));
   $('#pdaPreviewAnalyze').addEventListener('click',()=>{if(!state.preview)return;analyze(state.preview.kind,state.preview.item);close('pdaPreviewModal')});
-  $('#pdaEditForm').addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(e.currentTarget),{item,mode}=state.edit||{};if(!item)return;for(const [k,v] of fd){
+  $('#pdaEditForm').addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(e.currentTarget),{kind,item,mode}=state.edit||{};if(!item)return;
+    if(kind==='copy'&&mode==='edit-copy'){
+      const text=String(fd.get('text')||'').trim();
+      if(!text)return toast('请输入文案内容');
+      if(window.ContentCompassCopyLibrary?.update(item.id,{text})){close('pdaEditModal');render();toast('文案已保存');}
+      return;
+    }
+    for(const [k,v] of fd){
       if(k==='tags')item.tags=String(v).split(/[,,]/).map(s=>s.trim()).filter(Boolean);
       else if(k==='qianchuan'){ item.ads = v ? [{id:String(v)}] : []; }
       else item[k]=v;
@@ -569,7 +668,46 @@
 
   function handleAction(btn){
     const a=btn.dataset.pdaAction,kind=btn.dataset.kind,id=btn.dataset.id,item=kind?find(kind,id):null;
+    const menu = a==='copy-ai' ? btn.parentElement?.querySelector('.pda-menu') : (a==='copy-more'||a==='script-more' ? btn.parentElement?.querySelector('.pda-script-more') : null);
+    const wasOpen = Boolean(menu && !menu.hidden);
     closeMenus();
+    if(a.startsWith('script-')){
+      const script=productScripts().find(item=>item.id===id);
+      if(!script)return;
+      if(a==='script-more'){
+        if(menu)menu.hidden=wasOpen;
+        return;
+      }
+      if(a==='script-history') {
+        if (window.AssetAudit?.showHistory) return window.AssetAudit.showHistory('脚本',script.name);
+        return toast('暂无脚本变更记录');
+      }
+      const actionMap={'script-view':'查看','script-edit':'编辑','script-locate':'定位至会话','script-download':'下载','script-delete':'删除'};
+      if(actionMap[a])return runScriptAction(script,actionMap[a]);
+    }
+    if(a.startsWith('copy-')) {
+      const copy=productCopies().find(item=>item.id===id);
+      if(!copy)return;
+      if(a==='copy-ai') {
+        if(menu)menu.hidden=wasOpen;
+        return;
+      }
+      if(a==='copy-more') {
+        if(menu)menu.hidden=wasOpen;
+        return;
+      }
+      if(a==='copy-view')return openCopyView(copy);
+      if(a==='copy-edit')return openEdit('copy',copy,'edit-copy');
+      if(a==='copy-script')return window.dispatchEvent(new CustomEvent('content-compass:script-copy',{detail:{copy:clone(copy)}}));
+      if(a==='copy-mix')return window.dispatchEvent(new CustomEvent('content-compass:mix-copy',{detail:{copy:clone(copy)}}));
+      if(a==='copy-history')return window.AssetAudit?.showHistory ? window.AssetAudit.showHistory('文案',copy.text.slice(0,24)) : toast('暂无文案变更记录');
+      if(a==='copy-download')return downloadCopy(copy);
+      if(a==='copy-delete')return openConfirm('删除文案','删除后无法恢复，确认删除该文案？',()=>{
+        if(window.ContentCompassCopyLibrary?.remove(copy.id)){render();toast('已删除文案');}
+      });
+      if(a==='copy-rewrite')return window.dispatchEvent(new CustomEvent('content-compass:rewrite-copy',{detail:{copy:clone(copy)}}));
+      if(a==='copy-imitate')return window.dispatchEvent(new CustomEvent('content-compass:imitate-copy',{detail:{copy:clone(copy)}}));
+    }
     if(a==='download')return download(item);
     if(a==='analyze')return analyze(kind,item);
     // 媒体菜单项 - 创作素材 + 成片视频共用
@@ -592,25 +730,19 @@
       setTimeout(()=>document.querySelector(`.agent-card[data-type="${agentType}"]`)?.click(),60);
       return toast(`已定位至${btn.dataset.value}会话`);
     }
-    // 脚本库 1:1 操作
-    if(a.startsWith('script-')){
-      const x=data.script.find(v=>v.id===id);
-      if(!x)return;
-      const op=a.slice(7);
-      if(op==='查看')return openScriptView(x);
-      if(op==='编辑')return openScriptEdit(x);
-      if(op==='复制')return openScriptCopy(x);
-      if(op==='下载')return downloadScript(x);
-      if(op==='删除')return openScriptDelete(x);
-    }
     const list=data.template[kind]||[],x=list.find(v=>v.id===id);
-    if(a==='prompt-default'){data.template.prompt.forEach(v=>v.isDefault=v.id===id);render();return toast('已设为默认模板')}
-    if(a==='use-image')return toast('已带入商品主图 Agent');
-    if(a==='template-edit')return openEdit('template',x,'template-edit');
-    if(a==='history')return openEdit('template',x,'history');
-    if(a==='template-copy'){list.push({...x,id:`t${Date.now()}`,name:`${x.name}_副本`,source:x.source==='千川学习'?'自建':x.source,updated:'刚刚'});render();return toast('已复制')};
-    if(a==='template-delete')return openConfirm('删除模板','删除后无法恢复,确认删除该模板?',()=>{const i=list.findIndex(v=>v.id===id);if(i>-1)list.splice(i,1);render();toast('已删除')});
+    if(a==='prompt-default')return openNativeTemplate('prompt',data.template.prompt.find(v=>v.id===id),'prompt-default');
+    if(a==='use-image'){document.querySelector('[data-page="image-main-agent"]')?.click();return toast('已带入商品主图 Agent')}
+    if(['template-edit','template-view','history','template-copy','template-delete'].includes(a))return openNativeTemplate(kind,x,a);
   }
 
+  window.addEventListener('content-compass:scripts-updated', () => {
+    setCounts();
+    if (state.tab === 'script') renderScripts();
+  });
+  window.addEventListener('content-compass:copies-updated', () => {
+    setCounts();
+    if (state.tab === 'copy') renderCopy();
+  });
   setCounts(); render();
 })();

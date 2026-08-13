@@ -15,7 +15,7 @@
 
             <div class="source-tabs" id="sourceTabs">
               <button class="source-tab active" data-source="link">🔗 通过链接添加</button>
-              <button class="source-tab" data-source="library">📁 从素材库</button>
+              <button class="source-tab" data-source="library">🎬 从视频库选择</button>
               <button class="source-tab" data-source="upload">↑ 本地上传视频</button>
             </div>
 
@@ -33,6 +33,12 @@
 
             <!-- 素材库选择(两栏:文件夹树 + 视频网格) -->
             <div class="source-panel" data-panel="library" hidden>
+              <div class="pull-input-area pull-video-library-entry">
+              <div class="pull-video-library-copy">
+                <strong>从视频库选择</strong>
+              </div>
+                <button class="primary-mini" type="button" id="openPullVideoPicker">选择视频</button>
+              </div>
               <div class="lib-picker" id="libPicker">
                 <!-- 左侧文件夹树 -->
                 <aside class="lib-folder-tree" id="libFolderTree">
@@ -120,8 +126,13 @@
                 <strong>点击或拖拽视频文件到这里</strong>
                 <small>支持 MP4 / MOV，单文件 ≤ 500MB，每次 1 个</small>
               </label>
+              <div class="pull-upload-progress" id="pullUploadProgress" hidden aria-live="polite">
+                <div><strong id="pullUploadName">正在上传视频</strong><span id="pullUploadPercent">0%</span></div>
+                <i><b id="pullUploadBar" style="width:0%"></b></i>
+              </div>
             </div>
 
+            <div class="pull-source-result" id="pullSourceResult">
             <div class="video-list-head">
               <div>待解析视频 <span class="counter">(<b id="videoCount">0</b>/1)</span></div>
               <button class="ghost-mini" id="clearAll">移除</button>
@@ -155,11 +166,8 @@
                 <span>▶ 开始解析</span>
               </button>
             </div>
+            </div>
 
-            <details class="copyright-note">
-              <summary>用户须确保上传链接对应的作品本身及所含的所有内容为自身所有或已获得合法授权，且内容遵守法律法规、公序良俗及社会公共利益……</summary>
-              <p>您上传或粘贴的视频链接及相关内容仅用于 AI 拆解分析，请确认您拥有合法的使用权。系统不会将内容用于模型训练以外的用途，分析结果仅供您本人参考。</p>
-            </details>
           </div>
         </div>
       </section>`);})();

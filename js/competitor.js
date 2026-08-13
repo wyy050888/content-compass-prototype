@@ -283,7 +283,7 @@
       },true);
 
       const cardObserver=new MutationObserver(() => renderAllCards());
-      if(grid) cardObserver.observe(grid,{childList:true,subtree:false});
+      try { if(grid instanceof Node) cardObserver.observe(grid,{childList:true,subtree:false}); } catch (_) {}
       renderAllCards(); renderCompetitorPanel();
 
       const taskShell=document.getElementById("agentTaskShell");
@@ -310,7 +310,7 @@
           else if(!complete && !taskShell.dataset.chatInitialized) { setChatCollapsed(true); taskShell.dataset.chatInitialized="true"; }
           previousComplete=complete;
         });
-        taskObserver.observe(taskShell,{attributes:true,attributeFilter:["class","data-agent-type"]});
+        try { if(taskShell instanceof Node) taskObserver.observe(taskShell,{attributes:true,attributeFilter:["class","data-agent-type"]}); } catch (_) {}
         setChatCollapsed(true);
       }
     })();

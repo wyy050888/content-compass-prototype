@@ -32,6 +32,7 @@
     const personaHistoryModal = document.getElementById("personaHistoryModal");
     const personaDeleteModal = document.getElementById("personaDeleteModal");
     let editingPersonaId = "";
+    let copyingPersonaId = "";
     let deletingPersonaId = "";
 
     function personaNow() {
@@ -88,15 +89,30 @@
         document.getElementById("personaFormAgeMax").value = parts[1] || "35";
       }
     }
-    function openPersonaModal(id = "") {
-      editingPersonaId = id;
+    function personaCopyName(sourceName) {
+      const base = String(sourceName || "未命名画像").replace(/（副本(?: \d+)?）$/, "");
+      let index = 1;
+      let name = `${base}（副本）`;
+      const names = new Set(personaCatalog.map(item => item.name));
+      while (names.has(name)) name = `${base}（副本 ${++index}）`;
+      return name;
+    }
+    function openPersonaModal(id = "", mode = "edit") {
+      const isCopy = mode === "copy";
       const persona = personaCatalog.find(item => item.id === id) || null;
-      document.getElementById("personaTemplateTitle").textContent = persona ? "编辑人群画像" : "新建人群画像";
+      editingPersonaId = isCopy ? "" : id;
+      copyingPersonaId = isCopy ? id : "";
+      document.getElementById("personaTemplateTitle").textContent = isCopy ? "复制人群画像" : persona ? "编辑人群画像" : "新建人群画像";
+      const saveButton = document.getElementById("savePersonaTemplate");
+      if (saveButton) saveButton.textContent = isCopy ? "确认复制" : "保存画像";
+      const note = personaModal?.querySelector(".persona-form-note");
+      if (note) note.textContent = isCopy ? "复制后生成独立画像，不影响原画像" : "保存后可在三个文案 Agent 中直接调用";
       resetPersonaForm(persona);
+      if (isCopy && persona) document.getElementById("personaFormName").value = personaCopyName(persona.name);
       personaModal?.classList.add("show");
       setTimeout(() => document.getElementById("personaFormName")?.focus(), 50);
     }
-    function closePersonaModal() { personaModal?.classList.remove("show"); editingPersonaId = ""; }
+    function closePersonaModal() { personaModal?.classList.remove("show"); editingPersonaId = ""; copyingPersonaId = ""; }
     function readPersonaForm() {
       const activeText = group => personaModal?.querySelector(`[data-persona-form-single="${group}"] > button.active`)?.textContent.trim() || "";
       let age = activeText("age");
@@ -129,9 +145,10 @@
         showToast("人群画像已更新；已在使用的任务仍保留原画像快照");
       } else {
         const id = `persona-${Date.now()}`;
-        personaCatalog.unshift({ id, ...form, usage:0, updated:time });
-        personaHistories[id] = [{ time, user:"嗡大发", field:"创建画像", before:"—", after:form.name }];
-        showToast("人群画像已新增，可在三个文案 Agent 中调用");
+        const source = personaCatalog.find(item => item.id === copyingPersonaId);
+        personaCatalog.unshift({ id, ...form, usage:0, created:time, updated:time });
+        personaHistories[id] = [{ time, user:"嗡大发", field:source ? "复制画像" : "创建画像", before:source?.name || "—", after:form.name }];
+        showToast(source ? "人群画像已复制" : "人群画像已新增，可在三个文案 Agent 中调用");
       }
       closePersonaModal();
       renderPersonaLibrary();
@@ -147,13 +164,7 @@
     function copyPersona(id) {
       const source = personaCatalog.find(item => item.id === id);
       if (!source) return;
-      const newId = `persona-${Date.now()}`;
-      const time = personaNow();
-      const copy = { ...source, id:newId, name:`${source.name}（副本）`, pain:[...source.pain], scenes:[...source.scenes], usage:0, updated:time };
-      personaCatalog.unshift(copy);
-      personaHistories[newId] = [{ time, user:"嗡大发", field:"复制画像", before:source.name, after:copy.name }];
-      renderPersonaLibrary();
-      showToast("人群画像已复制，可继续编辑");
+      openPersonaModal(id, "copy");
     }
     function openPersonaDelete(id) {
       const persona = personaCatalog.find(item => item.id === id);
@@ -2213,25 +2224,32 @@
     const clDeleteModal = document.getElementById("clDeleteModal");
     const clDetailDrawer = document.getElementById("clDetailDrawer");
     const clDrawerOverlay = document.getElementById("clDrawerOverlay");
-    const clProducts = ["轻净 Pro 除螨仪", "轻享空气炸锅 A8", "净界洗地机 S5", "随行榨汁杯 Mini"];
+    const clLearningSampleDetail = document.getElementById("clLearningSampleDetail");
+    const clLearningSampleDetailBody = document.getElementById("clLearningSampleDetailBody");
     const clEscape = value => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" }[char]));
+    const clVariableExamples = {
+      "产品名":"轻净 Pro 除螨仪", "可视化结果":"透明尘杯脏污", "表面状态":"床垫看着干净", "隐性问题":"纤维深处的灰尘碎屑",
+      "核心动作":"边拍边吸", "问题对象":"深层灰尘", "核心场景":"床垫", "扩展场景":"沙发布艺", "可验证内容":"完整实测结果",
+      "预期反差":"一遍完成清洁", "关键动作":"推拉一次吸走污渍", "使用场景":"厨房地面"
+    };
 
     let contentStructures = [
       {
         id: 1, name: "结果前置·实拍证明型", formula: "结果钩子 → 痛点解释 → 产品演示 → 效果证明 → 行动引导",
-        source: "千川学习", scope: "产品级结构", product: "轻净 Pro 除螨仪", duration: "30–45 秒", method: "平台数据学习", updated: "08-10 16:42", parseStatus:"completed",
+        source: "千川学习", method: "平台数据学习", learningStatus:"学习中", learnedAt:"2026-08-10", updated: "08-10 16:42", parseStatus:"completed",
         stages: [
-          { name:"结果钩子", say:"先抛出清洁后的反差结果，让用户立刻知道视频能解决什么问题。", visual:"尘杯灰尘特写或床褥清洁前后对比，产品不必完整出镜。", edit:"1–2 个近景；单镜 1–2 秒；结果画面直接硬切进入。" },
-          { name:"痛点解释", say:"说明肉眼看着干净，不代表纤维深处没有毛发、碎屑和灰尘。", visual:"床垫纤维、毛发碎屑、手拍扬尘等问题证据。", edit:"2–3 个细节镜头；正常速度；随信息点硬切。" },
-          { name:"产品演示", say:"表达高频拍打与同步吸尘如何把深层脏污带出来。", visual:"产品在床垫上推进、拍打头工作、尘杯积尘过程。", edit:"3–4 个动作镜头；保留完整关键动作；可轻微加速。" },
-          { name:"效果证明", say:"用可见结果强化清洁能力和真实可信感。", visual:"透明尘杯结果、清洁前后对比、用户查看结果。", edit:"2 个结果镜头；结果特写可短暂停留；前后硬切。" },
-          { name:"行动引导", say:"引导进入商品页查看完整实测与产品信息。", visual:"产品正面、收纳或用户持机展示。", edit:"1–2 个稳定镜头；正常速度；画面留足口播时间。" }
+          { name:"结果型视觉钩子", purpose:"先给结果，快速建立好奇与观看理由", say:"先抛出清洁后的反差结果，让用户立刻知道视频能解决什么问题。", talk:"先别听我讲参数，直接看{产品名}走完一遍后的{可视化结果}。", slots:["产品名","可视化结果"], visual:"结果特写、前后对比或反常画面；至少 1 个近景镜头。", edit:"1–2 个近景；单镜 1–2 秒；结果画面直接硬切进入。" },
+          { name:"隐性痛点放大", purpose:"解释为什么表面正常仍需要解决", say:"说明肉眼看着干净，不代表纤维深处没有毛发、碎屑和灰尘。", talk:"你以为{表面状态}就够了，其实{隐性问题}并没有解决。", slots:["表面状态","隐性问题"], visual:"床垫纤维、毛发碎屑、手拍扬尘等问题证据。", edit:"2–3 个细节镜头；正常速度；随信息点硬切。" },
+          { name:"产品能力演示", purpose:"用真实操作承接解决方案，而不是只讲参数", say:"表达高频拍打与同步吸尘如何把深层脏污带出来。", talk:"{产品名}通过{核心动作}，把{问题对象}直接带出来。", slots:["核心动作","问题对象"], visual:"产品露出、关键动作和使用过程；动作镜头需要连续清晰。", edit:"3–4 个动作镜头；保留完整关键动作；可轻微加速。" },
+          { name:"结果与场景证明", purpose:"证明产品有效，并覆盖更多使用场景", say:"用可见结果强化清洁能力和真实可信感。", talk:"{核心场景}、{扩展场景}都能用，清洁结果可以直接看见。", slots:["核心场景","扩展场景"], visual:"透明尘杯结果、清洁前后对比和两个以上使用场景。", edit:"2 个结果镜头；结果特写短暂停留；多场景硬切。" },
+          { name:"行动引导", purpose:"收束价值并给出明确下一步", say:"引导进入商品页查看完整实测与产品信息。", talk:"想看{可验证内容}，点击商品了解更多。", slots:["可验证内容"], visual:"产品正面、收纳或使用完成后的稳定画面。", edit:"1–2 个稳定镜头；素材不足可短时定帧。" }
         ],
+        reuse:"需要有可视化结果、完整操作过程或前后对比等可证明画面；仅有静态产品展示时不建议使用。",
         example:{ title:"轻净 Pro 除螨仪｜床褥结果冲击型", meta:"代表性高消耗成品 · 素材 ID 7553983811703193643", badge:"消耗 ¥328,460", copy:"你以为床垫看着干净就够了吗？实际走一遍才知道，藏在纤维深处的细小灰尘根本不是换床单能解决的。轻净 Pro 边拍边吸，尘杯里的结果当场就能看见。" }
       },
       {
         id: 2, name: "场景代入·功能证明型", formula: "生活场景 → 问题出现 → 功能演示 → 成品证明 → 优惠收口",
-        source: "千川学习", scope: "产品级结构", product: "轻享空气炸锅 A8", duration: "45–60 秒", method: "平台数据学习", updated: "08-09 14:28", parseStatus:"completed",
+        source: "千川学习", method: "平台数据学习", learningStatus:"样本稀少", learnedAt:"2026-07-26", updated: "07-26 10:18", parseStatus:"completed",
         stages: [
           { name:"生活场景", say:"从下班晚、做饭麻烦的真实场景切入。", visual:"下班回家、厨房台面、准备食材。", edit:"2–3 个环境与人物镜头；正常速度；硬切。" },
           { name:"问题出现", say:"点出传统烹饪耗时、油烟和看火的问题。", visual:"锅具、油烟、等待过程或凌乱台面。", edit:"2–3 个问题镜头；单镜 1–2 秒。" },
@@ -2243,7 +2261,7 @@
       },
       {
         id: 3, name: "人群点名·卖点展开型", formula: "人群点名 → 需求唤醒 → 核心卖点 → 证明补充 → 产品推荐",
-        source: "千川学习", scope: "通用结构", product: "通用", duration: "30–60 秒", method: "平台数据学习", updated: "08-08 18:20", parseStatus:"completed",
+        source: "千川学习", method: "平台数据学习", learningStatus:"待复核", learnedAt:"2026-07-10", updated: "07-10 18:20", parseStatus:"completed",
         stages: [
           { name:"人群点名", say:"直接点名最容易产生共鸣的一类目标用户。", visual:"目标人群在典型生活场景中的状态。", edit:"1–2 个人物或场景镜头；快速进入主题。" },
           { name:"需求唤醒", say:"说明这类人经常遇到的具体问题与损失。", visual:"问题发生过程和细节证据。", edit:"2–3 个问题镜头；跟随信息点硬切。" },
@@ -2254,22 +2272,101 @@
         example:{ title:"通用结构示例｜家庭清洁人群", meta:"平台学习样例 · 已脱敏", badge:"高转化", copy:"家里有孩子或者宠物的，日常清洁最怕看不见的残留。与其反复打扫，不如直接看一遍完整实测，再决定这类产品适不适合你。" }
       },
       {
-        id: 4, name: "反差开场·实测证明型", formula: "反差开场 → 过程实测 → 结果证明 → 行动引导",
-        source: "自建", scope: "产品级结构", product: "净界洗地机 S5", duration: "15–30 秒", method: "从参考视频提炼", reference:"洗地机紫色污渍实测_成品01.mp4", updated: "08-11 09:16", parseStatus:"completed", parseSummary:"已识别口播、12 个镜头与 4 个内容段落",
+        id: 5, name: "低价刺激·福利收口型", formula: "低价反差 → 福利说明 → 产品展示 → 立即行动",
+        source: "千川学习", method: "平台数据学习", learningStatus:"已停学", learnedAt:"2026-06-14", updated: "06-14 09:32", parseStatus:"completed",
         stages: [
-          { name:"反差开场", say:"先说一遍就干净的强结果，制造预期反差。", visual:"大面积紫色污渍与洗净地面的前后同场对比。", edit:"前后画面直接硬切；开场 2 秒内给结果。" },
-          { name:"过程实测", say:"描述推拉一次完成吸污与清洁。", visual:"洗地机经过污渍、污水被吸走的完整动作。", edit:"保留动作起止；等待段可 1.1–1.3 倍加速。" },
-          { name:"结果证明", say:"强调地面无明显残留、干净可见。", visual:"地面反光特写、人物走过或躺下展示。", edit:"结果镜头 2–3 个；稳定画面可短暂停留。" },
-          { name:"行动引导", say:"邀请用户进入商品页看完整实测。", visual:"产品与清洁后地面同框。", edit:"1 个稳定收尾镜头。" }
+          { name:"低价反差", say:"用低价或限时信息快速建立注意力。", visual:"价格牌、优惠券或产品与权益同框。", edit:"开场直接给权益；1–2 个信息镜头。" },
+          { name:"福利说明", say:"说明优惠门槛和当前可获得的福利。", visual:"权益说明、优惠券领取或下单界面。", edit:"信息分点硬切；关键条件稳定停留。" },
+          { name:"产品展示", say:"简要展示产品和一个核心使用场景。", visual:"产品全貌、核心动作和场景结果。", edit:"2–3 个产品镜头；快速承接权益信息。" },
+          { name:"立即行动", say:"收束权益并引导立即查看商品。", visual:"商品卡、产品正面或领取结果。", edit:"稳定收尾；口播结束即硬切。" }
+        ],
+        reuse:"当前不再自动学习，仅作为历史结构留存；如需使用，建议先人工复核当前产品和投放策略是否仍适用。",
+        example:{ title:"历史低价福利样例｜已停学", meta:"历史学习样例 · 已归档", badge:"历史结构", copy:"现在领券到手不到百元，功能看完再决定要不要下单。" }
+      },
+      {
+        id: 4, name: "反差开场·实测证明型", formula: "反差开场 → 过程实测 → 结果证明 → 行动引导",
+        source: "自建", method: "从参考视频提炼", reference:"洗地机紫色污渍实测_成品01.mp4", creator:"嗡大发", createdAt:"2026-08-11 09:16", updated: "08-11 09:16", parseStatus:"completed", parseSummary:"已识别口播、12 个镜头与 4 个内容段落",
+        stages: [
+          { name:"反差开场", say:"先给出结果，制造预期反差。", talk:"先给出{可视化结果}，再用{预期反差}建立观看理由。", slots:["可视化结果","预期反差"], visual:"大面积紫色污渍与洗净地面的前后同场对比。", edit:"前后画面直接硬切；开场 2 秒内给结果。" },
+          { name:"过程实测", say:"展示关键动作，让用户看到问题被解决。", talk:"用{关键动作}展示{问题对象}如何被解决。", slots:["关键动作","问题对象"], visual:"洗地机经过污渍、污水被吸走的完整动作。", edit:"保留动作起止；等待段可 1.1–1.3 倍加速。" },
+          { name:"结果证明", say:"强调可见结果，并补充使用场景。", talk:"强调{可视化结果}，再补充{使用场景}中的可见效果。", slots:["可视化结果","使用场景"], visual:"地面反光特写、人物走过或躺下展示。", edit:"结果镜头 2–3 个；稳定画面可短暂停留。" },
+          { name:"行动引导", say:"收束结果并引导进一步了解。", talk:"如果你也在{使用场景}遇到{问题对象}，可以进一步了解{产品名}。", slots:["使用场景","问题对象","产品名"], visual:"产品与清洁后地面同框。", edit:"1 个稳定收尾镜头。" }
         ],
         example:{ title:"洗地机紫色污渍实测_成品01.mp4", meta:"自建结构提炼来源 · 成品视频库", badge:"参考视频", copy:"这么大一片污渍，推过去没有反复拖，一遍就被吸走了。清洁后的地面没有明显水痕，结果直接看得到。" }
+      },
+      {
+        id: 6, name: "痛点前置·能力证明型", formula: "问题直给 → 产品登场 → 能力证明 → 行动引导",
+        source: "自建", method: "手动创建", creator:"嗡大发", createdAt:"2026-08-12 14:32", updated:"2026-08-12 14:32", parseStatus:"manual",
+        stages: [
+          { name:"问题直给", say:"先点出用户容易忽略的问题。", talk:"别只看{表面状态}，真正需要解决的是{隐性问题}。", slots:["表面状态","隐性问题"], visual:"问题细节、对比结果或用户常见错误动作。", edit:"开场 1–2 个问题镜头直接硬切。" },
+          { name:"产品登场", say:"说明什么产品能解决该问题。", talk:"用{产品名}的{核心动作}，正面解决{问题对象}。", slots:["产品名","核心动作","问题对象"], visual:"产品全貌和开始操作的第一个关键动作。", edit:"承接问题画面，切入产品操作。" },
+          { name:"能力证明", say:"用过程和结果证明能力。", talk:"完整展示{核心动作}，把{可验证内容}直接留在画面里。", slots:["核心动作","可验证内容"], visual:"完整操作过程、关键细节和结果特写。", edit:"按动作起止裁切；结果画面稳定停留。" },
+          { name:"行动引导", say:"收束价值并引导下一步。", talk:"如果你也有{隐性问题}，可以进一步了解{产品名}。", slots:["隐性问题","产品名"], visual:"产品与最终结果同框。", edit:"一个稳定镜头收尾。" }
+        ]
       }
     ];
+
+    const clLearningSampleProfiles = {
+      1: {
+        titles:["床褥深层灰尘实测", "除螨仪尘杯结果展示", "宠物家庭床垫清洁", "沙发布艺深度清洁"],
+        scripts:[
+          "别只看床垫表面干不干净，走一遍才知道深层藏了多少灰尘。边拍边吸，尘杯里的结果当场就能看见。",
+          "床单刚换不代表真的干净，纤维里的毛发碎屑才是容易被忽略的地方。",
+          "有孩子和宠物的家庭，清洁不能只靠晒，完整走一遍结果更直观。"
+        ], tone:"tone-1"
+      },
+      2: {
+        titles:["下班 15 分钟晚餐", "空气炸锅鸡翅实测", "少油烹饪场景展示", "可视窗口烹饪记录"],
+        scripts:[
+          "下班晚又不想点外卖，腌好的鸡翅放进去，选好时间就不用守着。",
+          "不用一滴油也能烤出焦脆表面，可视窗口直接看熟度。",
+          "传统做饭最麻烦的是看火和油烟，这次把整个过程给你看。"
+        ], tone:"tone-2"
+      },
+      3: {
+        titles:["养宠家庭清洁建议", "有娃家庭深层清洁", "日常清洁高频痛点", "看不见残留的家庭场景"],
+        scripts:[
+          "家里有孩子或者宠物的，日常清洁最怕看不见的残留。",
+          "反复打扫还是不放心，关键要看清洁后的结果能不能被验证。",
+          "别只盯着参数，先看这类产品能不能解决你每天遇到的问题。"
+        ], tone:"tone-3"
+      }
+    };
+    const clLearningPrototypeDates = Array.from({length:30}, (_, index) => index < 17
+      ? `2026-07-${String(index + 15).padStart(2,"0")}`
+      : `2026-08-${String(index - 16).padStart(2,"0")}`);
+    function clCreateLearningDailyRecords(structureId) {
+      const profile = clLearningSampleProfiles[structureId] || clLearningSampleProfiles[1];
+      if (structureId === 3 || structureId === 5) return [];
+      const materialTotal = structureId === 2 ? 6 : 128;
+      return Array.from({length:materialTotal}, (_, materialIndex) => {
+        const id = `QC-${240618 + structureId * 1000 + materialIndex}`;
+        const accountId = `${178023456 + ((materialIndex + structureId) % 6) * 10391}`;
+        const firstDay = (materialIndex * 3 + structureId * 5) % 23;
+        const activeDays = structureId === 2 ? 1 + (materialIndex % 2) : 5 + (materialIndex % 9);
+        return clLearningPrototypeDates.slice(firstDay, Math.min(firstDay + activeDays, clLearningPrototypeDates.length)).map((date, dayIndex) => {
+          const spend = 1120 + ((materialIndex * 487 + dayIndex * 769 + structureId * 917) % 18600);
+          const roi = 1.86 + ((materialIndex * 17 + dayIndex * 9 + structureId * 11) % 166) / 100;
+          const gmv = Math.round(spend * roi);
+          const cpm = 41 + ((materialIndex * 7 + dayIndex * 3 + structureId) % 38);
+          const impressions = Math.round(spend / cpm * 1000);
+          const ctr = 2.7 + ((materialIndex * 13 + dayIndex * 4 + structureId * 3) % 45) / 10;
+          const clicks = Math.max(1, Math.round(impressions * ctr / 100));
+          const cvr = 3.8 + ((materialIndex * 9 + dayIndex * 5 + structureId * 5) % 58) / 10;
+          const orders = Math.max(1, Math.round(clicks * cvr / 100));
+          return { id, accountId, title:profile.titles[materialIndex % profile.titles.length], script:profile.scripts[materialIndex % profile.scripts.length], date,
+            spend, gmv, roi, orders, impressions, clicks, ctr, cvr, cpm, cpc:spend / clicks, tone:profile.tone };
+        });
+      }).flat();
+    }
+    const clLearningDailyRecords = Object.fromEntries([1,2,3,5].map(id => [id, clCreateLearningDailyRecords(id)]));
+    const clLearningFilters = { period:"30", start:"2026-07-15", end:"2026-08-13", query:"", sort:"spend", page:1 };
+    let clActiveDetailStructure = null;
 
     function clOpenModal(modal) { if (modal) modal.classList.add("show"); }
     function clCloseModal(modal) { if (modal) modal.classList.remove("show"); }
     function clOpenDrawer() { if (clDetailDrawer) { clDetailDrawer.classList.add("show"); if (clDrawerOverlay) clDrawerOverlay.classList.add("show"); } }
-    function clCloseDrawer() { if (clDetailDrawer) { clDetailDrawer.classList.remove("show"); if (clDrawerOverlay) clDrawerOverlay.classList.remove("show"); } }
+    function clCloseDrawer() { clCloseLearningSampleDetail(); if (clDetailDrawer) { clDetailDrawer.classList.remove("show"); if (clDrawerOverlay) clDrawerOverlay.classList.remove("show"); } }
 
     let clEditingId = null;
     let clDeletingId = null;
@@ -2288,98 +2385,81 @@
       const date = new Date();
       return `${String(date.getMonth() + 1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")} ${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`;
     }
-    function clProductOptions(selected = "") {
-      return clProducts.map(name => `<option${name === selected ? " selected" : ""}>${clEscape(name)}</option>`).join("");
-    }
-    function clScopeCard(containerId, scope) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-      container.querySelectorAll(".cl-tag-card").forEach(card => card.classList.toggle("selected", card.dataset.clTag === (scope === "产品级结构" ? "product" : "general")));
-    }
-    function clSelectedScope(containerId) {
-      return document.querySelector(`#${containerId} .cl-tag-card.selected`)?.dataset.clTag === "product" ? "产品级结构" : "通用结构";
-    }
     function clParseStatusHtml(item) {
       if (item.parseStatus === "parsing") return `<span class="cl-parse-status parsing">◌ 解析中 <small>${clEscape(clParseStages[item.parseStep || 0]?.[0] || "处理中")}</small></span>`;
       if (item.parseStatus === "completed") return `<span class="cl-parse-status ready">✓ 已解析 <small>${clEscape(item.parseSummary || `${item.stages.length} 个阶段`)}</small></span>`;
       return `<span class="cl-parse-status manual">— 手动创建</span>`;
     }
     function clStructureStatusHtml(item) {
+      if (item.source === "千川学习") {
+        const status = item.learningStatus || "学习中";
+        const className = ({ "学习中":"learning", "样本稀少":"sparse", "待复核":"review", "已停学":"stopped" })[status] || "learning";
+        return `<span class="cl-structure-lifecycle ${className}">${clEscape(status)}</span>`;
+      }
       const status = item.parseStatus === "parsing" ? "解析中" : item.parseStatus === "completed" ? "已解析" : "手动创建";
       const className = item.parseStatus === "parsing" ? "parsing" : item.parseStatus === "completed" ? "enabled" : "pending";
       return `<span class="cl-structure-lifecycle ${className}">${status}</span>`;
     }
+    function clStructureOrigin(item) {
+      if (item.source === "千川学习") return "千川学习";
+      return item.method === "从参考视频提炼" ? "参考视频提炼" : "手动创建";
+    }
+    function clStructureOriginClass(item) {
+      if (item.source === "千川学习") return "cl-source-qc";
+      return item.method === "从参考视频提炼" ? "cl-source-custom" : "cl-source-manual";
+    }
+    const clCanEditStructure = item => item?.source === "自建" && item.method === "手动创建";
     function clRenderTable() {
       const tbody = document.getElementById("contentStructureTbody");
       if (!tbody) return;
       const query = document.getElementById("clStructureSearch")?.value.trim().toLowerCase() || "";
       const source = document.getElementById("clStructureSourceFilter")?.value || "全部来源";
-      const scope = document.getElementById("clStructureTagFilter")?.value || "全部适用范围";
       const filtered = contentStructures.filter(item => {
-        const haystack = [item.name, item.formula, item.product, item.reference].join(" ").toLowerCase();
-        return (!query || haystack.includes(query)) && (source === "全部来源" || item.source === source) && (scope === "全部适用范围" || item.scope === scope);
+        const origin = clStructureOrigin(item);
+        const haystack = [item.name, item.formula, item.reference, origin].join(" ").toLowerCase();
+        return (!query || haystack.includes(query)) && (source === "全部来源" || origin === source);
       });
-      tbody.innerHTML = filtered.map(item => `
+      tbody.innerHTML = filtered.map(item => {
+        const customActions = item.source === "自建" ? `${clCanEditStructure(item) ? '<button class="cl-table-action" type="button" data-cl-action="edit">编辑</button>' : ""}<button class="cl-table-action danger" type="button" data-cl-action="delete">删除</button>` : "";
+        return `
         <tr data-cl-id="${item.id}">
           <td><strong>${clEscape(item.name)}</strong><small class="cl-row-sub">${item.parseStatus === "parsing" ? "解析任务草稿" : `${item.stages.length} 个阶段`}</small></td>
           <td><span class="cl-formula-text">${clEscape(item.formula)}</span></td>
-          <td><span class="${item.source === "自建" ? "cl-source-custom" : "cl-source-qc"}">${clEscape(item.source)}</span></td>
-          <td><strong>${clEscape(item.reference || "—")}</strong><small class="cl-row-sub">${clParseStatusHtml(item)}</small></td>
-          <td><span class="cl-struct-tag ${item.scope === "产品级结构" ? "cl-struct-tag-product" : "cl-struct-tag-general"}">${clEscape(item.scope)}</span></td>
-          <td>${clEscape(item.duration)}</td><td>${clStructureStatusHtml(item)}</td>
-          <td><span class="cl-table-actions">${item.parseStatus === "parsing" ? '<button class="cl-table-action primary" type="button" data-cl-action="progress">查看进度</button>' : `<button class="cl-table-action primary" type="button" data-cl-action="view">查看</button>${item.source === "自建" ? '<button class="cl-table-action" type="button" data-cl-action="edit">编辑</button><button class="cl-table-action danger" type="button" data-cl-action="delete">删除</button>' : ""}`}</span></td>
-        </tr>`).join("");
+          <td><span class="${clStructureOriginClass(item)}">${clEscape(clStructureOrigin(item))}</span></td>
+          <td><strong>${clEscape(item.reference || item.example?.title || "—")}</strong><small class="cl-row-sub">${item.reference ? "结构提炼来源" : item.example ? "代表性成品" : "无提炼来源"}</small></td>
+          <td>${clStructureStatusHtml(item)}</td>
+          <td><span class="cl-table-actions">${item.parseStatus === "parsing" ? '<button class="cl-table-action primary" type="button" data-cl-action="progress">查看进度</button>' : `<button class="cl-table-action primary" type="button" data-cl-action="view">查看</button>${customActions}`}</span></td>
+        </tr>`;
+      }).join("");
       document.getElementById("contentStructureEmpty").hidden = filtered.length > 0;
     }
 
     function clStageRow(stage = {}) {
-      return `<div class="cl-stage-editor-row"><input data-stage-field="name" value="${clEscape(stage.name || "新阶段")}" aria-label="阶段名称"><textarea data-stage-field="say" rows="2" aria-label="说什么">${clEscape(stage.say || "")}</textarea><textarea data-stage-field="visual" rows="2" aria-label="拍什么">${clEscape(stage.visual || "")}</textarea><textarea data-stage-field="edit" rows="2" aria-label="怎么剪">${clEscape(stage.edit || "")}</textarea><button class="cl-stage-remove" type="button" data-remove-stage title="删除阶段">×</button></div>`;
+      return `<div class="cl-stage-editor-row"><input data-stage-field="name" value="${clEscape(stage.name || "新阶段")}" aria-label="阶段名称"><textarea data-stage-field="talk" rows="2" aria-label="表达模板">${clEscape(stage.talk || stage.say || "")}</textarea><textarea data-stage-field="visual" rows="2" aria-label="拍什么">${clEscape(stage.visual || "")}</textarea><textarea data-stage-field="edit" rows="2" aria-label="怎么剪">${clEscape(stage.edit || "")}</textarea><button class="cl-stage-remove" type="button" data-remove-stage title="删除阶段">×</button></div>`;
     }
     function clRenderStageEditor(stages) {
       const editor = document.getElementById("clStageEditor");
       if (editor) editor.innerHTML = stages.map(clStageRow).join("");
     }
+    function clExtractVariables(template) {
+      return [...new Set([...String(template || "").matchAll(/\{([^{}]+)\}/g)].map(match => match[1].trim()).filter(Boolean))];
+    }
     function clReadStages() {
-      return Array.from(document.querySelectorAll("#clStageEditor .cl-stage-editor-row")).map(row => ({
-        name: row.querySelector('[data-stage-field="name"]')?.value.trim() || "",
-        say: row.querySelector('[data-stage-field="say"]')?.value.trim() || "",
-        visual: row.querySelector('[data-stage-field="visual"]')?.value.trim() || "",
-        edit: row.querySelector('[data-stage-field="edit"]')?.value.trim() || ""
-      })).filter(stage => stage.name);
+      return Array.from(document.querySelectorAll("#clStageEditor .cl-stage-editor-row")).map(row => {
+        const talk = row.querySelector('[data-stage-field="talk"]')?.value.trim() || "";
+        return {
+          name: row.querySelector('[data-stage-field="name"]')?.value.trim() || "",
+          say: talk, talk, slots: clExtractVariables(talk),
+          visual: row.querySelector('[data-stage-field="visual"]')?.value.trim() || "",
+          edit: row.querySelector('[data-stage-field="edit"]')?.value.trim() || ""
+        };
+      }).filter(stage => stage.name);
     }
     function clToggleReference() {
       const isReference = document.getElementById("clNewMethod")?.value === "reference";
       const wrap = document.getElementById("clNewReferenceWrap");
       if (wrap) wrap.hidden = !isReference;
     }
-    function clToggleCustomDuration() {
-      const isCustom = document.getElementById("clNewDuration")?.value === "custom";
-      const custom = document.getElementById("clCustomDuration");
-      if (custom) custom.hidden = !isCustom;
-    }
-    function clSetDurationValue(duration = "30–45 秒") {
-      const select = document.getElementById("clNewDuration");
-      if (!select) return;
-      const standard = Array.from(select.options).some(option => option.value === duration && option.value !== "custom");
-      if (standard) {
-        select.value = duration;
-      } else {
-        select.value = "custom";
-        const values = String(duration).match(/\d+/g)?.map(Number) || [30,45];
-        document.getElementById("clDurationMin").value = values[0] || 30;
-        document.getElementById("clDurationMax").value = values[1] || values[0] || 45;
-      }
-      clToggleCustomDuration();
-    }
-    function clGetDurationValue() {
-      const select = document.getElementById("clNewDuration");
-      if (!select || select.value !== "custom") return select?.value || "不限";
-      const min = Number(document.getElementById("clDurationMin").value);
-      const max = Number(document.getElementById("clDurationMax").value);
-      if (!Number.isFinite(min) || !Number.isFinite(max) || min < 1 || max < min) return "";
-      return min === max ? `${min} 秒` : `${min}–${max} 秒`;
-    }
-
     const clVideoSourceCatalog = {
       finished: [
         { id:"finished-1", name:"轻净 Pro 除螨仪｜床褥结果冲击型.mp4", product:"轻净 Pro 除螨仪", duration:"00:36", status:"done", source:"remix", meta:"08/12 10:24", profileId:1, tone:"tone-1", qianchuan:true, tags:["痛点钩子","卧室"] },
@@ -2594,13 +2674,8 @@
       const source = contentStructures.find(item => item.id === (reference.profileId || 1)) || contentStructures[0];
       document.getElementById("clNewName").value = source.name.replace(/（自建）$/, "") + "（自建）";
       document.getElementById("clNewFormula").value = source.formula;
-      clSetDurationValue(source.duration);
       document.getElementById("clNewMethod").value = "reference";
       document.getElementById("clNewReference").value = reference.name;
-      clScopeCard("clNewTagCards", source.scope);
-      const product = document.getElementById("clNewProduct");
-      product.disabled = source.scope !== "产品级结构";
-      product.innerHTML = source.scope === "产品级结构" ? clProductOptions(source.product) : "<option>通用结构（不限定产品）</option>";
       clRenderStageEditor(source.stages.map(stage => ({...stage})));
       clToggleReference();
       clShowStructureForm(true, true);
@@ -2608,25 +2683,22 @@
     function clHydrateStructureForm(item, confirming = false) {
       document.getElementById("clNewName").value = item.name;
       document.getElementById("clNewFormula").value = item.formula;
-      clSetDurationValue(item.duration);
       document.getElementById("clNewMethod").value = item.reference ? "reference" : "manual";
-      document.getElementById("clNewReference").value = item.reference || "";
-      clScopeCard("clNewTagCards", item.scope);
-      const product = document.getElementById("clNewProduct");
-      product.disabled = item.scope !== "产品级结构";
-      product.innerHTML = item.scope === "产品级结构" ? clProductOptions(item.product) : "<option>通用结构（不限定产品）</option>";
+      const referenceInput = document.getElementById("clNewReference");
+      referenceInput.value = item.reference || "";
+      referenceInput.disabled = Boolean(item.reference);
       clRenderStageEditor(item.stages);
       clToggleReference();
       clEditingId = item.id;
       document.getElementById("clNewModalTitle").textContent = "编辑爆款内容结构";
-      document.getElementById("clNewModalSubtitle").textContent = "解析结果可直接编辑；保存后调用方将使用最新结构";
       document.getElementById("clNewSaveText").textContent = "保存修改";
       clShowStructureForm(confirming, false);
+      document.getElementById("clNewModalSubtitle").textContent = item.reference ? "可编辑结构内容；提炼来源仅用于溯源，如需更换请重新提炼" : "可编辑结构内容；保存后调用方将使用最新结构";
     }
     function clBuildParseDraft(reference) {
       const source = contentStructures.find(item => item.id === (reference.profileId || 1)) || contentStructures[0];
       return {
-        id: Date.now(), name: `${source.name}（解析中）`, formula:"正在提取内容公式…", source:"自建", scope:source.scope, product:source.scope === "产品级结构" ? source.product : "通用", duration:"—", method:"从参考视频提炼", reference:reference.name,
+        id: Date.now(), name: `${source.name}（解析中）`, formula:"正在提取内容公式…", source:"自建", method:"从参考视频提炼", reference:reference.name, creator:"嗡大发", createdAt:clNow(),
         referenceMeta:reference.meta || "本地上传视频", updated:clNow(), parseStatus:"parsing", parseStep:0, stages:[], parseProfileId:source.id,
         example:{ title:reference.name, meta:`提炼来源 · ${reference.meta || "参考视频"}`, badge:"解析中", copy:"正在识别口播、镜头与内容结构…" }
       };
@@ -2636,8 +2708,7 @@
       if (!item || item.parseStatus !== "parsing") return;
       const source = contentStructures.find(entry => entry.id === item.parseProfileId) || contentStructures[0];
       Object.assign(item, {
-        name:source.name.replace(/（自建）$/, ""), formula:source.formula, duration:source.duration, scope:source.scope,
-        product:source.scope === "产品级结构" ? source.product : "通用", stages:source.stages.map(stage => ({...stage})), parseStatus:"completed", parseStep:clParseStages.length,
+        name:source.name.replace(/（自建）$/, ""), formula:source.formula, stages:source.stages.map(stage => ({...stage})), parseStatus:"completed", parseStep:clParseStages.length,
         parseSummary:`已识别口播、${source.stages.length * 4 - 2} 个镜头与 ${source.stages.length} 个内容段落`, updated:clNow(),
         example:{ ...source.example, title:item.reference, meta:`提炼来源 · ${item.referenceMeta}`, badge:"已解析", copy:source.example.copy }
       });
@@ -2670,16 +2741,14 @@
     function clApplyManualDefaults() {
       document.getElementById("clNewName").value = "";
       document.getElementById("clNewFormula").value = "";
-      clSetDurationValue("30–45 秒");
       document.getElementById("clNewMethod").value = "manual";
-      document.getElementById("clNewReference").value = "";
-      clScopeCard("clNewTagCards", "通用结构");
-      const product = document.getElementById("clNewProduct");
-      product.disabled = true; product.innerHTML = "<option>通用结构（不限定产品）</option>";
+      const referenceInput = document.getElementById("clNewReference");
+      referenceInput.value = "";
+      referenceInput.disabled = false;
       clRenderStageEditor([
-        { name:"开场钩子", say:"用一句结果或问题抓住注意力", visual:"最有冲击力的结果或问题画面", edit:"1–2 个短镜头，直接硬切" },
-        { name:"产品证明", say:"说明产品如何解决问题", visual:"完整产品操作与结果特写", edit:"按口播信息点裁切拼接" },
-        { name:"行动引导", say:"总结价值并引导查看商品", visual:"产品全貌或使用完成画面", edit:"稳定镜头收尾" }
+        { name:"开场钩子", say:"用结果或问题抓住注意力", talk:"先给出{可视化结果}或{隐性问题}，让用户立刻知道视频要解决什么。", slots:["可视化结果","隐性问题"], visual:"最有冲击力的结果或问题画面", edit:"1–2 个短镜头，直接硬切" },
+        { name:"产品证明", say:"说明产品如何解决问题", talk:"展示{产品名}通过{核心动作}解决{问题对象}的过程。", slots:["产品名","核心动作","问题对象"], visual:"完整产品操作与结果特写", edit:"按口播信息点裁切拼接" },
+        { name:"行动引导", say:"总结价值并引导查看商品", talk:"总结{可验证内容}，引导有{隐性问题}的用户进一步了解。", slots:["可验证内容","隐性问题"], visual:"产品全貌或使用完成画面", edit:"稳定镜头收尾" }
       ]);
       clToggleReference();
     }
@@ -2695,6 +2764,7 @@
     }
 
     function clOpenEditModal(item) {
+      if (!clCanEditStructure(item)) return showToast("从参考视频提炼的结构暂不支持编辑");
       clResetNewModalMode();
       clHydrateStructureForm(item, false);
       clOpenModal(clNewModal);
@@ -2706,53 +2776,200 @@
       clOpenModal(clDeleteModal);
     }
 
-    function clBindTagCards(containerId, productSelectId) {
-      const container = document.getElementById(containerId);
-      const productSelect = document.getElementById(productSelectId);
-      if (!container) return;
-      container.querySelectorAll(".cl-tag-card").forEach(card => {
-        card.addEventListener("click", () => {
-          container.querySelectorAll(".cl-tag-card").forEach(c => c.classList.remove("selected"));
-          card.classList.add("selected");
-          if (productSelect) {
-            const isGeneral = card.dataset.clTag === "general";
-            productSelect.disabled = isGeneral;
-            productSelect.innerHTML = isGeneral ? "<option>通用结构（不限定产品）</option>" : clProductOptions();
-          }
-        });
-      });
+    const clFormatMoney = value => `¥${Math.round(value).toLocaleString("zh-CN")}`;
+    const clFormatDecimal = value => Number(value).toFixed(2);
+    function clLearningDailyRows(structureId) {
+      const { period, start, end, query, sort } = clLearningFilters;
+      const startDate = period === "7" ? "2026-08-07" : period === "30" ? "2026-07-15" : start;
+      const endDate = period === "custom" ? end : "2026-08-13";
+      const normalizedQuery = query.trim().toLowerCase();
+      return (clLearningDailyRecords[structureId] || [])
+        .filter(record => record.spend > 1000)
+        .filter(record => record.date >= startDate && record.date <= endDate)
+        .filter(record => !normalizedQuery || `${record.id} ${record.accountId}`.toLowerCase().includes(normalizedQuery));
     }
-    clBindTagCards("clNewTagCards", "clNewProduct");
+    function clLearningAggregate(rows) {
+      const total = rows.reduce((result, sample) => ({
+        spend:result.spend + sample.spend, gmv:result.gmv + sample.gmv, orders:result.orders + sample.orders,
+        impressions:result.impressions + sample.impressions, clicks:result.clicks + sample.clicks
+      }), {spend:0,gmv:0,orders:0,impressions:0,clicks:0});
+      return {
+        ...total,
+        roi:total.spend ? total.gmv / total.spend : 0,
+        ctr:total.impressions ? total.clicks / total.impressions * 100 : 0,
+        cvr:total.clicks ? total.orders / total.clicks * 100 : 0,
+        cpm:total.impressions ? total.spend / total.impressions * 1000 : 0,
+        cpc:total.clicks ? total.spend / total.clicks : 0
+      };
+    }
+    function clLearningMetric(label, value) {
+      return `<div class="cl-learning-metric"><span>${label}</span><strong>${value}</strong></div>`;
+    }
+    function clLearningMaterialRows(records, sort) {
+      const grouped = new Map();
+      records.forEach(record => {
+        const key = `${record.id}|${record.accountId}`;
+        const group = grouped.get(key) || { ...record, records:[] };
+        group.records.push(record);
+        grouped.set(key, group);
+      });
+      return [...grouped.values()].map(group => {
+        const metrics = clLearningAggregate(group.records);
+        const latestEntry = group.records.reduce((latest, record) => record.date > latest ? record.date : latest, group.records[0].date);
+        return { ...group, metrics, entryDays:group.records.length, latestEntry, records:[...group.records].sort((a,b) => b.date.localeCompare(a.date)) };
+      }).sort((a,b) => b.metrics[sort] - a.metrics[sort]);
+    }
+    function clRenderLearningSamples(item) {
+      const container = document.getElementById("clDrawerExamples");
+      if (!container || !item) return;
+      const dailyRows = clLearningDailyRows(item.id);
+      const aggregate = clLearningAggregate(dailyRows);
+      const rows = clLearningMaterialRows(dailyRows, clLearningFilters.sort);
+      const cappedRows = rows.slice(0,100);
+      const pageSize = 20;
+      const totalPages = Math.max(1, Math.ceil(cappedRows.length / pageSize));
+      clLearningFilters.page = Math.min(Math.max(clLearningFilters.page, 1), totalPages);
+      const pageStart = (clLearningFilters.page - 1) * pageSize;
+      const visibleRows = cappedRows.slice(pageStart, pageStart + pageSize);
+      const pagination = totalPages > 1 ? `<nav class="cl-learning-pagination" aria-label="学习素材分页"><span>第 ${clLearningFilters.page} / ${totalPages} 页</span><button type="button" data-cl-learning-page="${clLearningFilters.page - 1}"${clLearningFilters.page === 1 ? " disabled" : ""}>上一页</button>${Array.from({length:totalPages}, (_, index) => { const page = index + 1; return `<button type="button" class="${page === clLearningFilters.page ? "active" : ""}" data-cl-learning-page="${page}" aria-label="第 ${page} 页">${page}</button>`; }).join("")}<button type="button" data-cl-learning-page="${clLearningFilters.page + 1}"${clLearningFilters.page === totalPages ? " disabled" : ""}>下一页</button></nav>` : "";
+      const periodLabel = clLearningFilters.period === "7" ? "近 7 天" : clLearningFilters.period === "30" ? "近 30 天" : `${clLearningFilters.start} 至 ${clLearningFilters.end}`;
+      const sortOptions = [["spend","消耗最高"],["gmv","成交金额最高"],["roi","ROI 最高"],["orders","成交订单最多"],["cvr","转化率最高"]];
+      container.innerHTML = `<section class="cl-learning-materials">
+        <div class="cl-learning-rule"><span>千川每日学习入池标准</span><b>单日消耗 &gt; ¥1,000</b></div>
+        <div class="cl-learning-filters">
+          <div class="cl-learning-period" role="group" aria-label="统计周期">
+            <span>统计周期</span>${[["7","近 7 天"],["30","近 30 天"],["custom","自定义"]].map(([value,label]) => `<button type="button" class="${clLearningFilters.period === value ? "active" : ""}" data-cl-learning-period="${value}">${label}</button>`).join("")}
+          </div>
+          <div class="cl-learning-custom-range" ${clLearningFilters.period === "custom" ? "" : "hidden"}><input type="date" data-cl-learning-date="start" value="${clEscape(clLearningFilters.start)}"><i>至</i><input type="date" data-cl-learning-date="end" value="${clEscape(clLearningFilters.end)}"></div>
+          <label class="cl-learning-search"><span>⌕</span><input type="search" data-cl-learning-query placeholder="搜索素材 ID、千川账户 ID" value="${clEscape(clLearningFilters.query)}"></label>
+          <label class="cl-learning-sort"><span>排序</span><select data-cl-learning-sort>${sortOptions.map(([value,label]) => `<option value="${value}"${clLearningFilters.sort === value ? " selected" : ""}>${label}</option>`).join("")}</select></label>
+        </div>
+        <section class="cl-learning-summary">
+          <div class="cl-learning-section-head"><div class="cl-learning-summary-title"><strong>投放数据汇总</strong><span>统计周期：${periodLabel}</span></div><p>统计口径：当前筛选周期内，单日消耗 &gt; ¥1,000 的投放记录汇总</p></div>
+          <div class="cl-learning-metrics">
+            ${clLearningMetric("消耗", clFormatMoney(aggregate.spend))}
+            ${clLearningMetric("整体成交金额", clFormatMoney(aggregate.gmv))}
+            ${clLearningMetric("广告 ROI", clFormatDecimal(aggregate.roi))}
+            ${clLearningMetric("整体成交订单", Math.round(aggregate.orders).toLocaleString("zh-CN"))}
+            ${clLearningMetric("点击率", `${clFormatDecimal(aggregate.ctr)}%`)}
+            ${clLearningMetric("转化率", `${clFormatDecimal(aggregate.cvr)}%`)}
+            ${clLearningMetric("千展成本", clFormatMoney(aggregate.cpm))}
+            ${clLearningMetric("点击单价", clFormatMoney(aggregate.cpc))}
+          </div>
+        </section>
+        <div class="cl-learning-list-head"><strong>学习素材</strong><span>按素材 ID × 千川账户 ID 聚合，已取排序前 ${cappedRows.length} 条，每页 20 条</span></div>
+        <div class="cl-learning-list">${visibleRows.length ? visibleRows.map(sample => `<article class="cl-learning-sample" data-cl-learning-sample>
+          <button class="cl-learning-video ${clEscape(sample.tone)}" type="button" data-cl-sample-play aria-label="预览 ${clEscape(sample.id)}"><i>▶</i><span>9:16</span><em>预览播放</em></button>
+          <div class="cl-learning-sample-main">
+            <header><div><strong>${clEscape(sample.title)}</strong><span>素材 ID：${clEscape(sample.id)} ｜ 千川账户 ID：${clEscape(sample.accountId)}</span></div><div class="cl-learning-entry"><b>满足入池规则 ${sample.entryDays} 天</b><span>最近入池：${clEscape(sample.latestEntry)}</span></div></header>
+            <div class="cl-learning-sample-metrics">
+              <span>消耗 <b>${clFormatMoney(sample.metrics.spend)}</b></span><span>成交金额 <b>${clFormatMoney(sample.metrics.gmv)}</b></span><span>ROI <b>${clFormatDecimal(sample.metrics.roi)}</b></span><span>成交订单 <b>${sample.metrics.orders}</b></span>
+              <span class="more">点击率 ${clFormatDecimal(sample.metrics.ctr)}% · 转化率 ${clFormatDecimal(sample.metrics.cvr)}% · 千展成本 ${clFormatMoney(sample.metrics.cpm)} · 点击单价 ${clFormatMoney(sample.metrics.cpc)}</span>
+            </div>
+            <div class="cl-learning-actions">
+              <button type="button" data-cl-sample-detail="copy" data-cl-sample-id="${clEscape(sample.id)}" data-cl-sample-account="${clEscape(sample.accountId)}">文案解析 <span>查看完整解析</span></button>
+              <button type="button" data-cl-sample-detail="records" data-cl-sample-id="${clEscape(sample.id)}" data-cl-sample-account="${clEscape(sample.accountId)}">入池记录 <span>${sample.entryDays} 天满足规则</span></button>
+            </div>
+          </div>
+        </article>`).join("") : `<div class="cl-learning-empty">没有符合当前筛选条件的学习素材</div>`}</div>
+        ${pagination}
+      </section>`;
+    }
+    function clSetLearningSampleDetailTab(tab) {
+      if (!clLearningSampleDetail) return;
+      clLearningSampleDetail.querySelectorAll("[data-cl-learning-detail-tab]").forEach(button => button.classList.toggle("active", button.dataset.clLearningDetailTab === tab));
+      clLearningSampleDetail.querySelectorAll("[data-cl-learning-detail-panel]").forEach(panel => panel.hidden = panel.dataset.clLearningDetailPanel !== tab);
+    }
+    function clCloseLearningSampleDetail() {
+      if (!clLearningSampleDetail) return;
+      clLearningSampleDetail.classList.remove("show");
+      clLearningSampleDetail.hidden = true;
+    }
+    function clOpenLearningSampleDetail(sample, tab) {
+      if (!sample || !clLearningSampleDetail || !clLearningSampleDetailBody) return;
+      clLearningSampleDetailBody.innerHTML = `<section class="cl-learning-detail-summary">
+        <button class="cl-learning-detail-video ${clEscape(sample.tone)}" type="button" data-cl-sample-detail-play aria-label="预览 ${clEscape(sample.id)}"><i>▶</i><span>9:16</span></button>
+        <div class="cl-learning-detail-main"><div class="cl-learning-detail-title"><div><h3>${clEscape(sample.title)}</h3><p>素材 ID：${clEscape(sample.id)} ｜ 千川账户 ID：${clEscape(sample.accountId)}</p></div><b>满足入池规则 ${sample.entryDays} 天</b></div>
+          <div class="cl-learning-sample-metrics"><span>消耗 <b>${clFormatMoney(sample.metrics.spend)}</b></span><span>成交金额 <b>${clFormatMoney(sample.metrics.gmv)}</b></span><span>ROI <b>${clFormatDecimal(sample.metrics.roi)}</b></span><span>成交订单 <b>${sample.metrics.orders}</b></span><span class="more">点击率 ${clFormatDecimal(sample.metrics.ctr)}% · 转化率 ${clFormatDecimal(sample.metrics.cvr)}% · 千展成本 ${clFormatMoney(sample.metrics.cpm)} · 点击单价 ${clFormatMoney(sample.metrics.cpc)}</span></div>
+        </div>
+      </section>
+      <nav class="cl-learning-detail-tabs"><button type="button" data-cl-learning-detail-tab="copy">文案解析</button><button type="button" data-cl-learning-detail-tab="records">入池记录（${sample.entryDays} 天）</button></nav>
+      <section class="cl-learning-detail-panel" data-cl-learning-detail-panel="copy"><div class="cl-learning-copy-full"><header><b>文案解析</b><button type="button" data-cl-sample-copy>复制文案</button></header><p>${clEscape(sample.script)}</p></div></section>
+      <section class="cl-learning-detail-panel" data-cl-learning-detail-panel="records"><p class="cl-learning-records-note">以下展示该素材在当前筛选周期内，单日消耗满足入池规则的记录。</p><div class="cl-learning-records-table"><div class="cl-learning-records-row head"><span>入池日期</span><span>消耗</span><span>成交金额</span><span>ROI</span></div>${sample.records.map(record => `<div class="cl-learning-records-row"><span>${clEscape(record.date)}</span><span>${clFormatMoney(record.spend)}</span><span>${clFormatMoney(record.gmv)}</span><span>${clFormatDecimal(record.roi)}</span></div>`).join("")}</div></section>`;
+      clLearningSampleDetail.hidden = false;
+      clLearningSampleDetail.classList.add("show");
+      clSetLearningSampleDetailTab(tab);
+    }
+    function clRenderActiveLearningSamples() {
+      if (clActiveDetailStructure?.source === "千川学习") clRenderLearningSamples(clActiveDetailStructure);
+    }
 
     function clSetDetailTab(tabName = "stages") {
+      const target = document.querySelector(`#clDetailTabs [data-cl-detail-tab="${tabName}"]`);
+      if (target?.hidden) tabName = "stages";
       document.querySelectorAll("#clDetailTabs [data-cl-detail-tab]").forEach(button => button.classList.toggle("active", button.dataset.clDetailTab === tabName));
       document.querySelectorAll("#clDetailDrawer [data-cl-detail-panel]").forEach(panel => panel.classList.toggle("active", panel.dataset.clDetailPanel === tabName));
       const body = clDetailDrawer?.querySelector(".cl-drawer-body");
       if (body) body.scrollTop = 0;
     }
     function clOpenDetail(item) {
+      clActiveDetailStructure = item;
       document.getElementById("clDrawerTitle").textContent = item.name;
-      document.getElementById("clDrawerName").textContent = item.name;
-      document.getElementById("clDrawerFormula").textContent = item.formula;
-      document.getElementById("clDrawerProduct").textContent = item.product;
-      document.getElementById("clDrawerDuration").textContent = item.duration;
-      document.getElementById("clDrawerMethod").textContent = item.method;
+      const isCustom = item.source === "自建";
+      const isLearned = item.source === "千川学习";
+      document.getElementById("clDrawerLearnedAtItem").hidden = !isLearned;
+      if (isLearned) {
+        const status = item.learningStatus || "学习中";
+        const statusNode = document.getElementById("clDrawerLearningStatus");
+        statusNode.textContent = status;
+        statusNode.className = `cl-learning-state ${({ "学习中":"learning", "样本稀少":"sparse", "待复核":"review", "已停学":"stopped" })[status] || "learning"}`;
+        document.getElementById("clDrawerLearnedAt").textContent = item.learnedAt || item.updated || "—";
+      }
+      document.getElementById("clDrawerCustomMeta").hidden = !isCustom;
+      document.getElementById("clDrawerEdit").hidden = !clCanEditStructure(item);
+      if (isCustom) {
+        document.getElementById("clDrawerCreator").textContent = item.creator || "嗡大发";
+        document.getElementById("clDrawerCreatedAt").textContent = item.createdAt || item.updated || "—";
+      }
       const source = document.getElementById("clDrawerSource");
-      source.className = item.source === "自建" ? "cl-source-custom" : "cl-source-qc"; source.textContent = item.source;
-      document.getElementById("clDrawerTag").innerHTML = `<span class="cl-struct-tag ${item.scope === "产品级结构" ? "cl-struct-tag-product" : "cl-struct-tag-general"}">${clEscape(item.scope)}</span>`;
-      const reference = document.getElementById("clDrawerReference");
-      reference.hidden = !item.reference;
-      const parseNote = item.parseStatus === "parsing"
-        ? `正在${clEscape(clParseStages[item.parseStep]?.[0] || "解析")}`
-        : item.parseStatus === "completed"
-          ? clEscape(item.parseSummary || "视频解析已完成")
-          : "手动维护的内容结构";
-      reference.innerHTML = item.reference ? `<strong>提炼来源：</strong>${clEscape(item.reference)}<span>${parseNote}</span>` : "";
-      document.getElementById("clDrawerStages").innerHTML = item.stages.map((stage, index) => `<article class="cl-stage-card"><div class="cl-stage-card-top"><span>${String(index + 1).padStart(2,"0")}</span><strong>${clEscape(stage.name)}</strong></div><dl><div><dt>说什么</dt><dd>${clEscape(stage.say)}</dd></div><div><dt>拍什么</dt><dd>${clEscape(stage.visual)}</dd></div><div><dt>怎么剪</dt><dd>${clEscape(stage.edit)}</dd></div></dl></article>`).join("");
+      source.className = clStructureOriginClass(item); source.textContent = clStructureOrigin(item);
+      const isManual = item.source === "自建" && !item.reference;
+      const examplesTab = document.getElementById("clExamplesTab");
+      const examplesPanel = document.getElementById("clExamplesPanel");
+      const examplesHint = document.getElementById("clDrawerExamplesHint");
+      const examplesTabLabel = document.getElementById("clExamplesTabLabel");
+      const examplesTabCount = document.getElementById("clExampleTabCount");
+      const sourceNote = document.getElementById("clDrawerSourceNote");
+      const hasReferenceSource = isCustom && Boolean(item.reference);
+      sourceNote.hidden = !hasReferenceSource;
+      if (hasReferenceSource) {
+        document.getElementById("clDrawerReference").textContent = item.reference;
+        document.getElementById("clDrawerParseSummary").textContent = item.parseSummary || "已完成内容结构提炼";
+      }
+
+      examplesTab.hidden = isManual;
+      examplesPanel.hidden = isManual;
+      if (isLearned) {
+        examplesTabLabel.textContent = "学习素材";
+        examplesTabCount.hidden = true;
+        examplesHint.hidden = true;
+        clRenderLearningSamples(item);
+      } else if (item.reference) {
+        examplesTabLabel.textContent = "提炼来源";
+        examplesTabCount.hidden = false;
+        examplesHint.hidden = true;
+      } else {
+        examplesTabLabel.textContent = "提炼来源";
+        examplesTabCount.hidden = false;
+        examplesHint.hidden = false;
+      }
+      const overview = document.getElementById("clStructureOverview");
+      overview.innerHTML = `<div class="cl-formula-overview"><small>爆款结构</small><div>${item.formula.split("→").map((part,index) => `${index ? "<i>→</i>" : ""}<b>${clEscape(part.trim())}</b>`).join("")}</div></div><div class="cl-reuse-scope"><b>使用前提</b><span>${clEscape(item.reuse || "每个阶段都应有对应的文案信息和可用画面；实际时长由配音与素材共同校准。")}</span></div>`;
       const example = item.example;
-      document.getElementById("clDrawerExamples").innerHTML = `<div class="cl-video-card"><div class="cl-video-thumb"></div><div class="cl-video-body"><div class="cl-video-head"><div><div class="cl-video-title">${clEscape(example.title)}</div><div class="cl-video-meta">${clEscape(example.meta)}</div></div><span class="cl-consume-chip">${clEscape(example.badge)}</span></div><div class="cl-video-content">${clEscape(example.copy)}</div><div class="cl-video-actions"><button class="cl-action-btn" type="button" data-cl-example="copy">复制示例文案</button><button class="cl-action-btn" type="button" data-cl-example="play">播放视频</button></div></div></div>`;
+      document.getElementById("clDrawerStages").innerHTML = item.stages.map((stage, index) => `<article class="cl-stage-card${index === 0 ? " expanded" : ""}" data-cl-stage-card><button class="cl-stage-card-head" type="button" data-cl-stage-toggle><i>${String(index + 1).padStart(2,"0")}</i><span><strong>${clEscape(stage.name)}</strong><small>${clEscape(stage.purpose || stage.say)}</small></span><u>⌄</u></button><div class="cl-stage-card-body"><section class="cl-stage-talk"><div><b>表达模板</b></div><p>${clEscape(stage.talk || stage.say)}</p>${stage.slots?.length ? `<div class="cl-stage-slots">${stage.slots.map(slot => `<span><code>${clEscape(slot)}</code><i>·</i>${clEscape(clVariableExamples[slot] || "从产品信息填充")}</span>`).join("")}</div>` : ""}</section><div class="cl-stage-execution"><section><b>素材匹配要求</b><p>${clEscape(stage.visual)}</p></section><section><b>剪辑建议</b><p>${clEscape(stage.edit)}</p></section></div></div></article>`).join("");
+      if (!isLearned) document.getElementById("clDrawerExamples").innerHTML = !isManual && example ? `<article class="cl-reference-card"><button class="cl-reference-preview" type="button" data-cl-reference-preview aria-label="播放提炼来源视频"><span aria-hidden="true">▶</span><small>9:16</small></button><div class="cl-reference-body"><h3>${clEscape(example.title)}</h3><section class="cl-reference-transcript"><b>识别口播</b><p>${clEscape(example.copy)}</p></section></div></article>` : "";
       document.getElementById("clStageTabCount").textContent = item.stages.length;
-      document.getElementById("clExampleTabCount").textContent = example ? 1 : 0;
+      if (!isLearned) examplesTabCount.textContent = !isManual && example ? 1 : 0;
       clSetDetailTab("stages");
       clOpenDrawer();
     }
@@ -2906,9 +3123,8 @@
       document.getElementById("clNewModalSubtitle").textContent = "优先从一条参考视频提炼，也支持手动创建";
       clShowSourceStep();
     });
-    ["clStructureSearch", "clStructureSourceFilter", "clStructureTagFilter"].forEach(id => document.getElementById(id)?.addEventListener(id === "clStructureSearch" ? "input" : "change", clRenderTable));
+    ["clStructureSearch", "clStructureSourceFilter"].forEach(id => document.getElementById(id)?.addEventListener(id === "clStructureSearch" ? "input" : "change", clRenderTable));
     document.getElementById("clNewMethod")?.addEventListener("change", clToggleReference);
-    document.getElementById("clNewDuration")?.addEventListener("change", clToggleCustomDuration);
     document.getElementById("clAddStage")?.addEventListener("click", () => document.getElementById("clStageEditor")?.insertAdjacentHTML("beforeend", clStageRow()));
     document.getElementById("clStageEditor")?.addEventListener("click", event => {
       const remove = event.target.closest("[data-remove-stage]");
@@ -2920,6 +3136,11 @@
     document.querySelectorAll("[data-cl-close='new']").forEach(btn => btn.addEventListener("click", () => { clCloseModal(clNewModal); clResetNewModalMode(); }));
     document.querySelectorAll("[data-cl-close='delete']").forEach(btn => btn.addEventListener("click", () => { clDeletingId = null; clDeleteTargetName = ""; clCloseModal(clDeleteModal); }));
     document.querySelectorAll("[data-cl-close='drawer']").forEach(btn => btn.addEventListener("click", clCloseDrawer));
+    document.getElementById("clDrawerEdit")?.addEventListener("click", () => {
+      if (!clCanEditStructure(clActiveDetailStructure)) return;
+      clCloseDrawer();
+      clOpenEditModal(clActiveDetailStructure);
+    });
     if (clDrawerOverlay) clDrawerOverlay.addEventListener("click", clCloseDrawer);
     if (clNewModal) clNewModal.addEventListener("click", e => { if (e.target === clNewModal) { clCloseModal(clNewModal); clResetNewModalMode(); } });
     if (clDeleteModal) clDeleteModal.addEventListener("click", e => { if (e.target === clDeleteModal) { clDeletingId = null; clDeleteTargetName = ""; clCloseModal(clDeleteModal); } });
@@ -2931,17 +3152,12 @@
       if (!newFormula) { showToast("请填写结构公式"); return; }
       const stages = clReadStages();
       if (stages.length < 2 || stages.some(stage => !stage.say || !stage.visual || !stage.edit)) { showToast("请至少完整填写 2 个结构阶段"); return; }
-      const duration = clGetDurationValue();
-      if (!duration) { showToast("请填写有效的适用时长，最长时长不能小于最短时长"); return; }
-      const scope = clSelectedScope("clNewTagCards");
       const reference = document.getElementById("clNewMethod").value === "reference" ? document.getElementById("clNewReference").value.trim() : "";
       if (document.getElementById("clNewMethod").value === "reference" && !reference) { showToast("请选择或填写参考视频"); return; }
       const existing = contentStructures.find(item => item.id === clEditingId);
       const next = {
-        ...(existing || {}), id: existing?.id || Date.now(), name:newName, formula:newFormula, source:"自建", scope,
-        product:scope === "产品级结构" ? document.getElementById("clNewProduct").value : "通用",
-        duration,
-        method:reference ? "从参考视频提炼" : "手动创建", reference, stages, updated:clNow(),
+        ...(existing || {}), id: existing?.id || Date.now(), name:newName, formula:newFormula, source:"自建",
+        method:reference ? "从参考视频提炼" : "手动创建", reference, stages, creator:existing?.creator || "嗡大发", createdAt:existing?.createdAt || clNow(), updated:clNow(),
         parseStatus: reference ? (existing?.parseStatus || "completed") : "manual",
         parseStep: existing?.parseStep || 0,
         parseSummary: existing?.parseSummary || (reference ? "视频解析已完成" : ""),
@@ -2961,15 +3177,155 @@
       showToast(`已删除「${clDeleteTargetName}」`);
     });
     document.getElementById("clDrawerExamples")?.addEventListener("click", event => {
-      const button = event.target.closest("[data-cl-example]");
-      if (!button) return;
-      if (button.dataset.clExample === "copy") showToast("示例文案已复制");
-      if (button.dataset.clExample === "play") { button.textContent = button.textContent === "播放视频" ? "暂停演示" : "播放视频"; showToast(button.textContent === "暂停演示" ? "正在播放参考成品" : "已暂停播放"); }
+      const preview = event.target.closest("[data-cl-reference-preview]");
+      if (preview) {
+        const playing = preview.classList.toggle("playing");
+        preview.querySelector("span").textContent = playing ? "Ⅱ" : "▶";
+        preview.setAttribute("aria-label", playing ? "暂停提炼来源视频" : "播放提炼来源视频");
+        showToast(playing ? "正在播放提炼来源视频" : "已暂停提炼来源视频");
+        return;
+      }
+      const period = event.target.closest("[data-cl-learning-period]");
+      if (period) { clLearningFilters.period = period.dataset.clLearningPeriod; clLearningFilters.page = 1; clRenderActiveLearningSamples(); return; }
+      const page = event.target.closest("[data-cl-learning-page]");
+      if (page && !page.disabled) {
+        clLearningFilters.page = Number(page.dataset.clLearningPage);
+        clRenderActiveLearningSamples();
+        requestAnimationFrame(() => document.querySelector(".cl-learning-list")?.scrollIntoView({ block:"start", behavior:"smooth" }));
+        return;
+      }
+      const play = event.target.closest("[data-cl-sample-play]");
+      if (play) {
+        const card = play.closest("[data-cl-learning-sample]");
+        const isPlaying = card.classList.toggle("playing");
+        play.querySelector("i").textContent = isPlaying ? "Ⅱ" : "▶";
+        play.querySelector("em").textContent = isPlaying ? "预览播放中" : "预览播放";
+        return showToast(isPlaying ? "正在预览素材" : "已暂停预览");
+      }
+      const detail = event.target.closest("[data-cl-sample-detail]");
+      if (detail && clActiveDetailStructure) {
+        const sample = clLearningMaterialRows(clLearningDailyRows(clActiveDetailStructure.id), clLearningFilters.sort)
+          .find(row => row.id === detail.dataset.clSampleId && row.accountId === detail.dataset.clSampleAccount);
+        if (sample) clOpenLearningSampleDetail(sample, detail.dataset.clSampleDetail);
+      }
+    });
+    clLearningSampleDetail?.addEventListener("click", event => {
+      if (event.target.closest("[data-cl-learning-detail-close]")) return clCloseLearningSampleDetail();
+      const tab = event.target.closest("[data-cl-learning-detail-tab]");
+      if (tab) return clSetLearningSampleDetailTab(tab.dataset.clLearningDetailTab);
+      const copy = event.target.closest("[data-cl-sample-copy]");
+      if (copy) {
+        const text = clLearningSampleDetail.querySelector(".cl-learning-copy-full p")?.textContent || "";
+        navigator.clipboard?.writeText(text);
+        return showToast("文案解析已复制");
+      }
+      const play = event.target.closest("[data-cl-sample-detail-play]");
+      if (play) {
+        const active = play.classList.toggle("playing");
+        play.querySelector("i").textContent = active ? "Ⅱ" : "▶";
+        return showToast(active ? "正在预览素材" : "已暂停预览");
+      }
+    });
+    document.getElementById("clDrawerExamples")?.addEventListener("change", event => {
+      const sort = event.target.closest("[data-cl-learning-sort]");
+      if (sort) { clLearningFilters.sort = sort.value; clLearningFilters.page = 1; clRenderActiveLearningSamples(); return; }
+      const query = event.target.closest("[data-cl-learning-query]");
+      if (query) { clLearningFilters.query = query.value; clLearningFilters.page = 1; clRenderActiveLearningSamples(); return; }
+      const date = event.target.closest("[data-cl-learning-date]");
+      if (date) {
+        clLearningFilters[date.dataset.clLearningDate] = date.value;
+        if (clLearningFilters.start > clLearningFilters.end) clLearningFilters.end = clLearningFilters.start;
+        clLearningFilters.page = 1;
+        clRenderActiveLearningSamples();
+      }
+    });
+    document.getElementById("clDrawerExamples")?.addEventListener("keydown", event => {
+      const query = event.target.closest("[data-cl-learning-query]");
+      if (query && event.key === "Enter") {
+        event.preventDefault();
+        clLearningFilters.query = query.value;
+        clLearningFilters.page = 1;
+        clRenderActiveLearningSamples();
+      }
+    });
+    document.getElementById("clDrawerStages")?.addEventListener("click", event => {
+      const toggle = event.target.closest("[data-cl-stage-toggle]");
+      if (toggle) return toggle.closest("[data-cl-stage-card]").classList.toggle("expanded");
     });
     document.getElementById("clDetailTabs")?.addEventListener("click", event => {
       const button = event.target.closest("[data-cl-detail-tab]");
       if (button) clSetDetailTab(button.dataset.clDetailTab);
     });
+
+    /* 模板库公共操作桥：产品关联资产复用本页数据、弹窗与操作，不维护第二套实现。 */
+    let templateOperationBridgeActive = false;
+    function templateBridgeCatalog() {
+      return {
+        prompt: promptLibraryRecords.map(record => ({ id:record.id, name:record.title, category:record.category, description:record.description, agent:record.category === "商品详情图" ? "商品详情图 Agent" : "商品主图 Agent", text:promptLibraryPreview(record), tags:record.category === "商品详情图" ? (record.modules || []).map(item => item.name) : (record.segments || []).filter(item => item.value).map(item => item.label), createdAt:record.createdAt, isDefault:Boolean(record.isDefault) })),
+        persona: personaCatalog.map(persona => ({ id:persona.id, name:persona.name, audience:`${persona.audience} · ${persona.gender}`, age:`${persona.age}岁`, scene:persona.scenes.join("；"), pain:persona.pain.join("；"), scope:persona.product || persona.category || persona.brand || "通用", created:`嗡大发 · ${persona.created || "08/01 10:20"}`, updated:`嗡大发 · ${persona.updated}`, usage:persona.usage })),
+        canvas: [...(canvasTemplateGrid?.querySelectorAll(":scope > .canvas-card") || [])].map(card => ({ id:card.dataset.canvasTemplate, name:card.querySelector(".canvas-header strong")?.textContent.trim() || "未命名画板", type:card.querySelector(".canvas-badge")?.textContent.trim() || "自定义", description:card.querySelector(".canvas-desc")?.textContent.trim() || "", node:card.querySelector(".canvas-stat")?.textContent.trim() || "—", usage:Number((card.querySelectorAll(".canvas-stat")[1]?.textContent.match(/\d+/) || [0])[0]), updated:"刚刚" })),
+        "content-structure": contentStructures.map(item => ({ id:String(item.id), name:item.name, source:item.source, formula:item.formula, reference:item.reference || item.example?.title || "暂无", status:item.learningStatus || (item.source === "自建" ? "手动创建" : "已启用"), updated:item.updated }))
+      };
+    }
+    function templateBridgePost(type) {
+      if (window.parent !== window) window.parent.postMessage({ type, catalog:templateBridgeCatalog() }, "*");
+    }
+    function templateBridgeHasSurface() {
+      return Boolean(document.querySelector(".modal-backdrop.show, .cl-drawer.show, .cl-drawer-overlay.show"));
+    }
+    function templateBridgeFinish() {
+      if (!templateOperationBridgeActive || templateBridgeHasSurface()) return;
+      templateOperationBridgeActive = false;
+      document.documentElement.classList.remove("template-operation-bridge");
+      templateBridgePost("content-compass-template-catalog");
+      templateBridgePost("content-compass-template-operation-close");
+    }
+    function templateBridgeActivateTab(kind) {
+      document.querySelector(`[data-lib-tab="${kind}"]`)?.click();
+    }
+    function templateBridgeOpen(message) {
+      const kind = message.kind;
+      const action = message.action;
+      templateBridgeActivateTab(kind);
+      templateOperationBridgeActive = true;
+      document.documentElement.classList.add("template-operation-bridge");
+      if (kind === "prompt") {
+        const record = promptLibraryRecords.find(item => item.id === message.id || item.title === message.name);
+        if (!record) return templateBridgeFinish();
+        if (action === "template-edit") openPromptLibraryEditor(record);
+        if (action === "template-delete") { deletingPromptLibraryId = record.id; document.getElementById("deletePromptLibraryName").textContent = record.title; togglePromptLibraryModal(promptLibraryDeleteModal, true); }
+        if (action === "prompt-default") { promptLibraryRecords.forEach(item => { if (item.category === record.category) item.isDefault = item.id === record.id; }); persistPromptLibraryRecords(); renderPromptLibrary(); showToast(`“${record.title}”已设为默认模板`); }
+      } else if (kind === "persona") {
+        const persona = personaCatalog.find(item => item.id === message.id || item.name === message.name);
+        if (!persona) return templateBridgeFinish();
+        if (action === "template-edit") openPersonaModal(persona.id);
+        if (action === "history") openPersonaHistory(persona.id);
+        if (action === "template-copy") copyPersona(persona.id);
+        if (action === "template-delete") openPersonaDelete(persona.id);
+      } else if (kind === "canvas") {
+        const card = [...(canvasTemplateGrid?.querySelectorAll(":scope > .canvas-card") || [])].find(item => item.dataset.canvasTemplate === String(message.id) || item.querySelector(".canvas-header strong")?.textContent.trim() === message.name);
+        if (!card) return templateBridgeFinish();
+        if (action === "template-edit") openCanvasTemplateEditor(card);
+        if (action === "template-delete") {
+          deletingCanvasTemplateCard = card;
+          document.getElementById("deleteCanvasTemplateName").textContent = card.querySelector(".canvas-header strong")?.textContent.trim() || "该模板";
+          canvasTemplateDeleteModal?.classList.add("show");
+        }
+      } else if (kind === "content-structure") {
+        const item = contentStructures.find(entry => String(entry.id) === String(message.id) || entry.name === message.name);
+        if (!item) return templateBridgeFinish();
+        if (action === "template-view") clOpenDetail(item);
+        if (action === "template-edit") clOpenEditModal(item);
+        if (action === "template-delete") clOpenDeleteModal(item);
+      }
+      requestAnimationFrame(templateBridgeFinish);
+    }
+    window.addEventListener("message", event => {
+      if (event.data?.type === "content-compass-template-catalog-request") return templateBridgePost("content-compass-template-catalog");
+      if (event.data?.type === "content-compass-template-operation") templateBridgeOpen(event.data);
+    });
+    document.addEventListener("click", () => setTimeout(templateBridgeFinish, 0));
+    document.addEventListener("keydown", event => { if (event.key === "Escape") setTimeout(templateBridgeFinish, 0); });
 
     clRenderTable();
 

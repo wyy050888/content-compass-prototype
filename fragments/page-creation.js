@@ -22,16 +22,16 @@
             </div>
             <div class="session-history-head">最近创作</div>
             <div class="chat-list">
-              <div class="chat-row active">
+              <div class="chat-row active" data-session-id="session-mite-summer">
                 <strong>为除螨仪生成暑期千川投放文案</strong><button class="session-more" type="button" aria-label="会话操作">⋯</button><div class="session-menu"><button type="button" data-session-rename>重命名</button><button class="danger" type="button" data-session-delete>删除</button></div>
               </div>
-              <div class="chat-row">
+              <div class="chat-row" data-session-id="session-air-fryer-copy">
                 <strong>参考爆款结构仿写空气炸锅口播</strong><button class="session-more" type="button" aria-label="会话操作">⋯</button><div class="session-menu"><button type="button" data-session-rename>重命名</button><button class="danger" type="button" data-session-delete>删除</button></div>
               </div>
-              <div class="chat-row">
+              <div class="chat-row" data-session-id="session-washer-script">
                 <strong>将洗地机文案转成可混剪脚本</strong><button class="session-more" type="button" aria-label="会话操作">⋯</button><div class="session-menu"><button type="button" data-session-rename>重命名</button><button class="danger" type="button" data-session-delete>删除</button></div>
               </div>
-              <div class="chat-row">
+              <div class="chat-row" data-session-id="session-juice-video">
                 <strong>制作便携榨汁杯 15 秒延伸视频</strong><button class="session-more" type="button" aria-label="会话操作">⋯</button><div class="session-menu"><button type="button" data-session-rename>重命名</button><button class="danger" type="button" data-session-delete>删除</button></div>
               </div>
             </div>

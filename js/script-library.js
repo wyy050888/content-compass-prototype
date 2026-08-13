@@ -18,10 +18,10 @@
   ].map(row => ({ ...row, material: mode === "depend" ? row.material : "" }));
 
   let scripts = [
-    { id:"sl-001", name:"轻净 Pro 除螨仪_脚本_20260807", product:"轻净 Pro 除螨仪", source:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。", sourceFull:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。轻净 Pro 边拍边吸，脏东西直接进尘杯，用完还能拆下水洗。", duration:60, ratio:"9:16", materialMode:"depend", materialStatus:"8/8 已匹配", updated:"08/11 14:32", rows:baseRows("depend") },
-    { id:"sl-002", name:"轻净 Pro 除螨仪_脚本_20260806", product:"轻净 Pro 除螨仪", source:"床单刚换一周，第一遍照样能吸出碎屑和毛发。", sourceFull:"床单刚换一周，第一遍照样能吸出碎屑和毛发。床垫深处的脏东西，普通清理根本触达不到。轻净 Pro 拍打吸尘同步完成，尘杯可水洗。", duration:30, ratio:"9:16", materialMode:"free", materialStatus:"已生成提示词", updated:"08/10 18:16", rows:baseRows("free") },
-    { id:"sl-003", name:"净味空气炸锅_快手晚餐脚本", product:"净味空气炸锅", source:"下班回家不想洗一堆锅，晚饭就用这一台解决。", sourceFull:"下班回家不想洗一堆锅，晚饭就用这一台解决。食材放进去，定好时间，外酥里嫩的一餐就能直接上桌。", duration:45, ratio:"9:16", materialMode:"depend", materialStatus:"6/6 已匹配", updated:"08/05 10:20", rows:baseRows("depend") },
-    { id:"sl-004", name:"清洁洗地机_夏季清爽脚本", product:"清洁洗地机", source:"地上看着干净，拖一遍才知道脏东西有多少。", sourceFull:"地上看着干净，拖一遍才知道脏东西，清洁洗地机洗拖同步，把日常地面清洁变成一件更省心的事。", duration:30, ratio:"16:9", materialMode:"free", materialStatus:"已生成提示词", updated:"08/03 16:08", rows:baseRows("free") }
+    { id:"sl-001", sessionId:"session-mite-summer", name:"轻净 Pro 除螨仪_脚本_20260807", product:"轻净 Pro 除螨仪", source:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。", sourceFull:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。轻净 Pro 边拍边吸，脏东西直接进尘杯，用完还能拆下水洗。", duration:60, ratio:"9:16", materialMode:"depend", materialStatus:"4/4 已匹配", createdBy:"嗡大发", createdAt:"08/04 14:20", updatedBy:"嗡大发", updated:"08/11 14:32", rows:baseRows("depend") },
+    { id:"sl-002", sessionId:"session-mite-summer", name:"轻净 Pro 除螨仪_脚本_20260806", product:"轻净 Pro 除螨仪", source:"床单刚换一周，第一遍照样能吸出碎屑和毛发。", sourceFull:"床单刚换一周，第一遍照样能吸出碎屑和毛发。床垫深处的脏东西，普通清理根本触达不到。轻净 Pro 拍打吸尘同步完成，尘杯可水洗。", duration:30, ratio:"9:16", materialMode:"free", materialStatus:"已生成提示词", createdBy:"李四", createdAt:"08/03 11:07", updatedBy:"李四", updated:"08/10 18:16", rows:baseRows("free") },
+    { id:"sl-003", sessionId:"session-air-fryer-copy", name:"轻享空气炸锅 A8_快手晚餐脚本", product:"轻享空气炸锅 A8", source:"下班回家不想洗一堆锅，晚饭就用这一台解决。", sourceFull:"下班回家不想洗一堆锅，晚饭就用这一台解决。食材放进去，定好时间，外酥里嫩的一餐就能直接上桌。", duration:45, ratio:"9:16", materialMode:"depend", materialStatus:"4/4 已匹配", createdBy:"嗡大发", createdAt:"08/04 14:20", updatedBy:"嗡大发", updated:"08/05 10:20", rows:baseRows("depend") },
+    { id:"sl-004", sessionId:"session-washer-script", name:"净界洗地机 S5_夏季清爽脚本", product:"净界洗地机 S5", source:"地上看着干净，拖一遍才知道脏东西有多少。", sourceFull:"地上看着干净，拖一遍才知道脏东西，净界洗地机 S5 洗拖同步，把日常地面清洁变成一件更省心的事。", duration:30, ratio:"16:9", materialMode:"free", materialStatus:"已生成提示词", createdBy:"李四", createdAt:"08/03 11:07", updatedBy:"李四", updated:"08/03 16:08", rows:baseRows("free") }
   ];
 
   const modal = (title, subtitle, body, footer = "", small = false) => {
@@ -42,8 +42,9 @@
   const modeText = mode => mode === "depend" ? "依赖素材库" : "不依赖素材库";
   const materialStatus = script => script.materialMode === "depend" ? script.materialStatus || `${script.rows.length}/${script.rows.length} 已匹配` : "已生成提示词";
   const specs = script => `${script.ratio} · ${script.duration}s · ${script.rows.length} 镜头`;
+  const notifyChange = () => window.dispatchEvent(new CustomEvent("content-compass:scripts-updated"));
   // 产品下拉选项(与产品库 / 文案库 / PDA 共享, 后续可改为从全局数据源拉取)
-  const productOptions = ["轻净 Pro 除螨仪", "净味空气炸锅", "清洁洗地机"];
+  const productOptions = ["轻净 Pro 除螨仪", "轻享空气炸锅 A8", "净界洗地机 S5"];
   const productOptionsHtml = (current = "") => {
     const list = current && !productOptions.includes(current) ? [current, ...productOptions] : productOptions;
     return list.map(name => `<option value="${escapeHtml(name)}" ${name === current ? "selected" : ""}>${escapeHtml(name)}</option>`).join("");
@@ -63,16 +64,37 @@
       <td><span class="sl-source" data-full="${escapeHtml(script.sourceFull)}">${escapeHtml(script.source)}</span></td>
       <td><span class="sl-spec">${escapeHtml(specs(script))}</span></td>
       <td><span class="sl-chip ${script.materialMode}">${modeText(script.materialMode)}</span></td>
-      <td class="asset-audit-cell"><b>${index % 2 ? '李四' : '嗡大发'}</b><small>${index % 2 ? '08/03 11:07' : '08/04 14:20'}</small></td>
-      <td class="asset-audit-cell"><b>${index % 2 ? '李四' : '嗡大发'}</b><small>${escapeHtml(script.updated)}</small></td>
-      <td><div class="sl-actions"><button data-sl-action="view">查看</button><button data-sl-action="edit">编辑</button><button data-sl-action="history">查看变更</button><button data-sl-action="copy">复制</button><button data-sl-action="download">下载</button><button class="danger" data-sl-action="delete">删除</button></div></td>
+      <td class="asset-audit-cell"><b>${escapeHtml(script.createdBy || "—")}</b><small>${escapeHtml(script.createdAt || "—")}</small></td>
+      <td class="asset-audit-cell"><b>${escapeHtml(script.updatedBy || script.createdBy || "—")}</b><small>${escapeHtml(script.updated)}</small></td>
+      <td><div class="sl-actions">
+        <button class="sl-action-btn view" data-sl-action="view">查看</button>
+        <button class="sl-action-btn" data-sl-action="edit">编辑</button>
+        <button class="sl-action-btn locate" data-sl-action="locate">定位会话</button>
+        <div class="sl-action-more">
+          <button class="sl-action-more-trigger" type="button" data-sl-menu-toggle aria-label="更多操作" aria-expanded="false">•••</button>
+          <div class="sl-action-menu" role="menu">
+            <button data-sl-action="history" role="menuitem">查看变更</button>
+            <button data-sl-action="download" role="menuitem">下载脚本</button>
+            <button class="danger" data-sl-action="delete" role="menuitem">删除脚本</button>
+          </div>
+        </div>
+      </div></td>
     </tr>`).join("");
     $("#slEmpty").hidden = Boolean(list.length);
     $("#slResultCount").textContent = `共 ${list.length} 条脚本`;
+    tbody.querySelectorAll("[data-sl-menu-toggle]").forEach(button => button.addEventListener("click", event => {
+      event.stopPropagation();
+      const more = button.closest(".sl-action-more");
+      const willOpen = !more.classList.contains("open");
+      tbody.querySelectorAll(".sl-action-more.open").forEach(item => item.classList.remove("open"));
+      more.classList.toggle("open", willOpen);
+      button.setAttribute("aria-expanded", String(willOpen));
+    }));
     tbody.querySelectorAll("[data-sl-action]").forEach(button => button.addEventListener("click", () => {
       const script = scripts.find(item => item.id === button.closest("tr").dataset.scriptId);
+      button.closest(".sl-action-more")?.classList.remove("open");
       if (button.dataset.slAction === 'history') return window.AssetAudit?.showHistory('脚本', script.name);
-      ({ view:openView, edit:openEdit, copy:openCopy, download:downloadScript, delete:confirmDelete })[button.dataset.slAction](script);
+      ({ view:openView, edit:openEdit, locate:locateSession, download:downloadScript, delete:confirmDelete })[button.dataset.slAction](script);
     }));
   }
 
@@ -85,10 +107,10 @@
 
   function openView(script, callbacks = {}) {
     const body = `<div class="sl-meta-grid"><div class="sl-meta"><small>对应产品</small><strong>${escapeHtml(script.product)}</strong></div><div class="sl-meta"><small>规格</small><strong>${escapeHtml(specs(script))}</strong></div><div class="sl-meta"><small>素材策略</small><strong>${modeText(script.materialMode)}</strong></div></div><section class="sl-source-block"><div><span>生成文案</span><button class="sl-link-btn" type="button" data-expand-source>展开全文</button></div><p>${escapeHtml(script.sourceFull)}</p></section>${storyTable(script)}`;
-    const host = modal(script.name, `最近更新：${script.updated}`, body, `<button class="sl-btn" data-view-edit>编辑脚本</button><button class="sl-btn" data-view-copy>复制脚本</button><button class="sl-btn" data-view-download>下载脚本</button><button class="sl-btn primary" data-close>关闭</button>`);
+    const host = modal(script.name, `最近更新：${script.updated}`, body, `<button class="sl-btn" data-view-edit>编辑脚本</button><button class="sl-btn" data-view-locate>定位至会话</button><button class="sl-btn" data-view-download>下载脚本</button><button class="sl-btn primary" data-close>关闭</button>`);
     host.querySelector("[data-expand-source]").addEventListener("click", event => { const box = event.currentTarget.closest(".sl-source-block"); box.classList.toggle("expanded"); event.currentTarget.textContent = box.classList.contains("expanded") ? "收起全文" : "展开全文"; });
     host.querySelector("[data-view-edit]").addEventListener("click", () => { host.remove(); openEdit(script, callbacks); });
-    host.querySelector("[data-view-copy]").addEventListener("click", () => { host.remove(); openCopy(script, callbacks); });
+    host.querySelector("[data-view-locate]").addEventListener("click", () => { host.remove(); locateSession(script); });
     host.querySelector("[data-view-download]").addEventListener("click", () => downloadScript(script));
   }
 
@@ -158,37 +180,69 @@
       collectRows(host, draft); draft.name = host.querySelector("#slEditName").value.trim(); draft.duration = Number(host.querySelector("#slEditDuration").value); draft.ratio = host.querySelector("#slEditRatio").value; draft.product = host.querySelector("#slEditProduct").value.trim();
       if (!draft.name || !Number.isInteger(draft.duration) || draft.duration <= 0 || !draft.rows.length) return toast("请完整填写脚本名称、时长和至少一条分镜");
       if (draft.rows.some(row => !row.time || !row.voice || !row.visual || (draft.materialMode === "free" && !row.videoPrompt))) return toast(draft.materialMode === "free" ? "请补充每条分镜的生视频提示词" : "请补充分镜必填信息");
-      draft.updated = now(); draft.materialStatus = draft.materialMode === "depend" ? `${draft.rows.length}/${draft.rows.length} 已匹配` : "已生成提示词";
-      scripts = scripts.map(item => item.id === script.id ? draft : item); callbacks.onSaved?.(draft); host.remove(); render(); toast("脚本已保存");
+      draft.updated = now(); draft.updatedBy = "嗡大发"; draft.materialStatus = draft.materialMode === "depend" ? `${draft.rows.length}/${draft.rows.length} 已匹配` : "已生成提示词";
+      scripts = scripts.map(item => item.id === script.id ? draft : item); callbacks.onSaved?.(draft); host.remove(); render(); notifyChange(); toast("脚本已保存");
     });
     host.querySelector("[data-edit-delete]").addEventListener("click", () => { host.remove(); confirmDelete(script, callbacks); });
   }
 
-  function openCopy(script, callbacks = {}) {
-    const defaultName = `${script.name}_副本`;
-    const host = modal("复制脚本", "复制后将生成独立脚本，不影响原脚本。", `<div class="sl-confirm-copy">将复制 <b>${escapeHtml(script.name)}</b> 的分镜、素材策略和素材关联。</div><input class="sl-copy-name" value="${escapeHtml(defaultName)}" aria-label="新脚本名称">`, `<button class="sl-btn" data-close>取消</button><button class="sl-btn primary" data-confirm-copy>确认复制</button>`, true);
-    host.querySelector("[data-confirm-copy]").addEventListener("click", () => { const name = host.querySelector(".sl-copy-name").value.trim(); if (!name) return toast("请输入新脚本名称"); const copied = clone(script); copied.id = `sl-${Date.now()}`; copied.name = name; copied.updated = now(); scripts.unshift(copied); callbacks.onCopied?.(copied); host.remove(); render(); toast("脚本已复制"); openView(copied, callbacks); });
+  function locateSession(script) {
+    if (!script.sessionId) return toast("该脚本未关联来源会话");
+    const creationNav = document.querySelector('.nav-item[data-page="creation"]');
+    if (!creationNav) return toast("无法打开 AI 创作页");
+    creationNav.click();
+    requestAnimationFrame(() => {
+      const row = [...document.querySelectorAll("#page-creation .chat-row")].find(item => item.dataset.sessionId === script.sessionId);
+      if (!row) return toast("来源会话已删除或不可用");
+      row.click();
+      row.scrollIntoView({ behavior:"smooth", block:"center" });
+      row.animate?.([
+        { boxShadow:"0 0 0 0 rgba(109, 76, 255, 0)", backgroundColor:"#eeeeF0" },
+        { boxShadow:"0 0 0 3px rgba(109, 76, 255, .22)", backgroundColor:"#f2efff", offset:.25 },
+        { boxShadow:"0 0 0 0 rgba(109, 76, 255, 0)", backgroundColor:"#eeeeF0" }
+      ], { duration:1400, easing:"ease-out" });
+    });
   }
   function downloadScript(script) {
     const blob = new Blob([JSON.stringify(script, null, 2)], { type:"application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${script.name}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); toast("脚本已下载");
   }
   function confirmDelete(script, callbacks = {}) {
     const host = modal("删除脚本", "删除后无法恢复。", `<div class="sl-confirm-copy">确认删除 <b>${escapeHtml(script.name)}</b> 吗？</div>`, `<button class="sl-btn" data-close>取消</button><button class="sl-btn primary" data-confirm-delete>确认删除</button>`, true);
-    host.querySelector("[data-confirm-delete]").addEventListener("click", () => { scripts = scripts.filter(item => item.id !== script.id); callbacks.onDeleted?.(script); host.remove(); render(); toast("脚本已删除"); });
+    host.querySelector("[data-confirm-delete]").addEventListener("click", () => { scripts = scripts.filter(item => item.id !== script.id); callbacks.onDeleted?.(script); host.remove(); render(); notifyChange(); toast("脚本已删除"); });
   }
   function normalizeAsset(asset) {
     const mode = asset.materialMode || "depend";
     const rows = (asset.scriptRows || baseRows(mode)).map((row, index) => ({ ...row, id:index + 1 }));
-    return { id:`asset-${asset.id}`, name:asset.title || "未命名脚本", product:asset.productName || "轻净 Pro 除螨仪", source:asset.sourceTitle || "当前生成文案", sourceFull:asset.sourceContent || asset.sourceTitle || "当前生成文案", duration:Math.max(1, rows.length * 4), ratio:"9:16", materialMode:mode, materialStatus:mode === "depend" ? `${rows.length}/${rows.length} 已匹配` : "已生成提示词", updated:now(), rows };
+    const activeSession = document.querySelector("#page-creation .chat-row.active");
+    const createdAt = now();
+    return { id:`asset-${asset.id}`, sessionId:asset.sessionId || activeSession?.dataset.sessionId || "", name:asset.title || "未命名脚本", product:asset.productName || "轻净 Pro 除螨仪", source:asset.sourceTitle || "当前生成文案", sourceFull:asset.sourceContent || asset.sourceTitle || "当前生成文案", duration:Math.max(1, rows.length * 4), ratio:"9:16", materialMode:mode, materialStatus:mode === "depend" ? `${rows.length}/${rows.length} 已匹配` : "已生成提示词", createdBy:"嗡大发", createdAt, updatedBy:"嗡大发", updated:createdAt, rows };
   }
-  window.addEventListener("script-library:sync", event => { const { action, asset } = event.detail || {}; if (!asset) return; const id = `asset-${asset.id}`; if (action === "remove") scripts = scripts.filter(script => script.id !== id); else { const normalized = normalizeAsset(asset); scripts = [normalized, ...scripts.filter(script => script.id !== id)]; } render(); });
+  function rematch(script, callbacks = {}) {
+    const target = scripts.find(item => item.id === script?.id);
+    if (!target) return;
+    target.materialMode = "depend";
+    target.rows = target.rows.map((row, index) => ({ ...row, material:`M-CL-${String(101 + index).padStart(3, "0")} · ${index % 2 ? "3" : "2"}s` }));
+    target.materialStatus = `${target.rows.length}/${target.rows.length} 已匹配`;
+    target.updated = now(); target.updatedBy = "嗡大发";
+    callbacks.onSaved?.(target);
+    render();
+    notifyChange();
+    toast("已重新匹配当前产品素材");
+  }
+  window.addEventListener("script-library:sync", event => { const { action, asset } = event.detail || {}; if (!asset) return; const id = `asset-${asset.id}`; if (action === "remove") scripts = scripts.filter(script => script.id !== id); else { const normalized = normalizeAsset(asset); scripts = [normalized, ...scripts.filter(script => script.id !== id)]; } render(); notifyChange(); });
   window.ContentCompassScriptLibrary = {
+    list() { return scripts; },
     open(script, action, callbacks = {}) {
       if (!script) return;
-      const actions = { "查看":openView, "编辑":openEdit, "复制":openCopy, "下载":downloadScript, "删除":confirmDelete };
+      const actions = { "查看":openView, "编辑":openEdit, "定位至会话":locateSession, "下载":downloadScript, "删除":confirmDelete, "重新匹配素材":rematch };
       actions[action]?.(clone(script), callbacks);
     }
   };
+  document.addEventListener("click", event => {
+    if (!event.target.closest(".sl-action-more")) {
+      root.querySelectorAll(".sl-action-more.open").forEach(item => item.classList.remove("open"));
+    }
+  });
   $("#slSearch").addEventListener("input", render); $("#slMaterialFilter").addEventListener("change", render);
   render();
 })();

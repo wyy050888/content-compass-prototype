@@ -6,3 +6,11 @@ html,body { min-width:0 !important; }
 .app > .asset-panel,
 .app > .asset-backdrop { display:none !important; }
 .app > .main { display:block !important; min-width:0 !important; min-height:100vh; padding-left:0 !important; }
+
+/* 产品关联资产调用模板库操作时，只透出模板库原有弹窗/抽屉。 */
+html.template-operation-bridge,
+html.template-operation-bridge body { background:transparent !important; }
+html.template-operation-bridge .app { visibility:hidden; }
+html.template-operation-bridge .modal-backdrop.show,
+html.template-operation-bridge .cl-drawer-overlay.show,
+html.template-operation-bridge .cl-drawer.show { visibility:visible !important; }

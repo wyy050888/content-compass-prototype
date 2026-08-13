@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="内容罗盘——面向兴趣电商团队的 AI 内容生产与经营增长平台产品原型">
   <title>内容罗盘 · AI经营增长平台</title>
-  <link rel="stylesheet" href="styles.css?v=20260811i">
-  <link rel="stylesheet" href="host-embed.css">
+  <link rel="stylesheet" href="styles.css?v=20260813ad">
+  <link rel="stylesheet" href="host-embed.css?v=20260813a">
 </head>
 <body>
   <div class="app">
@@ -1254,9 +1254,8 @@
           <!-- Tab 4: 爆款内容结构 - 同时沉淀说什么、拍什么、怎么剪 -->
           <div class="template-panel" data-lib-panel="content-structure">
             <div class="lib-filter-row">
-              <input type="text" class="lib-search" id="clStructureSearch" placeholder="搜索结构名称、公式、产品或参考视频">
-              <select class="lib-filter-select" id="clStructureSourceFilter"><option>全部来源</option><option>千川学习</option><option>自建</option></select>
-              <select class="lib-filter-select" id="clStructureTagFilter"><option>全部适用范围</option><option>通用结构</option><option>产品级结构</option></select>
+              <input type="text" class="lib-search" id="clStructureSearch" placeholder="搜索结构名称、公式或参考视频">
+              <select class="lib-filter-select" id="clStructureSourceFilter"><option>全部来源</option><option>千川学习</option><option>参考视频提炼</option><option>手动创建</option></select>
               <div class="cl-filter-actions">
                 <button class="cl-new-btn" type="button" data-cl-action="new">+ 新建内容结构</button>
               </div>
@@ -1265,14 +1264,12 @@
               <table class="lib-table">
                 <thead>
                   <tr>
-                    <th style="width:15%;">结构名称</th>
-                    <th style="width:22%;">内容公式</th>
-                    <th style="width:8%;">来源</th>
-                    <th style="width:14%;">参考成品 / 解析</th>
-                    <th style="width:10%;">适用范围</th>
-                    <th style="width:9%;">适用时长</th>
-                    <th style="width:9%;">解析状态</th>
-                    <th style="width:13%;">操作</th>
+                    <th style="width:18%;">结构名称</th>
+                    <th style="width:30%;">内容公式</th>
+                    <th style="width:10%;">来源</th>
+                    <th style="width:20%;">参考成品</th>
+                    <th style="width:10%;"><span class="cl-status-column-title">状态<button class="cl-status-help" type="button" aria-label="查看状态说明"><span aria-hidden="true">?</span><span class="cl-status-tooltip" role="tooltip"><b>状态说明</b><span><i class="learning">学习中</i>持续按入池标准更新学习素材。</span><span><i class="sparse">样本稀少</i>当前有效学习素材较少，结论仅供参考。</span><span><i class="review">待复核</i>近期表现发生变化，等待系统复核。</span><span><i class="stopped">已停学</i>已停止更新学习素材，保留历史结构供查看。</span></span></button></span></th>
+                    <th style="width:12%;">操作</th>
                   </tr>
                 </thead>
                 <tbody id="contentStructureTbody"></tbody>
@@ -1412,39 +1409,17 @@
               <label class="field-title">结构公式</label>
               <input type="text" id="clNewFormula" placeholder="例如：结果前置 → 痛点放大 → 能力证明 → 行动引导">
             </div>
-            <div class="cl-modal-two-col">
-              <div class="cl-modal-section">
-                <label class="field-title">适用时长</label>
-                <select id="clNewDuration"><option>不限</option><option>15–30 秒</option><option selected>30–45 秒</option><option>45–60 秒</option><option>60 秒以上</option><option value="custom">自定义</option></select>
-                <div class="cl-custom-duration" id="clCustomDuration" hidden>
-                  <label><input type="number" id="clDurationMin" min="1" max="600" value="30"><span>秒</span></label>
-                  <i>至</i>
-                  <label><input type="number" id="clDurationMax" min="1" max="600" value="45"><span>秒</span></label>
-                </div>
-              </div>
-              <div class="cl-modal-section">
-                <label class="field-title">创建方式</label>
-                <select id="clNewMethod" disabled><option value="manual">手动创建</option><option value="reference">从参考视频提炼</option></select>
-              </div>
+            <div class="cl-modal-section">
+              <label class="field-title">创建方式</label>
+              <select id="clNewMethod" disabled><option value="manual">手动创建</option><option value="reference">从参考视频提炼</option></select>
             </div>
             <div class="cl-modal-section" id="clNewReferenceWrap" hidden>
               <label class="field-title">参考视频</label>
               <input type="text" id="clNewReference" placeholder="选择成品视频或输入临时上传文件名">
             </div>
             <div class="cl-modal-section">
-              <label class="field-title">结构标签<span class="req">*</span></label>
-              <div class="cl-tag-cards" id="clNewTagCards">
-                <div class="cl-tag-card selected" data-cl-tag="general"><span class="cl-tag-card-icon">通</span><div class="cl-tag-card-body"><div class="cl-tag-card-title">通用结构</div><div class="cl-tag-card-desc">可供不同产品创作时复用</div></div><span class="cl-tag-card-check">✓</span></div>
-                <div class="cl-tag-card" data-cl-tag="product"><span class="cl-tag-card-icon">品</span><div class="cl-tag-card-body"><div class="cl-tag-card-title">产品级结构</div><div class="cl-tag-card-desc">仅在关联产品创作时优先调用</div></div><span class="cl-tag-card-check">✓</span></div>
-              </div>
-            </div>
-            <div class="cl-modal-section">
-              <label class="field-title">关联产品</label>
-              <select id="clNewProduct" disabled><option>通用结构（不限定产品）</option></select>
-            </div>
-            <div class="cl-modal-section">
               <div class="cl-stage-editor-head"><label class="field-title">结构阶段<span class="req">*</span></label><button class="cl-action-btn" type="button" id="clAddStage">＋ 添加阶段</button></div>
-              <div class="cl-stage-editor-labels"><span>阶段</span><span>说什么</span><span>拍什么</span><span>怎么剪</span><span></span></div>
+              <div class="cl-stage-editor-labels"><span>阶段</span><span>表达模板</span><span>拍什么</span><span>怎么剪</span><span></span></div>
               <div class="cl-stage-editor" id="clStageEditor"></div>
             </div>
             </div>
@@ -1471,44 +1446,42 @@
           <div class="cl-drawer-head-left">
             <span class="cl-source-qc" id="clDrawerSource">千川</span>
             <h2 id="clDrawerTitle">结果前置·痛点解决·行动引导型</h2>
+            <span class="cl-drawer-head-meta" id="clDrawerLearnedAtItem" hidden><b class="cl-learning-state" id="clDrawerLearningStatus">学习中</b><i></i><em>更新于</em><b id="clDrawerLearnedAt">—</b></span>
+            <span class="cl-drawer-head-meta" id="clDrawerCustomMeta" hidden><em id="clDrawerCreator">—</em><i></i><em>创建于</em><b id="clDrawerCreatedAt">—</b></span>
           </div>
           <div class="cl-drawer-actions">
+            <button class="cl-action-btn" type="button" id="clDrawerEdit" hidden>编辑</button>
             <button class="close-btn" type="button" data-cl-close="drawer">✕</button>
           </div>
         </div>
         <div class="cl-drawer-body">
-          <div class="cl-drawer-info">
-            <div class="cl-drawer-info-item"><label>结构名称</label><div class="cl-drawer-info-val" id="clDrawerName">结果前置·痛点解决·行动引导型</div></div>
-            <div class="cl-drawer-info-item"><label>结构公式</label><div class="cl-drawer-info-val" id="clDrawerFormula">结果前置 → 痛点放大 → 能力证明 → 行动引导</div></div>
-            <div class="cl-drawer-info-item"><label>适用范围</label><div class="cl-drawer-info-val" id="clDrawerTag"><span class="cl-struct-tag cl-struct-tag-product">产品级结构</span></div></div>
-            <div class="cl-drawer-info-item"><label>关联产品</label><div class="cl-drawer-info-val" id="clDrawerProduct">轻净 Pro 除螨仪</div></div>
-            <div class="cl-drawer-info-item"><label>适用时长</label><div class="cl-drawer-info-val" id="clDrawerDuration">30–45 秒</div></div>
-            <div class="cl-drawer-info-item"><label>创建方式</label><div class="cl-drawer-info-val" id="clDrawerMethod">平台数据学习</div></div>
-          </div>
-          <div class="cl-reference-note" id="clDrawerReference" hidden></div>
+          <section class="cl-structure-summary">
+            <div class="cl-drawer-source-note" id="clDrawerSourceNote" hidden><b>提炼来源</b><span id="clDrawerReference">—</span><i id="clDrawerParseSummary">—</i></div>
+            <div class="cl-structure-overview" id="clStructureOverview"></div>
+          </section>
           <div class="cl-detail-tabs" id="clDetailTabs">
             <button class="active" type="button" data-cl-detail-tab="stages">结构阶段 <span id="clStageTabCount">0</span></button>
-            <button type="button" data-cl-detail-tab="examples">参考成品 <span id="clExampleTabCount">0</span></button>
+            <button id="clExamplesTab" type="button" data-cl-detail-tab="examples"><span id="clExamplesTabLabel">提炼来源</span> <span id="clExampleTabCount">0</span></button>
           </div>
           <div class="cl-detail-panel active" data-cl-detail-panel="stages">
             <div class="cl-drawer-section">
-              <div class="cl-drawer-section-head">
-                <span class="ico">阶</span>
-                <div><h3>结构阶段</h3><p>一套结构同时约束内容表达、画面匹配与基础剪辑，实际时长由文案配音和已有素材共同校准。</p></div>
-              </div>
               <div class="cl-stage-cards" id="clDrawerStages"></div>
             </div>
           </div>
-          <div class="cl-detail-panel" data-cl-detail-panel="examples">
+          <div class="cl-detail-panel" id="clExamplesPanel" data-cl-detail-panel="examples">
             <div class="cl-drawer-section">
-              <div class="cl-drawer-section-head">
-                <span class="ico">荐</span>
-                <div><h3>参考成品</h3><p>用于说明该结构如何落到文案与画面；平台学习结构展示代表性高消耗成品，自建结构展示提炼来源。</p></div>
-              </div>
+              <p class="cl-panel-hint" id="clDrawerExamplesHint" hidden>用于核对结构来源。</p>
               <div id="clDrawerExamples"></div>
             </div>
           </div>
         </div>
+        <section class="cl-learning-detail-view" id="clLearningSampleDetail" hidden aria-label="素材详情">
+          <header class="cl-learning-detail-view-head">
+            <button class="cl-learning-back" type="button" data-cl-learning-detail-close>‹ 返回学习素材</button>
+            <button class="close-btn" type="button" data-cl-learning-detail-close>✕</button>
+          </header>
+          <div class="cl-learning-detail-view-body" id="clLearningSampleDetailBody"></div>
+        </section>
       </div>
 
       <!-- 素材监控 -->
@@ -3429,7 +3402,7 @@
   <script src="js/core.js"></script>
   <script src="js/pull.js"></script>
   <script src="js/business.js"></script>
-  <script src="js/misc.js?v=20260811h"></script>
+  <script src="js/misc.js?v=20260813ae"></script>
   <script>
     (function activateEmbeddedEntry(){
       var entry=new URLSearchParams(location.search).get('entry')||'image-library';

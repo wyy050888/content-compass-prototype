@@ -2,7 +2,7 @@
   <section class="page" id="page-script-library">
     <div class="page-pad script-library-page">
       <div class="page-head">
-        <div><h1>脚本库</h1><p>集中管理已保存的结构化脚本，支持查看、编辑、复制、下载与删除。</p></div>
+        <div><h1>脚本库</h1><p>集中管理已保存的结构化脚本，支持查看、编辑、定位原始会话、下载与删除。</p></div>
       </div>
       <section class="sl-panel" aria-label="脚本列表">
         <div class="sl-toolbar">

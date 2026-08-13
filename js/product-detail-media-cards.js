@@ -13,7 +13,7 @@
       const typeLabel = item.type === 'image' ? '图片' : '视频';
       const createdShort = cardTime(item.created, true);
       const statusLabel = status === 'analyzing' ? '' : (matStatusLabel[status] || '');
-      return `<article class="pda-media-card pda-mat" data-kind="material" data-id="${item.id}">
+      return `<article class="pda-media-card pda-mat pda-mat-card" data-kind="material" data-id="${item.id}">
         <div class="pda-mat-cover" data-pda-cover>
           <span class="pda-mat-status pda-status-${status}" data-act="start-analyze" data-tip="${esc(matStatusTip[status] || '')}">
             <span class="pda-mat-ico">${matStatusIco[status] || ''}</span>
@@ -24,9 +24,9 @@
           <div class="pda-mat-select-mark" data-pda-select></div>
         </div>
         <div class="pda-mat-info" data-pda-info>
-          <div class="pda-mat-name-row"><div class="pda-mat-name" title="${esc(item.name)}">${esc(item.name)}</div><button class="pda-mat-more" type="button" data-pda-menu-toggle data-kind="material" data-id="${item.id}" aria-label="素材操作">···</button></div>
-          <div class="pda-mat-tags"><span class="pda-mat-tag ${item.type === 'image' ? 'is-image' : 'is-video'}">${typeLabel}</span><span class="pda-mat-tag is-scene">${esc(item.tags?.[0] || '未打标签')}</span></div>
-          <div class="pda-mat-bottom"><div class="pda-mat-product-line"><span class="pda-mat-product ${isEmpty ? 'is-empty' : ''}" data-tip="${isEmpty ? '未关联产品' : '已关联产品'}">${esc(item.product || '未关联产品')}</span></div><div class="pda-mat-time">${esc(createdShort)}</div></div>
+          <div class="pda-mat-name-line"><div class="pda-mat-name" title="${esc(item.name)}">${esc(item.name)}</div><button class="pda-mat-more" type="button" data-pda-menu-toggle data-kind="material" data-id="${item.id}" aria-label="素材操作">···</button></div>
+          <div class="pda-mat-meta-line"><div class="pda-mat-product-line"><span class="pda-mat-product ${isEmpty ? 'is-empty' : ''}" data-tip="${isEmpty ? '未关联产品' : '已关联产品'}">${esc(item.product || '未关联产品')}</span></div><span class="pda-mat-type">${typeLabel} · ${esc(item.tags?.[0] || '未打标签')}</span></div>
+          <div class="pda-mat-card-created">${esc(createdShort)}</div>
         </div>
       </article>`;
     }
