@@ -45,14 +45,14 @@
     const sidebarMenuScroll = document.getElementById("sidebarMenuScroll");
     let sidebarScrollTimer;
 
-    function setSidebarCollapsed(collapsed) {
+    function setSidebarCollapsed(collapsed, persist = true) {
       if (window.innerWidth <= 860) return;
       sidebar.classList.toggle("is-collapsed", collapsed);
       appShell.classList.toggle("sidebar-collapsed", collapsed);
       sidebarCollapse.textContent = collapsed ? "›" : "‹";
       sidebarCollapse.setAttribute("aria-label", collapsed ? "展开菜单" : "收起菜单");
       sidebarCollapse.setAttribute("title", collapsed ? "展开菜单" : "收起菜单");
-      localStorage.setItem("contentCompassSidebarCollapsed", String(collapsed));
+      if (persist) localStorage.setItem("contentCompassSidebarCollapsed", String(collapsed));
     }
 
     const sidebarCollapsed = localStorage.getItem("contentCompassSidebarCollapsed") === "true";
@@ -3909,7 +3909,10 @@
       modelPicker.hidden = false;
       setAgentPicker(false);
       agentSelectionPending = false;
-      if (open) openAgentTask();
+      if (open) {
+        setSidebarCollapsed(true, false);
+        openAgentTask();
+      }
     }
 
     function selectChat() {
@@ -3990,6 +3993,7 @@
 
     function beginAgentCreation(card) {
       if (!card) return;
+      setSidebarCollapsed(true, false);
       if (card.dataset.type === "image-main") return switchPage("image-main-agent");
       if (card.dataset.type === "image-detail") return switchPage("image-detail-agent");
       const title = card.querySelector("strong")?.textContent?.trim() || "新建创作";
