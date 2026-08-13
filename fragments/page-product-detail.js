@@ -99,7 +99,6 @@
                   <button class="active" type="button" data-pda-template="prompt">提示词模板</button>
                   <button type="button" data-pda-template="persona">人群画像</button>
                   <button type="button" data-pda-template="canvas">无限画板模板</button>
-                  <button type="button" data-pda-template="content-structure">爆款内容结构</button>
                 </div>
                 <div id="pdaTemplateContent"></div>
               </div>
