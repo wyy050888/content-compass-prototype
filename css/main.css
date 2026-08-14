@@ -925,6 +925,29 @@
       .sidebar.is-collapsed .brand-copy,
       .sidebar.is-collapsed .nav-group-caret,
       .sidebar.is-collapsed .nav-sublist { display: none; }
+      .sidebar.is-collapsed .nav-group.is-flyout-open > .nav-sublist {
+        position: fixed;
+        z-index: 4;
+        top: var(--flyout-top, 72px);
+        left: calc(var(--sidebar) + 8px);
+        display: grid;
+        width: 224px;
+        max-height: min(560px, calc(100vh - var(--flyout-top, 72px) - 14px));
+        padding: 8px;
+        overflow: auto;
+        border: 1px solid #e5e4e9;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 14px 34px rgba(32,33,41,.16);
+      }
+      .sidebar.is-collapsed .nav-group.is-flyout-open > .nav-sublist .nav-item.nav-sub { min-height: 36px; padding: 8px 10px; color: #666871; }
+      .sidebar.is-collapsed .nav-group.is-flyout-open > .nav-sublist .nav-item.nav-sub:hover { color: #292a30; background: #f1f1f4; }
+      .sidebar.is-collapsed .nav-group.is-flyout-open > .nav-sublist .nav-item.nav-sub.active { color: #24252a; background: #e9e9ed; box-shadow: inset 2px 0 0 #242425; }
+      .sidebar.is-collapsed .nav-group.is-flyout-open > .nav-sublist .nav-child-group > summary { display:flex; justify-content:space-between; min-height: 36px; padding: 8px 10px; color: #55565e; background: transparent; font-weight: 650; text-align:left; }
+      .sidebar.is-collapsed .nav-group.is-flyout-open > .nav-sublist .nav-child-group > summary:hover { color: #292a30; background: #f1f1f4; }
+      .sidebar.is-collapsed .nav-group.is-flyout-open > .nav-sublist .nav-child-group > summary span:last-child { color: #9697a0; }
+      .sidebar.is-collapsed .nav-group.is-flyout-open > .nav-sublist .nav-item.nav-sub.nested { min-height: 34px; margin-left: 0; padding: 7px 10px; color: #71727a; font-size: 12px; }
+      .sidebar.is-collapsed .nav-group.is-flyout-open > .nav-sublist .nav-child-list { gap: 1px; margin: 2px 0 6px 14px; padding-left: 9px; border-left: 1px solid #e5e5e9; }
       .sidebar.is-collapsed .brand { gap: 4px; }
       .sidebar.is-collapsed .brand-mark { width: 28px; height: 28px; border-radius: 9px; font-size: 15px; }
       .sidebar.is-collapsed .sidebar-collapse { width: 20px; height: 20px; margin-left: 0; border-radius: 6px; font-size: 14px; }

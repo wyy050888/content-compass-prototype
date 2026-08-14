@@ -92,7 +92,7 @@
                 <small>把可用文案转成包含分镜、可直接驱动混剪的脚本</small>
                 <span class="agent-foot"><span class="agent-chip">结构化分镜</span><span class="agent-chip">混剪指令</span></span>
               </button>
-              <button class="agent-card" data-agent="智能混剪 Agent" data-type="mix" data-category="video">
+              <button class="agent-card" data-agent="智能混剪创作" data-type="mix" data-category="video">
                 <span class="agent-icon">剪</span>
                 <strong>智能混剪</strong>
                 <small>确认文案与 AI 配音，用已有素材完成裁切拼接</small>

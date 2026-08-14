@@ -45,6 +45,28 @@
     const sidebarMenuScroll = document.getElementById("sidebarMenuScroll");
     let sidebarScrollTimer;
 
+    function closeSidebarFlyouts(except = null) {
+      document.querySelectorAll(".sidebar .nav-group.is-flyout-open").forEach(group => {
+        if (group === except) return;
+        clearTimeout(group._flyoutCloseTimer);
+        group.classList.remove("is-flyout-open");
+        group.style.removeProperty("--flyout-top");
+      });
+    }
+
+    function openSidebarFlyout(group) {
+      if (!sidebar.classList.contains("is-collapsed")) return;
+      const summary = group.querySelector(":scope > summary");
+      if (!summary) return;
+      clearTimeout(group._flyoutCloseTimer);
+      closeSidebarFlyouts(group);
+      const bounds = summary.getBoundingClientRect();
+      const top = Math.max(12, Math.min(bounds.top, window.innerHeight - 360));
+      group.style.setProperty("--flyout-top", `${Math.round(top)}px`);
+      group.open = true;
+      group.classList.add("is-flyout-open");
+    }
+
     function setSidebarCollapsed(collapsed, persist = true) {
       if (window.innerWidth <= 860) return;
       sidebar.classList.toggle("is-collapsed", collapsed);
@@ -52,6 +74,7 @@
       sidebarCollapse.textContent = collapsed ? "›" : "‹";
       sidebarCollapse.setAttribute("aria-label", collapsed ? "展开菜单" : "收起菜单");
       sidebarCollapse.setAttribute("title", collapsed ? "展开菜单" : "收起菜单");
+      if (!collapsed) closeSidebarFlyouts();
       if (persist) localStorage.setItem("contentCompassSidebarCollapsed", String(collapsed));
     }
 
@@ -61,14 +84,18 @@
       setSidebarCollapsed(!sidebar.classList.contains("is-collapsed"));
     });
 
-    document.querySelectorAll(".nav-group > summary").forEach(summary => {
+    document.querySelectorAll(".nav-group").forEach(group => {
+      const summary = group.querySelector(":scope > summary");
+      if (!summary) return;
+      group.addEventListener("pointerenter", () => openSidebarFlyout(group));
+      group.addEventListener("pointerleave", () => {
+        if (!sidebar.classList.contains("is-collapsed")) return;
+        group._flyoutCloseTimer = setTimeout(() => closeSidebarFlyouts(), 140);
+      });
       summary.addEventListener("click", event => {
         if (!sidebar.classList.contains("is-collapsed")) return;
         event.preventDefault();
-        const group = summary.closest(".nav-group");
-        setSidebarCollapsed(false);
-        group.open = true;
-        requestAnimationFrame(() => summary.focus());
+        openSidebarFlyout(group);
       });
     });
 
@@ -126,7 +153,9 @@
     });
 
     navItems.forEach(item => item.addEventListener("click", () => {
+      if (item.dataset.page === "creation") resetCreationWorkspace();
       switchPage(item.dataset.page, item);
+      closeSidebarFlyouts();
       const libraryTab = item.dataset.libraryTab;
       const videoView = item.dataset.videoView;
       const promoTab = item.dataset.promoTab;
