@@ -184,7 +184,7 @@
     });
   }
 
-  const statusLabel = (status) => ({ done: '已分析', pending: '待分析', running: '分析中', failed: '分析失败' }[status] || '待分析');
+  const statusLabel = (status) => ({ done: '已拆解', pending: '待拆解', running: '拆解中', failed: '拆解失败' }[status] || '待拆解');
   const auditTime = (value, detailed = false) => {
     const match = String(value || '').match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?/); if (!match) return value || '—';
     const [, year, month, day, hour, minute, second = '00'] = match;
@@ -279,7 +279,7 @@
     const menu = byId('fvCardMenu');
     const qianchuanAction = video.ads?.length ? '更换千川素材 ID' : '关联千川素材 ID';
     const analysisDone = video.status === 'done';
-    menu.innerHTML = `<button type="button" data-video-action="download" data-id="${videoId}">下载</button><button type="button" data-video-action="analyze" data-id="${videoId}" ${analysisDone ? 'disabled aria-disabled="true" title="视频已分析，无需重复分析"' : ''}>分析</button><i class="fv-menu-divider"></i><button type="button" data-video-action="rename" data-id="${videoId}">重命名</button><button type="button" data-video-action="tag" data-id="${videoId}">编辑标签</button><button type="button" data-video-action="move" data-id="${videoId}">移动至文件夹</button><i class="fv-menu-divider"></i><button type="button" data-video-action="product" data-id="${videoId}">关联产品</button><button type="button" data-video-action="qianchuan" data-id="${videoId}">${qianchuanAction}</button><i class="fv-menu-divider"></i><button class="danger" type="button" data-video-action="delete" data-id="${videoId}">删除</button>`;
+    menu.innerHTML = `<button type="button" data-video-action="download" data-id="${videoId}">下载</button><button type="button" data-video-action="analyze" data-id="${videoId}" ${analysisDone ? 'disabled aria-disabled="true" title="视频已拆解，无需重复拆解"' : ''}>拆解</button><i class="fv-menu-divider"></i><button type="button" data-video-action="rename" data-id="${videoId}">重命名</button><button type="button" data-video-action="tag" data-id="${videoId}">编辑标签</button><button type="button" data-video-action="move" data-id="${videoId}">移动至文件夹</button><i class="fv-menu-divider"></i><button type="button" data-video-action="product" data-id="${videoId}">关联产品</button><button type="button" data-video-action="qianchuan" data-id="${videoId}">${qianchuanAction}</button><i class="fv-menu-divider"></i><button class="danger" type="button" data-video-action="delete" data-id="${videoId}">删除</button>`;
     positionMenu(menu, button); menu.hidden = false; state.menuVideo = videoId;
     menu.setAttribute('aria-label', `${video.file}操作`);
   }
@@ -567,7 +567,7 @@
     const targets = ids.map((id) => videos.find((item) => item.id === id)).filter(Boolean);
     if (!targets.length) { toast('请至少选择 1 个视频', 'warning'); return; }
     state.analyzeTargets = targets.map((item) => item.id);
-    byId('fvAnalyzeTitle').textContent = targets.length > 1 ? '确认开始批量智能拉片？' : '确认开始智能拉片？';
+    byId('fvAnalyzeTitle').textContent = targets.length > 1 ? '确认开始批量拆解？' : '确认开始拆解？';
     byId('fvAnalyzeQianchuan').hidden = !targets.some((video) => video.ads?.length);
     openModal('fvAnalyzeModal');
   }
@@ -577,10 +577,10 @@
     if (!targets.length) return;
     closeModal('fvAnalyzeModal');
     targets.forEach((video) => { video.status = 'running'; });
-    renderVideos(); toast('智能拉片已开始，可继续浏览页面');
+    renderVideos(); toast('视频拆解已开始，可继续浏览页面');
     const detailTarget = targets.find((video) => video.id === state.currentVideo);
     if (detailTarget && !byId('fvDetailView').hidden) {
-      byId('fvReanalyze').textContent = '分析中';
+      byId('fvReanalyze').textContent = '拆解中';
       byId('fvReanalyze').disabled = true;
     }
     setTimeout(() => {
@@ -594,16 +594,8 @@
       });
       renderAll(); cancelSelection();
       if (detailTarget && success.some((video) => video.id === detailTarget.id) && !byId('fvDetailView').hidden) openDetail(detailTarget.id);
-      showBatchResult(success, failed);
+      toast(`视频拆解完成：成功 ${success.length} 个${failed.length ? `，失败 ${failed.length} 个` : ''}`, failed.length ? 'warning' : 'success');
     }, 1100);
-  }
-
-  function showBatchResult(success, failed) {
-    byId('fvBatchResultTitle').textContent = failed.length ? '批量任务部分完成' : '智能拉片已完成';
-    byId('fvBatchResultSummary').textContent = `成功 ${success.length} 个，失败 ${failed.length} 个。`;
-    byId('fvBatchResultBody').innerHTML = `<div class="fv-result-summary"><span class="success">✓ ${success.length} 个成功</span><span class="danger">! ${failed.length} 个失败</span></div>
-      ${failed.map((video) => `<div class="fv-result-row"><div><b>${escapeHtml(video.name)}</b><small>分析任务暂时失败，请重试</small></div><button class="fv-btn fv-btn-secondary small" type="button" data-retry-video="${video.id}">重试</button></div>`).join('')}`;
-    openModal('fvBatchResultModal');
   }
 
   function openPreview(videoId) {
@@ -630,7 +622,7 @@
     byId('fvPreviewDetail').hidden = video.status !== 'done';
     byId('fvPreviewAnalyze').hidden = video.status === 'done';
     byId('fvPreviewAnalyze').disabled = video.status === 'running';
-    byId('fvPreviewAnalyze').textContent = video.status === 'running' ? '分析中' : video.status === 'failed' ? '重新分析' : '开始分析';
+    byId('fvPreviewAnalyze').textContent = video.status === 'running' ? '拆解中' : video.status === 'failed' ? '重新拆解' : '开始拆解';
     openModal('fvPreviewModal');
   }
 
@@ -673,7 +665,7 @@
     byId('fvPullVideoBox').hidden = hasQianchuan || !hasPullResult;
     byId('fvPullSummaryHead').hidden = hasQianchuan || !hasPullResult;
     byId('page-pull').classList.toggle('fv-pull-no-qianchuan', !hasQianchuan);
-    byId('fvReanalyze').textContent = video.status === 'running' ? '分析中' : hasPullResult ? '重新分析' : '开始拉片';
+    byId('fvReanalyze').textContent = video.status === 'running' ? '拆解中' : hasPullResult ? '重新拆解' : '开始拆解';
     byId('fvReanalyze').disabled = video.status === 'running';
     renderAds(video); renderPlayer(video); renderChart();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -716,7 +708,7 @@
     byId('fvPlayBtn').textContent = '▶';
     byId('fvPullVideoName').textContent = video.name;
     byId('fvPullSummaryTitle').textContent = video.file;
-    byId('fvPullSummaryMeta').textContent = `视频时长 ${formatTime(video.duration)} · 拉片时间 ${video.history?.[0]?.time || video.created}`;
+    byId('fvPullSummaryMeta').textContent = `视频时长 ${formatTime(video.duration)} · 拆解时间 ${video.history?.[0]?.time || video.created}`;
   }
 
   function currentVideo() { return videos.find((item) => item.id === state.currentVideo); }
@@ -822,7 +814,7 @@
     const video = currentVideo(); if (!video) return;
     const payload = { 视频名称: video.name, 文件名: video.file, 生成时间: nowText(), 千川素材: video.ads || [], 分镜分析: video.shots || [] };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' }); const anchor = document.createElement('a');
-    anchor.href = URL.createObjectURL(blob); anchor.download = `${video.name}-拉片结果.json`; anchor.click(); URL.revokeObjectURL(anchor.href); toast('分析结果已下载', 'success');
+    anchor.href = URL.createObjectURL(blob); anchor.download = `${video.name}-拆解结果.json`; anchor.click(); URL.revokeObjectURL(anchor.href); toast('拆解结果已下载', 'success');
   }
 
   function showTooltip(target, message) {
@@ -888,7 +880,6 @@
     if (target.dataset.previewArea) { openPreview(target.dataset.previewArea); return; }
     if (target.dataset.detailArea) { openDetail(target.dataset.detailArea); return; }
     if (target.dataset.preview) { event.stopPropagation(); openPreview(target.dataset.preview); return; }
-    if (target.dataset.retryVideo) { closeModal('fvBatchResultModal'); requestAnalyze([target.dataset.retryVideo]); return; }
     if (target.dataset.metric) { state.metric = target.dataset.metric; renderChart(); return; }
     if (target.dataset.seek) { seekTo(Number(target.dataset.seek)); return; }
     if (target.dataset.copyFrame) { event.stopPropagation(); copyFrame(target.dataset.copyFrame); return; }

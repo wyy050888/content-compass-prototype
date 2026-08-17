@@ -17,7 +17,7 @@
                 <button class="create-agent-option" type="button" data-create-agent-type="script" data-category="video"><span class="create-agent-dot"></span><span><strong>智能脚本</strong><small>把文案转为可拍摄、可混剪的分镜脚本</small></span><span class="create-agent-arrow">›</span></button>
                 <button class="create-agent-option" type="button" data-create-agent-type="mix" data-category="video"><span class="create-agent-dot"></span><span><strong>智能混剪</strong><small>确认文案配音，用已有素材生成成片</small></span><span class="create-agent-arrow">›</span></button>
                 <div class="create-agent-group">视频分析</div>
-                <button class="create-agent-option" type="button" data-create-page="pull-entry" data-category="analysis"><span class="create-agent-dot"></span><span><strong>智能拉片</strong><small>独立拆解视频口播、分镜与镜头语言</small></span><span class="create-agent-arrow">›</span></button>
+                <button class="create-agent-option" type="button" data-create-page="pull-entry" data-category="analysis"><span class="create-agent-dot"></span><span><strong>爆款拆解</strong><small>独立拆解视频口播、分镜与镜头语言</small></span><span class="create-agent-arrow">›</span></button>
               </div>
             </div>
             <div class="session-history-head">最近创作</div>
@@ -56,43 +56,43 @@
                 <button class="agent-filter" type="button" data-agent-filter="analysis" role="tab" aria-selected="false">视频分析</button>
               </div>
               <div class="agent-grid" id="agentGrid">
-              <button class="agent-card" data-agent="智能文案创作" data-type="original" data-category="copy">
+              <button class="agent-card" type="button" data-agent="智能文案创作" data-type="original" data-category="copy">
                 <span class="agent-icon">原</span>
                 <strong>智能文案</strong>
                 <small>结合产品事实与历史策略，生成多条单变量 A/B 文案</small>
                 <span class="agent-foot"><span class="agent-chip">产品事实</span><span class="agent-chip">单变量 A/B</span><span class="agent-chip">多版本</span></span>
               </button>
-              <button class="agent-card" data-agent="爆款文案仿写创作" data-type="copy" data-category="copy">
+              <button class="agent-card" type="button" data-agent="爆款文案仿写创作" data-type="copy" data-category="copy">
                 <span class="agent-icon">仿</span>
                 <strong>爆款文案仿写</strong>
                 <small>拆参考素材的钩子与结构，再映射为当前产品的新文案</small>
                 <span class="agent-foot"><span class="agent-chip">结构拆解</span><span class="agent-chip">原创映射</span><span class="agent-chip">去同质化</span></span>
               </button>
-              <button class="agent-card" data-agent="智能改写创作" data-type="rewrite" data-category="copy">
+              <button class="agent-card" type="button" data-agent="智能改写创作" data-type="rewrite" data-category="copy">
                 <span class="agent-icon">改</span>
                 <strong>智能改写</strong>
                 <small>换钩子、压时长、换人群，保留需要保留的内容</small>
                 <span class="agent-foot"><span class="agent-chip">局部锁定</span><span class="agent-chip">变更对照</span><span class="agent-chip">延伸视频</span></span>
               </button>
-              <button class="agent-card" data-agent="商品主图 Agent" data-type="image-main" data-category="image">
+              <button class="agent-card" type="button" data-agent="商品主图 Agent" data-type="image-main" data-category="image">
                 <span class="agent-icon">图</span>
                 <strong>商品主图</strong>
                 <small>基于产品图和卖点，生成可用于商品卡或图文推广的主图</small>
                 <span class="agent-foot"><span class="agent-chip">商品主图</span><span class="agent-chip">多版生成</span></span>
               </button>
-              <button class="agent-card" data-agent="商品详情页 Agent" data-type="image-detail" data-category="image">
+              <button class="agent-card" type="button" data-agent="商品详情页 Agent" data-type="image-detail" data-category="image">
                 <span class="agent-icon">详</span>
                 <strong>商品详情页</strong>
                 <small>按产品卖点和详情页模块，生成可继续编辑的图文页面</small>
                 <span class="agent-foot"><span class="agent-chip">详情页模块</span><span class="agent-chip">图文生成</span></span>
               </button>
-              <button class="agent-card" data-agent="智能脚本创作" data-type="script" data-category="video">
+              <button class="agent-card" type="button" data-agent="智能脚本创作" data-type="script" data-category="video">
                 <span class="agent-icon">导</span>
                 <strong>智能脚本</strong>
                 <small>把可用文案转成包含分镜、可直接驱动混剪的脚本</small>
                 <span class="agent-foot"><span class="agent-chip">结构化分镜</span><span class="agent-chip">混剪指令</span></span>
               </button>
-              <button class="agent-card" data-agent="智能混剪创作" data-type="mix" data-category="video">
+              <button class="agent-card" type="button" data-agent="智能混剪创作" data-type="mix" data-category="video">
                 <span class="agent-icon">剪</span>
                 <strong>智能混剪</strong>
                 <small>确认文案与 AI 配音，用已有素材完成裁切拼接</small>
@@ -100,7 +100,7 @@
               </button>
               <button class="agent-card tool-card" id="openPullTool" type="button" data-category="analysis">
                 <span class="agent-icon">拉</span>
-                <strong>智能拉片</strong>
+                <strong>爆款拆解</strong>
                 <small>独立拆解视频的口播、分镜、镜头语言与内容结构</small>
                 <span class="agent-foot"><span class="agent-chip">独立分析页</span><span class="agent-chip">非对话式</span><span class="agent-chip">仿写参考</span></span>
               </button>

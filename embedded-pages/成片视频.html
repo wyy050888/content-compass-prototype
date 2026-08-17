@@ -16,7 +16,7 @@
       <header class="fv-page-head">
         <div>
           <h1>成片视频</h1>
-          <p>集中管理成片视频，支持归档、智能拉片与千川投放数据联动。</p>
+          <p>集中管理成片视频，支持归档、视频拆解与千川投放数据联动。</p>
         </div>
         <div class="fv-head-actions"><button class="fv-btn fv-btn-primary" type="button" id="fvImportBtn">＋ 导入成片</button></div>
       </header>
@@ -45,8 +45,8 @@
                 <div class="fv-toolbar-menu" id="fvStatusDropdown" hidden>
                   <button type="button" data-status="all">全部状态</button>
                   <button type="button" data-status="pending">待分析</button>
-                  <button type="button" data-status="running">分析中</button>
-                  <button type="button" data-status="done">已分析</button>
+                  <button type="button" data-status="running">拆解中</button>
+                  <button type="button" data-status="done">已拆解</button>
                   <button type="button" data-status="failed">分析失败</button>
                 </div>
               </div>
@@ -97,7 +97,7 @@
           <button class="fv-action" type="button" data-batch="download" title="下载"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>下载</button>
           <button class="fv-action" type="button" data-batch="tag" title="打标签"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7" cy="8" r="1.5" fill="currentColor"/></svg>打标签</button>
           <button class="fv-action" type="button" data-batch="move" title="转移"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>转移</button>
-          <button class="fv-action" type="button" data-batch="analyze" title="分析"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 21 12 17l-5.5 4L8 13.5 3 9l6.5-.5z"/></svg>分析</button>
+          <button class="fv-action" type="button" data-batch="analyze" title="拆解"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 21 12 17l-5.5 4L8 13.5 3 9l6.5-.5z"/></svg>拆解</button>
           <button class="fv-action" type="button" data-batch="product" title="关联产品"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2M8 13h8"/></svg>关联产品</button>
           <button class="fv-action fv-action-danger" type="button" data-batch="delete" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>删除</button>
           <button class="fv-action-close" type="button" id="fvCancelSelection" title="取消选择" aria-label="取消选择">×</button>
@@ -122,7 +122,7 @@
         </div>
         <div class="fv-detail-actions">
           <button class="fv-btn fv-btn-secondary" id="fvDetailHistory" type="button">查看变更</button><button class="fv-btn fv-btn-secondary" id="fvEditDetailInfo" type="button">编辑信息</button>
-          <button class="fv-btn fv-btn-primary" id="fvReanalyze" type="button">重新分析</button>
+          <button class="fv-btn fv-btn-primary" id="fvReanalyze" type="button">重新拆解</button>
         </div>
       </header>
 
@@ -268,26 +268,18 @@
 
   <div class="fv-modal-backdrop" id="fvAnalyzeModal" hidden>
     <section class="fv-modal fv-modal-small" role="dialog" aria-modal="true" aria-labelledby="fvAnalyzeTitle">
-      <header><div><span class="fv-modal-kicker">智能拉片</span><h2 id="fvAnalyzeTitle">确认开始智能拉片？</h2></div><button type="button" data-close-modal="fvAnalyzeModal" aria-label="关闭">×</button></header>
+      <header><div><span class="fv-modal-kicker">视频拆解</span><h2 id="fvAnalyzeTitle">确认开始拆解？</h2></div><button type="button" data-close-modal="fvAnalyzeModal" aria-label="关闭">×</button></header>
       <div class="fv-modal-body">
         <ul class="fv-check-list">
           <li>生成口播文案、脚本结构、画面总结与分镜结果</li>
           <li id="fvAnalyzeQianchuan">已关联千川素材，同步生成互动时序分析</li>
-          <li>已有分析结果将保留历史版本，本次生成新版本</li>
         </ul>
         <p class="fv-modal-note">生成期间可继续浏览，完成后可在视频详情查看结果。</p>
       </div>
-      <footer><button class="fv-btn fv-btn-secondary" type="button" data-close-modal="fvAnalyzeModal">取消</button><button class="fv-btn fv-btn-primary" id="fvStartAnalyze" type="button">开始拉片</button></footer>
+      <footer><button class="fv-btn fv-btn-secondary" type="button" data-close-modal="fvAnalyzeModal">取消</button><button class="fv-btn fv-btn-primary" id="fvStartAnalyze" type="button">开始拆解</button></footer>
     </section>
   </div>
 
-  <div class="fv-modal-backdrop" id="fvBatchResultModal" hidden>
-    <section class="fv-modal fv-modal-small" role="dialog" aria-modal="true" aria-labelledby="fvBatchResultTitle">
-      <header><div><span class="fv-modal-kicker success">分析完成</span><h2 id="fvBatchResultTitle">批量任务已完成</h2><p id="fvBatchResultSummary"></p></div><button type="button" data-close-modal="fvBatchResultModal" aria-label="关闭">×</button></header>
-      <div class="fv-modal-body" id="fvBatchResultBody"></div>
-      <footer><button class="fv-btn fv-btn-primary" type="button" data-close-modal="fvBatchResultModal">完成</button></footer>
-    </section>
-  </div>
 
   <div class="fv-modal-backdrop" id="fvPreviewModal" hidden>
     <section class="fv-modal fv-preview-modal" role="dialog" aria-modal="true" aria-labelledby="fvPreviewTitle">
@@ -310,7 +302,7 @@
           </aside>
         </div>
       </div>
-      <footer><button class="fv-btn fv-btn-secondary" id="fvPreviewAnalyze" type="button" hidden>开始分析</button><button class="fv-btn fv-btn-secondary" id="fvPreviewDetail" type="button">查看拉片结果</button><button class="fv-btn fv-btn-primary" id="fvPreviewDownload" type="button">下载视频</button></footer>
+      <footer><button class="fv-btn fv-btn-secondary" id="fvPreviewAnalyze" type="button" hidden>开始拆解</button><button class="fv-btn fv-btn-secondary" id="fvPreviewDetail" type="button">查看拆解结果</button><button class="fv-btn fv-btn-primary" id="fvPreviewDownload" type="button">下载视频</button></footer>
     </section>
   </div>
 
@@ -355,7 +347,7 @@
 
   <div class="fv-modal-backdrop" id="fvHistoryModal" hidden>
     <section class="fv-modal" role="dialog" aria-modal="true" aria-labelledby="fvHistoryTitle">
-      <header><div><span class="fv-modal-kicker">分析历史</span><h2 id="fvHistoryTitle">历史分析记录</h2><p>重新分析会生成新记录，历史结果不会被覆盖。</p></div><button type="button" data-close-modal="fvHistoryModal" aria-label="关闭">×</button></header>
+      <header><div><span class="fv-modal-kicker">拆解历史</span><h2 id="fvHistoryTitle">历史拆解记录</h2><p>重新拆解会生成新记录，历史结果不会被覆盖。</p></div><button type="button" data-close-modal="fvHistoryModal" aria-label="关闭">×</button></header>
       <div class="fv-modal-body"><div class="fv-history-list" id="fvHistoryList"></div></div>
       <footer><button class="fv-btn fv-btn-primary" type="button" data-close-modal="fvHistoryModal">完成</button></footer>
     </section>
@@ -369,7 +361,7 @@
     </section>
   </div>
 
-  <script src="js/finished-videos.js?v=20260812a"></script>
+  <script src="js/finished-videos.js?v=20260816a"></script>
   <script src="../js/lapan-detail.js?v=20260808"></script>
 </body>
 </html>

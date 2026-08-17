@@ -13,7 +13,8 @@
       { id:"persona-mom", name:"精致妈妈—母婴清洁人群", brand:"轻净", category:"清洁电器", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"女性", age:"24–30", pain:["孩子接触床褥后容易敏感不适","床单刚换仍担心深层毛发碎屑"], scenes:["宝宝家庭的床垫日常清洁","毛绒玩具和布艺沙发清洁"], usage:36, updated:"08-04 15:30" },
       { id:"persona-pet", name:"精致妈妈—养宠清洁人群", brand:"轻净", category:"清洁电器", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"不限", age:"31–40", pain:["宠物掉毛进入沙发和床褥缝隙","表面清理后仍有毛发碎屑"], scenes:["宠物活动区日常清洁","换季掉毛期的床褥与沙发清洁"], usage:24, updated:"08-04 11:18" },
       { id:"persona-whitecollar", name:"新锐白领—一人食效率人群", brand:"轻享", category:"厨房电器", product:"轻享空气炸锅 A8", audience:"新锐白领", gender:"不限", age:"24–30", pain:["下班晚，没有时间准备复杂晚餐","做饭后不想处理大量油污"], scenes:["工作日晚间一人食","朋友到家时快速准备小食"], usage:19, updated:"08-03 16:42" },
-      { id:"persona-family", name:"资深中产—品质清洁人群", brand:"净界", category:"清洁电器", product:"净界洗地机 S5", audience:"资深中产", gender:"不限", age:"31–40", pain:["全屋清洁步骤多、耗时长","厨房和卫生间的干湿垃圾难一次处理"], scenes:["周末全屋深度清洁","餐后厨房地面即时清洁"], usage:17, updated:"08-02 10:15" }
+      { id:"persona-family", name:"资深中产—品质清洁人群", brand:"净界", category:"清洁电器", product:"净界洗地机 S5", audience:"资深中产", gender:"不限", age:"31–40", pain:["全屋清洁步骤多、耗时长","厨房和卫生间的干湿垃圾难一次处理"], scenes:["周末全屋深度清洁","餐后厨房地面即时清洁"], usage:17, updated:"08-02 10:15" },
+      { id:"persona-general", name:"家庭日常清洁—通用人群", brand:"", category:"", product:"", audience:"精致妈妈", gender:"不限", age:"24–40", pain:["高频清洁后仍担心遗漏深层脏污","希望减少重复清洁和工具切换"], scenes:["工作日居家快速整理","卧室与客厅等家庭高频区域日常维护"], usage:12, updated:"08-05 10:20" }
     ];
     const personaHistories = {
       "persona-mom":[
@@ -24,7 +25,7 @@
       "persona-whitecollar":[{ time:"08-03 16:42", user:"林运营", field:"创建画像", before:"—", after:"新锐白领—一人食效率人群" }],
       "persona-family":[{ time:"08-02 10:15", user:"嗡大发", field:"创建画像", before:"—", after:"资深中产—品质清洁人群" }]
     };
-    const personaFieldLabels = { name:"画像名称", brand:"适用品牌", category:"适用类目", product:"适用产品", audience:"抖音八大人群", gender:"性别", age:"年龄", pain:"人群核心痛点", scenes:"使用场景" };
+    const personaFieldLabels = { name:"画像名称", product:"关联产品", audience:"抖音八大人群", gender:"性别", age:"年龄", pain:"人群核心痛点", scenes:"使用场景" };
     const personaTbody = document.getElementById("personaLibraryTbody");
     const personaTime = (value, detailed = false) => { const match=String(value||"").match(/(?:(\d{4})[-/])?(\d{2})[-/](\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?/); if(!match)return value||"—"; const [,year,month,day,hour,minute,second="00"]=match; return `${year&&Number(year)!==2026?`${year}/`:""}${month}/${day} ${hour}:${minute}${detailed?`:${second}`:""}`; };
     const personaEmpty = document.getElementById("personaLibraryEmpty");
@@ -38,24 +39,56 @@
     function personaNow() {
       return new Intl.DateTimeFormat("zh-CN", { month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hour12:false }).format(new Date()).replaceAll("/", "-");
     }
-    function personaScope(persona) { return persona.product || persona.category || persona.brand || "全团队"; }
+    function personaProducts(persona) {
+      if (!persona) return [];
+      const product = Array.isArray(persona.linkedProducts) && persona.linkedProducts.length ? persona.linkedProducts[0] : persona.product;
+      return product ? [product] : [];
+    }
+    function personaScope(persona) { return personaProducts(persona).join("、") || "通用"; }
+    function personaScopeHtml(persona) { const products = personaProducts(persona); if (!products.length) return '<span class="persona-scope-tag universal">通用</span>'; return `<span class="persona-scope-tag" title="${escapeHtml(products[0])}">${escapeHtml(products[0])}</span>`; }
+    function setPersonaProduct(productName = "") {
+      const input = document.getElementById("personaFormProduct");
+      const label = document.querySelector("[data-persona-product-label]");
+      if (input) input.value = productName;
+      if (label) label.textContent = productName || "选择关联产品";
+      setPersonaProductMode(productName ? "linked" : "universal");
+    }
+    function setPersonaProductMode(mode) {
+      const normalized = mode === "linked" ? "linked" : "universal";
+      personaModal?.querySelectorAll("[data-persona-product-mode]").forEach(button => {
+        const active = button.dataset.personaProductMode === normalized;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", String(active));
+      });
+      personaModal?.querySelectorAll("[data-persona-product-panel]").forEach(panel => {
+        panel.hidden = panel.dataset.personaProductPanel !== normalized;
+      });
+      if (normalized === "universal") {
+        const input = document.getElementById("personaFormProduct");
+        const label = document.querySelector("[data-persona-product-label]");
+        if (input) input.value = "";
+        if (label) label.textContent = "选择关联产品";
+      }
+    }
     function personaLines(value) { return Array.isArray(value) ? value : String(value || "").split("\n").map(item => item.trim()).filter(Boolean); }
     function personaText(value) { return personaLines(value).join(" / ") || "—"; }
     function personaCellHtml(value) { const lines = personaLines(value); return lines.length ? lines.map(line => `<span class="persona-cell-line">${escapeHtml(line)}</span>`).join("") : "—"; }
     function renderPersonaLibrary() {
       if (!personaTbody) return;
       const keyword = document.getElementById("personaLibrarySearch")?.value.trim().toLowerCase() || "";
-      const product = document.getElementById("personaLibraryProductFilter")?.value || "all";
+      const scope = document.getElementById("personaLibraryScopeFilter")?.value || "all";
       const rows = personaCatalog.filter(persona => {
-        const haystack = [persona.name, persona.audience, persona.gender, persona.age, persona.brand, persona.category, persona.product, ...persona.pain, ...persona.scenes].join(" ").toLowerCase();
-        return (!keyword || haystack.includes(keyword)) && (product === "all" || persona.product === product);
+        const products = personaProducts(persona);
+        const haystack = [persona.name, persona.audience, persona.gender, persona.age, ...products, ...persona.pain, ...persona.scenes].join(" ").toLowerCase();
+        const inScope = scope === "all" || (scope === "universal" ? !products.length : products.length > 0);
+        return (!keyword || haystack.includes(keyword)) && inScope;
       });
       personaTbody.innerHTML = rows.map(persona => `<tr data-persona-row="${persona.id}">
         <td class="persona-name-cell"><strong>${escapeHtml(persona.name)}</strong></td>
         <td><span class="persona-attribute-summary">${escapeHtml(persona.audience)}<br>${escapeHtml(persona.gender)} · ${escapeHtml(persona.age)}岁</span></td>
         <td class="lib-cell-text">${personaCellHtml(persona.pain)}</td>
         <td class="lib-cell-text">${personaCellHtml(persona.scenes)}</td>
-        <td><span class="persona-scope-tag">${escapeHtml(personaScope(persona))}</span></td>
+        <td>${personaScopeHtml(persona)}</td>
         <td><span class="persona-attribute-summary">嗡大发<br>${escapeHtml(personaTime(persona.created || '08/01 10:20'))}</span></td>
         <td><span class="persona-attribute-summary">嗡大发<br>${escapeHtml(personaTime(persona.updated))}</span></td>
         <td>${persona.usage} 次</td>
@@ -68,11 +101,37 @@
       if (!row) return;
       row.querySelectorAll(":scope > button").forEach(button => button.classList.toggle("active", button.textContent.trim() === value));
     }
+    const personaAiSuggestions = {
+      pain: [
+        ["日常清洁频率高，但总担心遗漏深层脏污", "看似处理完成后，仍担心反复清洁带来额外负担", "希望清洁结果能被直接看见，而不是凭感觉判断"],
+        ["家庭成员需求不同，清洁方式难以兼顾", "不希望花太多时间，却希望结果足够直观可靠", "工具切换和后续收纳会增加日常家务负担"],
+        ["高频使用物品容易积累脏污，表面处理不够安心", "担心清洁过程复杂，难以长期坚持", "希望一次处理多个高频区域，减少重复劳动"]
+      ],
+      scene: [
+        ["工作日回家后的快速整理", "周末集中处理家庭高频使用区域", "换季整理和深度清洁前"],
+        ["家有孩子或宠物的日常清洁", "客厅、卧室等多人共用空间的定期维护", "访客到家前的快速处理"],
+        ["床褥、沙发等布艺的定期维护", "做饭或用餐后的快速收拾", "多人共用区域的集中清洁"]
+      ]
+    };
+    const personaAiSuggestionIndex = { pain:0, scene:0 };
+    async function refreshPersonaSuggestion(type, button) {
+      const field = document.getElementById(type === "pain" ? "personaFormPain" : "personaFormScenes");
+      const groups = personaAiSuggestions[type] || [];
+      if (!field || !groups.length || button?.disabled) return;
+      if (field.value.trim() && !confirm(`将替换当前${type === "pain" ? "人群核心痛点" : "使用场景"}，是否继续？`)) return;
+      const originalLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = "生成中…";
+      await new Promise(resolve => setTimeout(resolve, 420));
+      personaAiSuggestionIndex[type] = (personaAiSuggestionIndex[type] + 1) % groups.length;
+      field.value = groups[personaAiSuggestionIndex[type]].join("\n");
+      button.disabled = false;
+      button.textContent = originalLabel;
+      showToast("已生成 3 条新建议，可继续手动编辑");
+    }
     function resetPersonaForm(persona = null) {
       document.getElementById("personaFormName").value = persona?.name || "";
-      document.getElementById("personaFormBrand").value = persona?.brand || "";
-      document.getElementById("personaFormCategory").value = persona?.category || "";
-      document.getElementById("personaFormProduct").value = persona?.product || "";
+      setPersonaProduct(personaProducts(persona)[0] || "");
       document.getElementById("personaFormPain").value = persona?.pain?.join("\n") || "";
       document.getElementById("personaFormScenes").value = persona?.scenes?.join("\n") || "";
       setPersonaChoice("audience", persona?.audience || "精致妈妈");
@@ -105,8 +164,6 @@
       document.getElementById("personaTemplateTitle").textContent = isCopy ? "复制人群画像" : persona ? "编辑人群画像" : "新建人群画像";
       const saveButton = document.getElementById("savePersonaTemplate");
       if (saveButton) saveButton.textContent = isCopy ? "确认复制" : "保存画像";
-      const note = personaModal?.querySelector(".persona-form-note");
-      if (note) note.textContent = isCopy ? "复制后生成独立画像，不影响原画像" : "保存后可在三个文案 Agent 中直接调用";
       resetPersonaForm(persona);
       if (isCopy && persona) document.getElementById("personaFormName").value = personaCopyName(persona.name);
       personaModal?.classList.add("show");
@@ -117,9 +174,10 @@
       const activeText = group => personaModal?.querySelector(`[data-persona-form-single="${group}"] > button.active`)?.textContent.trim() || "";
       let age = activeText("age");
       if (age === "自定义") age = `${document.getElementById("personaFormAgeMin").value || 18}–${document.getElementById("personaFormAgeMax").value || 35}`;
+      const product = document.getElementById("personaFormProduct").value;
       return {
-        name:document.getElementById("personaFormName").value.trim(), brand:document.getElementById("personaFormBrand").value,
-        category:document.getElementById("personaFormCategory").value, product:document.getElementById("personaFormProduct").value,
+        name:document.getElementById("personaFormName").value.trim(), product,
+        linkedProducts:product ? [product] : [],
         audience:activeText("audience"), gender:activeText("gender"), age,
         pain:personaLines(document.getElementById("personaFormPain").value), scenes:personaLines(document.getElementById("personaFormScenes").value)
       };
@@ -128,6 +186,7 @@
     function savePersonaTemplate() {
       const form = readPersonaForm();
       if (!form.name || !form.audience || !form.gender || !form.age) return showToast("请补全标记 * 的人群画像信息");
+      if (!form.pain.length && !form.scenes.length) return showToast("请至少填写一条核心痛点或使用场景");
       const ageParts = form.age.split(/[–-]/).map(Number);
       if (ageParts.length === 2 && ageParts[0] > ageParts[1]) return showToast("年龄起始值不能大于结束值");
       const duplicate = personaCatalog.find(item => item.id !== editingPersonaId && item.name === form.name && personaScope(item) === personaScope(form));
@@ -141,14 +200,15 @@
           const after = personaComparable(form[key]);
           if (before !== after) (personaHistories[editingPersonaId] ||= []).unshift({ time, user:"嗡大发", field:personaFieldLabels[key], before:before || "—", after:after || "—" });
         });
-        personaCatalog[index] = { ...previous, ...form, updated:time };
+        const linkedProducts = form.product ? [form.product] : [];
+        personaCatalog[index] = { ...previous, ...form, linkedProducts, product:linkedProducts[0] || "", updated:time };
         showToast("人群画像已更新；已在使用的任务仍保留原画像快照");
       } else {
         const id = `persona-${Date.now()}`;
         const source = personaCatalog.find(item => item.id === copyingPersonaId);
         personaCatalog.unshift({ id, ...form, usage:0, created:time, updated:time });
         personaHistories[id] = [{ time, user:"嗡大发", field:source ? "复制画像" : "创建画像", before:source?.name || "—", after:form.name }];
-        showToast(source ? "人群画像已复制" : "人群画像已新增，可在三个文案 Agent 中调用");
+        showToast(source ? "人群画像已复制" : "人群画像已新增，可在创作中选择");
       }
       closePersonaModal();
       renderPersonaLibrary();
@@ -171,6 +231,8 @@
       if (!persona) return;
       deletingPersonaId = id;
       document.getElementById("personaDeleteTitle").textContent = `删除“${persona.name}”？`;
+      const note = personaDeleteModal?.querySelector(".persona-delete-copy");
+      if (note) note.textContent = persona.usage ? `该画像已被调用 ${persona.usage} 次。删除后无法继续用于新任务，历史会话和已生成资产仍保留当时使用的人群信息。` : "删除后无法继续用于新任务，历史会话和已生成资产仍保留当时使用的人群信息。";
       personaDeleteModal?.classList.add("show");
     }
     function closePersonaDelete() { personaDeleteModal?.classList.remove("show"); deletingPersonaId = ""; }
@@ -206,6 +268,9 @@
     function closeCanvasTemplateDelete() { deletingCanvasTemplateCard = null; canvasTemplateDeleteModal?.classList.remove("show"); }
 
     document.getElementById("createPersonaTemplate")?.addEventListener("click", () => openPersonaModal());
+    document.getElementById("personaFormProductTrigger")?.addEventListener("click", () => {
+      window.parent?.postMessage({ type:"content-compass:persona-product-picker-open", selectedProduct:document.getElementById("personaFormProduct")?.value || "" }, "*");
+    });
     document.getElementById("saveTemplateButton")?.addEventListener("click", () => {
       const activeTab = document.querySelector("#templateLibTabs [data-lib-tab].active")?.dataset.libTab;
       if (activeTab === "prompt") openPromptLibraryEditor();
@@ -259,7 +324,7 @@
     canvasTemplateDeleteModal?.addEventListener("click", event => { if (event.target === canvasTemplateDeleteModal) closeCanvasTemplateDelete(); });
     decorateCanvasTemplates();
     document.getElementById("personaLibrarySearch")?.addEventListener("input", renderPersonaLibrary);
-    document.getElementById("personaLibraryProductFilter")?.addEventListener("change", renderPersonaLibrary);
+    document.getElementById("personaLibraryScopeFilter")?.addEventListener("change", renderPersonaLibrary);
     personaTbody?.addEventListener("click", event => {
       const edit = event.target.closest("[data-persona-edit]");
       const history = event.target.closest("[data-persona-history]");
@@ -272,6 +337,10 @@
     });
     personaModal?.addEventListener("click", event => {
       if (event.target === personaModal || event.target.closest("[data-close-persona-modal]")) return closePersonaModal();
+      const aiSuggest = event.target.closest("[data-persona-ai-suggest]");
+      if (aiSuggest) { refreshPersonaSuggestion(aiSuggest.dataset.personaAiSuggest, aiSuggest); return; }
+      const productMode = event.target.closest("[data-persona-product-mode]");
+      if (productMode) { setPersonaProductMode(productMode.dataset.personaProductMode); return; }
       const choice = event.target.closest("[data-persona-form-single] > button");
       if (!choice) return;
       const row = choice.parentElement;
@@ -303,7 +372,7 @@
         category:dynamicForm.querySelector("[data-original-category]")?.value.trim() || ""
       };
     }
-    function isPersonaRecommended(persona, context) { return Boolean((context.name && persona.product === context.name) || (context.category && persona.category === context.category) || (context.brand && persona.brand === context.brand)); }
+    function isPersonaRecommended(persona, context) { return Boolean((context.name && personaProducts(persona).includes(context.name)) || (context.category && persona.category === context.category) || (context.brand && persona.brand === context.brand)); }
     function renderPersonaPickerOptions(picker, keyword = "") {
       const host = picker.querySelector("[data-persona-options]");
       if (!host) return;
@@ -2241,7 +2310,7 @@
     let contentStructures = [
       {
         id: 1, name: "结果前置·实拍证明型", formula: "结果钩子 → 痛点解释 → 产品演示 → 效果证明 → 行动引导",
-        source: "千川学习", method: "平台数据学习", learningStatus:"生效中", learningSampleCount:3842, learnedAt:"2026-08-10", updated: "08-10 16:42", parseStatus:"completed",
+        source: "千川学习", method: "平台数据学习", learningStatus:"生效中", learningSampleCount:3842, learnedAt:"2026-08-10", updated: "08-10 16:42", parseStatus:"completed", mixProfile:"result", autoProductIds:["mite-pro"], productNames:["轻净 Pro 除螨仪"], scriptTypes:["痛点类型","活动类型","对比类型","点名人群类型","网络爆款音频类型","正话反说类型"], defaultForScriptTypes:["痛点类型","活动类型","网络爆款音频类型"],
         stages: [
           { name:"结果型视觉钩子", purpose:"先给结果，快速建立好奇与观看理由", say:"先抛出清洁后的反差结果，让用户立刻知道视频能解决什么问题。", talk:"先别听我讲参数，直接看{产品名}走完一遍后的{可视化结果}。", slots:["产品名","可视化结果"], visual:"可被直接验证的结果、前后差异或反常状态；至少 1 个近景镜头。", edit:"1–2 个近景；单镜 1–2 秒；结果画面直接硬切进入。" },
           { name:"隐性痛点放大", purpose:"解释为什么表面正常仍需要解决", say:"说明肉眼看着干净，不代表纤维深处没有毛发、碎屑和灰尘。", talk:"你以为{表面状态}就够了，其实{隐性问题}并没有解决。", slots:["表面状态","隐性问题"], visual:"问题对象的细节、隐性问题的可见证据，或用户常见错误做法。", edit:"2–3 个细节镜头；正常速度；随信息点硬切。" },
@@ -2254,7 +2323,7 @@
       },
       {
         id: 2, name: "场景代入·功能证明型", formula: "生活场景 → 问题出现 → 功能演示 → 成品证明 → 优惠收口",
-        source: "千川学习", method: "平台数据学习", learningStatus:"生效中", learningSampleCount:1276, learnedAt:"2026-07-26", updated: "07-26 10:18", parseStatus:"completed",
+        source: "千川学习", method: "平台数据学习", learningStatus:"生效中", learningSampleCount:1276, learnedAt:"2026-07-26", updated: "07-26 10:18", parseStatus:"completed", mixProfile:"scene", autoProductIds:["air-a8"], productNames:["轻享空气炸锅 A8"], scriptTypes:["打感情类型","种草类型","活动类型","网络爆款音频类型"], defaultForScriptTypes:["打感情类型","种草类型"],
         stages: [
           { name:"生活场景", say:"从下班晚、做饭麻烦的真实场景切入。", visual:"目标用户的日常环境、人物行为，以及问题出现前的触发画面。", edit:"2–3 个环境与人物镜头；正常速度；硬切。" },
           { name:"问题出现", say:"点出传统烹饪耗时、油烟和看火的问题。", visual:"问题发生过程、原有方式的局限，或用户等待与处理的细节。", edit:"2–3 个问题镜头；单镜 1–2 秒。" },
@@ -2266,7 +2335,7 @@
       },
       {
         id: 3, name: "人群点名·卖点展开型", formula: "人群点名 → 需求唤醒 → 核心卖点 → 证明补充 → 产品推荐",
-        source: "千川学习", method: "平台数据学习", learningStatus:"生效中", learningSampleCount:864, learnedAt:"2026-07-10", updated: "07-10 18:20", parseStatus:"completed",
+        source: "千川学习", method: "平台数据学习", learningStatus:"生效中", learningSampleCount:864, learnedAt:"2026-07-10", updated: "07-10 18:20", parseStatus:"completed", mixProfile:"audience", autoProductIds:[], productNames:[], scriptTypes:["点名人群类型","痛点类型","打感情类型"], defaultForScriptTypes:["点名人群类型"],
         stages: [
           { name:"人群点名", say:"直接点名最容易产生共鸣的一类目标用户。", visual:"目标人群在典型生活场景中的状态。", edit:"1–2 个人物或场景镜头；快速进入主题。" },
           { name:"需求唤醒", say:"说明这类人经常遇到的具体问题与损失。", visual:"问题发生过程和细节证据。", edit:"2–3 个问题镜头；跟随信息点硬切。" },
@@ -2278,7 +2347,7 @@
       },
       {
         id: 4, name: "反差开场·实测证明型", formula: "反差开场 → 过程实测 → 结果证明 → 行动引导",
-        source: "自建", method: "从参考视频提炼", reference:"洗地机紫色污渍实测_成品01.mp4", creator:"嗡大发", createdAt:"2026-08-11 09:16", updated: "08-11 09:16", parseStatus:"completed", validationStatus:"提炼完成", parseSummary:"已识别口播、12 个镜头与 4 个内容段落",
+        source: "自建", method: "从参考视频提炼", reference:"洗地机紫色污渍实测_成品01.mp4", creator:"嗡大发", createdAt:"2026-08-11 09:16", updated: "08-11 09:16", parseStatus:"completed", validationStatus:"提炼完成", parseSummary:"已识别口播、12 个镜头与 4 个内容段落", mixProfile:"contrast", autoProductIds:["washer-s5"], productNames:[], scriptTypes:["对比类型","制造焦虑类型","正话反说类型","种草类型","引发好奇类型"], defaultForScriptTypes:["对比类型","制造焦虑类型","正话反说类型","引发好奇类型"],
         stages: [
           { name:"反差开场", say:"先给出结果，制造预期反差。", strategy:"先让结果占据注意力，再用预期反差解释为什么值得继续看。", talk:"先给出{可视化结果}，再用{预期反差}建立观看理由。", slots:["可视化结果","预期反差"], visual:"大面积紫色污渍与洗净地面的前后同场对比。", edit:"前后画面直接硬切；开场 2 秒内给结果。" },
           { name:"过程实测", say:"展示关键动作，让用户看到问题被解决。", strategy:"保留动作的起止过程，让解决发生本身成为可信证明。", talk:"用{关键动作}展示{问题对象}如何被解决。", slots:["关键动作","问题对象"], visual:"洗地机经过污渍、污水被吸走的完整动作。", edit:"保留动作起止；等待段可 1.1–1.3 倍加速。" },
@@ -2849,6 +2918,15 @@
         .filter(record => record.spend > 1000)
         .filter(record => record.date >= startDate && record.date <= endDate);
     }
+    // 结构选择器固定展示近 30 日口径，不受详情侧栏筛选条件影响。
+    function clLearningRecent30Summary(structureId) {
+      const rows = (clLearningDailyRecords[structureId] || [])
+        .filter(record => record.spend > 1000)
+        .filter(record => record.date >= "2026-07-15" && record.date <= "2026-08-13");
+      const aggregate = clLearningAggregate(rows);
+      const hitCount = clLearningMaterialRows(rows, "spend").length;
+      return hitCount ? { hitCount, spend:aggregate.spend, roi:aggregate.roi } : null;
+    }
     function clLearningAggregate(rows) {
       const total = rows.reduce((result, sample) => ({
         spend:result.spend + sample.spend, gmv:result.gmv + sample.gmv, orders:result.orders + sample.orders,
@@ -3369,9 +3447,30 @@
     function templateBridgeCatalog() {
       return {
         prompt: promptLibraryRecords.map(record => ({ id:record.id, name:record.title, category:record.category, description:record.description, agent:record.category === "商品详情图" ? "商品详情图 Agent" : "商品主图 Agent", text:promptLibraryPreview(record), tags:record.category === "商品详情图" ? (record.modules || []).map(item => item.name) : (record.segments || []).filter(item => item.value).map(item => item.label), createdAt:record.createdAt, isDefault:Boolean(record.isDefault) })),
-        persona: personaCatalog.map(persona => ({ id:persona.id, name:persona.name, audience:`${persona.audience} · ${persona.gender}`, age:`${persona.age}岁`, scene:persona.scenes.join("；"), pain:persona.pain.join("；"), scope:persona.product || persona.category || persona.brand || "通用", created:`嗡大发 · ${persona.created || "08/01 10:20"}`, updated:`嗡大发 · ${persona.updated}`, usage:persona.usage })),
+        persona: personaCatalog.map(persona => {
+          const linkedProducts = personaProducts(persona);
+          return { id:persona.id, name:persona.name, audience:`${persona.audience} · ${persona.gender}`, age:`${persona.age}岁`, scene:persona.scenes.join("；"), pain:persona.pain.join("；"), scope:linkedProducts.join("、") || persona.category || persona.brand || "通用", linkedProducts, created:`嗡大发 · ${persona.created || "08/01 10:20"}`, updated:`嗡大发 · ${persona.updated}`, usage:persona.usage };
+        }),
         canvas: [...(canvasTemplateGrid?.querySelectorAll(":scope > .canvas-card") || [])].map(card => ({ id:card.dataset.canvasTemplate, name:card.querySelector(".canvas-header strong")?.textContent.trim() || "未命名画板", type:card.querySelector(".canvas-badge")?.textContent.trim() || "自定义", description:card.querySelector(".canvas-desc")?.textContent.trim() || "", node:card.querySelector(".canvas-stat")?.textContent.trim() || "—", usage:Number((card.querySelectorAll(".canvas-stat")[1]?.textContent.match(/\d+/) || [0])[0]), updated:"刚刚" })),
-        "content-structure": contentStructures.map(item => ({ id:String(item.id), name:item.name, source:item.source, formula:item.formula, reference:item.reference || item.example?.title || "暂无", status:item.source === "千川学习" ? clLearningLifecycle(item) : (item.validationStatus || (item.source === "自建" ? "提炼完成" : "已启用")), updated:item.updated }))
+        "content-structure": contentStructures.map(item => ({
+          id:String(item.id),
+          name:item.name,
+          source:clStructureOrigin(item),
+          sourceKey:item.source === "千川学习" ? "qianchuan" : item.method === "从参考视频提炼" ? "reference" : "custom",
+          formula:item.formula,
+          reference:item.reference || item.example?.title || "",
+          status:item.source === "千川学习" ? clLearningLifecycle(item) : (item.validationStatus || (item.source === "自建" ? "提炼完成" : "已启用")),
+          sampleCount:Number(item.learningSampleCount || 0),
+          recent30:item.source === "千川学习" ? clLearningRecent30Summary(item.id) : null,
+          stageCount:item.stages.length,
+          stageNames:item.stages.map(stage => stage.name),
+          mixProfile:item.mixProfile || "",
+          autoProductIds:item.autoProductIds || [],
+          productNames:item.productNames || [],
+          scriptTypes:item.scriptTypes || [],
+          defaultForScriptTypes:item.defaultForScriptTypes || [],
+          updated:item.updated
+        }))
       };
     }
     function templateBridgePost(type) {
@@ -3403,6 +3502,21 @@
         if (action === "template-delete") { deletingPromptLibraryId = record.id; document.getElementById("deletePromptLibraryName").textContent = record.title; togglePromptLibraryModal(promptLibraryDeleteModal, true); }
         if (action === "prompt-default") { promptLibraryRecords.forEach(item => { if (item.category === record.category) item.isDefault = item.id === record.id; }); persistPromptLibraryRecords(); renderPromptLibrary(); showToast(`“${record.title}”已设为默认模板`); }
       } else if (kind === "persona") {
+        if (action === "template-create") {
+          openPersonaModal();
+          if (message.productName) setPersonaProduct(message.productName);
+          return requestAnimationFrame(templateBridgeFinish);
+        }
+        if (action === "template-associate" || action === "template-disassociate") {
+          const ids = new Set((message.personaIds || []).map(String));
+          personaCatalog.forEach(persona => {
+            if (!ids.has(String(persona.id))) return;
+          const linkedProducts = action === "template-associate" && message.productName ? [message.productName] : [];
+          persona.linkedProducts = linkedProducts;
+          persona.product = linkedProducts[0] || "";
+          });
+          return requestAnimationFrame(templateBridgeFinish);
+        }
         const persona = personaCatalog.find(item => item.id === message.id || item.name === message.name);
         if (!persona) return templateBridgeFinish();
         if (action === "template-edit") openPersonaModal(persona.id);
@@ -3429,6 +3543,7 @@
     }
     window.addEventListener("message", event => {
       if (event.data?.type === "content-compass-template-catalog-request") return templateBridgePost("content-compass-template-catalog");
+      if (event.data?.type === "content-compass:persona-product-picker-selected") return setPersonaProduct(event.data.productName || "");
       if (event.data?.type === "content-compass-template-operation") templateBridgeOpen(event.data);
     });
     document.addEventListener("click", () => setTimeout(templateBridgeFinish, 0));

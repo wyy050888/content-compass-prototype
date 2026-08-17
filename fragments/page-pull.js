@@ -5,7 +5,7 @@
 <!-- 页头 -->
 <div class="page-head">
   <div class="page-head-left">
-    <h2>拉片结果详情</h2>
+    <h2>拆解结果详情</h2>
     <button class="btn-back" id="lpBackBtn">← 返回列表</button>
   </div>
   <button class="btn-history" id="lpHistoryBtn">
@@ -30,7 +30,7 @@
   <div class="summary-col">
     <div class="summary-head">
       <span class="name">下载.mp4</span>
-      <span class="meta"><span>视频时长&nbsp;&nbsp;2分13秒</span><span>拉片时间&nbsp;&nbsp;2026/07/28 09:12</span></span>
+      <span class="meta"><span>视频时长&nbsp;&nbsp;2分13秒</span><span>拆解时间&nbsp;&nbsp;2026/07/28 09:12</span></span>
     </div>
     <div class="summary-grid">
 

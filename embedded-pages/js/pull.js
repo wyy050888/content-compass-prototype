@@ -569,9 +569,9 @@
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url; a.download = "拉片结果.json"; a.click();
+      a.href = url; a.download = "拆解结果.json"; a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      showToast("已下载 拉片结果.json");
+      showToast("已下载 拆解结果.json");
     });
 
     // 下载视频
@@ -1234,17 +1234,17 @@
       },
       "script-copy": {
         intro: "拆解参考视频的节奏、场景组织和镜头逻辑，再用当前产品、文案和可用素材重构新脚本，避免照搬参考画面。",
-        process: "智能拉片参考视频 → 提取镜头任务与节奏模板 → 替换为目标产品信息 → 检查素材可执行性 → 输出新分镜。",
+        process: "拆解参考视频 → 提取镜头任务与节奏模板 → 替换为目标产品信息 → 检查素材可执行性 → 输出新分镜。",
         placeholder: "还可以补充：保留前 3 秒节奏，产品演示必须使用我们的实拍素材……",
-        request: "参考已拉片视频的镜头节奏，为轻净 Pro 除螨仪生成一条 30 秒主视频脚本。",
+        request: "参考已拆解视频的镜头节奏，为轻净 Pro 除螨仪生成一条 30 秒主视频脚本。",
         version: "脚本仿写 V11",
         summary: "已保留参考视频的“证据先行 + 快速演示 + 场景扩展”镜头逻辑，并按轻净 Pro 的产品事实和现有素材重新设计分镜。",
         form: `
           <section class="form-section">
-            <div class="form-section-head"><div><strong>参考脚本方法</strong><small>优先选择已完成的智能拉片结果，直接读取镜头和节奏结构</small></div></div>
+            <div class="form-section-head"><div><strong>参考脚本方法</strong><small>优先选择已完成的拆解结果，直接读取镜头和节奏结构</small></div></div>
             <div class="section-grid">
-              <div class="field"><label>参考来源 *</label><select><option>智能拉片记录</option><option>千川素材 ID</option><option>内部视频库</option><option>上传视频</option></select></div>
-              <div class="field"><label>参考视频 *</label><select><option>除螨仪爆款拉片 #A023</option><option>输入素材 ID</option></select></div>
+              <div class="field"><label>参考来源 *</label><select><option>拆解记录</option><option>千川素材 ID</option><option>内部视频库</option><option>上传视频</option></select></div>
+              <div class="field"><label>参考视频 *</label><select><option>除螨仪爆款拆解 #A023</option><option>输入素材 ID</option></select></div>
               <div class="field full"><label>希望借鉴的元素 *（最多 2 项）</label><div class="choice-row" data-limit="2"><span class="choice-chip active">开场镜头</span><span class="choice-chip active">分镜顺序</span><span class="choice-chip">节奏变化</span><span class="choice-chip">产品展示方式</span><span class="choice-chip">转化收口</span></div></div>
             </div>
           </section>
@@ -2257,8 +2257,8 @@
       if (feedback) {
         feedback.hidden = false;
         feedback.innerHTML = option.dataset.referenceSourceType === "history"
-          ? "<strong>已带入</strong><span>已读取该历史投放视频的口播和拉片结果，并用于仿写结构学习。</span>"
-          : "<strong>已带入</strong><span>已读取外部参考视频的拉片结果，仅学习创作方法，不作为效果样本。</span>";
+          ? "<strong>已带入</strong><span>已读取该历史投放视频的口播和拆解结果，并用于仿写结构学习。</span>"
+          : "<strong>已带入</strong><span>已读取外部参考视频的拆解结果，仅学习创作方法，不作为效果样本。</span>";
       }
       setFormFeedback("");
       showToast("参考视频已带入");
@@ -2288,7 +2288,7 @@
         }
         if (button) {
           button.disabled = false;
-          button.textContent = source === "text" ? "重新分析" : "重新解析";
+          button.textContent = source === "text" ? "重新拆解" : "重新解析";
         }
         setFormFeedback("");
         showToast("参考内容解析完成");
@@ -2570,9 +2570,9 @@
                 <div class="reference-picker-head"><div><strong>选择参考视频</strong><span>历史投放素材和外部参考视频统一在视频库管理</span></div><button type="button" data-action="toggle-reference-library">×</button></div>
                 <div class="reference-picker-tools"><input data-reference-search placeholder="搜索视频名称或素材 ID"><div class="choice-row" data-single="reference-filter"><span class="choice-chip active" data-reference-filter="all">全部</span><span class="choice-chip" data-reference-filter="history">历史投放</span><span class="choice-chip" data-reference-filter="external">外部参考</span></div></div>
                 <div class="reference-video-list">
-                  <button class="reference-video-option" type="button" data-reference-video="7553983811703193643" data-reference-source-type="history" data-reference-search-text="轻净pro除螨仪 结果冲击 高转化 7553983811703193643"><i>▶</i><span><strong>轻净 Pro 除螨仪｜结果冲击型</strong><small>历史投放 · 素材 ID 7553983811703193643 · 已有口播与拉片结果</small></span><em>选择</em></button>
-                  <button class="reference-video-option" type="button" data-reference-video="7553983811703195018" data-reference-source-type="history" data-reference-search-text="净界洗地机 痛点直给 7553983811703195018"><i>▶</i><span><strong>净界洗地机｜痛点直给型</strong><small>历史投放 · 素材 ID 7553983811703195018 · 已有口播与拉片结果</small></span><em>选择</em></button>
-                  <button class="reference-video-option" type="button" data-reference-video="external-mite-hook-01" data-reference-source-type="external" data-reference-search-text="清洁家电 结果钩子 外部参考 除螨"><i>▶</i><span><strong>清洁家电｜结果钩子参考</strong><small>外部参考 · 已完成智能拉片 · 仅用于创作方法学习</small></span><em>选择</em></button>
+                  <button class="reference-video-option" type="button" data-reference-video="7553983811703193643" data-reference-source-type="history" data-reference-search-text="轻净pro除螨仪 结果冲击 高转化 7553983811703193643"><i>▶</i><span><strong>轻净 Pro 除螨仪｜结果冲击型</strong><small>历史投放 · 素材 ID 7553983811703193643 · 已有口播与拆解结果</small></span><em>选择</em></button>
+                  <button class="reference-video-option" type="button" data-reference-video="7553983811703195018" data-reference-source-type="history" data-reference-search-text="净界洗地机 痛点直给 7553983811703195018"><i>▶</i><span><strong>净界洗地机｜痛点直给型</strong><small>历史投放 · 素材 ID 7553983811703195018 · 已有口播与拆解结果</small></span><em>选择</em></button>
+                  <button class="reference-video-option" type="button" data-reference-video="external-mite-hook-01" data-reference-source-type="external" data-reference-search-text="清洁家电 结果钩子 外部参考 除螨"><i>▶</i><span><strong>清洁家电｜结果钩子参考</strong><small>外部参考 · 已完成拆解 · 仅用于创作方法学习</small></span><em>选择</em></button>
                 </div>
               </div>
             </div>
@@ -3491,7 +3491,7 @@
         "image-main": `为“${product.name}”生成3张商品主图，突出“${product.core}”。`,
         "image-detail": `为“${product.name}”生成一组详情页图片，按卖点顺序组织内容。`,
         script: `把当前文案转为“${product.name}”的30秒结构化脚本，优先使用产品绑定素材。`,
-        "script-copy": `参考已拉片视频，为“${product.name}”重构一条30秒原创脚本。`,
+        "script-copy": `参考已拆解视频，为“${product.name}”重构一条30秒原创脚本。`,
         "video-create": `为“${product.name}”生成一条可复用的产品镜头。`,
         mix: `使用当前结构化脚本和“${product.name}”绑定素材生成待终审成片。`
       };
@@ -4508,8 +4508,8 @@
         switchPage("creation");
         const copyCard = agentCards.find(card => card.dataset.type === "copy");
         selectAgent(copyCard, false);
-        promptInput.value = "参考刚才的拉片结果，为轻净 Pro 除螨仪生成三条原创仿写文案。";
-        showToast("已带入拉片结果和参考视频");
+        promptInput.value = "参考刚才的拆解结果，为轻净 Pro 除螨仪生成三条原创仿写文案。";
+        showToast("已带入拆解结果和参考视频");
       });
     });
 

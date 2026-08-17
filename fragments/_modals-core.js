@@ -16,7 +16,7 @@
           <div class="field full"><label>核心卖点<em class="required-mark">*</em></label><textarea id="productFormCore" placeholder="一行一个核心卖点"></textarea></div>
           <div class="field full"><label>次要卖点</label><textarea id="productFormSecondary" placeholder="一行一个次要卖点"></textarea></div>
           <div class="field full"><label>差异化卖点</label><textarea id="productFormDifference" placeholder="一行一个差异化卖点"></textarea></div>
-          <div class="field full"><label>产品信任背书</label><textarea id="productFormTrust" placeholder="一行一条可核验的信任背书"></textarea></div>
+          <div class="field full"><label>产品信任背书</label><textarea id="productFormTrust" placeholder="一行一条可核验的信任背书"></textarea><section class="trust-attachment-create" aria-label="背书附件"><div class="trust-attachment-head"><div><strong>背书附件 <small id="productCreateTrustAttachmentCount">0</small></strong><span>不限格式，单个文件最大 50 MB</span></div><div><input id="productCreateTrustAttachmentInput" type="file" multiple hidden><button class="soft-btn" type="button" id="productCreateTrustAttachmentUpload">＋ 上传附件</button></div></div><div class="trust-attachment-list" id="productCreateTrustAttachmentList"></div></section></div>
           <div class="field full"><label>禁用话术</label><textarea id="productFormForbidden" placeholder="一行一条禁止在创作中使用的表达"></textarea></div>
         </div></div>
         <div class="product-form-panel" data-product-create-panel="batch"><div class="field"><label>商品链接<em class="required-mark">*</em></label><textarea class="batch-link-area" placeholder="每行粘贴一个商品链接，支持批量新增&#10;https://...&#10;https://..."></textarea></div></div>
@@ -47,17 +47,15 @@
       <div class="modal-body">
         <div class="persona-form-grid">
           <div class="field full"><label>画像名称<em class="required-mark">*</em></label><input id="personaFormName" placeholder="例如：精致妈妈—母婴清洁人群"></div>
-          <div class="field"><label>适用品牌</label><select id="personaFormBrand"><option value="">全部品牌</option><option>轻净</option><option>净界</option><option>轻享</option></select></div>
-          <div class="field"><label>适用类目</label><select id="personaFormCategory"><option value="">全部类目</option><option>清洁电器</option><option>厨房电器</option><option>生活电器</option></select></div>
-          <div class="field full"><label>适用产品</label><select id="personaFormProduct"><option value="">全部产品</option><option>轻净 Pro 除螨仪</option><option>轻享空气炸锅 A8</option><option>净界洗地机 S5</option></select></div>
+          <div class="field full"><label>关联产品（可选）</label><div class="persona-product-control"><button class="persona-product-trigger" id="personaFormProductTrigger" type="button" aria-haspopup="dialog"><span data-persona-product-label>选择关联产品</span><b>⌄</b></button><button class="persona-product-universal" id="personaFormProductUniversal" type="button">设为通用</button></div><input id="personaFormProduct" type="hidden" value=""><small data-persona-product-status>当前为通用画像，可用于全部产品；从产品详情页新增时会自动关联当前产品。</small></div>
           <div class="field full"><label>抖音八大人群<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="audience"><button class="active" type="button">精致妈妈</button><button type="button">新锐白领</button><button type="button">资深中产</button><button type="button">Z世代</button><button type="button">小镇青年</button><button type="button">小镇中老年</button><button type="button">都市蓝领</button><button type="button">都市银发</button></div></div>
           <div class="field full"><label>性别<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="gender"><button class="active" type="button">不限</button><button type="button">女性</button><button type="button">男性</button></div></div>
           <div class="field full"><label>年龄<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="age"><button type="button">18–23</button><button class="active" type="button">24–30</button><button type="button">31–40</button><button type="button">41–50</button><button type="button">51+</button><button type="button" data-persona-custom-age-trigger>自定义</button><span class="persona-custom-age" data-persona-custom-age hidden><input id="personaFormAgeMin" type="number" min="1" max="99" value="25"><i>至</i><input id="personaFormAgeMax" type="number" min="1" max="99" value="35"></span></div></div>
-          <div class="field full"><label>人群核心痛点</label><textarea id="personaFormPain" placeholder="一行一个人群核心痛点"></textarea></div>
-          <div class="field full"><label>使用场景</label><textarea id="personaFormScenes" placeholder="一行一个使用场景"></textarea></div>
+          <div class="field full"><div class="persona-field-head"><label>人群核心痛点</label><button class="persona-ai-refresh" type="button" data-persona-ai-suggest="pain">✦ AI 换一组</button></div><textarea id="personaFormPain" placeholder="一行一个人群核心痛点"></textarea></div>
+          <div class="field full"><div class="persona-field-head"><label>使用场景</label><button class="persona-ai-refresh" type="button" data-persona-ai-suggest="scene">✦ AI 换一组</button></div><textarea id="personaFormScenes" placeholder="一行一个使用场景"></textarea></div>
         </div>
       </div>
-      <div class="modal-foot"><span class="persona-form-note">保存后可在三个文案 Agent 中直接调用</span><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-persona-modal>取消</button><button class="primary-btn" type="button" id="savePersonaTemplate">保存画像</button></div></div>
+      <div class="modal-foot"><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-persona-modal>取消</button><button class="primary-btn" type="button" id="savePersonaTemplate">保存画像</button></div></div>
     </div>
   </div>
 

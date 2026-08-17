@@ -1,7 +1,7 @@
     const pageNames = {
       creation: "AI创作",
-      "pull-entry": "智能拉片",
-      pull: "智能拉片",
+      "pull-entry": "爆款拆解",
+      pull: "拆解结果",
       products: "产品库",
       competitors: "竞品库",
       "product-detail": "产品详情",
@@ -212,4 +212,3 @@
     document.getElementById("assetToggle").addEventListener("click", () => setAssetPanel(true));
     document.getElementById("assetClose").addEventListener("click", () => setAssetPanel(false));
     assetBackdrop.addEventListener("click", () => setAssetPanel(false));
-

@@ -14,7 +14,7 @@
     pickerRoot.innerHTML = `
       <section class="creation-product-picker-modal" role="dialog" aria-modal="true" aria-labelledby="creationProductPickerTitle">
         <header class="creation-product-picker-head">
-          <div><h2 id="creationProductPickerTitle">选择产品</h2><p>选择后将带入产品事实、卖点、人群建议和禁用表达。</p></div>
+          <div><h2 id="creationProductPickerTitle">选择产品</h2><p data-picker-description>选择后将带入产品事实、卖点、人群建议和禁用表达。</p></div>
           <button type="button" class="creation-product-picker-close" data-picker-close aria-label="关闭">×</button>
         </header>
         <div class="creation-product-picker-toolbar">
@@ -46,7 +46,12 @@
         renderProducts();
         return;
       }
-      if (event.target.closest("[data-picker-confirm]") && pickerState?.pendingId) {
+      if (event.target.closest("[data-picker-empty-option]") && pickerState?.allowEmpty) {
+        pickerState.pendingId = "";
+        renderProducts();
+        return;
+      }
+      if (event.target.closest("[data-picker-confirm]") && pickerState && (pickerState.pendingId || pickerState.allowEmpty)) {
         const selected = pickerState.items.find(item => item.id === pickerState.pendingId);
         pickerState.onConfirm?.(pickerState.pendingId, selected);
         closePicker();
@@ -77,8 +82,9 @@
       const haystack = [item.name, item.brand, item.category, item.core, item.secondary, ...(item.audiences || [])].join(" ").toLowerCase();
       return (!keyword || haystack.includes(keyword)) && (!brand || item.brand === brand) && (!category || item.category === category);
     });
-    pickerRoot.querySelector("[data-picker-result-count]").textContent = `共 ${visible.length} 个产品`;
-    pickerRoot.querySelector("[data-picker-grid]").innerHTML = visible.length ? visible.map(item => {
+    pickerRoot.querySelector("[data-picker-result-count]").textContent = pickerState.allowEmpty ? `可选通用或 ${visible.length} 个产品` : `共 ${visible.length} 个产品`;
+    const emptyOption = pickerState.allowEmpty ? `<button type="button" class="creation-product-card creation-product-empty-option${!pickerState.pendingId ? " selected" : ""}" data-picker-empty-option aria-pressed="${!pickerState.pendingId}"><span class="creation-product-card-check">${!pickerState.pendingId ? "✓" : ""}</span><span class="creation-product-card-top"><b>通</b><span><strong>${escapeHtml(pickerState.emptyLabel)}</strong><small>不绑定产品</small></span></span><span class="creation-product-card-fact">通用画像可在任意产品的 AI 创作中使用。</span></button>` : "";
+    pickerRoot.querySelector("[data-picker-grid]").innerHTML = (visible.length || emptyOption) ? `${emptyOption}${visible.map(item => {
       const selected = pickerState.pendingId === item.id;
       return `<button type="button" class="creation-product-card${selected ? " selected" : ""}" data-picker-product="${escapeHtml(item.id)}" aria-pressed="${selected}">
         <span class="creation-product-card-check">${selected ? "✓" : ""}</span>
@@ -89,11 +95,11 @@
         <span class="creation-product-card-audience"><em>适用人群</em>${(item.audiences || []).slice(0, 3).map(value => `<i>${escapeHtml(value)}</i>`).join("") || "未设置"}</span>
         <span class="creation-product-card-meta"><small>${escapeHtml(item.facts || "产品信息待完善")}</small><small>${escapeHtml(item.assetCount || "")}</small></span>
       </button>`;
-    }).join("") : `<div class="creation-product-picker-empty"><b>没有找到匹配产品</b><span>试试更换关键词，或重置品牌、类目筛选。</span></div>`;
+    }).join("")}` : `<div class="creation-product-picker-empty"><b>没有找到匹配产品</b><span>试试更换关键词，或重置品牌、类目筛选。</span></div>`;
 
     const selected = pickerState.items.find(item => item.id === pickerState.pendingId);
-    pickerRoot.querySelector("[data-picker-selection]").innerHTML = selected ? `已选择：<b>${escapeHtml(selected.name)}</b>` : "暂未选择产品";
-    pickerRoot.querySelector("[data-picker-confirm]").disabled = !selected;
+    pickerRoot.querySelector("[data-picker-selection]").innerHTML = selected ? `已选择：<b>${escapeHtml(selected.name)}</b>` : (pickerState.allowEmpty ? `已选择：<b>${escapeHtml(pickerState.emptyLabel)}</b>` : "暂未选择产品");
+    pickerRoot.querySelector("[data-picker-confirm]").disabled = !selected && !pickerState.allowEmpty;
   }
 
   function openPicker(options) {
@@ -101,8 +107,12 @@
     pickerState = {
       items: Array.isArray(options.items) ? options.items : [],
       pendingId: options.selectedId || "",
+      allowEmpty: Boolean(options.allowEmpty),
+      emptyLabel: options.emptyLabel || "不关联产品（通用）",
       onConfirm: options.onConfirm
     };
+    pickerRoot.querySelector("#creationProductPickerTitle").textContent = options.title || "选择产品";
+    pickerRoot.querySelector("[data-picker-description]").textContent = options.description || "选择后将带入产品事实、卖点、人群建议和禁用表达。";
     const brands = [...new Set(pickerState.items.map(item => item.brand).filter(Boolean))];
     const categories = [...new Set(pickerState.items.map(item => item.category).filter(Boolean))];
     setSelectOptions(pickerRoot.querySelector("[data-picker-brand]"), "品牌", brands);

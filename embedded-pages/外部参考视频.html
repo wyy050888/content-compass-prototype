@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="zh-CN"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>外部参考视频 · 内容罗盘</title><link rel="stylesheet" href="external-reference.css?v=20260811b"><link rel="stylesheet" href="external-reference-overrides.css?v=20260811m"><script defer src="external-reference.js?v=20260812a"></script>
+<title>外部参考视频 · 内容罗盘</title><link rel="stylesheet" href="external-reference.css?v=20260811b"><link rel="stylesheet" href="external-reference-overrides.css?v=20260811m"><script defer src="external-reference.js?v=20260816a"></script>
 </head><body><main class="rv-app" id="referenceApp">
-  <header class="rv-head"><div><h1>外部参考视频</h1><p>采集、上传和管理外部参考视频，沉淀可复用的拉片与创作洞察。</p></div><div class="rv-head-actions"><button class="rv-btn rv-btn-secondary" id="rvCollect">爆款采集</button><button class="rv-btn rv-btn-primary" id="rvImport">＋ 导入外部视频</button></div></header>
+  <header class="rv-head"><div><h1>外部参考视频</h1><p>采集、上传和管理外部参考视频，沉淀可复用的拆解与创作洞察。</p></div><div class="rv-head-actions"><button class="rv-btn rv-btn-secondary" id="rvCollect">爆款采集</button><button class="rv-btn rv-btn-primary" id="rvImport">＋ 导入外部视频</button></div></header>
   <section class="rv-content"><div class="rv-toolbar">
     <div class="rv-menu-wrap"><button class="rv-filter-btn" id="rvPlatformBtn"><svg viewBox="0 0 24 24"><path d="M4 5h16M7 12h10M10 19h4"/></svg><span id="rvPlatformText">全部平台</span></button><div class="rv-pop-menu" id="rvPlatformMenu" hidden><button data-platform="all">全部平台</button><button data-platform="douyin">抖音</button><button data-platform="kuaishou">快手</button><button data-platform="channels">视频号</button><button data-platform="xiaohongshu">小红书</button><button data-platform="other">其他</button></div></div>
     <button class="rv-filter-btn" id="rvTagBtn"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7" cy="8" r="1.5"/></svg>视频标签</button>
-    <div class="rv-menu-wrap"><button class="rv-filter-btn" id="rvStatusBtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg><span id="rvStatusText">全部状态</span></button><div class="rv-pop-menu" id="rvStatusMenu" hidden><button data-status="all">全部状态</button><button data-status="pending">待分析</button><button data-status="running">分析中</button><button data-status="done">已分析</button><button data-status="failed">分析失败</button></div></div>
+    <div class="rv-menu-wrap"><button class="rv-filter-btn" id="rvStatusBtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg><span id="rvStatusText">全部状态</span></button><div class="rv-pop-menu" id="rvStatusMenu" hidden><button data-status="all">全部状态</button><button data-status="pending">待拆解</button><button data-status="running">拆解中</button><button data-status="done">已拆解</button><button data-status="failed">拆解失败</button></div></div>
     <label class="rv-search"><span>⌕</span><input id="rvSearch" placeholder="搜索视频名称或关联产品" autocomplete="off"><button id="rvSearchClear" hidden>×</button></label>
     <div class="rv-menu-wrap"><button class="rv-icon-btn" id="rvSort" title="排序"><svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg></button><div class="rv-pop-menu rv-sort-menu" id="rvSortMenu" hidden><button data-sort="new">最近上传</button><button data-sort="old">最早上传</button><button data-sort="name">视频名称</button><button data-sort="duration-desc">时长从长到短</button><button data-sort="duration-asc">时长从短到长</button></div></div>
     <button class="rv-icon-btn" id="rvRefresh" title="刷新"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></svg></button>
@@ -19,8 +19,8 @@
     <button class="rv-action" data-batch="download" title="下载"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>下载</button>
     <button class="rv-action" data-batch="tag" title="打标签"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7" cy="8" r="1.5" fill="currentColor"/></svg>打标签</button>
     <button class="rv-action" data-batch="product" title="关联产品"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4"/></svg>关联产品</button>
-    <button class="rv-action" data-batch="analyze" title="分析"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 21 12 17l-5.5 4L8 13.5 3 9l6.5-.5z"/></svg>分析</button>
+    <button class="rv-action" data-batch="analyze" title="拆解"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 21 12 17l-5.5 4L8 13.5 3 9l6.5-.5z"/></svg>拆解</button>
     <button class="rv-action rv-action-danger" data-batch="delete" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>删除</button>
     <button class="rv-action-close" id="rvCancelSelect" title="取消选择" aria-label="取消选择">×</button>
   </div>
-</div><div id="rvOverlays"></div><div class="rv-toast" id="rvToast" hidden></div><script src="external-reference.js?v=20260811n"></script></body></html>
+</div><div id="rvOverlays"></div><div class="rv-toast" id="rvToast" hidden></div><script src="external-reference.js?v=20260816a"></script></body></html>

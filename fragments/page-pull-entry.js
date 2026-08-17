@@ -5,7 +5,7 @@
         <div class="pull-entry">
           <div class="pull-entry-shell">
             <div class="pull-entry-head">
-              <h1>智能拉片</h1>
+              <h1>爆款拆解</h1>
               <p>一键拆解画面分镜，助力仿拍或创作</p>
               <div class="pull-entry-top-actions">
                 <button class="text-btn" id="openHistory">⏱ 历史解析记录</button>

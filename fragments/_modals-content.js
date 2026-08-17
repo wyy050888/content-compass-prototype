@@ -1,48 +1,4 @@
 (function(){var s=document.currentScript;if(!s)return;s.insertAdjacentHTML('beforebegin',`
-  <!-- 爆款内容结构：详情及自建结构编辑 -->
-  <div class="modal-backdrop" id="copyStructureDetailModal" role="dialog" aria-modal="true">
-    <div class="modal copy-structure-detail">
-      <div class="modal-head">
-        <div><span class="badge" id="copyStructureDetailSource">千川学习</span><h3 id="copyStructureDetailTitle">爆款内容结构</h3></div>
-        <div class="copy-structure-head-actions"><button class="primary-btn" type="button" id="copyStructureCloneFromDetail">复制为自建</button><button class="close-btn" type="button" data-close-copy-structure-detail aria-label="关闭">×</button></div>
-      </div>
-      <div class="modal-body">
-        <div class="copy-structure-detail-summary" id="copyStructureDetailSummary"></div>
-        <div class="copy-structure-formula-card" id="copyStructureFormulaCard"></div>
-        <div class="copy-structure-detail-tabs" role="tablist">
-          <button class="active" type="button" data-copy-detail-tab="stages">结构阶段</button>
-          <button type="button" data-copy-detail-tab="references">参考成品 <span id="copyStructureReferenceTabCount">0</span></button>
-        </div>
-        <section class="copy-structure-detail-panel active" data-copy-detail-panel="stages">
-          <div class="copy-stage-list" id="copyStructureStageList"></div>
-        </section>
-        <section class="copy-structure-detail-panel" data-copy-detail-panel="references">
-          <div class="copy-related-rank-note"><i>榜</i><div><strong>高消耗参考成品</strong><span>展示命中该结构且消耗较高的成品，用于核对结构来源和实际表达。</span></div></div>
-          <div class="copy-related-toolbar">
-            <div><strong>相关千川文案与视频</strong><small id="copyStructureRelatedCount" style="margin-left:8px;color:#999aa4;"></small></div>
-            <input type="search" id="copyStructureRelatedSearch" placeholder="搜索资产名称或素材 ID">
-          </div>
-          <div class="copy-related-list" id="copyStructureRelatedList"></div>
-        </section>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-backdrop" id="copyStructureEditorModal" role="dialog" aria-modal="true">
-    <div class="modal copy-structure-editor-modal">
-      <div class="modal-head"><div class="modal-head-title"><i>构</i><div><h3 id="copyStructureEditorTitle">新建爆款内容结构</h3><small>保存后可在智能文案、脚本与混剪中调用</small></div></div><button class="close-btn" type="button" data-close-copy-structure-editor aria-label="关闭">×</button></div>
-      <div class="modal-body">
-        <div class="copy-structure-editor-grid">
-          <label class="full">结构名称<input id="copyStructureNameInput" maxlength="40" placeholder="例如：结果前置·痛点解决·行动引导型"></label>
-          <label class="full">结构公式<input id="copyStructureFormulaInput" maxlength="120" placeholder="例如：结果前置 → 痛点放大 → 能力证明 → 行动引导"></label>
-          <div class="copy-structure-editor-field full"><span>结构标签 <b style="color:#e14b53;">*</b></span><input type="hidden" id="copyStructureLevelInput" value="general"><div class="copy-level-options"><button class="active" type="button" data-copy-level="general"><i>通</i><span><b>通用结构</b><small>可供不同产品创作时复用</small></span><em>✓</em></button><button type="button" data-copy-level="product"><i>品</i><span><b>产品级结构</b><small>仅在关联产品创作时优先调用</small></span><em>✓</em></button></div></div>
-          <label class="full">关联产品<select id="copyStructureProductInput"><option value="">通用结构（不限定产品）</option><option>轻净 Pro 除螨仪</option><option>轻享空气炸锅 A8</option><option>净界洗地机 S5</option><option>随行榨汁杯 Mini</option></select></label>
-        </div>
-      </div>
-      <div class="modal-foot"><div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-copy-structure-editor>取消</button><button class="primary-btn" type="button" id="saveCopyStructure">保存结构</button></div></div>
-    </div>
-  </div>
-
   <!-- 文案库：新增文案 -->
   <div class="modal-backdrop" id="clCreateModal" role="dialog" aria-modal="true">
     <div class="modal cl-create-modal">

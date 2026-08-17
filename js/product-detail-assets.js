@@ -57,7 +57,7 @@
     return list.map(n => `<option value="${esc(n)}" ${n===current?'selected':''}>${esc(n)}</option>`).join('');
   };
 
-  const state = { tab:'copy', template:'prompt', search:'', templatePromptType:'商品主图', templateQuery:'', preview:null, edit:null, confirm:null, overlayRequest:null, associate:null };
+  const state = { tab:'copy', template:'prompt', search:'', templatePromptType:'商品主图', templateQuery:'', preview:null, edit:null, confirm:null, overlayRequest:null, associate:null, personaCatalog:[], personaAssociation:null };
   // 状态枚举与源页对齐:
   //   创作素材 status: ok / fail / pending / analyzing
   //   成片视频 status: done / pending / running / failed
@@ -324,11 +324,15 @@
     const promptItems=items.filter(item => item.category === state.templatePromptType && (!state.templateQuery || `${item.name} ${item.description} ${item.text}`.toLowerCase().includes(state.templateQuery.toLowerCase())));
     let html='';
     if(type==='prompt') html=`<div class="pda-template-toolbar"><div class="pda-prompt-type-tabs"><button class="${state.templatePromptType==='商品主图'?'active':''}" type="button" data-pda-prompt-type="商品主图">主图模板</button><button class="${state.templatePromptType==='商品详情图'?'active':''}" type="button" data-pda-prompt-type="商品详情图">详情图模板</button></div><button class="pda-btn primary" type="button" data-pda-open-template-library="prompt">＋ 关联提示词模板</button></div><div class="pda-prompt-library-panel"><div class="pda-prompt-filter"><span>当前展示已关联当前产品的模板</span><input data-pda-prompt-search type="search" placeholder="搜索模板名称或内容" value="${esc(state.templateQuery)}"></div><div class="pda-prompt-grid">${promptItems.map(x=>`<article class="pda-prompt-card"><div class="pda-prompt-head"><div><strong>${esc(x.name)}</strong><small>${esc(x.description || '')} · ${esc(x.createdAt || '刚刚')}</small></div><span class="pda-prompt-category">${esc(x.category || x.agent)}</span></div><div class="pda-prompt-preview">${esc(x.text)}</div><div class="pda-prompt-tags">${(x.tags||[]).map(tag=>`<span>${esc(tag)}</span>`).join('')}</div><footer><label><input type="radio" ${x.isDefault?'checked':''} data-pda-action="prompt-default" data-id="${x.id}"> 默认模板</label><div><button class="pda-link" data-pda-action="use-image" data-id="${x.id}">用于生图</button><button class="pda-link" data-pda-action="template-edit" data-kind="prompt" data-id="${x.id}">编辑</button><button class="pda-link danger" data-pda-action="template-delete" data-kind="prompt" data-id="${x.id}">删除</button></div></footer></article>`).join('')||'<div class="pda-template-empty">暂无已关联的提示词模板</div>'}</div></div>`;
-    if(type==='persona') html=tableTemplate(['画像名称','人群属性','核心痛点','使用场景','适用范围','创建','最近修改','调用','操作'],items,x=>`<td><div class="pda-persona-name"><strong>${esc(x.name)}</strong></div></td><td>${esc(x.audience || '—')}<br><small>${esc(x.age)}</small></td><td>${esc(x.pain)}</td><td>${esc(x.scene)}</td><td><span class="pda-template-usage">${esc(x.scope || productName())}</span></td><td>${esc(x.created || '—')}</td><td>${esc(x.updated)}</td><td>${x.usage||0} 次</td><td><div class="pda-actions"><button class="pda-link" data-pda-action="template-edit" data-kind="persona" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="history" data-kind="persona" data-id="${x.id}">查看变更</button><button class="pda-link" data-pda-action="template-copy" data-kind="persona" data-id="${x.id}">复制</button><button class="pda-link danger" data-pda-action="template-delete" data-kind="persona" data-id="${x.id}">删除</button></div></td>`);
+    if(type==='persona') html=`<div class="pda-template-toolbar"><span>当前展示已关联当前产品的人群画像</span><div><button class="pda-btn" type="button" data-pda-action="persona-create">＋ 新建画像</button><button class="pda-btn primary" type="button" data-pda-action="persona-associate">＋ 关联人群画像</button></div></div>${items.length?tableTemplate(['画像名称','人群属性','核心痛点','使用场景','关联产品','创建','最近修改','调用','操作'],items,x=>`<td><div class="pda-persona-name"><strong>${esc(x.name)}</strong></div></td><td><div class="pda-persona-attributes"><span>${esc(x.audience || '—')}</span><small>${esc(x.age)}</small></div></td>${personaInsightCell(x.pain,'pain')}${personaInsightCell(x.scene,'scene')}<td><span class="pda-template-usage">${esc(x.scope || productName())}</span></td><td>${esc(x.created || '—')}</td><td>${esc(x.updated)}</td><td>${x.usage||0} 次</td><td><div class="pda-actions"><button class="pda-link" data-pda-action="template-edit" data-kind="persona" data-id="${x.id}">编辑</button><button class="pda-link" data-pda-action="history" data-kind="persona" data-id="${x.id}">查看变更</button><button class="pda-link" data-pda-action="template-copy" data-kind="persona" data-id="${x.id}">复制</button><button class="pda-link danger" data-pda-action="persona-disassociate" data-id="${x.id}">取消关联</button></div></td>`,'pda-persona-table'):'<div class="pda-template-empty">暂无已关联的人群画像</div>'}`;
     if(type==='canvas') html=`<div class="pda-template-toolbar"><span>当前展示已关联当前产品的画板模板</span><button class="pda-btn primary" type="button" data-pda-open-template-library="canvas">＋ 关联无限画板模板</button></div><div class="pda-canvas-grid">${items.map((x,index)=>`<article class="pda-canvas-card" data-pda-canvas="${x.id}"><div class="pda-canvas-visual tone-${index%3+1}"><span>${esc(x.type || 'TVC')}</span></div><div class="pda-canvas-meta"><div><strong>${esc(x.name)}</strong><span>${esc(x.type || 'TVC')}</span></div><p>${index?'开箱、上手、横向对比与推荐结论，适合产品横评创作。':'问题、演示、结果与品牌收口的画板模板，内置产品特写、场景图与分镜节点。'}</p><footer><span>${esc(x.node)}</span><span>使用 ${x.usage||0}</span></footer></div><div class="pda-canvas-actions"><button data-pda-action="template-edit" data-kind="canvas" data-id="${x.id}">编辑</button><button class="danger" data-pda-action="template-delete" data-kind="canvas" data-id="${x.id}">删除</button></div></article>`).join('')}</div>`;
     $('#pdaTemplateContent').innerHTML=items.length?html:empty('模板');
   }
-  function tableTemplate(head,items,row){return `<div class="pda-table-wrap"><table class="pda-table"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${items.map(x=>`<tr>${row(x)}</tr>`).join('')}</tbody></table></div>`}
+  function personaInsightCell(value, tone) {
+    const lines = String(value || '未设置').split(/[；;\n]+/).map(item => item.trim()).filter(Boolean);
+    return `<td><div class="pda-persona-insight ${tone}" title="${esc(value || '未设置')}">${lines.map(item => `<span>${esc(item)}</span>`).join('')}</div></td>`;
+  }
+  function tableTemplate(head,items,row,className=''){return `<div class="pda-table-wrap"><table class="pda-table ${className}"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${items.map(x=>`<tr>${row(x)}</tr>`).join('')}</tbody></table></div>`}
   function render() { setCounts(); ({copy:renderCopy,image:renderImages,script:renderScripts,material:()=>renderMedia('material'),video:()=>renderMedia('video'),reference:()=>renderMedia('reference'),template:renderTemplates}[state.tab])(); }
 
   function find(kind,id) { return kind==='template'?null:(data[kind]||[]).find(x=>x.id===id); }
@@ -523,7 +527,56 @@
     const frame = document.querySelector('#page-template-library iframe');
     if (!host || !frame?.contentWindow) return toast('模板库尚未加载，请刷新后重试');
     host.classList.add('pda-template-operation-host');
-    frame.contentWindow.postMessage({ type:'content-compass-template-operation', kind, action, id:item?.id, name:item?.name }, '*');
+    frame.contentWindow.postMessage({ type:'content-compass-template-operation', kind, action, id:item?.id, name:item?.name, productName:productName() }, '*');
+  }
+
+  function linkedToCurrentProduct(item) {
+    const linked = personaProductScope(item);
+    return linked.includes(productName()) || item.scope === productName();
+  }
+  function personaLines(value) {
+    return (Array.isArray(value) ? value : String(value || '').split(/\n|[；;]/))
+      .map(item => String(item).trim())
+      .filter(Boolean);
+  }
+  function personaProductScope(item) {
+    const product = Array.isArray(item.linkedProducts) && item.linkedProducts.length ? item.linkedProducts[0] : item.product;
+    return product ? [product] : [];
+  }
+  function openPersonaAssociation() {
+    if (!state.personaCatalog.length) { requestTemplateCatalog(); return toast('正在加载人群画像，请稍后重试'); }
+    state.personaAssociation = { query:'', selected:new Set() };
+    $('#pdaPersonaAssociateSearch').value = '';
+    renderPersonaAssociation(); open('pdaPersonaAssociateModal');
+  }
+  function renderPersonaAssociation() {
+    const associate = state.personaAssociation;
+    if (!associate) return;
+    const term = associate.query.trim().toLowerCase();
+    const rows = state.personaCatalog
+      .filter(item => !personaProductScope(item).length)
+      .filter(item => !term || [item.name,item.audience,item.gender,item.age,...personaLines(item.pain),...personaLines(item.scenes || item.scene),...personaProductScope(item)].join(' ').toLowerCase().includes(term));
+    $('#pdaPersonaAssociateList').innerHTML = rows.length ? rows.map(item => {
+      const selected = associate.selected.has(item.id);
+      const pains = personaLines(item.pain).slice(0, 2);
+      const scenes = personaLines(item.scenes || item.scene).slice(0, 2);
+      const scope = personaProductScope(item);
+      return `<article class="pda-persona-associate-card ${selected?'selected':''}" data-pda-persona-id="${esc(item.id)}" aria-pressed="${selected}">
+        <i class="pda-persona-check">${selected?'✓':''}</i>
+        <div class="pda-persona-card-title"><div><strong>${esc(item.name)}</strong><small>更新于 ${esc(item.updated || '—')}</small></div><em>通用</em></div>
+        <div class="pda-persona-meta"><span>${esc(item.audience || '未标注人群')}</span><span>${esc(item.gender || '不限')}</span><span>${esc(item.age || '年龄未标注')}</span></div>
+        <div class="pda-persona-scope"><em>适用范围</em><b>${esc(scope.join('、') || '通用')}</b></div>
+        <div class="pda-persona-detail"><em>核心痛点</em>${(pains.length ? pains : ['未设置']).map(value => `<i>${esc(value)}</i>`).join('')}</div>
+        <div class="pda-persona-detail"><em>使用场景</em>${(scenes.length ? scenes : ['未设置']).map(value => `<i>${esc(value)}</i>`).join('')}</div>
+        <div class="pda-persona-card-meta">已调用 ${Number(item.usage || 0)} 次</div>
+      </article>`;
+    }).join('') : '<div class="pda-persona-associate-empty">没有可关联的人群画像</div>';
+    $('#pdaPersonaAssociateCount').textContent = `已选择 ${associate.selected.size} 项`;
+  }
+  function updatePersonaRelation(ids, action) {
+    const frame = document.querySelector('#page-template-library iframe');
+    if (!frame?.contentWindow) return toast('模板库尚未加载，请刷新后重试');
+    frame.contentWindow.postMessage({ type:'content-compass-template-operation', kind:'persona', action, personaIds:ids, productName:productName() }, '*');
   }
 
   window.addEventListener('message', event => {
@@ -533,7 +586,9 @@
       Object.keys(data.template).forEach(kind => {
         const source = Array.isArray(event.data.catalog[kind]) ? event.data.catalog[kind] : [];
         if (kind === 'persona') {
-          data.template[kind] = source.filter(item => item.scope === productName());
+          state.personaCatalog = source;
+          data.template[kind] = source.filter(linkedToCurrentProduct);
+          window.dispatchEvent(new CustomEvent('content-compass:persona-catalog-updated',{ detail:source }));
           return;
         }
         const linkedIds = new Set(data.template[kind].map(item => String(item.id)));
@@ -641,6 +696,14 @@
     renderAssociation();
   });
   $('#pdaAssociateConfirm').addEventListener('click',confirmAssociation);
+  $('#pdaPersonaAssociateSearch').addEventListener('input', event => { if(state.personaAssociation){ state.personaAssociation.query=event.target.value; renderPersonaAssociation(); } });
+  $('#pdaPersonaAssociateList').addEventListener('click', event => {
+    const card=event.target.closest('[data-pda-persona-id]');
+    if(!card)return;
+    const {selected}=state.personaAssociation||{}; if(!selected)return;
+    const id=card.dataset.pdaPersonaId; selected.has(id)?selected.delete(id):selected.add(id); renderPersonaAssociation();
+  });
+  $('#pdaPersonaAssociateConfirm').addEventListener('click',()=>{const selected=[...(state.personaAssociation?.selected||[])];if(!selected.length)return toast('请至少选择一个人群画像');updatePersonaRelation(selected,'template-associate');close('pdaPersonaAssociateModal');state.personaAssociation=null;toast('人群画像已关联到当前产品');});
   $$('[data-pda-close]').forEach(btn=>btn.addEventListener('click',()=>close(btn.dataset.pdaClose)));
   $$('.pda-layer').forEach(layer=>layer.addEventListener('click',e=>{if(e.target===layer)close(layer.id)}));
   $('#pdaConfirmAction').addEventListener('click',()=>{const fn=state.confirm;close('pdaConfirmModal');state.confirm=null;if(fn)fn()});
@@ -726,6 +789,9 @@
       return toast(`已定位至${btn.dataset.value}会话`);
     }
     const list=data.template[kind]||[],x=list.find(v=>v.id===id);
+    if(a==='persona-create') return openNativeTemplate('persona',null,'template-create');
+    if(a==='persona-associate') return openPersonaAssociation();
+    if(a==='persona-disassociate') return updatePersonaRelation([id],'template-disassociate');
     if(a==='prompt-default')return openNativeTemplate('prompt',data.template.prompt.find(v=>v.id===id),'prompt-default');
     if(a==='use-image'){document.querySelector('[data-page="image-main-agent"]')?.click();return toast('已带入商品主图 Agent')}
     if(['template-edit','template-view','history','template-copy','template-delete'].includes(a))return openNativeTemplate(kind,x,a);

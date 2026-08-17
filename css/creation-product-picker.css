@@ -1,6 +1,6 @@
 body.creation-product-picker-open { overflow:hidden; }
 .creation-product-picker-backdrop[hidden] { display:none; }
-.creation-product-picker-backdrop { position:fixed; inset:0; z-index:3200; display:grid; place-items:center; padding:32px; background:rgba(22,24,35,.42); backdrop-filter:blur(2px); }
+.creation-product-picker-backdrop { position:fixed; inset:0; z-index:10000; display:grid; place-items:center; padding:32px; background:rgba(22,24,35,.42); backdrop-filter:blur(2px); }
 .creation-product-picker-modal { width:min(1040px,calc(100vw - 64px)); max-height:min(790px,calc(100vh - 64px)); display:flex; flex-direction:column; overflow:hidden; background:#fff; border:1px solid #e7e6ef; border-radius:18px; box-shadow:0 24px 72px rgba(26,22,58,.2); color:#202033; }
 .creation-product-picker-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding:24px 26px 18px; border-bottom:1px solid #eeedf4; }
 .creation-product-picker-head h2 { margin:0 0 6px; font-size:20px; }
@@ -19,6 +19,8 @@ body.creation-product-picker-open { overflow:hidden; }
 .creation-product-card.selected { border:2px solid #6755eb; padding:17px; background:#fbfaff; box-shadow:0 0 0 3px rgba(103,85,235,.08); }
 .creation-product-card-check { position:absolute; top:15px; right:15px; width:22px; height:22px; display:grid; place-items:center; border:1px solid #ddd9ef; border-radius:50%; background:#fff; color:#fff; font-size:12px; }
 .creation-product-card.selected .creation-product-card-check { border-color:#6755eb; background:#6755eb; }
+.creation-product-empty-option { border-style:dashed; background:#faf9ff; }
+.creation-product-empty-option .creation-product-card-top > b { color:#6755eb; background:#eeeaff; }
 .creation-product-card-top { display:flex; align-items:center; gap:11px; padding-right:28px; }
 .creation-product-card-top > b { width:42px; height:42px; flex:0 0 auto; display:grid; place-items:center; border-radius:11px; background:linear-gradient(145deg,#7564ee,#4e3ad0); color:#fff; font-size:18px; }
 .creation-product-card-top > span { min-width:0; display:flex; flex-direction:column; gap:3px; }

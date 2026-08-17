@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="内容罗盘——面向兴趣电商团队的 AI 内容生产与经营增长平台产品原型">
   <title>内容罗盘 · AI经营增长平台</title>
-  <link rel="stylesheet" href="styles.css?v=20260813bc">
+  <link rel="stylesheet" href="styles.css?v=20260817b">
   <link rel="stylesheet" href="host-embed.css?v=20260813a">
+  <script>
+    if (new URLSearchParams(location.search).get('drawer') === '1') {
+      document.documentElement.classList.add('template-drawer-embed');
+    }
+  </script>
 </head>
 <body>
   <div class="app">
@@ -299,7 +304,7 @@
               </button>
               <button class="agent-card tool-card" id="openPullTool" type="button" data-category="analysis">
                 <span class="agent-icon">拉</span>
-                <strong>智能拉片</strong>
+                <strong>爆款拆解</strong>
                 <small>独立拆解视频的口播、分镜、镜头语言与内容结构</small>
                 <span class="agent-foot"><span class="agent-chip">独立分析页</span><span class="agent-chip">非对话式</span><span class="agent-chip">仿写参考</span></span>
               </button>
@@ -415,7 +420,7 @@
         <div class="pull-entry">
           <div class="pull-entry-shell">
             <div class="pull-entry-head">
-              <h1>智能拉片</h1>
+              <h1>爆款拆解</h1>
               <p>一键拆解画面分镜，助力仿拍或创作</p>
               <div class="pull-entry-top-actions">
                 <button class="text-btn" id="openHistory">⏱ 历史解析记录</button>
@@ -531,12 +536,12 @@
           <div class="pull-result-head">
             <div class="title-block">
               <button class="dark-button" id="backToEntry">← 返回列表</button>
-              <h1>拉片结果详情 <small>· <a href="#" class="download-link" id="downloadVideo">下载.mp4 ↓</a></small></h1>
+              <h1>拆解结果详情 <small>· <a href="#" class="download-link" id="downloadVideo">下载.mp4 ↓</a></small></h1>
             </div>
             <div class="meta-line">
               <b id="resultDuration">2 分 13 秒</b>
               <span class="dot">·</span>
-              拉片时间 <b id="resultTime">2026/07/28 09:12</b>
+              拆解时间 <b id="resultTime">2026/07/28 09:12</b>
             </div>
           </div>
 
@@ -1127,11 +1132,11 @@
 
       <section class="page" id="page-reference-videos">
         <div class="page-pad">
-          <div class="page-head"><div><h1>外部参考视频</h1><p>用于竞品分析、智能拉片与创意仿写；不参与内部投放效果学习或直接混剪。</p></div><button class="primary-btn">＋ 添加参考视频</button></div>
+          <div class="page-head"><div><h1>外部参考视频</h1><p>用于竞品分析、视频拆解与创意仿写；不参与内部投放效果学习或直接混剪。</p></div><button class="primary-btn">＋ 添加参考视频</button></div>
           <div class="card"><div class="filter-bar"><input class="search" placeholder="搜索钩子或参考结构"><select class="filter-select"><option>全部来源</option><option>抖音</option><option>视频号</option><option>快手</option></select></div>
             <div class="asset-grid">
-              <article class="library-card"><div class="library-cover"><span class="cover-type">参考</span><span class="badge">抖音</span></div><div class="library-info"><strong>除螨仪结果型钩子参考</strong><p>已完成拉片 · 结构可仿写 · 外部内容</p><span class="badge">仅创意参考</span></div></article>
-              <article class="library-card"><div class="library-cover"><span class="cover-type">参考</span><span class="badge">快手</span></div><div class="library-info"><strong>空气炸锅省时场景参考</strong><p>厨房场景 · 快节奏镜头组织</p><span class="badge">待拉片</span></div></article>
+              <article class="library-card"><div class="library-cover"><span class="cover-type">参考</span><span class="badge">抖音</span></div><div class="library-info"><strong>除螨仪结果型钩子参考</strong><p>已完成拆解 · 结构可仿写 · 外部内容</p><span class="badge">仅创意参考</span></div></article>
+              <article class="library-card"><div class="library-cover"><span class="cover-type">参考</span><span class="badge">快手</span></div><div class="library-info"><strong>空气炸锅省时场景参考</strong><p>厨房场景 · 快节奏镜头组织</p><span class="badge">待拆解</span></div></article>
             </div>
           </div>
         </div>
@@ -1184,8 +1189,8 @@
           <!-- Tab 2: 人群画像 - 表格 -->
           <div class="template-panel" data-lib-panel="persona">
             <div class="lib-filter-row">
-              <input type="text" class="lib-search" id="personaLibrarySearch" placeholder="搜索产品名称、画像名称或人群">
-              <select class="lib-filter-select" id="personaLibraryProductFilter"><option value="all">全部产品</option><option>轻净 Pro 除螨仪</option><option>轻享空气炸锅 A8</option><option>净界洗地机 S5</option></select>
+              <input type="text" class="lib-search" id="personaLibrarySearch" placeholder="搜索画像名称、人群或关联产品">
+              <select class="lib-filter-select" id="personaLibraryScopeFilter" aria-label="适用范围"><option value="all">全部画像</option><option value="universal">通用画像</option><option value="linked">已关联产品</option></select>
               <button class="primary-btn" type="button" id="createPersonaTemplate">＋ 新建人群画像</button>
             </div>
             <div class="lib-table-wrap">
@@ -1196,7 +1201,7 @@
                     <th style="width:11%;">人群属性</th>
                     <th style="width:14%;">核心痛点</th>
                     <th style="width:13%;">使用场景</th>
-                    <th style="width:9%;">适用范围</th>
+                    <th style="width:9%;">关联产品</th>
                     <th style="width:9%;">创建</th>
                     <th style="width:10%;">最近修改</th>
                     <th style="width:5%;">调用</th>
@@ -1259,7 +1264,7 @@
               <div class="cl-list-period" role="group" aria-label="投放数据统计周期"><span>统计周期</span><button type="button" class="active" data-cl-list-period="30">近 30 天</button><button type="button" data-cl-list-period="7">近 7 天</button><button type="button" data-cl-list-period="custom">自定义</button></div>
               <div class="cl-list-custom-range" id="clListCustomRange" hidden><input type="date" data-cl-list-date="start" value="2026-07-15"><i>至</i><input type="date" data-cl-list-date="end" value="2026-08-13"></div>
               <div class="cl-filter-actions">
-                <button class="cl-new-btn" type="button" data-cl-action="new">+ 拆解爆款结构</button>
+                <button class="cl-new-btn" type="button" data-cl-action="new">+ 爆款视频提炼</button>
               </div>
             </div>
             <div class="lib-table-wrap">
@@ -2544,17 +2549,15 @@
       <div class="modal-body">
         <div class="persona-form-grid">
           <div class="field full"><label>画像名称<em class="required-mark">*</em></label><input id="personaFormName" placeholder="例如：精致妈妈—母婴清洁人群"></div>
-          <div class="field"><label>适用品牌</label><select id="personaFormBrand"><option value="">全部品牌</option><option>轻净</option><option>净界</option><option>轻享</option></select></div>
-          <div class="field"><label>适用类目</label><select id="personaFormCategory"><option value="">全部类目</option><option>清洁电器</option><option>厨房电器</option><option>生活电器</option></select></div>
-          <div class="field full"><label>适用产品</label><select id="personaFormProduct"><option value="">全部产品</option><option>轻净 Pro 除螨仪</option><option>轻享空气炸锅 A8</option><option>净界洗地机 S5</option></select></div>
+          <div class="field full"><label>适用范围</label><div class="persona-product-mode" role="tablist" aria-label="适用范围"><button class="active" type="button" role="tab" aria-selected="true" data-persona-product-mode="linked">关联产品</button><button type="button" role="tab" aria-selected="false" data-persona-product-mode="universal">设为通用</button></div><div class="persona-product-panel" data-persona-product-panel="linked"><button class="persona-product-trigger" id="personaFormProductTrigger" type="button" aria-haspopup="dialog"><span data-persona-product-label>选择关联产品</span><b>⌄</b></button><small>选择后仅在该产品的创作流程中优先推荐。</small></div><div class="persona-product-panel" data-persona-product-panel="universal" hidden><small>通用画像不绑定产品，可在所有产品的创作流程中选择。</small></div><input id="personaFormProduct" type="hidden" value=""></div>
           <div class="field full"><label>抖音八大人群<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="audience"><button class="active" type="button">精致妈妈</button><button type="button">新锐白领</button><button type="button">资深中产</button><button type="button">Z世代</button><button type="button">小镇青年</button><button type="button">小镇中老年</button><button type="button">都市蓝领</button><button type="button">都市银发</button></div></div>
           <div class="field full"><label>性别<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="gender"><button class="active" type="button">不限</button><button type="button">女性</button><button type="button">男性</button></div></div>
           <div class="field full"><label>年龄<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="age"><button type="button">18–23</button><button class="active" type="button">24–30</button><button type="button">31–40</button><button type="button">41–50</button><button type="button">51+</button><button type="button" data-persona-custom-age-trigger>自定义</button><span class="persona-custom-age" data-persona-custom-age hidden><input id="personaFormAgeMin" type="number" min="1" max="99" value="25"><i>至</i><input id="personaFormAgeMax" type="number" min="1" max="99" value="35"></span></div></div>
-          <div class="field full"><label>人群核心痛点</label><textarea id="personaFormPain" placeholder="一行一个人群核心痛点"></textarea></div>
-          <div class="field full"><label>使用场景</label><textarea id="personaFormScenes" placeholder="一行一个使用场景"></textarea></div>
+          <div class="field full"><div class="persona-field-head"><label>人群核心痛点</label><button class="persona-ai-refresh" type="button" data-persona-ai-suggest="pain">✦ AI 换一组</button></div><textarea id="personaFormPain" placeholder="一行一个人群核心痛点"></textarea></div>
+          <div class="field full"><div class="persona-field-head"><label>使用场景</label><button class="persona-ai-refresh" type="button" data-persona-ai-suggest="scene">✦ AI 换一组</button></div><textarea id="personaFormScenes" placeholder="一行一个使用场景"></textarea></div>
         </div>
       </div>
-      <div class="modal-foot"><span class="persona-form-note">保存后可在三个文案 Agent 中直接调用</span><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-persona-modal>取消</button><button class="primary-btn" type="button" id="savePersonaTemplate">保存画像</button></div></div>
+      <div class="modal-foot"><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-persona-modal>取消</button><button class="primary-btn" type="button" id="savePersonaTemplate">保存画像</button></div></div>
     </div>
   </div>
 
@@ -2854,11 +2857,11 @@
   <div class="modal-backdrop" id="sampleModal" role="dialog" aria-modal="true">
     <div class="modal" style="width:min(880px,100%);height:min(720px,calc(100vh - 40px));">
       <div class="modal-head">
-        <div><span class="badge">示例</span><h3>拉片示例：除螨仪主视频</h3></div>
+        <div><span class="badge">示例</span><h3>拆解示例：除螨仪主视频</h3></div>
         <button class="close-btn" id="closeSample" aria-label="关闭">×</button>
       </div>
       <div class="modal-body">
-        <p class="modal-intro">下面是一段已经完成智能拉片的视频示例，展示了系统对一条 31 秒口播视频的结构化拆解。点击「用此示例回填」即可将该示例数据带入到当前入口页体验。</p>
+        <p class="modal-intro">下面是一段已经完成爆款拆解的视频示例，展示了系统对一条 31 秒口播视频的结构化拆解。点击「用此示例回填」即可将该示例数据带入到当前入口页体验。</p>
         <div style="display:grid;grid-template-columns:200px 1fr;gap:18px;align-items:start;">
           <div style="border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;">
             <div style="width:100%;aspect-ratio:9/16;border-radius:8px;background:linear-gradient(180deg,#e9d9c7 0 36%,#8b6d55 37% 54%,#d9c3aa 55%);display:grid;place-items:center;color:#fff;font-weight:700;">预览</div>
@@ -3388,10 +3391,20 @@
 
 
   <script src="js/image-library.js"></script>
-  <script src="js/core.js"></script>
-  <script src="js/pull.js"></script>
+  <script src="js/core.js?v=20260816a"></script>
+  <script src="js/pull.js?v=20260816a"></script>
   <script src="js/business.js"></script>
-  <script src="js/misc.js?v=20260813bc"></script>
+  <script src="js/misc.js?v=20260817c"></script>
+  <script>
+    (function prepareDrawerEmbed(){
+      if (!document.documentElement.classList.contains('template-drawer-embed')) return;
+      var overlay=document.getElementById('clDrawerOverlay');
+      var drawer=document.getElementById('clDetailDrawer');
+      if (!overlay || !drawer) return;
+      // 移动原节点而非复制，确保详情内容、事件和样式与模板库完全一致。
+      document.body.append(overlay,drawer);
+    })();
+  </script>
   <script>
     (function activateEmbeddedEntry(){
       var entry=new URLSearchParams(location.search).get('entry')||'image-library';

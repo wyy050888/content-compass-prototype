@@ -5280,7 +5280,7 @@
     .persona-library-table .persona-name-cell small { display:block; }
     .persona-library-table .persona-name-cell small { margin-top:3px; color:#9799a5; font-size:10px; }
     .persona-attribute-summary { color:#4f5260; }
-    .persona-scope-tag { display:inline-flex; padding:3px 8px; border-radius:7px; color:#5d4bc2; background:#f2efff; font-size:10px; }
+    .persona-scope-tag { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:7px; color:#5d4bc2; background:#f2efff; font-size:10px; }.persona-scope-tag.universal { color:#727988; background:#f2f3f6; }.persona-scope-tag em { color:#7969df; font-style:normal; }
     .persona-row-actions { display:flex; flex-wrap:wrap; gap:6px 9px; }
     .persona-row-actions button { padding:0; border:0; background:transparent; font:inherit; }
     .persona-library-empty { padding:42px 20px; color:#9698a4; text-align:center; }
@@ -5289,10 +5289,23 @@
     .persona-delete-modal { width:min(460px,100%); height:auto; }
     .persona-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
     .persona-form-grid .full { grid-column:1/-1; }
+    .persona-product-trigger { width:100%; min-height:42px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 13px; border:1px solid #dcddeb; border-radius:9px; color:#343542; background:#fff; font:inherit; text-align:left; cursor:pointer; }
+    .persona-product-trigger:hover { border-color:#9c8af1; }
+    .persona-product-trigger span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .persona-product-trigger b { color:#8a8c9a; font-size:13px; }
+    .persona-product-mode { display:inline-grid; grid-template-columns:repeat(2, auto); gap:3px; margin:0 0 9px; padding:3px; border:1px solid #e1e1e8; border-radius:9px; background:#f5f5f8; }
+    .persona-product-mode button { min-height:30px; padding:0 12px; border:0; border-radius:6px; color:#747682; background:transparent; font:inherit; font-size:11px; cursor:pointer; }
+    .persona-product-mode button.active { color:#6047c3; background:#fff; box-shadow:0 1px 4px rgba(43,36,77,.09); font-weight:650; }
+    .persona-product-panel[hidden] { display:none; }
     .persona-choice-row { display:flex; flex-wrap:wrap; gap:8px; }
     .persona-choice-row > button { min-height:34px; padding:6px 12px; border:1px solid #dedee7; border-radius:9px; color:#626472; background:#fff; cursor:pointer; font-size:12px; }
     .persona-choice-row > button:hover { border-color:#aaa2df; }
     .persona-choice-row > button.active { border-color:#8067ef; color:#6245df; background:#f5f2ff; }
+    .persona-field-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:7px; }
+    .persona-field-head label { margin:0; }
+    .persona-ai-refresh { padding:4px 8px; border:0; border-radius:7px; color:#7357d7; background:#f5f1ff; font:inherit; font-size:11px; cursor:pointer; }
+    .persona-ai-refresh:hover { color:#5a3fc0; background:#eee8ff; }
+    .persona-ai-refresh:disabled { color:#a59bbf; background:#f5f4f8; cursor:wait; }
     .persona-custom-age { display:inline-flex; align-items:center; gap:7px; }
     .persona-custom-age[hidden] { display:none; }
     .persona-custom-age input { width:76px !important; height:34px; }
@@ -5584,6 +5597,10 @@
     .cl-drawer-overlay.show { display: block; animation: fadeIn .2s ease; }
     .cl-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(1080px, 96vw); z-index: 91; background: #fff; box-shadow: -8px 0 32px rgba(20, 22, 35, .18); display: none; flex-direction: column; animation: drawerIn .25s ease; }
     .cl-drawer.show { display: flex; }
+    html.template-drawer-embed, html.template-drawer-embed body { min-width:0; overflow:hidden; background:transparent; }
+    html.template-drawer-embed .app { display:none !important; }
+    html.template-drawer-embed .cl-drawer-overlay { display:none !important; }
+    html.template-drawer-embed .cl-drawer { width:100%; max-width:none; }
     @keyframes drawerIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .cl-drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 24px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
