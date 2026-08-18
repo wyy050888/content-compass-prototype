@@ -7428,6 +7428,21 @@
           card.style.animationDelay = `${i * 90}ms`;
         });
         updateMixScriptCompletion();
+        // 自动展开"有问题"的分镜卡(口播缺失 / 镜头未匹配 / needs-rematch),
+        // 让用户进 Step 3 一眼能看到是哪几段,不用挨个点"展开"
+        const segments = mixScriptSegments();
+        host.querySelectorAll(".mix-script-card").forEach((card, i) => {
+          const seg = segments[i];
+          const isProblem = !seg || !seg.complete;
+          if (isProblem) {
+            const body = card.querySelector(".mix-script-body");
+            if (body && body.hidden) {
+              body.hidden = false;
+              const toggle = card.querySelector("[data-mix-toggle-row]");
+              if (toggle) toggle.textContent = "收起";
+            }
+          }
+        });
         const counter = dynamicForm.querySelector("[data-mix-script-count]");
         if (counter) counter.textContent = String(total);
       }, 1200);
