@@ -42,6 +42,7 @@
 .pda-link-primary{padding:4px 8px;border-radius:6px;background:#f0edff;color:#5642c8;font-weight:650}
 .pda-script-status{display:flex;flex-direction:column;gap:3px;min-width:0}
 .pda-script-status b{font-size:12px;font-weight:650;color:#a66c19}
+.pda-product{display:inline-flex;max-width:100%;padding:3px 8px;border-radius:5px;background:#f0efff;color:#6657db;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pda-script-status small{font-size:11px;color:#8b91a1;line-height:1.35}
 .pda-script-status.ready b{color:#1c936b}
 .pda-updated{font-size:12px;color:#667087;white-space:nowrap}

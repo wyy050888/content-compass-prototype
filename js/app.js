@@ -1300,8 +1300,49 @@
       ["方圆·公版", "方", "亲和女声"], ["高远·公版", "高", "专业男声"],
       ["夏语薇·公版", "夏", "轻快女声"], ["陈海峰·公版", "海", "磁性男声"]
     ];
+    function voiceOptionsHtml(optionAttribute, previewAttribute, selectedValue = SCRIPT_VOICE_OPTIONS[0][0]) {
+      return SCRIPT_VOICE_OPTIONS.map(([name, avatar, tone]) => {
+        const selected = name === selectedValue;
+        return `<div class="script-voice-choice"><button class="script-voice-select${selected ? " active" : ""}" type="button" data-voice-option="${escapeHtml(name)}" data-${optionAttribute}="${escapeHtml(name)}" aria-pressed="${selected}"><span class="script-voice-avatar" aria-hidden="true">${avatar}</span><span class="script-voice-meta"><b>${name}</b><small>${tone}</small></span><i>✓</i></button><button class="script-voice-preview" type="button" data-voice-preview="${escapeHtml(name)}" data-${previewAttribute}="${escapeHtml(name)}" aria-label="试听 ${name}"><span>▶</span><em>试听</em></button></div>`;
+      }).join("");
+    }
     function scriptVoiceOptionsHtml() {
-      return SCRIPT_VOICE_OPTIONS.map(([name, avatar, tone], index) => `<div class="script-voice-choice"><button class="script-voice-select${index === 0 ? " active" : ""}" type="button" data-script-voice-option="${name}" aria-pressed="${index === 0}"><span class="script-voice-avatar" aria-hidden="true">${avatar}</span><span class="script-voice-meta"><b>${name}</b><small>${tone}</small></span><i>✓</i></button><button class="script-voice-preview" type="button" data-script-voice-preview="${name}" aria-label="试听 ${name}"><span>▶</span><em>试听</em></button></div>`).join("");
+      return voiceOptionsHtml("script-voice-option", "script-voice-preview");
+    }
+
+    function bindVoiceChoiceEvents(root, inputSelector) {
+      root.querySelectorAll("[data-voice-option]").forEach(button => {
+        button.addEventListener("click", () => {
+          root.querySelectorAll("[data-voice-option]").forEach(item => {
+            const selected = item === button;
+            item.classList.toggle("active", selected);
+            item.setAttribute("aria-pressed", String(selected));
+          });
+          const input = root.querySelector(inputSelector);
+          if (input) input.value = button.dataset.voiceOption;
+          if (input) input.dispatchEvent(new Event("change", { bubbles:true }));
+        });
+      });
+      let voicePreviewTimer = null;
+      root.querySelectorAll("[data-voice-preview]").forEach(button => {
+        button.addEventListener("click", () => {
+          const card = button.closest(".script-voice-choice");
+          const isPlaying = card?.classList.contains("is-playing");
+          clearTimeout(voicePreviewTimer);
+          root.querySelectorAll(".script-voice-choice").forEach(item => {
+            item.classList.remove("is-playing");
+            item.querySelector("[data-voice-preview] em")?.replaceChildren("试听");
+          });
+          if (isPlaying) return;
+          card?.classList.add("is-playing");
+          button.querySelector("em")?.replaceChildren("试听中");
+          showToast(`正在试听 ${button.dataset.voicePreview}`);
+          voicePreviewTimer = setTimeout(() => {
+            card?.classList.remove("is-playing");
+            button.querySelector("em")?.replaceChildren("试听");
+          }, 4500);
+        });
+      });
     }
 
     const agentConfigs = {
@@ -1546,6 +1587,27 @@
                 </div>
               </div>
 
+              <div class="field full" data-script-audience-field data-script-audience-panel>
+                <label>目标人群 <span class="required-star">*</span></label>
+                <div class="source-mode-switch script-persona-source" role="tablist" aria-label="目标人群来源">
+                  <button type="button" class="active" data-script-persona-mode="template" role="tab" aria-selected="true">从模板库选择</button>
+                  <button type="button" data-script-persona-mode="manual" role="tab" aria-selected="false">自行输入</button>
+                </div>
+                <div class="script-persona-mode-panel" data-script-persona-panel="template">
+                  <div class="script-persona-trigger" data-action="open-script-audience-picker" role="button" tabindex="0">
+                    <span class="script-persona-placeholder" data-script-audience-placeholder>请选择人群</span>
+                    <span class="script-persona-chips" data-script-audience-chips hidden></span>
+                    <button type="button" class="script-persona-clear" data-action="clear-script-audience" aria-label="清空目标人群" title="清空" hidden>×</button>
+                    <i class="script-persona-arrow">›</i>
+                  </div>
+                </div>
+                <div class="script-persona-mode-panel script-persona-manual" data-script-persona-panel="manual" hidden>
+                  <div class="script-persona-groups" data-script-persona-groups></div>
+                  <button type="button" class="script-persona-add-group" data-script-add-persona-group><i>＋</i>添加人群</button>
+                </div>
+                <input type="hidden" data-script-audience data-required>
+              </div>
+
             </div>
           </section>
 
@@ -1560,6 +1622,14 @@
           <section class="form-section" data-task-step="2">
             <div class="form-section-head"><div><strong>脚本策略</strong><small>选择素材库依赖模式、素材范围与生成模型。</small></div></div>
             <div class="section-grid">
+              <div class="field">
+                <label>画面比例 <span class="required-star">*</span></label>
+                <select data-script-ratio>
+                  <option value="9:16" selected>9:16</option>
+                  <option value="16:9">16:9</option>
+                </select>
+                <div class="form-hint">9:16 适用于抖音/快手竖屏；16:9 适用于横屏场景。</div>
+              </div>
               <div class="field full">
                 <label>是否依赖素材库 <span class="required-star">*</span></label>
                 <div class="choice-row" data-single="script-material-mode" data-role="script-material-mode">
@@ -1684,14 +1754,26 @@
                 <div class="mix-plan-context" data-mix-plan-context></div>
               </article>
               <article class="mix-block">
-                <div class="mix-block-head"><div><strong>目标产品与视频要求</strong><small data-mix-product-origin>自主创作需选择目标产品；产品事实用于约束文案和素材范围。</small></div></div>
+                <div class="mix-block-head"><div><strong>目标产品与视频要求</strong><small data-mix-product-origin>选择产品后，系统将匹配本次设定，生成后续文案及脚本。</small></div></div>
                 <div class="mix-three-col">
-                  <label class="mix-field" data-mix-product-field><span data-mix-product-label>目标产品</span><select data-mix-product hidden><option value="" selected>请选择产品</option><option value="mite-pro">轻净 Pro 除螨仪</option><option value="washer-s5">净界洗地机 S5</option><option value="air-a8">轻享空气炸锅 A8</option></select><button class="mix-picker-trigger" type="button" data-mix-pick-product><span data-mix-product-picker-label>请选择产品</span><i>›</i></button></label>
-                  <label class="mix-field" data-mix-audience-field><span>目标人群</span><input type="hidden" value="" data-mix-audience><button class="mix-picker-trigger" type="button" data-mix-pick-audience><span data-mix-audience-label>请选择人群</span><i>›</i></button></label>
-                  <label class="mix-field mix-duration-field" data-mix-duration-field><span data-mix-duration-label>视频生成时长</span><span class="mix-duration-input"><input type="number" min="10" max="180" step="1" value="60" data-mix-target-duration><i>秒</i></span><small data-mix-duration-hint hidden>已继承脚本时长，可修改</small></label>
+                  <label class="mix-field" data-mix-product-field><span data-mix-product-label>目标产品</span><select data-mix-product hidden><option value="" selected>请选择产品</option><option value="mite-pro">轻净 Pro 除螨仪</option><option value="washer-s5">净界洗地机 S5</option><option value="air-a8">轻享空气炸锅 A8</option></select><button class="mix-picker-trigger" type="button" data-mix-pick-product><span data-mix-product-picker-label>请选择产品</span><i>›</i></button><div class="mix-fact-strip" data-mix-product-facts><b>已带入产品事实</b><button type="button" data-mix-show-facts>查看</button></div></label>
+                  <label class="mix-field mix-audience-block" data-mix-audience-block data-mix-audience-field>
+                    <span data-mix-audience-label>目标人群</span>
+                    <input type="hidden" value="" data-mix-audience>
+                    <div class="mix-persona-source" role="group" aria-label="目标人群来源"><button class="active" type="button" data-mix-persona-mode="template">从模板库选择</button><button type="button" data-mix-persona-mode="manual">自行输入</button></div>
+                    <div class="mix-persona-mode-panel" data-mix-persona-panel="template">
+                      <div class="mix-persona-trigger" data-mix-pick-audience role="button" tabindex="0"><span class="mix-persona-placeholder" data-mix-audience-placeholder>请选择人群</span><span class="mix-persona-chips" data-mix-audience-chips hidden></span><button type="button" class="mix-persona-clear" data-persona-clear aria-label="清空选择" hidden>×</button><i class="mix-persona-arrow">›</i></div>
+                    </div>
+                    <div class="mix-persona-mode-panel mix-persona-manual" data-mix-persona-panel="manual" hidden>
+                      <div class="mix-persona-groups" data-mix-persona-groups></div>
+                      <button type="button" class="mix-persona-add-group" data-mix-add-persona-group><i>＋</i>添加人群</button>
+                    </div>
+                  </label>
+                  <label class="mix-field mix-duration-field" data-mix-duration-field><span data-mix-duration-label>视频生成时长 <small data-mix-duration-hint hidden>已继承脚本时长，可修改</small></span><span class="mix-duration-input"><input type="number" step="1" placeholder="请输入" data-mix-target-duration><i>秒</i></span></label>
+                  <label class="mix-field mix-ratio-field" data-mix-ratio-field><span>画面比例 <em class="required-star">*</em></span><select data-mix-ratio><option value="9:16" selected>9:16</option><option value="16:9">16:9</option></select></label>
                 </div>
                 <div class="mix-duration-presets" data-mix-duration-presets hidden></div>
-                <div class="mix-fact-strip" data-mix-product-facts><b>已带入产品事实</b><span>深层清洁 · 拍打吸尘同步 · 透明尘杯可水洗 · 禁用“100%除螨”</span><button type="button" data-mix-show-facts>查看</button></div>
+                <label class="mix-requirement" data-mix-requirement-block><span>本次创作要求</span><textarea data-mix-requirement placeholder="例如：希望突出哪些卖点、使用哪些画面，或需要避免哪些表达。"></textarea></label>
               </article>
               <article class="mix-block" data-mix-material-block>
                 <div class="mix-block-head mix-material-block-head"><div><div class="mix-material-title-line"><strong>创作素材</strong><span>已选 <b data-mix-selected-count>24</b> / <i data-mix-total-count>24</i></span></div><small>默认展示该产品关联素材；取消选择的素材不会参与本次混剪。</small></div><div class="mix-material-head-actions"><button type="button" data-mix-select-all>取消全选</button><button type="button" data-mix-add-material title="关联创作素材">＋ 添加素材</button></div></div>
@@ -1711,39 +1793,32 @@
                 <div class="mix-material-pagination" data-mix-material-pagination hidden></div>
                 <div class="mix-empty-material" data-mix-material-empty hidden><b data-mix-material-empty-title></b><span data-mix-material-empty-detail></span></div>
               </article>
-              <label class="mix-block mix-requirement" data-mix-requirement-block><span>本次创作要求（选填）</span><textarea data-mix-requirement placeholder="例如：结尾引导点击商品；不要出现价格信息；优先使用卧室清洁画面。">结尾引导点击商品；不要出现未经验证的功效数据。</textarea></label>
             </section>
 
             <section class="mix-step-panel" data-task-step="2" hidden>
-              <div class="mix-step-title"><div><span>STEP 2</span><h3>确认文案与配音</h3><p>这里展示第一步输入形成的本次最终文案，不会修改资产库原文案或脚本。</p></div><span class="mix-source-badge" data-mix-source-badge>AI 生成</span></div>
-              <article class="mix-structure-result compact" data-mix-structure-result>
-                <span>本次结构</span><strong data-mix-result-structure-name>结果前置·痛点解决·行动引导型</strong><em data-mix-result-structure-reason>AI 智能匹配</em><button type="button" data-mix-change-structure>更换</button>
-              </article>
               <article class="mix-block mix-copy-editor">
-                <div class="mix-block-head"><div><strong>口播文案</strong><small data-mix-copy-editor-hint>可直接修改；产品库禁用话术会在保存前校验。</small></div><button type="button" data-mix-regenerate-copy>重新生成</button></div>
-                <textarea data-mix-copy>刚换的床单，看起来干净，床垫深处却可能还藏着毛发和碎屑。先别听我讲参数，直接看轻净 Pro 除螨仪走完一遍后的透明尘杯。它在床垫表面推进时，拍打和吸尘同步进行，把织物深处的细小脏污带出来，清洁结果当场就能看见。卧室床垫、客厅沙发和其他布艺都能使用，用完后尘杯还可以拆下来水洗，日常整理更省事。家里有孩子或宠物，别只停留在换床单和粘表面毛发，定期把床褥深处也清理一遍。想看完整实测过程，点击商品了解更多。</textarea>
-                <div class="mix-copy-meta"><span><b data-mix-copy-count>196</b> 字</span><span class="ok">✓ 产品事实校验通过</span><span>已避开禁用话术</span></div>
+                <div class="mix-block-head"><div><strong>口播文案</strong></div><div class="mix-copy-head-actions"><span class="mix-structure-stages" data-mix-structure-stages hidden></span><button class="mix-regenerate-copy" type="button" data-mix-regenerate-copy>重新生成</button></div></div>
+                <div class="mix-copy-textarea-wrap"><textarea data-mix-copy>刚换的床单，看起来干净，床垫深处却可能还藏着毛发和碎屑。先别听我讲参数，直接看轻净 Pro 除螨仪走完一遍后的透明尘杯。它在床垫表面推进时，拍打和吸尘同步进行，把织物深处的细小脏污带出来，清洁结果当场就能看见。卧室床垫、客厅沙发和其他布艺都能使用，用完后尘杯还可以拆下来水洗，日常整理更省事。家里有孩子或宠物，别只停留在换床单和粘表面毛发，定期把床褥深处也清理一遍。想看完整实测过程，点击商品了解更多。</textarea><span class="mix-copy-count" aria-live="polite"><b data-mix-copy-count>196</b> 字</span></div>
               </article>
               <article class="mix-block">
                 <div class="mix-block-head"><div><strong>配音设置</strong><small>选择音色、试听并微调语速；修改文案后实际时长会自动重算。</small></div></div>
+                <div class="mix-voice-role-field"><span>配音角色</span><div class="script-voice-inline mix-voice-inline" data-mix-voice-options></div><input type="hidden" data-mix-voice value="陈子建·公版"></div>
                 <div class="mix-voice-layout">
-                  <label class="mix-field"><span>配音角色</span><select data-mix-voice><option>许念 · 自然亲和</option><option>陈子建 · 清晰有力</option><option>周雨桐 · 轻快种草</option></select></label>
                   <div class="mix-speed-control"><span>语速</span><button type="button" data-mix-speed-minus>−</button><input type="range" min="0.8" max="1.3" step="0.05" value="1" data-mix-speed><button type="button" data-mix-speed-plus>＋</button><b data-mix-speed-label>1.00×</b></div>
-                  <button class="mix-voice-preview" type="button" data-mix-voice-preview><span>▶</span><div><strong>试听当前配音</strong><small data-mix-voice-status>许念 · 1.00×</small></div></button>
                 </div>
-                <div class="mix-duration-card"><div data-mix-target-duration-panel><span>目标视频时长</span><b data-mix-target-duration-display>60.0 秒</b></div><i data-mix-duration-connector>↔</i><div data-mix-actual-duration-panel><span>当前配音时长</span><b class="primary" data-mix-duration>59.4 秒</b></div><div class="mix-duration-diff" data-mix-duration-diff-panel><span>时长偏差</span><b data-mix-duration-diff>−0.6 秒 · 可生成</b></div><button type="button" data-mix-fit-duration>适配目标时长</button></div>
+                <div class="mix-duration-card"><span>当前配音时长</span><b data-mix-duration>59.4s</b></div>
               </article>
             </section>
 
             <section class="mix-step-panel" data-task-step="3" hidden>
-              <div class="mix-step-title"><div><span>STEP 3</span><h3>确认脚本与素材</h3><p>请逐段确认口播与镜头；AI 匹配不到时可手动调整画面。</p></div><button class="mix-rematch-all" type="button" data-mix-rematch-all>重新匹配全部</button></div>
+              <div class="mix-step-actions" hidden><button class="mix-rematch-all" type="button" data-mix-rematch-all>重新匹配全部</button></div>
               <div class="mix-script-alert" data-mix-script-alert hidden></div>
               <div class="mix-script-list" data-mix-script-list></div>
             </section>
 
             <section class="mix-step-panel" data-task-step="4" hidden>
               <div class="mix-step-title"><div><span>STEP 4</span><h3>生成视频</h3><p>最后检查本次输入，确认后将使用已有素材完成裁切拼接。</p></div><span class="mix-ready-badge">已就绪</span></div>
-              <article class="mix-block mix-generation-summary"><div><span>产品</span><b data-mix-final-product>轻净 Pro 除螨仪</b></div><div><span>成片时长</span><b data-mix-final-duration>48.6 秒</b></div><div><span>配音</span><b data-mix-final-voice>许念 · 1.00×</b></div><div><span>使用素材</span><b data-mix-final-materials>6 个</b></div><div><span>输出规格</span><b>9:16 · 1080×1920 · 30fps</b></div></article>
+              <article class="mix-block mix-generation-summary"><div><span>产品</span><b data-mix-final-product>轻净 Pro 除螨仪</b></div><div><span>成片时长</span><b data-mix-final-duration>48.6 秒</b></div><div><span>配音</span><b data-mix-final-voice>许念 · 1.00×</b></div><div><span>使用素材</span><b data-mix-final-materials>6 个</b></div><div><span>输出规格</span><b data-mix-final-spec>9:16 · 1080×1920 · 30fps</b></div></article>
               <article class="mix-block mix-checklist"><strong>生成前检查</strong><p><span>✓</span> 文案与配音已确认</p><p><span>✓</span> <i data-mix-script-count>5</i> 个脚本段落已确认</p><p><span>✓</span> 所有时间段均已匹配已有素材</p><p><span>✓</span> 未使用原声、字幕、特效或转场</p></article>
               <div class="mix-generation-host" data-mix-generation-host><div class="mix-generation-placeholder"><span>▶</span><strong>等待生成视频</strong><small>预计约 40 秒完成演示生成</small></div></div>
             </section>
@@ -1992,7 +2067,7 @@
       return true;
     }
 
-    function applyProductToForm(productId, announce = false) {
+    function applyProductToForm(productId, announce = false, revealAdvanced = false) {
       if (!productCatalog[productId]) return false;
       const nextProduct = productCatalog[productId];
       if (!clearIncompatiblePersonaTemplates(nextProduct.name)) return false;
@@ -2030,6 +2105,10 @@
       dynamicForm.querySelectorAll(".material-summary strong").forEach(label => {
         label.textContent = `${product.name} · 已绑定素材`;
       });
+      if (revealAdvanced && isStructuredCopyFlow()) {
+        setOriginalAdvanced(true);
+        creationContext.originalFields.advancedOpen = true;
+      }
       if (activeType === "rewrite") refreshRewriteSetting();
       updateModalContext();
       if (announce) setFormFeedback(`已切换至“${product.name}”，并重新带入卖点、人群建议和禁用词。`);
@@ -2645,6 +2724,13 @@
           setFormFeedback(sourceMode === "library" ? "请先选择一条关联产品的文案。" : "请输入或选择对应产品。", "error");
           return false;
         }
+        const audience = panel.querySelector("[data-script-audience]")?.value.trim();
+        if (!audience) {
+          const field = panel.querySelector("[data-script-audience]");
+          field?.closest(".field")?.classList.add("invalid");
+          setFormFeedback("请选择本次脚本的目标人群。", "error");
+          return false;
+        }
         const duration = getScriptDuration();
         if (!Number.isInteger(duration) || duration <= 0 || duration > 600) {
           panel.querySelector("[data-script-duration]")?.closest(".field")?.classList.add("invalid");
@@ -2659,6 +2745,12 @@
       }
       // 步骤②校验
       if (step === 2) {
+        const ratio = dynamicForm.querySelector("[data-script-ratio]")?.value;
+        if (!["9:16", "16:9"].includes(ratio)) {
+          dynamicForm.querySelector("[data-script-ratio]")?.closest(".field")?.classList.add("invalid");
+          setFormFeedback("请选择画面比例。", "error");
+          return false;
+        }
         if (materialMode === "depend") {
           const groupCount = (window.__scriptMaterialSelected || []).length;
           if (groupCount === 0) {
@@ -2693,6 +2785,7 @@
       const sourceMode = dynamicForm.querySelector("[data-script-source-mode].active")?.dataset.scriptSourceMode || "library";
       const productInput = getScriptProductInput(sourceMode);
       const product = productInput?.dataset.productId || "";
+      const audienceInput = dynamicForm.querySelector("[data-script-audience]");
       const materialMode = dynamicForm.querySelector('[data-role="script-material-mode"] .choice-chip.active')?.dataset.materialMode || "depend";
       const sourceValue = sourceMode === "library"
         ? dynamicForm.querySelector("[data-script-source-library]")?.value
@@ -2712,7 +2805,12 @@
           : (dynamicForm.querySelector("[data-script-source-text]")?.value || "").slice(0, 60) + (dynamicForm.querySelector("[data-script-source-text]")?.value.length > 60 ? "…" : ""),
         product,
         productName: productInput?.value.trim() || "",
+        audience: audienceInput?.value.trim() || "",
+        audienceCount: String(audienceInput?.dataset.personaIds || "").split("|").filter(Boolean).length,
+        personaId: audienceInput?.dataset.personaId || "",
+        personaIds: audienceInput?.dataset.personaIds || "",
         duration: getScriptDuration(),
+        ratio: dynamicForm.querySelector("[data-script-ratio]")?.value || "9:16",
         sourceText: sourceMode === "library" ? (dynamicForm.querySelector("[data-script-source-content]")?.value || "") : sourceValue,
         voice: dynamicForm.querySelector("[data-script-voice]")?.value || "",
         materialMode,
@@ -2754,8 +2852,16 @@
             <div class="script-summary-value"><b>${escapeHtml(productName)}</b></div>
           </div>
           <div class="script-summary-item">
+            <span class="script-summary-label">目标人群</span>
+            <div class="script-summary-value"><b>${escapeHtml(ctx.audience || "—")}</b>${ctx.audienceCount > 1 ? `<small>已选择 ${ctx.audienceCount} 个人群画像</small>` : ""}</div>
+          </div>
+          <div class="script-summary-item">
             <span class="script-summary-label">目标时长</span>
             <div class="script-summary-value"><b>${ctx.duration || 30} 秒</b></div>
+          </div>
+          <div class="script-summary-item">
+            <span class="script-summary-label">画面比例</span>
+            <div class="script-summary-value"><b>${escapeHtml(ctx.ratio || "9:16")}</b></div>
           </div>
           <div class="script-summary-item"><span class="script-summary-label">配音角色</span><div class="script-summary-value"><b>${escapeHtml(ctx.voice || "—")}</b></div></div>
           <div class="script-summary-item">
@@ -2785,35 +2891,36 @@
     }
 
     // 文案库数据：一条文案只对应一个目标人群，避免混用不同人群的表达策略。
+    // 适用人群字段统一使用「抖音八大人群」，便于智能混剪自动匹配到标准人群 chip。
     const SCRIPT_LIBRARY_ITEMS = [
       {
         id: "mite-summer", productId: "mite-pro",
         text: "刚换的床单,也能吸出一杯脏东西。看得见的是表面,看不见的都藏在床垫深处。轻净 Pro 边拍边吸,脏东西直接进尘杯,用完还能拆下水洗。",
-        audience: "家庭主妇", structure: "结果直给型",
+        audience: "精致妈妈", structure: "结果直给型",
         source: "AI 生成", createdBy: "嗡大发", createdAt: "2026-08-05 14:20", updatedBy: "嗡大发", scope: "mine", updated: "2026-08-05 14:20"
       },
       {
         id: "mite-family", productId: "mite-pro",
         text: "床单刚换一周,第一遍照样能吸出碎屑和毛发。床垫深处的脏东西,普通清理根本触达不到。轻净 Pro 拍打吸尘同步完成,尘杯可水洗。",
-        audience: "年轻父母", structure: "痛点钩子型",
+        audience: "精致妈妈", structure: "痛点钩子型",
         source: "AI 生成", createdBy: "嗡大发", createdAt: "2026-08-05 14:20", updatedBy: "嗡大发", scope: "mine", updated: "2026-08-05 14:25"
       },
       {
         id: "mite-pet", productId: "mite-pro",
         text: "家里养宠物,床铺最该清理的是藏起来的毛。刚洗完的床单,宠物上去转一圈就又有碎屑。轻净 Pro 大吸力,一拍一吸全带走。",
-        audience: "养宠人群", structure: "场景痛点型",
+        audience: "精致妈妈", structure: "场景痛点型",
         source: "AI 生成", createdBy: "嗡大发", createdAt: "2026-08-05 14:20", updatedBy: "嗡大发", scope: "mine", updated: "2026-08-05 14:30"
       },
       {
         id: "mite-rationale", productId: "mite-pro",
         text: "先不讲参数,直接看一次真实使用。轻净 Pro 工作时可以做到深层清洁,处理后的变化通过尘杯直接呈现。",
-        audience: "理性消费者", structure: "实测证明型",
+        audience: "资深中产", structure: "实测证明型",
         source: "AI 生成", createdBy: "李四", createdAt: "2026-08-04 10:12", updatedBy: "李四", scope: "team", updated: "2026-08-04 10:12"
       },
       {
         id: "mite-curiosity", productId: "mite-pro",
         text: "明明刚整理过,为什么再次处理还能看到变化?答案不靠猜,直接看完整演示。",
-        audience: "好奇心驱动", structure: "悬念钩子型",
+        audience: "Z世代", structure: "悬念钩子型",
         source: "AI 生成", createdBy: "李四", createdAt: "2026-08-04 10:12", updatedBy: "李四", scope: "team", updated: "2026-08-04 10:18"
       }
     ];
@@ -2884,6 +2991,7 @@
             }
             syncScriptLibraryProductDisplay();
           }
+          clearScriptPersonaIfIncompatible();
         });
       });
 
@@ -2942,6 +3050,7 @@
           root.querySelectorAll("[data-script-manual-product-panel]").forEach(panel => {
             panel.hidden = panel.dataset.scriptManualProductPanel !== source;
           });
+          clearScriptPersonaIfIncompatible();
           setFormFeedback("");
         });
       });
@@ -2951,11 +3060,14 @@
       root.querySelector('[data-script-manual-product-panel="library"] [data-script-product]')?.addEventListener("change", event => {
         const label = root.querySelector("[data-script-selected-product]");
         if (label) label.textContent = event.target.value || "选择产品";
+        clearScriptPersonaIfIncompatible();
       });
+      root.querySelector('[data-script-product-panel="library"] [data-script-product]')?.addEventListener("change", () => clearScriptPersonaIfIncompatible());
       root.querySelector('[data-script-manual-product-panel="manual"] [data-script-product]')?.addEventListener("input", event => {
         const matched = Object.entries(productCatalog).find(([, product]) => product.name === event.target.value.trim());
         if (matched) event.target.dataset.productId = matched[0];
         else delete event.target.dataset.productId;
+        clearScriptPersonaIfIncompatible();
       });
       root.querySelector("[data-action='recognize-script-product']")?.addEventListener("click", () => {
         const link = root.querySelector("[data-script-product-link]")?.value.trim();
@@ -2964,73 +3076,154 @@
         if (input) {
           input.value = productCatalog["mite-pro"].name;
           input.dataset.productId = "mite-pro";
+          clearScriptPersonaIfIncompatible();
         }
         setFormFeedback(`已解析产品“${productCatalog["mite-pro"].name}”。`);
       });
 
-      // 6) 素材库弹窗触发
+      // 6) 目标人群：与智能混剪一致，支持从模板库多选（无上限）和自行输入两种模式。
+      const audienceField = root.querySelector("[data-script-audience-field]");
+      const setScriptAudience = (personas = []) => {
+        const input = root.querySelector("[data-script-audience]");
+        if (!input) return;
+        const field = audienceField;
+        const selected = (Array.isArray(personas) ? personas : [personas]).filter(Boolean)
+          .filter((item, index, list) => list.findIndex(candidate => candidate.id === item.id) === index);
+        const names = selected.map(item => item.name || item.audience);
+        input.value = names.join("、");
+        input.dataset.personaId = selected[0]?.id || "";
+        input.dataset.personaIds = selected.map(item => item.id).join("|");
+        const placeholder = field?.querySelector("[data-script-audience-placeholder]");
+        const chips = field?.querySelector("[data-script-audience-chips]");
+        const clearBtn = field?.querySelector("[data-action='clear-script-audience']");
+        const trigger = field?.querySelector(".script-persona-trigger");
+        if (selected.length) {
+          if (placeholder) placeholder.hidden = true;
+          if (chips) {
+            chips.hidden = false;
+            chips.innerHTML = names.map(name => `<em class="script-persona-chip">${escapeHtml(name)}</em>`).join("");
+          }
+          if (clearBtn) clearBtn.hidden = false;
+          trigger?.classList.add("is-filled");
+        } else {
+          if (placeholder) placeholder.hidden = false;
+          if (chips) { chips.hidden = true; chips.innerHTML = ""; }
+          if (clearBtn) clearBtn.hidden = true;
+          trigger?.classList.remove("is-filled");
+        }
+        input.closest(".field")?.classList.remove("invalid");
+      };
+      const currentScriptProductName = () => getScriptProductInput(root.querySelector("[data-script-source-mode].active")?.dataset.scriptSourceMode || "library")?.value.trim() || "";
+      const clearScriptPersonaIfIncompatible = () => {
+        const input = root.querySelector("[data-script-audience]");
+        const ids = String(input?.dataset.personaIds || "").split("|").filter(Boolean);
+        const productName = currentScriptProductName();
+        const selected = ids.map(id => personaCatalog.find(item => item.id === id)).filter(Boolean);
+        if (selected.some(persona => personaProducts(persona).length && !personaProducts(persona).includes(productName))) setScriptAudience([]);
+      };
+      const openScriptAudiencePicker = () => {
+        const productName = currentScriptProductName();
+        if (!productName) return showToast("请先确认对应产品，再选择人群画像。");
+        if (!window.CreationPersonaPicker) return showToast("人群画像选择器加载失败，请刷新页面后重试。");
+        const audienceInput = root.querySelector("[data-script-audience]");
+        const manualValues = String(audienceInput?.value || "").split("、").map(value => value.trim()).filter(Boolean)
+          .filter(name => !personaCatalog.some(persona => persona.name === name || persona.audience === name));
+        window.CreationPersonaPicker.open({
+          items: personaCatalog,
+          productName,
+          multiple:true,
+          maxSelected:99,
+          selectedIds:String(root.querySelector("[data-script-audience]")?.dataset.personaIds || "").split("|").filter(Boolean),
+          allowManual:true,
+          mode:"template",
+          hideModeSwitch:true,
+          manualValues,
+          description:"从模板库多选人群画像,本次创作共同生效。",
+          onConfirm(personas) {
+            const selected = Array.isArray(personas) ? personas : [personas];
+            setScriptAudience(selected);
+            showToast(`已应用 ${selected.length} 个人群画像`);
+          }
+        });
+      };
+      if (audienceField) {
+        // 模式切换按钮
+        audienceField.querySelectorAll("[data-script-persona-mode]").forEach(btn => {
+          btn.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            setScriptPersonaMode(root, btn.dataset.scriptPersonaMode);
+          });
+        });
+        // 添加人群按钮（兜底）
+        ensureScriptAddPersonaBinding(root);
+        // 移除人群按钮
+        audienceField.addEventListener("click", event => {
+          const removeGroup = event.target.closest("[data-script-persona-group-remove]");
+          if (removeGroup) {
+            event.preventDefault();
+            const group = removeGroup.closest("[data-script-persona-group]");
+            if (group) {
+              const groups = audienceField.querySelector("[data-script-persona-groups]");
+              const wasOnly = groups.querySelectorAll("[data-script-persona-group]").length <= 1;
+              group.remove();
+              if (wasOnly) {
+                groups.insertAdjacentHTML("beforeend", scriptPersonaGroupTemplate(0));
+              } else {
+                [...groups.querySelectorAll("[data-script-persona-group]")].forEach((node, index) => {
+                  node.dataset.scriptPersonaIndex = String(index);
+                  const label = node.querySelector(".script-persona-group-head > span");
+                  if (label) label.textContent = `人群 ${index + 1}`;
+                  if (index === 0) {
+                    const remove = node.querySelector("[data-script-persona-group-remove]");
+                    if (remove) remove.remove();
+                  }
+                });
+              }
+              syncScriptManualPersonaSummary(root);
+            }
+            return;
+          }
+          const pill = event.target.closest(".script-persona-pill");
+          if (pill) {
+            const row = pill.closest(".script-persona-chips-row");
+            if (row) {
+              row.querySelectorAll(".script-persona-pill").forEach(button => button.classList.toggle("active", button === pill));
+              const group = pill.closest("[data-script-persona-group]");
+              const customAge = group?.querySelector("[data-script-custom-age]");
+              if (customAge) customAge.hidden = pill.dataset.value !== "自定义" || row !== group.querySelector("[data-script-age-chips]");
+              syncScriptManualPersonaSummary(root);
+            }
+            return;
+          }
+        });
+        audienceField.addEventListener("input", event => {
+          if (event.target.matches("[data-script-age-min],[data-script-age-max]")) {
+            syncScriptManualPersonaSummary(root);
+          }
+        });
+        // 打开人群画像选择器（直接绑定在 trigger 上,避免委托失效）
+        audienceField.querySelector("[data-action='open-script-audience-picker']")?.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          openScriptAudiencePicker();
+        });
+        audienceField.querySelector("[data-action='clear-script-audience']")?.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          setScriptAudience([]);
+        });
+        // 初始化为模板库模式
+        setScriptPersonaMode(root, "template");
+      }
+
+      // 7) 素材库弹窗触发
       root.querySelector("[data-action='open-script-material-picker']")?.addEventListener("click", () => {
         openScriptMaterialPicker();
       });
       const voiceOptionsHost = root.querySelector("[data-script-voice-options]");
       if (voiceOptionsHost) voiceOptionsHost.innerHTML = scriptVoiceOptionsHtml();
-      root.querySelectorAll("[data-script-voice-option]").forEach(button => {
-        button.addEventListener("click", () => {
-          root.querySelectorAll("[data-script-voice-option]").forEach(item => item.classList.toggle("active", item === button));
-          root.querySelectorAll("[data-script-voice-option]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
-          const voice = button.dataset.scriptVoiceOption;
-          const input = root.querySelector("[data-script-voice]");
-          if (input) input.value = voice;
-        });
-      });
-      let voicePreviewTimer = null;
-      root.querySelectorAll("[data-script-voice-preview]").forEach(button => {
-        button.addEventListener("click", () => {
-          const card = button.closest(".script-voice-choice");
-          const isPlaying = card?.classList.contains("is-playing");
-          clearTimeout(voicePreviewTimer);
-          root.querySelectorAll(".script-voice-choice").forEach(item => {
-            item.classList.remove("is-playing");
-            const label = item.querySelector("[data-script-voice-preview] em");
-            if (label) label.textContent = "试听";
-          });
-          if (isPlaying) return;
-          card?.classList.add("is-playing");
-          const label = button.querySelector("em");
-          if (label) label.textContent = "试听中";
-          showToast(`正在试听 ${button.dataset.scriptVoicePreview}`);
-          voicePreviewTimer = setTimeout(() => {
-            card?.classList.remove("is-playing");
-            if (label) label.textContent = "试听";
-          }, 4500);
-        });
-      });
-    }
-
-    function openScriptVoicePicker() {
-      const voices = ["许念·公版", "阿乐·公版", "陈海峰·公版", "赵明远·公版", "徐子轩·公版", "周雨桐·公版", "陈子建·公版", "范青·公版", "方圆·公版", "高远·公版", "郭美琳·公版", "夏语薇·公版"];
-      let selected = dynamicForm.querySelector("[data-script-voice]")?.value || voices[0];
-      const overlay = document.createElement("div");
-      overlay.className = "modal-overlay show";
-      overlay.innerHTML = `<div class="modal-card script-voice-modal" role="dialog" aria-label="选择配音角色"><header class="modal-head"><div><strong>选择角色</strong><small>单选，角色仅用于本次脚本配音设置</small></div><button class="modal-close" type="button" data-close>×</button></header><div class="script-voice-toolbar"><input type="search" placeholder="搜索角色" data-search></div><div class="script-voice-grid" data-grid></div><footer class="modal-foot"><div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close>取消</button><button class="primary-btn" type="button" data-confirm>确认选择</button></div></footer></div>`;
-      document.body.appendChild(overlay);
-      const grid = overlay.querySelector("[data-grid]");
-      const render = () => {
-        const keyword = overlay.querySelector("[data-search]").value.trim();
-        grid.innerHTML = voices.filter(name => name.includes(keyword)).map(name => `<button class="script-voice-card${name === selected ? " selected" : ""}" type="button" data-voice="${name}"><span>${name.slice(0, 1)}</span><b>${name}</b>${name === selected ? "<i>✓</i>" : ""}</button>`).join("") || '<div class="script-voice-empty">未找到匹配角色</div>';
-        grid.querySelectorAll("[data-voice]").forEach(card => card.addEventListener("click", () => { selected = card.dataset.voice; render(); }));
-      };
-      overlay.querySelector("[data-search]").addEventListener("input", render);
-      overlay.addEventListener("click", event => { if (event.target === overlay || event.target.closest("[data-close]")) overlay.remove(); });
-      overlay.querySelector("[data-confirm]").addEventListener("click", () => {
-        const input = dynamicForm.querySelector("[data-script-voice]");
-        const label = dynamicForm.querySelector("[data-script-voice-label]");
-        if (input) input.value = selected;
-        if (label) label.textContent = selected;
-        overlay.remove();
-        showToast("已选择配音角色");
-      });
-      render();
+      bindVoiceChoiceEvents(root, "[data-script-voice]");
     }
 
     function renderScriptModelCards() {
@@ -3138,8 +3331,13 @@
       if (!display || !productInput) return;
       const product = productCatalog[productInput.dataset.productId || ""];
       display.innerHTML = product
-        ? `<span class="script-product-display-icon">◈</span><div><strong>${escapeHtml(product.name)}</strong></div>`
+        ? `<span class="script-product-display-icon">◈</span><div class="script-product-info"><strong>${escapeHtml(product.name)}</strong></div><span class="script-product-fact">已带入产品事实 <button type="button" data-script-show-facts="${escapeHtml(productInput.dataset.productId)}">查看</button></span>`
         : `<span class="script-product-display-icon">◈</span><div><strong>等待带入对应产品</strong></div>`;
+      display.querySelector("[data-script-show-facts]")?.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        openMixProductFacts(event.currentTarget.dataset.scriptShowFacts);
+      });
     }
 
     function refreshScriptMaterialSummary() {
@@ -3262,8 +3460,8 @@
         if (!selectedId) return;
         const item = SCRIPT_LIBRARY_ITEMS.find(i => i.id === selectedId);
         if (typeof options.onConfirm === "function") {
-          options.onConfirm(item);
           overlay.remove();
+          try { options.onConfirm(item); } catch (err) { console.error("[mix-source] onConfirm 处理失败:", err); showToast("已选择来源，但回填信息失败，请刷新页面后重试。"); }
           return;
         }
         const hidden = dynamicForm.querySelector("[data-script-source-library]");
@@ -3273,6 +3471,7 @@
           productInput.value = productCatalog[item.productId]?.name || item.productId;
           productInput.dataset.productId = item.productId;
           productInput.setAttribute("data-product-id", item.productId);
+          productInput.dispatchEvent(new Event("change", { bubbles:true }));
         }
         refreshScriptLibraryTrigger();
         syncScriptSourcePreviewFromLibrary();
@@ -3321,7 +3520,7 @@
       overlay.innerHTML = `
         <div class="modal-card material-picker-modal" role="dialog" aria-label="从素材库选择素材">
           <header class="modal-head">
-            <div><strong>${options.title || "从素材库选择素材"}</strong><small>${options.productName ? `已按“${escapeHtml(options.productName)}”筛选关联素材；` : "可多选；"}支持按文件夹、类型和分析状态筛选</small></div>
+            <div><strong>${options.title || "从素材库选择素材"}</strong><small>${options.productName ? `已按“${escapeHtml(options.productName)}”筛选关联素材；` : (options.defaultSelectionHint || "可多选；")}支持按文件夹、类型和分析状态筛选</small></div>
             <button class="modal-close" type="button" data-modal-close>×</button>
           </header>
           <div class="lib-picker">
@@ -4212,7 +4411,7 @@
         items,
         selectedId: creationContext.productId,
         onConfirm(productId) {
-          applyProductToForm(productId, true);
+          applyProductToForm(productId, true, true);
           setFormFeedback(`已选择“${productCatalog[productId].name}”，产品信息已自动带入。`);
         }
       });
@@ -4398,7 +4597,7 @@
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>次要卖点（最多 3 个）</label><button class="ai-refresh" type="button" data-ai-suggest="secondary">AI 换一组</button></div><div class="point-editor" data-point-editor="secondary" data-limit="3"><div class="point-row"><span class="point-index">●</span><input data-point-value value="透明尘杯可拆卸水洗"></div><div class="point-row"><span class="point-index">●</span><input data-point-value value="床垫、沙发和布艺均可使用"></div><button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button><textarea data-field="secondary" hidden>透明尘杯可拆卸水洗\n床垫、沙发和布艺均可使用</textarea></div></div>
               <div class="original-field full advanced-field" hidden><label>差异化卖点</label><textarea data-field="difference">清洁效果可视化，操作完成后尘杯清理方便</textarea></div>
               <div class="original-field advanced-field" hidden><label>营销场景</label><div class="choice-row original-choices" data-single="marketing-scene" data-role="marketing-scene"><span class="choice-chip">短视频带货</span><span class="choice-chip active">直播间引流</span></div></div>
-              <div class="original-field advanced-field" hidden><label>营销策略</label><textarea data-field="marketing" placeholder="填写当前产品真实价格、优惠、赠品或活动信息">暑期活动，到手赠送 3 个替换滤网</textarea></div>
+              <div class="original-field full advanced-field" hidden><label>营销策略</label><textarea data-field="marketing" placeholder="填写当前产品真实价格、优惠、赠品或活动信息">暑期活动，到手赠送 3 个替换滤网</textarea></div>
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>信任背书</label><button class="ai-refresh" type="button" data-ai-suggest="trust">AI 换一组</button></div><div class="point-editor" data-point-editor="trust" data-limit="5"><div class="point-row"><span class="point-index">●</span><input data-point-value value="整机质保 1 年，产品参数与包装清单可核验"></div><button class="point-add" type="button" data-point-action="add">＋ 添加背书</button><textarea data-field="trust" hidden>整机质保 1 年，产品参数与包装清单可核验</textarea></div></div>
             </div>
           </div>
@@ -4480,7 +4679,7 @@
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>次要卖点（最多 3 个）</label><button class="ai-refresh" type="button" data-ai-suggest="secondary">AI 换一组</button></div><div class="point-editor" data-point-editor="secondary" data-limit="3"><div class="point-row"><span class="point-index">●</span><input data-point-value value="透明尘杯可拆卸水洗"></div><div class="point-row"><span class="point-index">●</span><input data-point-value value="床垫、沙发和布艺均可使用"></div><button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button><textarea data-field="secondary" hidden>透明尘杯可拆卸水洗\n床垫、沙发和布艺均可使用</textarea></div></div>
               <div class="original-field full advanced-field" hidden><label>差异化卖点</label><textarea data-field="difference">清洁结果可视化，操作完成后尘杯清理方便</textarea></div>
               <div class="original-field"><label>营销场景<span class="required-star">*</span></label><div class="choice-row original-choices" data-single="marketing-scene" data-role="marketing-scene"><span class="choice-chip">短视频带货</span><span class="choice-chip active">直播间引流</span></div></div>
-              <div class="original-field"><label>营销策略</label><textarea data-field="marketing" placeholder="填写当前真实价格、优惠、赠品或活动信息">暑期活动，到手赠送 3 个替换滤网</textarea></div>
+              <div class="original-field full"><label>营销策略</label><textarea data-field="marketing" placeholder="填写当前真实价格、优惠、赠品或活动信息">暑期活动，到手赠送 3 个替换滤网</textarea></div>
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>信任背书</label><button class="ai-refresh" type="button" data-ai-suggest="trust">AI 换一组</button></div><div class="point-editor" data-point-editor="trust" data-limit="5"><div class="point-row"><span class="point-index">●</span><input data-point-value value="整机质保 1 年，产品参数与包装清单可核验"></div><button class="point-add" type="button" data-point-action="add">＋ 添加背书</button><textarea data-field="trust" hidden>整机质保 1 年，产品参数与包装清单可核验</textarea></div></div>
             </div>
           </div>
@@ -4562,10 +4761,14 @@
       return `${String(Math.floor(value / 60)).padStart(2,"0")}:${String(value % 60).padStart(2,"0")}`;
     }
 
+    function mixEffectiveCopy(root = dynamicForm.querySelector(".mix-flow-form")) {
+      return String(root?._mixChatCopy || root?.querySelector("[data-mix-copy]")?.value || "").trim();
+    }
+
     function mixActualDuration() {
-      const copy = dynamicForm.querySelector("[data-mix-copy]");
+      const root = dynamicForm.querySelector(".mix-flow-form");
       const speed = Number(dynamicForm.querySelector("[data-mix-speed]")?.value || 1);
-      const count = String(copy?.value || "").replace(/\s/g, "").length;
+      const count = mixEffectiveCopy(root).replace(/\s/g, "").length;
       return Math.max(4, count / 3.35 / speed);
     }
 
@@ -4579,7 +4782,7 @@
     }
 
     function mixCopySegments() {
-      const copy = String(dynamicForm.querySelector("[data-mix-copy]")?.value || "").trim();
+      const copy = mixEffectiveCopy();
       const sentences = copy.match(/[^。！？!?]+[。！？!?]?/g)?.map(item => item.trim()).filter(Boolean) || [];
       const stages = mixStageNames();
       const groups = Array.from({ length:stages.length }, () => []);
@@ -4592,7 +4795,7 @@
         id:card.dataset.mixMaterial,
         name:card.querySelector("strong")?.textContent?.trim() || `素材 ${index + 1}`,
         scene:card.dataset.mixMaterialScene || "已分析镜头",
-        status:card.dataset.mixMaterialStatus === "ok" ? "已分析" : "待分析",
+        status:{ ok:"已分析", pending:"待分析", analyzing:"分析中", fail:"分析失败" }[card.dataset.mixMaterialStatus] || "待分析",
         duration:Number(card.querySelector(".mix-material-cover em")?.textContent?.replace(/\D/g, "")) || 3
       }));
     }
@@ -4614,20 +4817,101 @@
 
     function mixScriptSegments() {
       const root = dynamicForm.querySelector(".mix-flow-form");
+      const plan = root?.dataset.mixPlanMode || "ai";
       const materials = mixSelectedMaterials().filter(item => item.status === "已分析");
-      const drafts = mixCopySegments().map((item, index) => ({ ...item, index, copy:root?._mixRowCopyOverrides?.[index] ?? item.copy }));
+      // 阶段2 J: 原始 draft 应用 _mixRowCopyOverrides + _mixRowMergedCopy (合) 之后,在过滤 _mixRowDeleted (删)
+      const draftsRaw = mixCopySegments().map((item, index) => ({
+        ...item,
+        index,
+        copy: root?._mixRowMergedCopy?.[index] ?? (root?._mixRowCopyOverrides?.[index] ?? item.copy)
+      }));
+      const deletedSet = root?._mixRowDeleted || new Set();
+      const splitMap = root?._mixRowSplit || new Map();
+      // 应用删除过滤
+      const baseDrafts = draftsRaw
+        .map((item, i) => ({ ...item, _origIndex: i }))
+        .filter(item => !deletedSet.has(item._origIndex));
+      // 应用拆分:对每个被 split 标记的 origIndex,把 copy 按 `。！？` 切两半,前段留原行(并把后段 copy 复制给新 inserted segment)
+      const splitBuckets = []; // [{ afterOrigIndex, halfCopy }]
+      const baseRows = baseDrafts.map(item => {
+        const origIdx = item._origIndex;
+        if (splitMap.has(origIdx)) {
+          const text = item.copy || "";
+          const match = text.match(/[^。！？!?]+[。！？!?]/g);
+          if (match && match.length >= 2) {
+            const cut = Math.floor(match.length / 2);
+            const first = match.slice(0, cut).join("");
+            const second = match.slice(cut).join("");
+            splitBuckets.push({ afterOrigIndex: origIdx, halfCopy: second });
+            return { ...item, copy: first };
+          }
+        }
+        return item;
+      });
+      // 合并 baseRows + 拆分产生的右半段 + 用户插入的 _mixInsertedSegments
+      const insertedFromSplit = splitBuckets.map((b, k) => ({
+        _origIndex: -1,
+        _isInserted: true,
+        stage: "新分镜",
+        copy: b.halfCopy,
+        visual: "请补充该分镜的画面内容描述",
+        sourceRow: { shotType: "暂无", cameraMove: "暂无", visual: "暂无" }
+      }));
+      const userInserted = (root?._mixInsertedSegments || []).map(payload => ({
+        _origIndex: -1,
+        _isInserted: true,
+        ...payload,
+        sourceRow: payload.sourceRow || { shotType: "暂无", cameraMove: "暂无", visual: "暂无" }
+      }));
+      // 把 inserted 段按 afterIndex 顺序插回 baseRows
+      const result = [...baseRows];
+      const allInserted = [...insertedFromSplit, ...userInserted];
+      allInserted.forEach(payload => {
+        if (payload.afterIndex === undefined) {
+          result.push(payload);
+          return;
+        }
+        // 找到 baseRows 中 _origIndex === afterIndex 的位置,插到它后面
+        const targetIdx = result.findIndex(s => s._origIndex === payload.afterIndex);
+        if (targetIdx === -1) {
+          result.push(payload);
+        } else {
+          result.splice(targetIdx + 1, 0, payload);
+        }
+      });
+      // 计算总字数和 actual,一次性 map 出 start/duration
       const speed = Number(dynamicForm.querySelector("[data-mix-speed]")?.value || 1);
-      const totalChars = drafts.reduce((sum, item) => sum + item.copy.replace(/\s/g, "").length, 0) || 1;
+      const totalChars = result.reduce((sum, item) => sum + (item.copy || "").replace(/\s/g, "").length, 0) || 1;
       const actual = Math.max(4, totalChars / 3.35 / speed);
       let start = 0;
-      return drafts.map((item, index) => {
-        const duration = index === drafts.length - 1 ? Math.max(.1, actual - start) : Math.max(1.2, actual * item.copy.replace(/\s/g, "").length / totalChars);
-        const hasManualOverride = Boolean(root?._mixRowOverrides && Object.prototype.hasOwnProperty.call(root._mixRowOverrides, index));
-        const manual = mixRowMaterialIds(root, index).map(id => materials.find(material => material.id === id)).filter(Boolean);
+      return result.map((item, index) => {
+        const origIdx = item._origIndex ?? -1;
+        const sourceRows = plan === "script" && root?._mixExternalScript?.rows?.length
+          ? root._mixExternalScript.rows
+          : completeScriptRows;
+        const sourceRow = item._isInserted ? item.sourceRow : (sourceRows[origIdx] || {});
+        const chars = (item.copy || "").replace(/\s/g, "").length;
+        const duration = index === result.length - 1 ? Math.max(.1, actual - start) : Math.max(1.2, actual * chars / totalChars);
+        const hasManualOverride = Boolean(root?._mixRowOverrides && Object.prototype.hasOwnProperty.call(root._mixRowOverrides, origIdx));
+        const manual = mixRowMaterialIds(root, origIdx).map(id => materials.find(material => material.id === id)).filter(Boolean);
         const auto = materials.find(material => mixStageMatchesMaterial(item.stage, material));
-        const assigned = hasManualOverride ? manual : (auto ? [auto] : []);
-        const needsRematch = root?._mixRowNeedsRematch?.has(index);
-        const segment = { ...item, start, end:start + duration, duration, assigned, needsRematch, complete:Boolean(item.copy.trim() && assigned.length) && !needsRematch };
+        const assignedBase = hasManualOverride ? manual : (auto ? [auto] : []);
+        const durationOverrides = root?._mixRowMaterialDurations?.[origIdx] || {};
+        const assigned = assignedBase.map(material => ({ ...material, duration:durationOverrides[material.id] ?? material.duration }));
+        const needsRematch = root?._mixRowNeedsRematch?.has(origIdx);
+        const segment = {
+          ...item,
+          index,
+          start, end: start + duration, duration,
+          assigned, needsRematch,
+          sourceRow,
+          shotType: sourceRow.shotType || "暂无",
+          cameraMove: sourceRow.cameraMove || "暂无",
+          visual: (root?._mixRowVisualOverrides?.[origIdx] ?? sourceRow.visual ?? "暂无"),
+          complete: Boolean((item.copy || "").trim() && assigned.length) && !needsRematch,
+          _origIndex: origIdx,
+          _isInserted: Boolean(item._isInserted)
+        };
         start += duration;
         return segment;
       });
@@ -4635,10 +4919,27 @@
 
     function updateMixScriptCompletion(segments = mixScriptSegments()) {
       const incomplete = segments.filter(item => !item.complete);
+      const noCopySegs = segments.map((s, i) => ({ s, i })).filter(x => !(x.s.copy || "").trim());
+      const noShotSegs = segments.map((s, i) => ({ s, i })).filter(x => !x.s.assigned.length);
       const alert = dynamicForm.querySelector("[data-mix-script-alert]");
       if (alert) {
-        alert.hidden = !incomplete.length;
-        alert.innerHTML = incomplete.length ? `<b>还有 ${incomplete.length} 个段落未完成</b><span>请补全口播文案并完成镜头匹配，完成后才可确认脚本。</span>` : "";
+        if (!incomplete.length) {
+          alert.hidden = true;
+          alert.innerHTML = "";
+        } else {
+          alert.hidden = false;
+          // 阶段2: 分项 chip 化,每项可点击定位/跳转
+          const chips = [];
+          if (noCopySegs.length) {
+            const indices = noCopySegs.map(x => x.i + 1).slice(0, 3).join(",") + (noCopySegs.length > 3 ? "…" : "");
+            chips.push(`<button type="button" class="mix-alert-chip" data-mix-alert-goto="copy"><b>${noCopySegs.length}</b> 段口播未补全 <small>(${indices}段)→ 步骤 2</small></button>`);
+          }
+          if (noShotSegs.length) {
+            const indices = noShotSegs.map(x => x.i + 1).slice(0, 3).join(",") + (noShotSegs.length > 3 ? "…" : "");
+            chips.push(`<button type="button" class="mix-alert-chip" data-mix-alert-goto="shot" data-mix-alert-shot-idx="${noShotSegs[0].i}"><b>${noShotSegs.length}</b> 段镜头未匹配 <small>(${indices}段)→ 定位</small></button>`);
+          }
+          alert.innerHTML = `<b class="mix-alert-title">还有 ${incomplete.length} 个段落待完善</b><div class="mix-alert-chips">${chips.join("")}</div><span class="mix-alert-hint">完成全部段落后才可确认脚本</span>`;
+        }
       }
       if (activeType === "mix" && taskStep === 3) {
         const next = taskActionButtons.querySelector(".primary-btn");
@@ -4649,40 +4950,89 @@
     }
 
     function renderMixScript() {
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      const flagSet = root?._mixRowFlag || new Set();
+      const insertedSet = root?._mixRowInserted || new Set();
       const host = dynamicForm.querySelector("[data-mix-script-list]");
       if (!host) return;
       const segments = mixScriptSegments();
-      host.innerHTML = segments.map((item, index) => {
-        const hint = item.needsRematch
-          ? `<div class="mix-row-rematch-hint"><b>口播文案已变更</b><span>当前镜头可能不再匹配，请重新匹配或手动调整画面。</span></div>`
-          : (!item.copy.trim() ? `<div class="mix-row-rematch-hint"><b>请补全口播文案</b><span>补全后再确认该段镜头。</span></div>` : "");
-        return `<article class="mix-script-card${item.complete ? "" : " needs-rematch"}" data-mix-script-row="${index}" data-mix-material-ids="${escapeHtml(item.assigned.map(material => material.id).join(","))}"><header><div><b>${mixTimeLabel(item.start)}–${mixTimeLabel(item.end)}</b><strong>${escapeHtml(item.stage)}</strong><span>${item.duration.toFixed(1)}s</span></div><button type="button" data-mix-toggle-row>${index === 0 ? "收起" : "展开"}</button></header><div class="mix-script-body"${index === 0 ? "" : " hidden"}><label class="mix-script-copy-edit"><span>口播文案</span><textarea data-mix-row-copy="${index}">${escapeHtml(item.copy)}</textarea></label>${hint}<section class="mix-row-materials"><div class="mix-row-materials-head"><span>已选镜头</span><button type="button" data-mix-replace-row>手动调整画面</button></div>${item.assigned.length ? `<div class="mix-row-material-list">${item.assigned.map((material, materialIndex) => `<div class="mix-assigned-material"><div class="mini-cover tone-${(index + materialIndex) % 6 + 1}">${escapeHtml(material.scene)}</div><div><strong data-mix-material-name>${escapeHtml(material.name)}</strong><small>使用 ${Math.min(item.duration, Math.max(material.duration, 1)).toFixed(1)}s</small></div></div>`).join("")}</div>` : `<div class="mix-row-empty">AI 未在已选素材中找到可用镜头，请调整镜头或修改本段文案。</div>`}</section><footer><button type="button" data-mix-preview-row>▶ 预览本段</button><button type="button" data-mix-replace-row>手动调整画面</button><button type="button" data-mix-rematch-row>${item.needsRematch ? "重新匹配镜头" : "重新匹配"}</button></footer></div></article>`;
-      }).join("");
+      // E1/E2: 边缘态 — 无分镜 / 无素材
+      const totalChars = mixEffectiveCopy(root).replace(/\s/g, "").length;
+      const hasCopy = totalChars > 0;
+      const materialCount = mixSelectedMaterials().filter(item => item.status === "已分析").length;
+      if (!hasCopy || !materialCount) {
+        const reason = !hasCopy ? "口播文案为空" : "尚未选择已分析的素材";
+        const step = !hasCopy ? "2" : "2";
+        host.innerHTML = `<div class="mix-script-empty">
+          <div class="mix-script-empty-icon">${!hasCopy ? "✎" : "▰"}</div>
+          <div class="mix-script-empty-title">${!hasCopy ? "先去第二步补全口播文案" : "请先在第二步选择已分析素材"}</div>
+          <div class="mix-script-empty-sub">${reason} · 系统无法分镜。当前在步骤 3 不会生成任何分镜。</div>
+          <div class="mix-script-empty-tip">切回步骤 ${step} 完成 <b>${!hasCopy ? "口播文案" : "素材选择"}</b> 后再返回步骤 3。</div>
+        </div>`;
+        dynamicForm.querySelector("[data-mix-script-count]")?.replaceChildren("0");
+        updateMixScriptCompletion([]);
+        return;
+      }
+      // E3: 删除到最后一段 — 至少保留 1 段
+      if (segments.length <= 1) {
+        host.innerHTML = `<div class="mix-script-min-banner"><span>⚠</span> 至少需要保留 1 段分镜。如需重做该段,请用"重新匹配"或修改画面描述。</div>` + segments.map((item, index) => {
+          return renderSingleMixCard(item, index, flagSet, insertedSet, { disableDelete: true });
+        }).join("");
+        dynamicForm.querySelector("[data-mix-script-count]")?.replaceChildren(String(segments.length));
+        updateMixScriptCompletion(segments);
+        return;
+      }
+      // E4: needs-rematch banner(>0 段待重新匹配)
+      const needRematchSegs = segments.map((s, i) => ({ ...s, index: i })).filter(s => s.needsRematch);
+      const banner = needRematchSegs.length > 0
+        ? `<div class="mix-rematch-banner">
+            <div><b>${needRematchSegs.length}</b> 段镜头可能不再匹配当前画面<b>·</b>推荐:点击下方"重新匹配"逐段调整,或一键全部重新匹配。</div>
+            <div class="mix-rematch-banner-actions">
+              <button type="button" class="ghost-btn-sm" data-mix-rematch-all>一键重新匹配</button>
+            </div>
+          </div>`
+        : "";
+      host.innerHTML = banner + segments.map((item, index) => renderSingleMixCard(item, index, flagSet, insertedSet)).join("");
       dynamicForm.querySelector("[data-mix-script-count]")?.replaceChildren(String(segments.length));
       updateMixScriptCompletion(segments);
+    }
+
+    // 把单卡模板抽成函数,空态/末段/正常态共用
+    function renderSingleMixCard(item, index, flagSet, insertedSet, opts = {}) {
+      const disableDelete = opts.disableDelete || index === 0;
+      const hint = item.needsRematch
+        ? `<div class="mix-row-rematch-hint"><b>画面内容描述已变更</b><span>当前镜头可能不再匹配，请重新匹配或手动调整画面。</span></div>`
+        : (!item.copy.trim() ? `<div class="mix-row-rematch-hint"><b>请补全口播文案</b><span>补全后再确认该段镜头。</span></div>` : "");
+      const copyField = item.copy.trim()
+        ? `<p class="mix-row-copy-text">${escapeHtml(item.copy)}</p>`
+        : `<p class="mix-row-copy-empty">（暂无口播文案，请先在第二步完成文案）</p>`;
+      const isFlagged = item._isInserted || flagSet.has(item._origIndex) || (item._origIndex >= 0 && insertedSet.has(item._origIndex));
+      const flagMark = isFlagged ? `<i class="mix-row-flag" title="本行已变更" aria-label="本行已变更"></i>` : "";
+      const deleteDisabledAttr = disableDelete ? ` disabled aria-disabled="true" title="第 1 段不可删除"` : ` title="删除第 ${index + 1} 段" aria-label="删除分镜"`;
+      const headerActions = `<div class="mix-row-header-actions">
+        <button type="button" class="mix-row-icon-btn" data-mix-insert-row="${index}" title="在第 ${index + 1} 段之后插入新分镜" aria-label="插入分镜">
+          <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button type="button" class="mix-row-icon-btn" data-mix-delete-row="${index}"${deleteDisabledAttr}>
+          <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"/></svg>
+        </button>
+        <button type="button" data-mix-toggle-row>${index === 0 ? "收起" : "展开"}</button>
+      </div>`;
+      return `<article class="mix-script-card${item.needsRematch ? " needs-rematch" : ""}${isFlagged ? " is-flagged" : ""}${item._isInserted ? " is-inserted" : ""}${(item.assigned.length === 0) ? " is-needs-shot" : ""}" data-mix-script-row="${index}" data-mix-orig-row="${item._origIndex}" data-mix-material-ids="${escapeHtml(item.assigned.map(material => material.id).join(","))}">${flagMark}<header><div><b>${mixTimeLabel(item.start)}–${mixTimeLabel(item.end)}</b><strong>${escapeHtml(item.stage)}</strong><span>${item.duration.toFixed(1)}s</span></div>${headerActions}</header><div class="mix-script-body"${index === 0 ? "" : " hidden"}><div class="mix-script-detail-layout"><div class="mix-stage-preview" data-mix-preview-row tabindex="0" role="button" aria-label="预览第 ${index + 1} 个镜头"><span>9:16</span><small>${item.assigned.length ? escapeHtml(item.assigned[0].name) : "暂无匹配镜头"}</small><b>▶</b></div><div class="mix-stage-attributes"><div class="mix-script-copy-readonly" data-mix-row-copy-host><span class="mix-field-label">口播文案<i class="mix-readonly-tag">只读</i></span>${copyField}</div><i class="mix-field-divider" aria-hidden="true"></i><div class="mix-row-meta-grid"><label><span>景别</span><span class="mix-row-meta-val${item.shotType === "暂无" ? " is-empty" : ""}">${escapeHtml(item.shotType)}</span></label><label><span>运镜方式</span><span class="mix-row-meta-val${item.cameraMove === "暂无" ? " is-empty" : ""}">${escapeHtml(item.cameraMove)}</span></label></div><i class="mix-field-divider" aria-hidden="true"></i><label class="mix-stage-visual-edit"><span>画面内容描述<small data-mix-row-visual-count>${(item.visual || "").length} 字</small></span><textarea data-mix-row-visual="${index}" placeholder="描述这个分镜的画面，例如：白色背景，产品置于中心，特写镜头拍摄按键细节">${escapeHtml(item.visual)}</textarea></label></div></div>${hint}<footer><button type="button" data-mix-rematch-row>重新匹配镜头</button><button type="button" data-mix-replace-row>替换镜头</button></footer></div></article>`;
     }
 
     function syncMixDuration() {
       const copy = dynamicForm.querySelector("[data-mix-copy]");
       const speed = Number(dynamicForm.querySelector("[data-mix-speed]")?.value || 1);
-      const target = Number(dynamicForm.querySelector("[data-mix-target-duration]")?.value || 60);
       const count = String(copy?.value || "").replace(/\s/g, "").length;
       const duration = mixActualDuration();
-      const durationText = `${duration.toFixed(1)} 秒`;
-      const difference = duration - target;
-      const differenceText = `${difference > 0 ? "+" : difference < 0 ? "−" : ""}${Math.abs(difference).toFixed(1)} 秒 · ${Math.abs(difference) <= 2 ? "可生成" : "建议适配"}`;
+      const durationText = `${duration.toFixed(1)}s`;
       dynamicForm.querySelector("[data-mix-copy-count]")?.replaceChildren(String(count));
       dynamicForm.querySelector("[data-mix-speed-label]")?.replaceChildren(`${speed.toFixed(2)}×`);
       dynamicForm.querySelector("[data-mix-duration]")?.replaceChildren(durationText);
-      dynamicForm.querySelector("[data-mix-target-duration-display]")?.replaceChildren(`${target.toFixed(1)} 秒`);
-      const diffNode = dynamicForm.querySelector("[data-mix-duration-diff]");
-      if (diffNode) {
-        diffNode.textContent = differenceText;
-        diffNode.classList.toggle("warning", Math.abs(difference) > 2);
-      }
       dynamicForm.querySelector("[data-mix-script-duration]")?.replaceChildren(`${duration.toFixed(1)}s`);
       dynamicForm.querySelector("[data-mix-final-duration]")?.replaceChildren(`${duration.toFixed(1)} 秒`);
-      const voice = dynamicForm.querySelector("[data-mix-voice]")?.value.split(" · ")[0] || "许念";
+      const voice = dynamicForm.querySelector("[data-mix-voice]")?.value.split(" · ")[0] || "陈子建·公版";
       dynamicForm.querySelector("[data-mix-final-voice]")?.replaceChildren(`${voice} · ${speed.toFixed(2)}×`);
       const status = dynamicForm.querySelector("[data-mix-voice-status]");
       if (status) status.textContent = `${voice} · ${speed.toFixed(2)}×`;
@@ -4691,7 +5041,6 @@
 
     function renderMixPlanContext(mode) {
       const host = dynamicForm.querySelector("[data-mix-plan-context]");
-      const badge = dynamicForm.querySelector("[data-mix-source-badge]");
       if (!host) return;
       const root = dynamicForm.querySelector(".mix-flow-form");
       if (root) {
@@ -4700,19 +5049,28 @@
         if (mode === "ai") root._mixDefaultMaterialIds = null;
       }
       const contexts = {
-        ai: `<span class="mix-plan-icon">✦</span><div class="mix-context-main"><div class="mix-context-title"><strong>爆款内容结构</strong><small>选填；不选择时由 AI 自动匹配</small></div><input type="hidden" data-mix-content-structure value="${escapeHtml(root?._mixSelectedStructureMode || "")}"><button class="mix-picker-trigger mix-structure-picker-trigger" type="button" data-mix-pick-structure><span><b data-mix-structure-picker-label>${escapeHtml(root?._mixSelectedStructureName || "不选择（AI 自动匹配）")}</b><small data-mix-structure-picker-formula>${escapeHtml(root?._mixSelectedStructureName ? (root?._mixSelectedStructureFormula || "已选择爆款内容结构") : "根据产品、素材与时长匹配")}</small></span><i>›</i></button>${root?._mixSelectedStructureName ? '<button class="mix-clear-structure" type="button" data-mix-clear-structure>取消选择</button>' : ""}</div>`,
-        copy: `<span class="mix-plan-icon">文</span><div class="mix-context-main"><strong>选择已有文案</strong><small>文案将完整带入第二步，仅修改本次任务副本。</small><select data-mix-existing-copy hidden><option value="">请选择文案</option></select><button class="mix-picker-trigger mix-source-picker" type="button" data-mix-pick-copy><span data-mix-source-picker-label>选择文案</span><i>›</i></button><div class="mix-source-asset-info" data-mix-source-asset-info><b>尚未选择文案</b><span>选择后将带入关联产品与内容摘要。</span><em>请选择一条文案继续</em></div></div>`,
-        script: `<span class="mix-plan-icon">稿</span><div class="mix-context-main"><strong>选择已有脚本</strong><small>脚本口播在第二步确认；原分镜在第三步按当前素材和配音重新校准。</small><select data-mix-existing-script hidden><option value="">请选择脚本</option></select><button class="mix-picker-trigger mix-source-picker" type="button" data-mix-pick-script><span data-mix-source-picker-label>选择脚本</span><i>›</i></button><div class="mix-source-asset-info" data-mix-source-asset-info><b>尚未选择脚本</b><span>选择后将带入关联产品、口播与分镜信息。</span><em>请选择一个脚本继续</em></div></div>`
+        ai: `<span class="mix-plan-icon">✦</span><div class="mix-context-main"><div class="mix-context-title"><strong>爆款内容结构</strong><small>选填；不选择时由 AI 自动匹配</small></div><input type="hidden" data-mix-content-structure value="${escapeHtml(root?._mixSelectedStructureMode || "")}"><button class="mix-picker-trigger mix-structure-picker-trigger${root?._mixSelectedStructureName ? " is-selected" : ""}" type="button" data-mix-pick-structure><span><b data-mix-structure-picker-label>${escapeHtml(root?._mixSelectedStructureName || "不选择（AI 自动匹配）")}</b><small data-mix-structure-picker-formula>${root?._mixSelectedStructureName ? "· " : ""}${escapeHtml(root?._mixSelectedStructureName ? (root?._mixSelectedStructureFormula || "已选择爆款内容结构") : "根据产品、素材与时长匹配")}</small></span><i>›</i></button>${root?._mixSelectedStructureName ? '<button class="mix-clear-structure" type="button" data-mix-clear-structure>取消选择</button>' : ""}</div>`,
+        copy: `<span class="mix-plan-icon">文</span><div class="mix-context-main"><strong>选择已有文案</strong><small>选择后将基于原文生成本次任务文案，不影响原文。</small><select data-mix-existing-copy hidden><option value="">请选择文案</option></select><button class="mix-picker-trigger mix-source-picker" type="button" data-mix-pick-copy><span data-mix-source-picker-label>选择文案</span><i>›</i></button><div class="mix-source-asset-info" data-mix-source-asset-info><b>原文案</b><span>请选择一条文案查看内容预览</span><button type="button" class="mix-source-expand" data-mix-source-expand hidden>展开全文</button><em>选择后将自动带入关联产品</em></div></div>`,
+        script: `<span class="mix-plan-icon">稿</span><div class="mix-context-main"><strong>选择已有脚本</strong><small>脚本口播在第二步确认；原分镜在第三步按当前素材和配音重新校准。</small><select data-mix-existing-script hidden><option value="">请选择脚本</option></select><button class="mix-picker-trigger mix-source-picker" type="button" data-mix-pick-script><span data-mix-source-picker-label>选择脚本</span><i>›</i></button><div class="mix-source-asset-info" data-mix-source-asset-info><b>原脚本口播</b><span>请选择一个脚本查看口播预览</span><button type="button" class="mix-source-expand" data-mix-source-expand hidden>展开全文</button><em>选择后将带入关联产品与分镜</em></div></div>`
       };
       host.innerHTML = contexts[mode] || contexts.ai;
-      if (badge) badge.textContent = { ai:"AI 生成", copy:"已有文案", script:"已有脚本" }[mode] || "AI 生成";
+      renderMixAudienceEditor(dynamicForm.querySelector(".mix-flow-form"), []);
+      const mixPersonaPicker = dynamicForm.querySelector("[data-persona-picker][data-persona-context='mix']");
+      if (mixPersonaPicker) {
+        mixPersonaPicker.dataset.personaMode = "template";
+        mixPersonaPicker.querySelectorAll("[data-persona-source-mode]").forEach(button => button.classList.toggle("active", button.dataset.personaSourceMode === "template"));
+        const templateSelect = mixPersonaPicker.querySelector("[data-persona-template-select]");
+        if (templateSelect) templateSelect.hidden = false;
+      }
       const product = dynamicForm.querySelector("[data-mix-product]");
       const origin = dynamicForm.querySelector("[data-mix-product-origin]");
       const sourceSelect = host.querySelector("[data-mix-existing-copy], [data-mix-existing-script]");
       const usesSource = mode === "copy" || mode === "script";
+      const sourceHasProduct = Boolean(sourceSelect?.selectedOptions?.[0]?.dataset.product);
+      const script = mode === "script";
       const productLabel = dynamicForm.querySelector("[data-mix-product-label]");
       if (product) {
-        product.disabled = usesSource && Boolean(product.value);
+        product.disabled = usesSource;
         if (usesSource && !sourceSelect?.value) {
           product.value = "";
           syncMixProductMaterials("");
@@ -4721,9 +5079,13 @@
           syncMixProductMaterials("");
         }
       }
-      if (productLabel) productLabel.textContent = usesSource ? "关联产品" : "目标产品";
+      if (productLabel) productLabel.textContent = "目标产品";
       if (origin) origin.textContent = usesSource
-        ? (sourceSelect?.value ? `产品已从所选${mode === "copy" ? "文案" : "脚本"}带入；如需换产品，请切换为 AI 生成。` : `请先选择${mode === "copy" ? "文案" : "脚本"}，系统将自动带入关联产品与可用素材。`)
+        ? (!sourceSelect?.value
+          ? `请先选择${mode === "copy" ? "已有文案" : "已有脚本"}，系统将自动带入关联产品。`
+          : sourceHasProduct
+            ? mode === "copy" ? "已带入已有文案相关产品，修改目标人群、视频时长或创作要求后，下一步将按最新配置重新生成一版文案" : "已带入已有脚本相关产品，修改目标人群、视频时长或创作要求后，后续将按最新配置重新生成一版文案及脚本"
+            : `${mode === "copy" ? "该文案" : "该脚本"}未关联产品，请更换一篇有关联产品的${mode === "copy" ? "文案" : "脚本"}。`)
         : "选择产品后，系统将匹配内容结构、校验文案并限定本次素材范围。";
       if (sourceSelect?.value) updateMixSourceAsset(sourceSelect);
       syncMixModeFields(mode);
@@ -4732,35 +5094,75 @@
     function syncMixModeFields(mode) {
       const root = dynamicForm.querySelector(".mix-flow-form");
       if (!root) return;
+      const productField = root.querySelector("[data-mix-product-field]");
+      if (productField && !productField.querySelector("[data-mix-product-title]")) {
+        const productLabel = productField.querySelector("[data-mix-product-label]");
+        const productFacts = productField.querySelector("[data-mix-product-facts]");
+        if (productLabel && productFacts) {
+          const title = document.createElement("span");
+          title.className = "mix-product-title";
+          title.dataset.mixProductTitle = "";
+          productLabel.parentElement.insertBefore(title, productLabel);
+          title.append(productLabel, productFacts);
+        }
+      }
       const ai = mode === "ai";
+      const copyRewrite = mode === "copy";
       const script = mode === "script";
+      const aiDriven = ai || copyRewrite || script;
       const hasLinkedProduct = Boolean(root.querySelector("[data-mix-product]")?.value);
-      root.querySelector("[data-mix-audience-field]")?.toggleAttribute("hidden", !ai);
-      root.querySelector("[data-mix-product-field]")?.toggleAttribute("hidden", !ai && hasLinkedProduct);
-      root.querySelector("[data-mix-duration-field]")?.toggleAttribute("hidden", mode === "copy");
+      const sourceSelected = Boolean(root.querySelector("[data-mix-existing-copy], [data-mix-existing-script]")?.value);
+      const audienceEditor = root.querySelector("[data-persona-picker][data-persona-context='mix']");
+      const audienceField = root.querySelector("[data-mix-audience-field]");
+      const audienceBlocked = copyRewrite && (!sourceSelected || !hasLinkedProduct);
+      if (audienceEditor) {
+        audienceField?.toggleAttribute("inert", audienceBlocked);
+        audienceField?.classList.toggle("is-disabled", audienceBlocked);
+        audienceEditor.setAttribute("aria-disabled", String(audienceBlocked));
+      }
+      root.querySelector("[data-mix-audience-block]")?.toggleAttribute("hidden", !aiDriven);
+      root.querySelector("[data-mix-product-field]")?.toggleAttribute("hidden", false);
+      root.querySelector("[data-mix-duration-field]")?.toggleAttribute("hidden", false);
       root.querySelector("[data-mix-duration-presets]")?.toggleAttribute("hidden", true);
-      root.querySelector("[data-mix-product-facts]")?.toggleAttribute("hidden", !ai || !hasLinkedProduct);
-      root.querySelector("[data-mix-requirement-block]")?.toggleAttribute("hidden", !ai);
-      root.querySelector("[data-mix-structure-result]")?.toggleAttribute("hidden", !ai);
-      root.querySelector("[data-mix-regenerate-copy]")?.toggleAttribute("hidden", !ai);
-      root.querySelector("[data-mix-target-duration-panel]")?.toggleAttribute("hidden", !ai);
-      root.querySelector("[data-mix-duration-connector]")?.toggleAttribute("hidden", !ai);
-      root.querySelector("[data-mix-duration-diff-panel]")?.toggleAttribute("hidden", !ai);
-      root.querySelector("[data-mix-fit-duration]")?.toggleAttribute("hidden", !ai);
+      root.querySelector("[data-mix-product-facts]")?.toggleAttribute("hidden", !aiDriven || !hasLinkedProduct);
+      root.querySelector("[data-mix-requirement-block]")?.toggleAttribute("hidden", !aiDriven);
+      root.querySelector("[data-mix-regenerate-copy]")?.toggleAttribute("hidden", !aiDriven);
       const durationHint = root.querySelector("[data-mix-duration-hint]");
-      if (durationHint) durationHint.hidden = !script;
+      if (durationHint) durationHint.hidden = !(script && sourceSelected);
       const durationLabel = root.querySelector("[data-mix-duration-label]");
-      if (durationLabel) durationLabel.textContent = script ? "视频目标时长" : "视频生成时长";
+      if (durationLabel) durationLabel.firstChild.nodeValue = "视频生成时长 ";
       const copyHint = root.querySelector("[data-mix-copy-editor-hint]");
       if (copyHint) copyHint.textContent = ai
         ? "可直接修改；产品库禁用话术会在保存前校验。"
-        : "直接使用来源内容；可手动编辑，或通过侧边栏 AI 对话主动改写。";
+        : copyRewrite
+          ? "AI 将基于原文、目标人群、时长和本次要求生成新文案；不会修改资产库原文。"
+        : script
+          ? "AI 将基于已有脚本、目标人群、时长和本次要求重新生成文案及脚本。"
+          : "直接使用来源内容；可手动编辑，或通过侧边栏 AI 对话主动改写。";
       const materialNote = root.querySelector(".mix-material-block-head small");
       if (materialNote) materialNote.textContent = script
         ? "展示脚本关联产品的全部素材；原脚本已使用的素材默认勾选，可自行调整。"
         : mode === "copy" ? "展示关联产品的全部素材；可自行选择本次用于混剪的素材。"
         : "默认展示该产品关联素材；取消选择的素材不会参与本次混剪。";
+      syncMixRequiredIndicators(root, mode);
       syncMixProductPicker();
+    }
+
+    function syncMixRequiredIndicators(root, mode) {
+      root.querySelectorAll(".mix-required-star").forEach(node => node.remove());
+      const mark = node => {
+        if (!node) return;
+        const star = document.createElement("span");
+        star.className = "required-star mix-required-star";
+        star.setAttribute("aria-hidden", "true");
+        star.textContent = "*";
+        node.append(star);
+      };
+      mark(root.querySelector("[data-mix-product-label]"));
+      mark(root.querySelector("[data-mix-audience-label]"));
+      mark(root.querySelector("[data-mix-duration-label]"));
+      mark(root.querySelector("[data-mix-material-block] .mix-material-title-line > strong"));
+      if (mode === "copy" || mode === "script") mark(root.querySelector("[data-mix-plan-context] > .mix-context-main > strong"));
     }
 
     const mixProductNames = { "mite-pro":"轻净 Pro 除螨仪", "washer-s5":"净界洗地机 S5", "air-a8":"轻享空气炸锅 A8" };
@@ -4794,21 +5196,29 @@
       });
     }
 
-    function openMixProductFacts() {
-      const productId = dynamicForm.querySelector("[data-mix-product]")?.value;
+    function openMixProductFacts(productIdOverride = "") {
+      const productId = productIdOverride || dynamicForm.querySelector("[data-mix-product]")?.value;
       const product = productCatalog[productId];
       if (!product) return showToast("请先选择产品后查看产品事实。");
       const detail = productDetailData[productId] || product;
       const lines = value => Array.isArray(value) ? value : String(value || "").split(/[\n；]/).map(item => item.trim()).filter(Boolean);
       const section = (title, values, empty = "暂无已确认内容") => `<section class="mix-product-drawer-section"><strong>${title}</strong>${values.length ? `<ul>${values.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : `<p>${empty}</p>`}</section>`;
+      const links = Array.isArray(detail.links) ? detail.links : [];
+      const attachments = Array.isArray(detail.trustAttachments) ? detail.trustAttachments : [];
+      const linkMarkup = links.length ? links.map(link => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener"><b>${escapeHtml(link.platform || "商品")}</b><span>${escapeHtml(link.url)}</span></a>`).join("") : "<p>暂无商品链接</p>";
+      const attachmentMarkup = attachments.length ? attachments.map(item => `<div class="mix-product-drawer-file"><div><b>${escapeHtml(item.name)}</b><span>${trustAttachmentSize(item.size)} · ${escapeHtml(item.uploadedAt || "已上传")}</span></div><button type="button" data-mix-preview-trust-attachment="${escapeHtml(item.id)}">预览</button></div>`).join("") : "<p>暂无背书附件</p>";
       document.querySelector("[data-mix-product-detail-layer]")?.remove();
       const layer = document.createElement("div");
       layer.className = "mix-product-detail-layer";
       layer.dataset.mixProductDetailLayer = "";
-      layer.innerHTML = `<div class="mix-product-detail-mask" data-mix-product-detail-close></div><aside class="mix-product-detail-drawer" role="dialog" aria-modal="true" aria-label="产品详情"><header><div><small>产品详情</small><h2>${escapeHtml(detail.name || product.name)}</h2><p>${escapeHtml(detail.brand || product.brand || "未设置品牌")} · ${escapeHtml(detail.category || product.category || "未设置类目")} · ${escapeHtml(detail.price || "价格待补充")}</p></div><button type="button" data-mix-product-detail-close aria-label="关闭">×</button></header><div class="mix-product-drawer-body"><section class="mix-product-drawer-overview"><span>产品事实</span><p>${escapeHtml(product.facts || "产品信息待完善")}</p></section>${section("核心卖点", lines(detail.core || product.core).concat(lines(detail.secondary || product.secondary), lines(detail.difference || product.difference)))}${section("信任依据", lines(detail.trust), "暂无信任依据")}${section("禁用表达", lines(detail.forbidden), "暂无禁用表达")}${section("关联人群", lines(product.audiences), "暂无关联人群")}</div></aside>`;
+      layer.innerHTML = `<div class="mix-product-detail-mask" data-mix-product-detail-close></div><aside class="mix-product-detail-drawer" role="dialog" aria-modal="true" aria-label="产品详情"><header><div><small>产品详情</small><h2>${escapeHtml(detail.name || product.name)}</h2><p>${escapeHtml(detail.brand || product.brand || "未设置品牌")} · ${escapeHtml(detail.category || product.category || "未设置类目")} · ${escapeHtml(detail.price || "价格待补充")}</p></div><button type="button" data-mix-product-detail-close aria-label="关闭">×</button></header><div class="mix-product-drawer-body"><section class="mix-product-drawer-basic"><strong>基础信息</strong><div><span>产品名称<b>${escapeHtml(detail.name || product.name)}</b></span><span>品牌<b>${escapeHtml(detail.brand || product.brand || "—")}</b></span><span>类目<b>${escapeHtml(detail.category || product.category || "—")}</b></span><span>价格<b>${escapeHtml(detail.price || "—")}</b></span></div><em>商品链接</em><nav>${linkMarkup}</nav></section><section class="mix-product-drawer-description"><strong>商品描述</strong><pre>${escapeHtml(detail.description || "暂无商品描述")}</pre></section><div class="mix-product-drawer-content-grid">${section("核心卖点", lines(detail.core || product.core))}${section("次要卖点", lines(detail.secondary || product.secondary))}${section("差异化卖点", lines(detail.difference || product.difference))}${section("产品信任背书", lines(detail.trust), "暂无信任依据")}<section class="mix-product-drawer-section mix-product-drawer-attachments"><strong>背书附件</strong>${attachmentMarkup}</section>${section("禁用话术", lines(detail.forbidden), "暂无禁用表达")}</div></div></aside>`;
       document.body.appendChild(layer);
       requestAnimationFrame(() => layer.classList.add("show"));
-      layer.addEventListener("click", event => { if (event.target.closest("[data-mix-product-detail-close]")) layer.remove(); });
+      layer.addEventListener("click", event => {
+        if (event.target.closest("[data-mix-product-detail-close]")) { layer.remove(); return; }
+        const preview = event.target.closest("[data-mix-preview-trust-attachment]");
+        if (preview) openTrustAttachment(attachments.find(item => item.id === preview.dataset.mixPreviewTrustAttachment));
+      });
     }
     const mixMiteMaterialExtras = [
       ["M-EX-01","床褥纤维近景","痛点解释",4],["M-EX-02","床单拍打过程","使用过程",4],["M-EX-03","尘杯倒出碎屑","结果证明",3],
@@ -5037,7 +5447,7 @@
       const size = source?.fileSize || (type === "图片" ? "1.8 MB" : `${Math.max(18.6, Number(duration || 3) * 31.48).toFixed(2)} MB`);
       const status = source?.status || "ok";
       const statusText = { ok:"已分析", pending:"待分析", analyzing:"分析中", fail:"分析失败" }[status] || status;
-      return `<article class="mix-material-card${selected ? " selected" : ""}" data-mix-material="${escapeHtml(id)}" data-mix-material-tags="${escapeHtml(tags.join("|"))}" data-mix-material-scene="${escapeHtml(scene)}" data-mix-material-type="${type === "图片" ? "image" : "video"}" data-mix-material-status="${escapeHtml(status)}" tabindex="0" role="checkbox" aria-checked="${selected}" aria-label="选择素材：${escapeHtml(name)}"><button class="mix-material-select" type="button" aria-label="${selected ? "取消选择" : "选择"}${escapeHtml(name)}">${selected ? "✓" : ""}</button><div class="mix-material-cover tone-${index % 6 + 1}"><span class="mix-material-status">${statusText}</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览${escapeHtml(name)}">▶</button><em>00:${String(Math.round(duration || 3)).padStart(2,"0")}</em></div><strong>${escapeHtml(name)}</strong><small><span>${type}</span><i>·</i>${size}</small></article>`;
+      return `<article class="mix-material-card${selected ? " selected" : ""}" data-mix-material="${escapeHtml(id)}" data-mix-material-tags="${escapeHtml(tags.join("|"))}" data-mix-material-scene="${escapeHtml(scene)}" data-mix-material-type="${type === "图片" ? "image" : "video"}" data-mix-material-status="${escapeHtml(status)}" tabindex="0" role="checkbox" aria-checked="${selected}" aria-label="选择素材：${escapeHtml(name)}"><button class="mix-material-select" type="button" aria-label="${selected ? "取消选择" : "选择"}${escapeHtml(name)}">${selected ? "✓" : ""}</button><div class="mix-material-cover tone-${index % 6 + 1}"><span class="mix-material-status pda-status-${escapeHtml(status)}">${statusText}</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览${escapeHtml(name)}">▶</button><em>00:${String(Math.round(duration || 3)).padStart(2,"0")}</em></div><strong>${escapeHtml(name)}</strong><small><span>${type}</span><i>·</i>${size}</small></article>`;
     }
 
     function syncMixMaterialTagFilter() {
@@ -5234,6 +5644,10 @@
       dynamicForm.querySelector(".mix-flow-form").dataset.mixMaterialTagFilter = "";
       if (facts) facts.textContent = productId === "mite-pro" ? "深层清洁 · 拍打吸尘同步 · 透明尘杯可水洗 · 禁用“100%除螨”" : productId === "washer-s5" ? "吸拖洗一体 · 贴边清洁 · 滚刷自清洁 · 禁用“完全无水渍”" : "热风循环 · 多档温控 · 炸篮可拆洗 · 禁用“零油脂”";
       dynamicForm.querySelector("[data-mix-final-product]")?.replaceChildren(mixProductNames[productId]);
+      // 同步 step 4 输出规格(画面比例)
+      const ratio = dynamicForm.querySelector("[data-mix-ratio]")?.value || "9:16";
+      const spec = ratio === "16:9" ? "16:9 · 1920×1080 · 30fps" : "9:16 · 1080×1920 · 30fps";
+      dynamicForm.querySelector("[data-mix-final-spec]")?.replaceChildren(spec);
       dynamicForm.querySelector("[data-mix-total-count]")?.replaceChildren(String(samples.length));
       if (contextStatus) {
         contextStatus.hidden = false;
@@ -5247,26 +5661,58 @@
     function updateMixSourceAsset(select) {
       const option = select?.selectedOptions?.[0];
       if (!option) return;
-      const assetProduct = option.dataset.product || "";
       const info = dynamicForm.querySelector("[data-mix-source-asset-info]");
       const isScript = select.matches("[data-mix-existing-script]");
       const externalCopy = !isScript && dynamicForm.querySelector(".mix-flow-form")?._mixExternalCopy;
       const externalScript = isScript && dynamicForm.querySelector(".mix-flow-form")?._mixExternalScript;
-      const isExternalCopy = externalCopy?.id === option.value;
       if (info) {
         const sourceText = isScript
           ? (externalScript?.sourceFull || externalScript?.source || externalScript?.text || "")
-          : (externalCopy?.text || "");
-        const inheritedDuration = Math.max(1, Math.round(Number(externalScript?.duration) || sourceText.replace(/\s/g, "").length / 3.35));
-        info.querySelector("b").textContent = assetProduct ? `关联产品：${mixProductNames[assetProduct]}` : "未关联产品：请手动选择";
-        info.querySelector("span").textContent = isScript
-          ? `口播约 ${sourceText.replace(/\s/g, "").length} 字 · 原脚本约 ${inheritedDuration} 秒`
-          : isExternalCopy
-            ? `原文约 ${sourceText.replace(/\s/g, "").length} 字 · 仅作为本次任务副本使用`
-            : `内容摘要：${option.textContent.split("｜")[0]} · 可在第二步编辑`;
-        info.querySelector("em").textContent = assetProduct ? "✓ 已带入关联产品，可选择本次素材" : "选择产品后加载对应的全部素材";
+          : (externalCopy?.text || SCRIPT_LIBRARY_ITEMS.find(item => item.id === option.value)?.text || "");
+        const wordCount = sourceText.replace(/\s/g, "").length;
+        const sourceDuration = Math.max(1, Math.round(isScript ? (Number(externalScript?.duration) || wordCount / 3.35) : wordCount / 3.35));
+        info.querySelector("b").textContent = isScript ? "原脚本口播" : "原文案";
+        const preview = sourceText
+          ? `${sourceText.slice(0, 72)}${sourceText.length > 72 ? "…" : ""}`
+          : isScript ? "请选择一个脚本查看口播预览" : "请选择一条文案查看内容预览";
+        const previewNode = info.querySelector("span");
+        if (previewNode) {
+          previewNode.dataset.fullText = sourceText;
+          previewNode.dataset.expanded = "false";
+          previewNode.textContent = preview;
+        }
+        const expandButton = info.querySelector("[data-mix-source-expand]");
+        if (expandButton) {
+          expandButton.hidden = sourceText.length <= 72;
+          expandButton.textContent = "展开全文";
+        }
+        info.querySelector("em").textContent = sourceText
+          ? `${wordCount} 字 · ${isScript ? "原脚本" : "预计"} ${sourceDuration} 秒`
+          : isScript ? "选择后将带入关联产品与分镜" : "选择后将自动带入关联产品";
       }
       dynamicForm.querySelector(".mix-flow-form").dataset.mixSourceConflict = "false";
+    }
+
+    function renderMixAudienceEditor(root, names = []) {
+      const box = root.querySelector("[data-mix-audience-box]");
+      if (!box) return;
+      const standardAudiences = ["精致妈妈", "新锐白领", "资深中产", "Z世代", "小镇青年", "小镇中老年", "都市蓝领", "都市银发"];
+      box.querySelectorAll(".mix-source-audience-chip").forEach(item => item.remove());
+      names.filter(name => !standardAudiences.includes(name)).forEach(name => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "original-audience-chip audience-chip mix-source-audience-chip";
+        chip.textContent = name;
+        box.prepend(chip);
+      });
+      box.querySelectorAll(".audience-chip").forEach(chip => chip.classList.toggle("active", names.includes(chip.textContent.trim())));
+      const first = names[0] ? personaCatalog.find(persona => persona.name === names[0] || persona.audience === names[0]) : null;
+      const gender = root.querySelector("[data-role='mix-gender']");
+      const age = root.querySelector("[data-role='mix-age']");
+      gender?.querySelectorAll(".choice-chip").forEach(chip => chip.classList.toggle("active", chip.textContent.trim() === (first?.gender || "不限")));
+      age?.querySelectorAll(".choice-chip").forEach(chip => chip.classList.toggle("active", chip.textContent.trim() === (first?.age || "")));
+      root.querySelector("[data-mix-audience-pain]").value = first?.pain?.join("\n") || "";
+      root.querySelector("[data-mix-audience-scenes]").value = first?.scenes?.join("\n") || "";
     }
 
     function setMixSourceSelection(kind, item) {
@@ -5280,6 +5726,7 @@
       source.innerHTML = `<option value="${escapeHtml(item.id)}" data-product="${escapeHtml(productId)}">${escapeHtml(label)}</option>`;
       source.value = item.id;
       root[kind === "script" ? "_mixExternalScript" : "_mixExternalCopy"] = item;
+      if (kind === "copy") root._mixCopyRewriteVersion = 0;
       const trigger = root.querySelector(kind === "script" ? "[data-mix-pick-script]" : "[data-mix-pick-copy]");
       trigger?.querySelector("[data-mix-source-picker-label]")?.replaceChildren(label);
       const productSelect = root.querySelector("[data-mix-product]");
@@ -5289,17 +5736,32 @@
         root._mixDefaultMaterialIds = kind === "script"
           ? new Set([
             ...(item.usedMaterialIds || []),
-            ...((item.rows || item.scriptRows || []).flatMap(row => row.materialIds || row.materialRefs || (row.materialOverride ? [row.materialOverride] : [])))
+            ...((item.rows || item.scriptRows || []).flatMap(row => row.materialIds || row.materialRefs || (row.materialOverride ? [row.materialOverride] : (row.material ? [String(row.material).split(" · ")[0]] : []))))
           ])
           : null;
         syncMixProductMaterials(productId);
-        root.querySelector("[data-mix-product-origin]")?.replaceChildren(`产品已从所选${kind === "script" ? "脚本" : "文案"}带入，并用于筛选本次素材。`);
+        root.querySelector("[data-mix-product-origin]")?.replaceChildren(kind === "copy" ? "已带入已有文案相关产品，修改目标人群、视频时长或创作要求后，下一步将按最新配置重新生成一版文案" : "已带入已有脚本相关产品，修改目标人群、视频时长或创作要求后，后续将按最新配置重新生成一版文案及脚本");
       } else if (productSelect) {
         productSelect.value = "";
         productSelect.disabled = false;
         root._mixDefaultMaterialIds = null;
         syncMixProductMaterials("");
-        root.querySelector("[data-mix-product-origin]")?.replaceChildren("来源内容未关联产品，请手动选择产品后再选择创作素材。");
+        root.querySelector("[data-mix-product-origin]")?.replaceChildren(`${kind === "copy" ? "该文案" : "该脚本"}未关联产品，请更换一篇有关联产品的${kind === "copy" ? "文案" : "脚本"}。`);
+      }
+      const sourceText = String(item.sourceFull || item.source || item.text || "");
+      const normalizeSource = value => String(value || "").replace(/[，。！？、,.!?\s]/g, "");
+      const matchedCopy = kind === "script"
+        ? SCRIPT_LIBRARY_ITEMS.find(copy => copy.productId === productId && copy.text && normalizeSource(sourceText).includes(normalizeSource(copy.text).slice(0, 16)))
+        : null;
+      const sourceAudiences = (Array.isArray(item.audiences) ? item.audiences : String(item.audience || item.targetAudience || matchedCopy?.audience || "").split(/[、,，]/))
+        .map(value => String(value || "").trim()).filter(Boolean);
+      const knownPersonaIds = sourceAudiences.map(name => personaCatalog.find(persona => persona.name === name || persona.audience === name)?.id).filter(Boolean);
+      root._mixSourceAudienceNames = sourceAudiences;
+      const audienceInput = root.querySelector("[data-mix-audience]");
+      if (audienceInput) {
+        audienceInput.value = sourceAudiences.join("、");
+        audienceInput.dataset.personaId = knownPersonaIds[0] || "";
+        audienceInput.dataset.personaIds = knownPersonaIds.join("|");
       }
       if (kind === "script") {
         const text = item.sourceFull || item.source || item.text || "";
@@ -5310,34 +5772,408 @@
       updateMixSourceAsset(source);
       syncMixModeFields(kind);
       syncMixDuration();
+      try {
+        prefillMixManualFromSource(root, sourceAudiences, mixProductNames[productId] || "");
+      } catch (err) {
+        console.error("[mix-source] 自动填充 自行输入 人群失败:", err);
+        showToast("已带入来源信息，但目标人群自动填充失败，可手动选择或自行输入。");
+      }
+    }
+
+    function prefillMixManualFromSource(root, sourceAudiences, productName) {
+      if (!root) return;
+      const audiences = (Array.isArray(sourceAudiences) ? sourceAudiences : []).map(value => String(value || "").trim()).filter(Boolean);
+      if (!audiences.length) return;
+      const matchedPersonaByName = name => personaCatalog.find(persona => persona?.audience === name || persona?.name === name) || null;
+      const standards = new Set(MIX_PERSONA_AUDIENCES);
+      setMixPersonaMode(root, "manual");
+      const groups = root.querySelector("[data-mix-persona-groups]");
+      if (!groups) return;
+      groups.innerHTML = "";
+      ensureMixAddPersonaBinding(root);
+      audiences.forEach((audienceName, index) => {
+        const persona = matchedPersonaByName(audienceName);
+        const matchedStandardAudience = standards.has(persona?.audience) ? persona.audience
+          : standards.has(audienceName) ? audienceName
+          : "";
+        const matchedStandardAge = (() => {
+          const candidate = String(persona?.age || "").replace(/[–—]/g, "-");
+          return MIX_PERSONA_AGES.find(value => value === candidate) || "";
+        })();
+        const matchedStandardGender = MIX_PERSONA_GENDERS.find(value => value === (persona?.gender || "不限")) || "不限";
+        const group = mixPersonaGroupTemplate(index);
+        groups.insertAdjacentHTML("beforeend", group);
+        const groupNode = groups.lastElementChild;
+        if (!groupNode) return;
+        const audienceChips = groupNode.querySelector("[data-mix-audience-chips]");
+        if (audienceChips) {
+          audienceChips.querySelectorAll(".mix-persona-pill").forEach(pill => pill.classList.remove("active"));
+          if (matchedStandardAudience) {
+            const pill = audienceChips.querySelector(`.mix-persona-pill[data-value="${cssEscapeValue(matchedStandardAudience)}"]`);
+            if (pill) pill.classList.add("active");
+          } else {
+            const customPill = document.createElement("button");
+            customPill.type = "button";
+            customPill.className = "mix-persona-pill active is-custom";
+            customPill.dataset.value = audienceName;
+            customPill.textContent = audienceName;
+            audienceChips.appendChild(customPill);
+          }
+        }
+        const genderChips = groupNode.querySelector("[data-mix-gender-chips]");
+        if (genderChips) {
+          genderChips.querySelectorAll(".mix-persona-pill").forEach(pill => pill.classList.toggle("active", pill.dataset.value === matchedStandardGender));
+        }
+        const ageChips = groupNode.querySelector("[data-mix-age-chips]");
+        if (ageChips) {
+          ageChips.querySelectorAll(".mix-persona-pill").forEach(pill => pill.classList.toggle("active", pill.dataset.value === (matchedStandardAge || "24-30")));
+        }
+        const painArea = groupNode.querySelector("[data-mix-audience-pain]");
+        if (painArea) painArea.value = (Array.isArray(persona?.pain) ? persona.pain : []).join("\n");
+        const scenesArea = groupNode.querySelector("[data-mix-audience-scenes]");
+        if (scenesArea) scenesArea.value = (Array.isArray(persona?.scenes) ? persona.scenes : []).join("\n");
+        if (persona && typeof productName === "string" && productName) {
+          groupNode.dataset.mixSourcePersonaId = persona.id || "";
+        }
+        bindMixPersonaGroupPills(groupNode, root);
+      });
+      ensureMixAddPersonaBinding(root);
+      ensureMixPersonaPanelInteractive(root);
+      syncMixManualPersonaSummary(root);
+      showToast(`已带入 ${audiences.length} 个人群，可继续编辑`);
+    }
+
+    function ensureMixPersonaPanelInteractive(root) {
+      const field = root.querySelector("[data-mix-audience-field]");
+      if (!field) return;
+      field.removeAttribute("inert");
+      field.classList.remove("is-disabled");
+      field.querySelectorAll("[data-mix-persona-panel]").forEach(panel => {
+        panel.removeAttribute("inert");
+        panel.classList.remove("is-disabled");
+      });
+    }
+
+    function bindMixPersonaGroupPills(groupNode, root) {
+      if (!groupNode || groupNode.dataset.pillsBound === "true") return;
+      groupNode.dataset.pillsBound = "true";
+      const handler = event => {
+        const pill = event.target.closest(".mix-persona-pill");
+        if (!pill || !groupNode.contains(pill)) return;
+        const row = pill.closest(".mix-persona-chips-row");
+        if (!row) return;
+        row.querySelectorAll(".mix-persona-pill").forEach(button => button.classList.toggle("active", button === pill));
+        const customAge = groupNode.querySelector("[data-mix-custom-age]");
+        if (customAge) customAge.hidden = pill.dataset.value !== "自定义" || row !== groupNode.querySelector("[data-mix-age-chips]");
+        syncMixManualPersonaSummary(root);
+        event.stopPropagation();
+      };
+      groupNode.addEventListener("click", handler);
+      const remove = groupNode.querySelector("[data-mix-persona-group-remove]");
+      if (remove) remove.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const groups = root.querySelector("[data-mix-persona-groups]");
+        const group = remove.closest("[data-mix-persona-group]");
+        if (!groups || !group) return;
+        const wasOnly = groups.querySelectorAll("[data-mix-persona-group]").length <= 1;
+        group.remove();
+        if (wasOnly) {
+          groups.insertAdjacentHTML("beforeend", mixPersonaGroupTemplate(0));
+          const fresh = groups.lastElementChild;
+          if (fresh) bindMixPersonaGroupPills(fresh, root);
+        } else {
+          [...groups.querySelectorAll("[data-mix-persona-group]")].forEach((node, index) => {
+            node.dataset.mixPersonaIndex = String(index);
+            const label = node.querySelector(".mix-persona-group-head > span");
+            if (label) label.textContent = `人群 ${index + 1}`;
+            if (index === 0) {
+              const removeBtn = node.querySelector("[data-mix-persona-group-remove]");
+              if (removeBtn) removeBtn.remove();
+            }
+          });
+        }
+        syncMixManualPersonaSummary(root);
+      });
+    }
+
+    function cssEscapeValue(value) {
+      return String(value || "").replace(/(["\\])/g, "\\$1");
     }
 
     function openMixAudiencePicker(root) {
+      const mode = root.dataset.mixPlanMode || "ai";
+      const sourceSelected = Boolean(root.querySelector("[data-mix-existing-copy], [data-mix-existing-script]")?.value);
+      if (mode === "copy" && !sourceSelected) return showToast("请先选择已有文案，系统将自动带入关联产品。");
       if (!window.CreationPersonaPicker) return showToast("人群画像选择器加载失败，请刷新页面后重试。");
       const productId = root.querySelector("[data-mix-product]")?.value || "";
       const productName = mixProductNames[productId] || "";
-      if (!productName) return showToast("请先选择产品，再选择人群画像");
+      if (!productName) return showToast(mode === "copy" ? "该文案未关联产品，请更换一篇有关联产品的文案。" : "请先选择产品，再选择人群画像");
       const current = String(root.querySelector("[data-mix-audience]")?.dataset.personaIds || "").split("|").filter(Boolean);
+      const manualValues = String(root.querySelector("[data-mix-audience]")?.value || "").split("、").map(value => value.trim()).filter(Boolean)
+        .filter(name => !personaCatalog.some(persona => persona.name === name || persona.audience === name));
+      const activeModeBtn = root.querySelector("[data-mix-persona-mode].active");
+      const pickerMode = activeModeBtn?.dataset.mixPersonaMode || "template";
       window.CreationPersonaPicker.open({
         items: personaCatalog,
         productName,
-        multiple:true,
-        maxSelected:3,
-        selectedIds:current,
+        multiple: pickerMode === "template",
+        maxSelected: 99,
+        selectedIds: current,
+        allowManual: true,
+        mode: pickerMode,
+        hideModeSwitch: true,
+        description: pickerMode === "manual"
+          ? "输入自定义人群并选择;可多选人群画像,可临时补充未入库人群。"
+          : "从模板库多选人群画像,本次创作共同生效。",
+        manualValues,
         onConfirm(personas) {
           const input = root.querySelector("[data-mix-audience]");
-          const label = root.querySelector("[data-mix-audience-label]");
-          const selected = Array.isArray(personas) ? personas : [personas];
-          const primary = selected[0];
+          const placeholder = root.querySelector("[data-mix-audience-placeholder]");
+          const chips = root.querySelector("[data-mix-audience-chips]");
+          const clearBtn = root.querySelector("[data-mix-audience-field] [data-persona-clear]");
+          const trigger = root.querySelector("[data-mix-pick-audience]");
+          const selected = (Array.isArray(personas) ? personas : [personas])
+            .filter(Boolean)
+            .filter((item, index, list) => list.findIndex(candidate => candidate.id === item.id) === index);
+          const personaNames = selected.map(item => item.name || item.audience);
           if (input) {
-            input.value = selected.map(item => item.audience).join("、");
-            input.dataset.personaId = primary?.id || "";
+            input.value = personaNames.join("、");
+            input.dataset.personaId = selected[0]?.id || "";
             input.dataset.personaIds = selected.map(item => item.id).join("|");
           }
-          if (label) label.textContent = primary ? `${primary.audience}（主）${selected.length > 1 ? ` +${selected.length - 1}` : ""}` : "请选择人群";
-          showToast(`已应用 ${selected.length} 个人群画像${primary ? `，主目标：${primary.audience}` : ""}`);
+          if (selected.length) {
+            if (placeholder) placeholder.hidden = true;
+            if (chips) {
+              chips.hidden = false;
+              chips.innerHTML = personaNames.map(name => `<em class="mix-persona-chip">${escapeHtml(name)}</em>`).join("");
+            }
+            if (clearBtn) clearBtn.hidden = false;
+            trigger?.classList.add("is-filled");
+          } else {
+            if (placeholder) placeholder.hidden = false;
+            if (chips) { chips.hidden = true; chips.innerHTML = ""; }
+            if (clearBtn) clearBtn.hidden = true;
+            trigger?.classList.remove("is-filled");
+          }
+          showToast(`已应用 ${selected.length} 个人群画像`);
         }
       });
+    }
+
+    const MIX_PERSONA_AUDIENCES = ["精致妈妈", "新锐白领", "资深中产", "Z世代", "小镇青年", "小镇中老年", "都市蓝领", "都市银发"];
+    const MIX_PERSONA_GENDERS = ["不限", "女性", "男性"];
+    const MIX_PERSONA_AGES = ["18-23", "24-30", "31-40", "41-50", "50+", "自定义"];
+
+    function mixPersonaGroupTemplate(index) {
+      return `<div class="mix-persona-group" data-mix-persona-group data-mix-persona-index="${index}">
+        <div class="mix-persona-group-head"><span>人群 ${index + 1}</span>${index > 0 ? '<button type="button" class="mix-persona-group-remove" data-mix-persona-group-remove aria-label="删除该人群组">删除</button>' : ""}</div>
+        <div class="mix-persona-fields">
+          <div class="mix-persona-field">
+            <label>核心目标人群 <em class="mix-persona-required">*</em></label>
+            <div class="mix-persona-chips-row" data-mix-audience-chips>${MIX_PERSONA_AUDIENCES.map(value => `<button type="button" class="mix-persona-pill${value === "精致妈妈" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}</div>
+          </div>
+          <div class="mix-persona-field">
+            <label>性别 <em class="mix-persona-required">*</em></label>
+            <div class="mix-persona-chips-row" data-mix-gender-chips>${MIX_PERSONA_GENDERS.map(value => `<button type="button" class="mix-persona-pill${value === "不限" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}</div>
+          </div>
+          <div class="mix-persona-field">
+            <label>年龄 <em class="mix-persona-required">*</em></label>
+            <div class="mix-persona-chips-row" data-mix-age-chips>${MIX_PERSONA_AGES.map(value => `<button type="button" class="mix-persona-pill${value === "24-30" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}<div class="mix-persona-custom-age" data-mix-custom-age hidden><input type="number" data-mix-age-min min="1" max="99" placeholder="最小"><i>至</i><input type="number" data-mix-age-max min="1" max="99" placeholder="最大"></div></div>
+          </div>
+          <div class="mix-persona-field mix-persona-field-text">
+            <label>人群核心痛点 <button type="button" class="mix-persona-ai-action" data-mix-ai-suggest="pain">AI 换一组</button></label>
+            <textarea data-mix-audience-pain placeholder="一行一个人群核心痛点"></textarea>
+          </div>
+          <div class="mix-persona-field mix-persona-field-text">
+            <label>使用场景 <button type="button" class="mix-persona-ai-action" data-mix-ai-suggest="scene">AI 换一组</button></label>
+            <textarea data-mix-audience-scenes placeholder="一行一个使用场景"></textarea>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function setMixPersonaMode(root, mode) {
+      const panels = root.querySelectorAll("[data-mix-persona-panel]");
+      panels.forEach(panel => { panel.hidden = panel.dataset.mixPersonaPanel !== mode; });
+      root.querySelectorAll("[data-mix-persona-mode]").forEach(button => button.classList.toggle("active", button.dataset.mixPersonaMode === mode));
+      const field = root.querySelector("[data-mix-audience-field]");
+      if (field) field.dataset.mixPersonaMode = mode;
+      if (mode === "manual") {
+        const groups = root.querySelector("[data-mix-persona-groups]");
+        if (groups && !groups.children.length) {
+          groups.insertAdjacentHTML("beforeend", mixPersonaGroupTemplate(0));
+          const fresh = groups.lastElementChild;
+          if (fresh) bindMixPersonaGroupPills(fresh, root);
+        }
+        ensureMixAddPersonaBinding(root);
+        ensureMixPersonaPanelInteractive(root);
+      }
+      syncMixManualPersonaSummary(root);
+    }
+
+    function appendMixPersonaGroup(root) {
+      const groups = root.querySelector("[data-mix-persona-groups]");
+      if (!groups) return;
+      const index = groups.querySelectorAll("[data-mix-persona-group]").length;
+      groups.insertAdjacentHTML("beforeend", mixPersonaGroupTemplate(index));
+      const newGroup = groups.lastElementChild;
+      if (newGroup) bindMixPersonaGroupPills(newGroup, root);
+      newGroup?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      syncMixManualPersonaSummary(root);
+    }
+
+    function ensureMixAddPersonaBinding(root) {
+      const button = root.querySelector("[data-mix-add-persona-group]");
+      if (!button || button.dataset.bound === "true") return;
+      button.dataset.bound = "true";
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        appendMixPersonaGroup(root);
+      });
+    }
+
+    function syncMixManualPersonaSummary(root) {
+      const field = root.querySelector("[data-mix-audience-field]");
+      if (!field) return;
+      const groups = field.querySelectorAll("[data-mix-persona-group]");
+      const summaries = [];
+      const personaIds = [];
+      groups.forEach(group => {
+        const audience = group.querySelector("[data-mix-audience-chips] .mix-persona-pill.active")?.dataset.value;
+        const gender = group.querySelector("[data-mix-gender-chips] .mix-persona-pill.active")?.dataset.value || "不限";
+        let age = group.querySelector("[data-mix-age-chips] .mix-persona-pill.active")?.dataset.value || "";
+        if (age === "自定义") {
+          const min = group.querySelector("[data-mix-age-min]")?.value;
+          const max = group.querySelector("[data-mix-age-max]")?.value;
+          if (min && max) age = `${min}–${max}`;
+          else age = "";
+        }
+        if (audience) {
+          const summary = age ? `${audience} / ${gender} / ${age}` : `${audience} / ${gender}`;
+          summaries.push(summary);
+          personaIds.push(`manual:${audience}:${age}`);
+        }
+      });
+      const input = field.querySelector("[data-mix-audience]");
+      if (input) {
+        input.value = summaries.join(" | ");
+        input.dataset.personaIds = personaIds.join("|");
+      }
+    }
+
+    function applyMixManualAiSuggestion(group, type) {
+      const samples = type === "pain"
+        ? ["担心实际效果不稳定\n不想为日常问题反复花时间", "希望一次解决核心问题\n更在意使用过程是否省心"]
+        : ["日常使用场景\n需要快速处理问题的即时场景", "周末集中使用场景\n家人共同使用的生活场景"];
+      const key = `${type}Index`;
+      const stored = Number(group.dataset[key] || 0);
+      const index = stored % samples.length;
+      const textarea = group.querySelector(type === "pain" ? "[data-mix-audience-pain]" : "[data-mix-audience-scenes]");
+      if (textarea) textarea.value = samples[index];
+      group.dataset[key] = String(stored + 1);
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      syncMixManualPersonaSummary(root);
+    }
+
+    // 智能脚本：目标人群双模式（模板库 / 自行输入），结构与混剪一致
+    const SCRIPT_PERSONA_AUDIENCES = ["精致妈妈", "新锐白领", "资深中产", "Z世代", "小镇青年", "小镇中老年", "都市蓝领", "都市银发"];
+    const SCRIPT_PERSONA_GENDERS = ["不限", "女性", "男性"];
+    const SCRIPT_PERSONA_AGES = ["18-23", "24-30", "31-40", "41-50", "50+", "自定义"];
+
+    function scriptPersonaGroupTemplate(index) {
+      return `<div class="script-persona-group" data-script-persona-group data-script-persona-index="${index}">
+        <div class="script-persona-group-head"><span>人群 ${index + 1}</span>${index > 0 ? '<button type="button" class="script-persona-group-remove" data-script-persona-group-remove aria-label="删除该人群组">删除</button>' : ""}</div>
+        <div class="script-persona-fields">
+          <div class="script-persona-field">
+            <label>核心目标人群 <em class="script-persona-required">*</em></label>
+            <div class="script-persona-chips-row" data-script-audience-chips>${SCRIPT_PERSONA_AUDIENCES.map(value => `<button type="button" class="script-persona-pill${value === "精致妈妈" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}</div>
+          </div>
+          <div class="script-persona-field">
+            <label>性别 <em class="script-persona-required">*</em></label>
+            <div class="script-persona-chips-row" data-script-gender-chips>${SCRIPT_PERSONA_GENDERS.map(value => `<button type="button" class="script-persona-pill${value === "不限" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}</div>
+          </div>
+          <div class="script-persona-field">
+            <label>年龄 <em class="script-persona-required">*</em></label>
+            <div class="script-persona-chips-row" data-script-age-chips>${SCRIPT_PERSONA_AGES.map(value => `<button type="button" class="script-persona-pill${value === "24-30" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}<div class="script-persona-custom-age" data-script-custom-age hidden><input type="number" data-script-age-min min="1" max="99" placeholder="最小"><i>至</i><input type="number" data-script-age-max min="1" max="99" placeholder="最大"></div></div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function setScriptPersonaMode(root, mode) {
+      const field = root?.querySelector?.("[data-script-audience-field]");
+      if (!field) return;
+      const panels = field.querySelectorAll("[data-script-persona-panel]");
+      panels.forEach(panel => { panel.hidden = panel.dataset.scriptPersonaPanel !== mode; });
+      field.querySelectorAll("[data-script-persona-mode]").forEach(button => {
+        const active = button.dataset.scriptPersonaMode === mode;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      field.dataset.scriptPersonaMode = mode;
+      if (mode === "manual") {
+        const groups = field.querySelector("[data-script-persona-groups]");
+        if (groups && !groups.children.length) {
+          groups.insertAdjacentHTML("beforeend", scriptPersonaGroupTemplate(0));
+        }
+        ensureScriptAddPersonaBinding(root);
+      }
+      syncScriptManualPersonaSummary(root);
+    }
+
+    function appendScriptPersonaGroup(root) {
+      const field = root?.querySelector?.("[data-script-audience-field]");
+      if (!field) return;
+      const groups = field.querySelector("[data-script-persona-groups]");
+      if (!groups) return;
+      const index = groups.querySelectorAll("[data-script-persona-group]").length;
+      groups.insertAdjacentHTML("beforeend", scriptPersonaGroupTemplate(index));
+      const newGroup = groups.lastElementChild;
+      newGroup?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      syncScriptManualPersonaSummary(root);
+    }
+
+    function ensureScriptAddPersonaBinding(root) {
+      const field = root?.querySelector?.("[data-script-audience-field]");
+      const button = field?.querySelector?.("[data-script-add-persona-group]");
+      if (!button || button.dataset.bound === "true") return;
+      button.dataset.bound = "true";
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        appendScriptPersonaGroup(root);
+      });
+    }
+
+    function syncScriptManualPersonaSummary(root) {
+      const field = root?.querySelector?.("[data-script-audience-field]");
+      if (!field) return;
+      const groups = field.querySelectorAll("[data-script-persona-group]");
+      const summaries = [];
+      const personaIds = [];
+      groups.forEach(group => {
+        const audience = group.querySelector("[data-script-audience-chips] .script-persona-pill.active")?.dataset.value;
+        const gender = group.querySelector("[data-script-gender-chips] .script-persona-pill.active")?.dataset.value || "不限";
+        let age = group.querySelector("[data-script-age-chips] .script-persona-pill.active")?.dataset.value || "";
+        if (age === "自定义") {
+          const min = group.querySelector("[data-script-age-min]")?.value;
+          const max = group.querySelector("[data-script-age-max]")?.value;
+          if (min && max) age = `${min}–${max}`;
+          else age = "";
+        }
+        if (audience) {
+          const summary = age ? `${audience} / ${gender} / ${age}` : `${audience} / ${gender}`;
+          summaries.push(summary);
+          personaIds.push(`manual:${audience}:${age}`);
+        }
+      });
+      const input = field.querySelector("[data-script-audience]");
+      if (input) {
+        input.value = summaries.join(" | ");
+        input.dataset.personaIds = personaIds.join("|");
+      }
     }
 
     function syncMixStructureDecision() {
@@ -5345,19 +6181,28 @@
       const plan = root?.dataset.mixPlanMode || "ai";
       const selectedId = dynamicForm.querySelector("[data-mix-content-structure]")?.value || "";
       const structure = mixCurrentStructure();
-      const target = Number(dynamicForm.querySelector("[data-mix-target-duration]")?.value || 60);
-      const name = dynamicForm.querySelector("[data-mix-result-structure-name]");
-      const reason = dynamicForm.querySelector("[data-mix-result-structure-reason]");
-      if (name) name.textContent = structure?.name || "AI 自动匹配内容结构";
-      if (reason) reason.textContent = plan === "ai" && !selectedId
-        ? `AI 自动匹配 · ${target}秒目标`
-        : plan === "ai" ? "已选择爆款内容结构"
-        : plan === "copy" ? "从已有文案识别"
-        : "从已有脚本带入";
-      const result = dynamicForm.querySelector("[data-mix-structure-result]");
-      if (result) result.classList.toggle("is-inherited", plan !== "ai");
-      const changeButton = dynamicForm.querySelector("[data-mix-change-structure]");
-      if (changeButton) changeButton.hidden = plan !== "ai";
+      const stageHint = dynamicForm.querySelector("[data-mix-structure-stages]");
+      const shouldShowStages = plan === "ai" && Boolean(selectedId) && Boolean(structure?.stageNames?.length);
+      if (stageHint) {
+        stageHint.hidden = !shouldShowStages;
+        stageHint.textContent = shouldShowStages ? structure.stageNames.join(" → ") : "";
+      }
+    }
+
+    function generateMixCopyRewrite(sourceText) {
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      const product = productCatalog[root?.querySelector("[data-mix-product]")?.value || ""];
+      const audiences = String(root?.querySelector("[data-mix-audience]")?.value || "").trim();
+      const requirement = String(root?.querySelector("[data-mix-requirement]")?.value || "").trim();
+      const source = String(sourceText || "").trim();
+      const facts = [product?.core, product?.secondary, product?.difference].filter(Boolean).join("；");
+      const openings = audiences
+        ? [`如果你也是${audiences}，日常使用时更在意的是效果是否看得见、操作是否省心。`, `对${audiences}来说，先把使用中的真实问题讲清楚，再看产品能做什么。`]
+        : ["先别急着看参数，先看真实使用中最容易被忽略的问题。", "真正影响日常体验的，往往不是参数，而是使用时能不能解决具体问题。"];
+      const opening = openings[Number(root?._mixCopyRewriteVersion || 0) % openings.length];
+      const body = source || `${product?.name || "产品"}围绕真实使用场景，把关键能力和使用结果讲清楚。`;
+      const productName = product?.name || "产品";
+      return `${opening}${body}${facts ? ` ${productName}可重点呈现：${facts}。` : ""}${requirement ? ` 本次要求：${requirement}。` : ""} 最后用清晰行动引导收口。`;
     }
 
     function syncMixPlanToConfirmation() {
@@ -5367,9 +6212,16 @@
         root._mixRowOverrides = {};
         root._mixRowCopyOverrides = {};
         root._mixRowNeedsRematch = new Set();
+        root._mixChatCopy = "";
+        // 阶段2 J: 分镜增删 override
+        root._mixRowInserted = new Set();
+        root._mixRowDeleted = new Set();
+        root._mixInsertedSegments = [];
+        root._mixRowMergedCopy = {};
+        root._mixRowSplit = new Map();
+        root._mixRowFlag = new Set();
       }
       const copy = dynamicForm.querySelector("[data-mix-copy]");
-      const sourceBadge = dynamicForm.querySelector("[data-mix-source-badge]");
       const regenerate = dynamicForm.querySelector("[data-mix-regenerate-copy]");
       const copySamples = {
         "copy-mite":"刚换的床单，看起来干净，不代表床垫深处没有毛发和碎屑。轻净 Pro 在床垫表面推进时，拍打与吸尘同步进行，清洁后的结果直接呈现在透明尘杯里。床垫、沙发和日常布艺都能使用，用完尘杯还能拆下水洗。想看完整实测过程，点击商品了解更多。",
@@ -5384,23 +6236,23 @@
       if (plan === "copy") {
         const id = dynamicForm.querySelector("[data-mix-existing-copy]")?.value || "copy-mite";
         const externalCopy = root?._mixExternalCopy;
-        if (copy) copy.value = externalCopy?.id === id
+        const sourceCopy = externalCopy?.id === id
           ? externalCopy.text
           : (copySamples[id] || copySamples["copy-mite"]);
-        if (sourceBadge) sourceBadge.textContent = "已有文案 · 本次副本";
-        if (regenerate) regenerate.textContent = "恢复来源文案";
+        if (copy) copy.value = generateMixCopyRewrite(sourceCopy);
+        if (regenerate) regenerate.textContent = "重新生成";
+        fitMixCopyToTarget(false);
       } else if (plan === "script") {
         const id = dynamicForm.querySelector("[data-mix-existing-script]")?.value || "script-mite";
         const externalScript = root?._mixExternalScript;
-        if (copy) copy.value = externalScript?.id === id
+        const sourceScript = externalScript?.id === id
           ? (externalScript.sourceFull || externalScript.source || scriptSamples["script-mite"])
           : (scriptSamples[id] || scriptSamples["script-mite"]);
-        if (sourceBadge) sourceBadge.textContent = "已有脚本口播 · 本次副本";
-        if (regenerate) regenerate.textContent = "恢复脚本口播";
+        if (copy) copy.value = generateMixCopyRewrite(sourceScript);
+        if (regenerate) regenerate.textContent = "重新生成";
+        fitMixCopyToTarget(false);
       } else {
-        const specifiedStructure = dynamicForm.querySelector("[data-mix-content-structure]")?.value || "";
-        if (sourceBadge) sourceBadge.textContent = specifiedStructure ? "AI生成 · 已选爆款结构" : "AI生成 · 自动匹配";
-        if (regenerate) regenerate.textContent = "按当前结构重新生成";
+        if (regenerate) regenerate.textContent = "重新生成";
         const profile = mixCurrentStructure()?.mixProfile || "result";
         if (copy) copy.value = mixGeneratedCopyByProfile[profile] || mixGeneratedCopyByProfile.result;
         fitMixCopyToTarget(false);
@@ -5412,11 +6264,11 @@
     function fitMixCopyToTarget(notifyUser = true) {
       const root = dynamicForm.querySelector(".mix-flow-form");
       const copy = root?.querySelector("[data-mix-copy]");
-      if (!copy || root?.dataset.mixPlanMode !== "ai") return;
+      if (!copy || !["ai", "copy"].includes(root?.dataset.mixPlanMode)) return;
       const target = Number(root.querySelector("[data-mix-target-duration]")?.value || 60);
       const speed = Number(root.querySelector("[data-mix-speed]")?.value || 1);
       const targetChars = Math.max(20, Math.round(target * 3.35 * speed));
-      let text = copy.value.trim();
+      let text = mixEffectiveCopy(root);
       if (text.replace(/\s/g, "").length > targetChars + 5) {
         const compact = text.replace(/\s/g, "");
         const candidate = compact.slice(0, targetChars);
@@ -5430,7 +6282,8 @@
         const lastStop = Math.max(candidate.lastIndexOf("。"), candidate.lastIndexOf("！"), candidate.lastIndexOf("？"));
         text = lastStop >= targetChars - 12 ? candidate.slice(0, lastStop + 1) : compact.slice(0, targetChars - 4) + "更省心。";
       }
-      copy.value = text;
+      if (root._mixChatCopy) root._mixChatCopy = text;
+      else copy.value = text;
       syncMixDuration();
       if (notifyUser) showToast(`文案已适配 ${target} 秒目标时长，可继续试听确认`);
     }
@@ -5474,14 +6327,25 @@
           return false;
         }
         const targetDuration = Number(dynamicForm.querySelector("[data-mix-target-duration]")?.value || 0);
-        if (mixPlan !== "copy" && (targetDuration < 10 || targetDuration > 180)) {
-          setFormFeedback("视频生成时长需设置在 10–180 秒之间。", "error");
+        if (!Number.isFinite(targetDuration) || targetDuration <= 0) {
+          setFormFeedback("请设置视频生成时长。", "error");
           dynamicForm.querySelector("[data-mix-target-duration]")?.focus();
+          return false;
+        }
+        const mixRatio = dynamicForm.querySelector("[data-mix-ratio]")?.value;
+        if (!["9:16", "16:9"].includes(mixRatio)) {
+          setFormFeedback("请选择画面比例（9:16 或 16:9）。", "error");
+          dynamicForm.querySelector("[data-mix-ratio]")?.focus();
           return false;
         }
         if (!dynamicForm.querySelector("[data-mix-product]")?.value) {
           setFormFeedback("请先选择产品，系统才能带入对应的创作素材。", "error");
           dynamicForm.querySelector("[data-mix-product]")?.focus();
+          return false;
+        }
+        if (!String(dynamicForm.querySelector("[data-mix-audience]")?.value || "").trim()) {
+          setFormFeedback("请至少选择一个目标人群。", "error");
+          dynamicForm.querySelector("[data-mix-pick-audience]")?.focus();
           return false;
         }
         if (!mixSelectedMaterialIds().length) {
@@ -5496,22 +6360,15 @@
       }
       if (step === 2) {
         const copy = dynamicForm.querySelector("[data-mix-copy]");
-        if (!copy?.value.trim()) {
+        const effectiveCopy = mixEffectiveCopy();
+        if (!effectiveCopy) {
           setFormFeedback("口播文案不能为空。", "error");
           copy?.focus();
           return false;
         }
-        if (copy.value.includes("100%除螨")) {
+        if (effectiveCopy.includes("100%除螨")) {
           setFormFeedback("文案包含产品禁用话术“100%除螨”，请修改后继续。", "error");
           copy.focus();
-          return false;
-        }
-        const mixPlan = dynamicForm.querySelector(".mix-flow-form")?.dataset.mixPlanMode || "ai";
-        const target = Number(dynamicForm.querySelector("[data-mix-target-duration]")?.value || 60);
-        const speed = Number(dynamicForm.querySelector("[data-mix-speed]")?.value || 1);
-        const actual = copy.value.replace(/\s/g, "").length / 3.35 / speed;
-        if (mixPlan === "ai" && Math.abs(actual - target) > 2) {
-          setFormFeedback(`当前配音约 ${actual.toFixed(1)} 秒，与目标 ${target} 秒偏差较大，请先点击“适配目标时长”。`, "error");
           return false;
         }
       }
@@ -5525,7 +6382,9 @@
         }
         const copy = dynamicForm.querySelector("[data-mix-copy]");
         if (copy) {
-          copy.value = segments.map(item => item.copy).join("");
+          const nextCopy = segments.map(item => item.copy).join("");
+          if (dynamicForm.querySelector(".mix-flow-form")?._mixChatCopy) dynamicForm.querySelector(".mix-flow-form")._mixChatCopy = nextCopy;
+          else copy.value = nextCopy;
           syncMixDuration();
         }
       }
@@ -5577,14 +6436,14 @@
       const materials = mixSelectedMaterials().filter(item => item.status === "已分析");
       if (!segment || !materials.length) return openMixRowMaterialPicker(row);
       const candidates = materials.filter(item => mixStageMatchesMaterial(segment.stage, item));
-      const pool = (candidates.length ? candidates : materials).slice(0, 4);
+      const pool = candidates.slice(0, 4);
       let selectedId = pool[0]?.id || "";
       const overlay = createMixDialog({
         title:"重新匹配镜头",
-        subtitle:`根据“${segment.stage}”与当前口播，从已选素材中推荐候选镜头。`,
+        subtitle:"",
         label:"重新匹配镜头",
-        body:`<div class="mix-rematch-dialog-body"><div class="mix-rematch-copy"><span>当前口播</span><p>${escapeHtml(segment.copy)}</p></div><div class="mix-rematch-candidates" data-mix-rematch-candidates></div></div>`,
-        footer:`<span class="mix-dialog-foot-note">也可以改为手动选择多个镜头拼接。</span><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-mix-open-manual>手动调整画面</button><button class="primary-btn" type="button" data-mix-confirm-rematch>使用推荐镜头</button></div>`
+        body:`<div class="mix-rematch-dialog-body"><p style="margin:0;color:#4c505d;font-size:14px">请确认是否重新匹配镜头？</p><div class="mix-rematch-candidates" data-mix-rematch-candidates hidden></div><div class="mix-match-status" data-mix-match-status hidden style="padding:9px 11px;border-radius:8px;color:#6b55b7;background:#f7f4ff;font-size:11px"></div></div>`,
+        footer:`<div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close>取消</button><button class="primary-btn" type="button" data-mix-confirm-rematch>确认</button></div>`
       });
       const candidateHost = overlay.querySelector("[data-mix-rematch-candidates]");
       const renderCandidates = () => {
@@ -5594,17 +6453,30 @@
           renderCandidates();
         }));
       };
-      overlay.querySelector("[data-mix-open-manual]").addEventListener("click", () => {
-        overlay.remove();
-        openMixRowMaterialPicker(row);
-      });
       overlay.querySelector("[data-mix-confirm-rematch]").addEventListener("click", () => {
-        if (!selectedId) return showToast("请先选择推荐镜头");
-        root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [index]:[selectedId] };
-        root._mixRowNeedsRematch?.delete(index);
-        overlay.remove();
-        renderMixScript();
-        showToast("已应用推荐镜头，本段已完成匹配");
+        const confirm = overlay.querySelector("[data-mix-confirm-rematch]");
+        const status = overlay.querySelector("[data-mix-match-status]");
+        if (!selectedId) {
+          status.hidden = false;
+          status.textContent = "匹配失败：当前已选素材中没有符合画面描述的镜头，请手动替换镜头。";
+          return;
+        }
+        confirm.disabled = true;
+        confirm.textContent = "匹配中…";
+        status.hidden = false;
+        status.textContent = "正在根据画面描述匹配景别、运镜和素材…";
+        setTimeout(() => {
+          if (!pool.length) {
+            status.textContent = "匹配失败：当前已选素材中没有符合条件的镜头。";
+            confirm.disabled = false;
+            confirm.textContent = "重新匹配";
+            return;
+          }
+          root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [index]:[selectedId] };
+          root._mixRowNeedsRematch?.delete(index);
+          status.textContent = "匹配成功：已更新镜头。";
+          setTimeout(() => { overlay.remove(); renderMixScript(); showToast("已应用推荐镜头，本段已完成匹配"); }, 350);
+        }, 650);
       });
       renderCandidates();
     }
@@ -5632,32 +6504,251 @@
       });
     }
 
+    // ── 阶段2 J: 插入/删除分镜 ────────────────────────────────────────
+    function openMixInsertRowDialog(row) {
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      if (!root) return;
+      const { index } = getMixRowSegment(row);
+      const stages = mixStageNames();
+      const overlay = createMixDialog({
+        title: "插入新分镜",
+        subtitle: "将在当前段之后插入一行；插入后总时长与口播分配会自动重算。",
+        label: "插入新分镜",
+        body: `<div class="mix-insert-dialog-body">
+          <label><span>分镜阶段</span><select data-mix-insert-stage>${stages.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("")}</select></label>
+          <label><span>口播文案</span><textarea data-mix-insert-copy placeholder="可先留空,后续在卡片内补全,或让 AI 优化。"></textarea></label>
+        </div>`,
+        footer: `<div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close>取消</button><button class="primary-btn" type="button" data-mix-confirm-insert>插入</button></div>`
+      });
+      overlay.querySelector("[data-mix-confirm-insert]").addEventListener("click", () => {
+        const stage = overlay.querySelector("[data-mix-insert-stage]")?.value || stages[0] || "新分镜";
+        const copy = (overlay.querySelector("[data-mix-insert-copy]")?.value || "").trim();
+        overlay.remove();
+        applyMixRowInsert(index, { stage, copy });
+      });
+    }
+
+    function applyMixRowInsert(afterIndex, payload) {
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      if (!root) return;
+      root._mixInsertedSegments = root._mixInsertedSegments || [];
+      root._mixRowInserted = root._mixRowInserted || new Set();
+      root._mixRowFlag = root._mixRowFlag || new Set();
+      const origIndex = afterIndex; // 渲染位置(在 afterIndex 行之后)
+      root._mixInsertedSegments.push({
+        afterIndex,
+        stage: payload.stage || "新分镜",
+        copy: payload.copy || "",
+        visual: payload.visual || "请补充该分镜的画面内容描述",
+        _afterOrig: origIndex
+      });
+      root._mixRowInserted.add(afterIndex);
+      root._mixRowFlag.add(afterIndex);
+      renderMixScript();
+      showToast("已插入 1 个新分镜,总时长已重算");
+    }
+
+    function openMixDeleteRowConfirm(row) {
+      const { index, segment } = getMixRowSegment(row);
+      if (!segment) return;
+      const overlay = createMixDialog({
+        title: "删除该分镜?",
+        subtitle: "删除后总时长与口播分配会自动重算,后续可重新插入。",
+        label: "删除分镜",
+        body: `<div class="mix-delete-dialog-body">
+          <p>将删除第 <b>${index + 1}</b> 段<b>"${escapeHtml(segment.stage)}"</b>(${mixTimeLabel(segment.start)}–${mixTimeLabel(segment.end)},${segment.duration.toFixed(1)}s)。</p>
+          <p style="color:#8d91a0;font-size:12px">该分镜关联的口播将一并从总时长中扣除。如需保留内容,建议先"合并到上一段"。</p>
+        </div>`,
+        footer: `<div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close>取消</button><button class="primary-btn danger" type="button" data-mix-confirm-delete>确认删除</button></div>`
+      });
+      overlay.querySelector("[data-mix-confirm-delete]").addEventListener("click", () => {
+        overlay.remove();
+        applyMixRowDelete(index);
+      });
+    }
+
+    function applyMixRowDelete(rowIndex) {
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      if (!root) return;
+      // 兼容 render index(可能是基于原始 draft 的行号)→ 反查 origIndex
+      const segments = mixScriptSegments();
+      const seg = segments[rowIndex];
+      const origIndex = seg ? seg._origIndex : rowIndex;
+      root._mixRowDeleted = root._mixRowDeleted || new Set();
+      root._mixRowNeedsRematch = root._mixRowNeedsRematch || new Set();
+      root._mixRowFlag = root._mixRowFlag || new Set();
+      // 注意:对 inserted 行(-1)或对已合并行不能反查原始 index,直接用 rowIndex 作为"占位"
+      const targetOrig = origIndex >= 0 ? origIndex : -rowIndex;
+      root._mixRowDeleted.add(targetOrig);
+      // 清相关 overrides
+      if (root._mixRowOverrides) delete root._mixRowOverrides[targetOrig];
+      if (root._mixRowVisualOverrides) delete root._mixRowVisualOverrides[targetOrig];
+      if (root._mixRowCopyOverrides) delete root._mixRowCopyOverrides[targetOrig];
+      if (root._mixRowMaterialDurations) delete root._mixRowMaterialDurations[targetOrig];
+      if (origIndex >= 0) root._mixRowNeedsRematch.delete(origIndex);
+      root._mixRowFlag.add(targetOrig);
+      // 同步移除 _mixInsertedSegments 里这个 orig 对应的"前向插入"行(如果该 inserted 行的 afterIndex 等于 targetOrig)
+      if (root._mixInsertedSegments) {
+        root._mixInsertedSegments = root._mixInsertedSegments.filter(p => !(p.afterIndex === targetOrig && p._dropOnDelete));
+      }
+      renderMixScript();
+      showToast("已删除 1 个分镜,总时长已重算");
+    }
+
     function openMixRowMaterialPicker(row) {
       const root = dynamicForm.querySelector(".mix-flow-form");
-      const materials = mixSelectedMaterials().filter(item => item.status === "已分析");
-      if (!materials.length) return showToast("请先在第一步选择可用创作素材");
+      const currentMaterials = mixSelectedMaterials().filter(item => item.status === "已分析");
       const rowIndex = Number(row?.dataset.mixScriptRow || 0);
-      const selectedIds = new Set((row?.dataset.mixMaterialIds || "").split(",").filter(Boolean));
-      if (!selectedIds.size && materials[0]) selectedIds.add(materials[0].id);
-      const overlay = document.createElement("div");
-      overlay.className = "modal-overlay show";
-      overlay.innerHTML = `<div class="modal-card script-picker-modal" role="dialog" aria-label="手动调整画面"><header class="modal-head"><div><strong>手动调整画面</strong><small>仅展示本次已选且已分析的创作素材，可选择多个镜头拼接。</small></div><button class="modal-close" type="button" data-close>×</button></header><div class="lib-pick-list" data-mix-row-material-list></div><footer class="modal-foot"><div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close>取消</button><button class="primary-btn" type="button" data-confirm>确认镜头</button></div></footer></div>`;
-      document.body.append(overlay);
-      const list = overlay.querySelector("[data-mix-row-material-list]");
-      const render = () => {
-        list.innerHTML = materials.map(item => `<article class="lib-pick-card${selectedIds.has(item.id) ? " selected" : ""}" data-material-id="${escapeHtml(item.id)}"><i class="lib-pick-check">${selectedIds.has(item.id) ? "✓" : ""}</i><p class="lib-pick-content">${escapeHtml(item.name)}</p><div class="lib-pick-tags"><span class="lib-pick-tag">${escapeHtml(item.scene)}</span><span class="lib-pick-tag">${item.duration}s 可用</span></div></article>`).join("");
-        list.querySelectorAll("[data-material-id]").forEach(card => card.addEventListener("click", () => { selectedIds.has(card.dataset.materialId) ? selectedIds.delete(card.dataset.materialId) : selectedIds.add(card.dataset.materialId); render(); }));
+      const selectedIds = (row?.dataset.mixMaterialIds || "").split(",").filter(Boolean);
+      const segment = getMixRowSegment(row).segment;
+      openScriptMaterialPicker({
+        title:"替换镜头",
+        selectedIds,
+        defaultSelectionHint:"可多选素材进行拼接，确认替换时仅使用已分析的素材；",
+        onConfirm(ids) {
+          const chosenIds = Array.isArray(ids) ? ids : [];
+          // 素材选择器返回的是素材库 ID；不能只从当前创作素材卡片中查找，
+          // 否则新增选择的镜头无法参与时长校验与裁剪。
+          const selectedMaterials = chosenIds
+            .map(id => findScriptMaterial(id))
+            .filter(item => item?.status === "ok");
+          if (!selectedMaterials.length) return showToast("请至少选择 1 个镜头");
+          const availableMaterials = [...new Map([...currentMaterials, ...selectedMaterials].map(item => [item.id, item])).values()];
+          // 替换镜头也进入本次创作素材，步骤三回显与后续成片始终使用同一份素材。
+          syncMixMaterialSelection([...new Set([...mixSelectedMaterialIds(), ...selectedMaterials.map(item => item.id)])]);
+          const totalDuration = selectedMaterials.reduce((sum, item) => sum + Math.max(1, Number(item.duration) || 0), 0);
+          if (totalDuration > (segment?.duration || 0)) return openMixConcatTrimDialog(root, rowIndex, selectedMaterials.map(item => item.id), segment?.duration || 0, availableMaterials);
+          root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [rowIndex]:selectedMaterials.map(item => item.id) };
+          root._mixRowNeedsRematch?.delete(rowIndex);
+          renderMixScript();
+          showToast("镜头已更新，当前阶段已完成替换");
+        }
+      });
+    }
+
+    function openMixConcatTrimDialog(root, rowIndex, ids, limit, materials) {
+      const selected = materials.filter(item => ids.includes(item.id));
+      const totalSelected = selected.length;
+      // 单镜头直采用提示
+      const singleTakeHint = totalSelected === 1
+        ? `<div class="mix-trim-singletake">本镜头已直接采用,无需裁剪。系统将根据本阶段时长 ${limit.toFixed(1)}s 适配。</div>`
+        : "";
+      const trimRows = totalSelected === 1 ? "" : `<div class="mix-trim-list" data-mix-trim-list>${selected.map(item => `<label data-mix-trim-row="${escapeHtml(item.id)}"><span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.scene || "")} · 原 ${Number(item.duration || 0).toFixed(1)}s</small></span><input type="number" min="0.3" max="${Math.max(.3, Number(item.duration) || 1)}" step="0.1" value="${Math.min(Number(item.duration) || 1, limit).toFixed(1)}" data-mix-trim-id="${escapeHtml(item.id)}"><em>s</em></label>`).join("")}</div>`;
+      const overlay = createMixDialog({
+        title: "拼接与剪辑镜头",
+        subtitle: `所选镜头总时长超过本阶段 ${limit.toFixed(1)}s,请裁剪后再替换。`,
+        label: "拼接与剪辑镜头",
+        body: `<div class="mix-rematch-dialog-body">
+          ${singleTakeHint}
+          ${totalSelected > 1 ? `<div class="mix-trim-progress">
+            <div class="mix-trim-progress-head">
+              <span>已裁剪 <b data-mix-trim-current>0.0</b> / ${totalSelected} 镜头</span>
+              <span>总时长 <b data-mix-trim-total>0.0</b>s / 限 <b data-mix-trim-limit>${limit.toFixed(1)}</b>s</span>
+            </div>
+            <div class="mix-trim-progress-bar"><i data-mix-trim-bar style="width:0%"></i></div>
+          </div>
+          <div class="mix-trim-toolbar">
+            <button class="ghost-btn-sm" type="button" data-mix-trim-auto>✨ AI 自动裁剪</button>
+            <span class="mix-trim-toolbar-note">平均分配 ${(limit / totalSelected).toFixed(1)}s / 镜头,长镜微调</span>
+          </div>` : ""}
+          ${trimRows}
+          <div class="mix-match-status" data-mix-trim-status hidden style="padding:9px 11px;border-radius:8px;color:#6b55b7;background:#f7f4ff;font-size:11px"></div>
+        </div>`,
+        footer: `<span class="mix-dialog-foot-note">确认后按裁剪时长拼接本阶段镜头。</span><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close>取消</button><button class="primary-btn" type="button" data-mix-confirm-trim${totalSelected > 1 ? " data-mix-trim-confirm-btn" : ""}>确认替换</button></div>`
+      });
+      // 1/N 进度 + 进度条 实时更新
+      const updateProgress = (statusOnly) => {
+        if (totalSelected <= 1) return;
+        const values = [...overlay.querySelectorAll("[data-mix-trim-id]")].map(input => Number(input.value) || 0);
+        const total = values.reduce((sum, v) => sum + v, 0);
+        const currentCount = values.filter(v => v > 0).length;
+        const ratio = Math.min(100, (total / limit) * 100);
+        overlay.querySelector("[data-mix-trim-current]").textContent = String(currentCount);
+        overlay.querySelector("[data-mix-trim-total]").textContent = total.toFixed(1);
+        const bar = overlay.querySelector("[data-mix-trim-bar]");
+        bar.style.width = `${ratio}%`;
+        const overLimit = total > limit + .05;
+        bar.classList.toggle("is-over", overLimit);
+        bar.classList.toggle("is-full", !overLimit && ratio > 90);
+        const confirmBtn = overlay.querySelector("[data-mix-confirm-trim]");
+        if (confirmBtn) {
+          confirmBtn.disabled = overLimit;
+          confirmBtn.classList.toggle("disabled", overLimit);
+        }
+        if (statusOnly) return;
       };
-      overlay.addEventListener("click", event => { if (event.target === overlay || event.target.closest("[data-close]")) overlay.remove(); });
-      overlay.querySelector("[data-confirm]").addEventListener("click", () => {
-        if (!selectedIds.size) return showToast("请至少选择 1 个镜头");
-        root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [rowIndex]:[...selectedIds] };
-        root._mixRowNeedsRematch?.delete(rowIndex);
+      // input 改变 → 实时进度
+      if (totalSelected > 1) {
+        overlay.querySelectorAll("[data-mix-trim-id]").forEach(input => {
+          input.addEventListener("input", () => updateProgress(false));
+        });
+        // 初始:把每个 input 限到 limit(避免总和超限,先均匀)
+        const initialAvg = limit / totalSelected;
+        const inputs = [...overlay.querySelectorAll("[data-mix-trim-id]")];
+        inputs.forEach(input => {
+          const origDur = Number(selected.find(m => m.id === input.dataset.mixTrimId)?.duration || 0);
+          input.value = Math.min(origDur || initialAvg, initialAvg).toFixed(1);
+        });
+        updateProgress(false);
+        // AI 自动裁剪
+        overlay.querySelector("[data-mix-trim-auto]").addEventListener("click", () => {
+          const btn = overlay.querySelector("[data-mix-trim-auto]");
+          btn.disabled = true;
+          btn.dataset.aiLoading = "true";
+          btn.textContent = "AI 正在裁剪…";
+          const status = overlay.querySelector("[data-mix-trim-status]");
+          status.hidden = false;
+          status.textContent = `正在按 ${(limit / totalSelected).toFixed(1)}s 平均分配,并适配每个镜头的原始时长…`;
+          setTimeout(() => {
+            const perBase = limit / totalSelected;
+            const inputsNow = [...overlay.querySelectorAll("[data-mix-trim-id]")];
+            // 先按 1/N 分配,再把超 limit 的部分削掉
+            inputsNow.forEach(input => {
+              const origDur = Number(selected.find(m => m.id === input.dataset.mixTrimId)?.duration || 0) || perBase;
+              const v = Math.min(origDur, perBase);
+              input.value = v.toFixed(1);
+            });
+            // 检查总和,微调最后一个
+            const totalNow = inputsNow.reduce((s, i) => s + (Number(i.value) || 0), 0);
+            if (totalNow > limit + .05 && inputsNow.length) {
+              const diff = totalNow - limit;
+              const last = inputsNow[inputsNow.length - 1];
+              const lastVal = Number(last.value) || 0;
+              last.value = Math.max(.3, lastVal - diff).toFixed(1);
+            }
+            updateProgress(false);
+            btn.disabled = false;
+            btn.dataset.aiLoading = "";
+            btn.textContent = "✨ AI 自动裁剪";
+            status.textContent = `已按 1/${totalSelected} 平均分配,总时长 ${overlay.querySelector("[data-mix-trim-total]").textContent}s / 限 ${limit.toFixed(1)}s。`;
+          }, 600);
+        });
+      }
+      overlay.querySelector("[data-mix-confirm-trim]").addEventListener("click", () => {
+        if (totalSelected > 1) {
+          const values = [...overlay.querySelectorAll("[data-mix-trim-id]")].map(input => ({ id: input.dataset.mixTrimId, duration: Number(input.value) || 0 }));
+          const total = values.reduce((sum, item) => sum + item.duration, 0);
+          const status = overlay.querySelector("[data-mix-trim-status]");
+          if (total > limit + .05) {
+            status.hidden = false;
+            status.textContent = `裁剪后总时长 ${total.toFixed(1)}s,仍超过阶段时长 ${limit.toFixed(1)}s,请继续调整或点 "✨ AI 自动裁剪"。`;
+            status.style.color = "#c44545";
+            status.style.background = "#fdecec";
+            return;
+          }
+          root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [rowIndex]:values.map(item => item.id) };
+          root._mixRowMaterialDurations = { ...(root._mixRowMaterialDurations || {}), [rowIndex]:Object.fromEntries(values.map(item => [item.id, item.duration])) };
+          root._mixRowNeedsRematch?.delete(rowIndex);
+        } else {
+          // 单镜头直采用
+          root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [rowIndex]:[selected[0].id] };
+          root._mixRowMaterialDurations = { ...(root._mixRowMaterialDurations || {}), [rowIndex]:{ [selected[0].id]: Math.min(limit, Number(selected[0].duration) || limit) } };
+          root._mixRowNeedsRematch?.delete(rowIndex);
+        }
         overlay.remove();
         renderMixScript();
-        showToast("镜头已更新，当前段落已完成手动匹配");
+        showToast(totalSelected > 1 ? `已按 1/${totalSelected} 拼接裁剪并替换` : "镜头已替换,本阶段时长已适配");
       });
-      render();
     }
 
     function openMixMaterialPicker(root) {
@@ -5665,7 +6756,7 @@
       openScriptMaterialPicker({
         title:"关联创作素材到本次混剪",
         selectedIds:currentIds.filter(id => findScriptMaterial(id)),
-        productName:mixProductNames[root.querySelector("[data-mix-product]")?.value] || "",
+        defaultSelectionHint:"默认勾选已带入创作素材的产品关联素材；",
         onConfirm:ids => {
           const beforeIds = new Set(currentIds);
           const candidateIds = [...new Set([...currentIds, ...ids])];
@@ -5696,11 +6787,17 @@
       const root = dynamicForm.querySelector(".mix-flow-form");
       if (!root || root.dataset.bound === "true") return;
       root.dataset.bound = "true";
+      const mixVoiceOptions = root.querySelector("[data-mix-voice-options]");
+      if (mixVoiceOptions) {
+        const currentVoice = root.querySelector("[data-mix-voice]")?.value || SCRIPT_VOICE_OPTIONS[0][0];
+        mixVoiceOptions.innerHTML = voiceOptionsHtml("mix-voice-option", "mix-voice-preview-option", currentVoice);
+        bindVoiceChoiceEvents(root, "[data-mix-voice]");
+      }
       if (!root._mixActionBridgeBound) {
         root._mixActionBridgeBound = true;
         document.addEventListener("click", event => {
           if (!root.isConnected) return;
-          const target = event.target.closest?.("[data-mix-preview-row],[data-mix-replace-row],[data-mix-rematch-row],[data-mix-rematch-all]");
+          const target = event.target.closest?.("[data-mix-preview-row],[data-mix-replace-row],[data-mix-rematch-row],[data-mix-rematch-all],[data-mix-insert-row],[data-mix-delete-row]");
           if (!target || !root.contains(target)) return;
           event.preventDefault();
           event.stopImmediatePropagation();
@@ -5717,6 +6814,15 @@
             return;
           }
           if (target.matches("[data-mix-rematch-all]")) openMixRematchAllDialog();
+          // 阶段2 J: 行级插入/删除
+          if (target.matches("[data-mix-insert-row]")) {
+            openMixInsertRowDialog(target.closest("[data-mix-script-row]"));
+            return;
+          }
+          if (target.matches("[data-mix-delete-row]")) {
+            openMixDeleteRowConfirm(target.closest("[data-mix-script-row]"));
+            return;
+          }
         }, true);
       }
       const materialGrid = root.querySelector("[data-mix-material-grid]");
@@ -5750,6 +6856,53 @@
         });
       }
       root.addEventListener("click", event => {
+        // Phase 3.6: alert chip 点击 — 跳转 / 定位
+        const alertChip = event.target.closest("[data-mix-alert-goto]");
+        if (alertChip) {
+          event.preventDefault();
+          event.stopPropagation();
+          const goto = alertChip.dataset.mixAlertGoto;
+          if (goto === "copy") {
+            setTaskStep(2);
+            showToast("已切到步骤 2,请补全口播文案");
+            return;
+          }
+          if (goto === "shot") {
+            const idx = Number(alertChip.dataset.mixAlertShotIdx || 0);
+            const card = root.querySelector(`.mix-script-card[data-mix-script-row="${idx}"]`);
+            if (card) {
+              card.scrollIntoView({ behavior: "smooth", block: "center" });
+              card.classList.add("is-flash");
+              setTimeout(() => card.classList.remove("is-flash"), 1600);
+              // 自动展开 body
+              const body = card.querySelector(".mix-script-body");
+              if (body && body.hidden) {
+                body.hidden = false;
+                const toggle = card.querySelector("[data-mix-toggle-row]");
+                if (toggle) toggle.textContent = "收起";
+              }
+              // 统计同 batch 数量提示
+              const more = root.querySelectorAll(".mix-script-card.is-needs-shot").length;
+              if (more > 1) showToast(`已定位到第 ${idx + 1} 段,还有 ${more - 1} 段镜头未匹配`);
+            } else {
+              showToast("未找到对应分镜卡片");
+            }
+            return;
+          }
+          return;
+        }
+        const sourceExpand = event.target.closest("[data-mix-source-expand]");
+        if (sourceExpand) {
+          const info = sourceExpand.closest("[data-mix-source-asset-info]");
+          const preview = info?.querySelector("span");
+          if (!preview) return;
+          const expanded = preview.dataset.expanded === "true";
+          const fullText = preview.dataset.fullText || "";
+          preview.dataset.expanded = String(!expanded);
+          preview.textContent = expanded ? `${fullText.slice(0, 72)}${fullText.length > 72 ? "…" : ""}` : fullText;
+          sourceExpand.textContent = expanded ? "展开全文" : "收起";
+          return;
+        }
         const tagToggle = event.target.closest("[data-mix-tag-filter-toggle]");
         if (tagToggle) {
           openMixMaterialTagFilter();
@@ -5790,15 +6943,73 @@
           showToast("已改为由 AI 自动匹配爆款内容结构");
           return;
         }
+        const audienceChip = event.target.closest("[data-mix-audience-box] .audience-chip");
+        if (audienceChip) {
+          root.querySelectorAll("[data-mix-audience-box] .audience-chip").forEach(chip => chip.classList.toggle("active", chip === audienceChip));
+          const names = [audienceChip.textContent.trim()];
+          const input = root.querySelector("[data-mix-audience]");
+          if (input) { input.value = names.join("、"); input.dataset.personaIds = names.map(name => personaCatalog.find(persona => persona.name === name || persona.audience === name)?.id || "").filter(Boolean).join("|"); }
+          return;
+        }
+        if (event.target.closest("[data-persona-clear]")) {
+          return;
+        }
         if (event.target.closest("[data-mix-pick-audience]")) {
           openMixAudiencePicker(root);
           return;
         }
-        if (event.target.closest("[data-mix-change-structure]")) {
-          setTaskStep(1);
-          root.querySelectorAll("[data-mix-plan]").forEach(button => button.classList.toggle("active", button.dataset.mixPlan === "ai"));
-          renderMixPlanContext("ai");
-          openMixStructurePicker();
+        const personaMode = event.target.closest("[data-mix-persona-mode]");
+        if (personaMode) {
+          setMixPersonaMode(root, personaMode.dataset.mixPersonaMode);
+          return;
+        }
+        const addGroup = event.target?.closest?.("[data-mix-add-persona-group]");
+        if (addGroup) {
+          appendMixPersonaGroup(root);
+          return;
+        }
+        const removeGroup = event.target.closest("[data-mix-persona-group-remove]");
+        if (removeGroup) {
+          const group = removeGroup.closest("[data-mix-persona-group]");
+          if (group) {
+            const groups = root.querySelector("[data-mix-persona-groups]");
+            const wasOnly = groups.querySelectorAll("[data-mix-persona-group]").length <= 1;
+            group.remove();
+            if (wasOnly) {
+              groups.insertAdjacentHTML("beforeend", mixPersonaGroupTemplate(0));
+              const fresh = groups.lastElementChild;
+              if (fresh) bindMixPersonaGroupPills(fresh, root);
+            } else {
+              [...groups.querySelectorAll("[data-mix-persona-group]")].forEach((node, index) => {
+                node.dataset.mixPersonaIndex = String(index);
+                const label = node.querySelector(".mix-persona-group-head > span");
+                if (label) label.textContent = `人群 ${index + 1}`;
+                if (index === 0) {
+                  const remove = node.querySelector("[data-mix-persona-group-remove]");
+                  if (remove) remove.remove();
+                }
+              });
+            }
+            syncMixManualPersonaSummary(root);
+          }
+          return;
+        }
+        const pill = event.target.closest(".mix-persona-pill");
+        if (pill) {
+          const row = pill.closest(".mix-persona-chips-row");
+          if (row) {
+            row.querySelectorAll(".mix-persona-pill").forEach(button => button.classList.toggle("active", button === pill));
+            const group = pill.closest("[data-mix-persona-group]");
+            const customAge = group?.querySelector("[data-mix-custom-age]");
+            if (customAge) customAge.hidden = pill.dataset.value !== "自定义" || row !== group.querySelector("[data-mix-age-chips]");
+            syncMixManualPersonaSummary(root);
+          }
+          return;
+        }
+        const aiSuggest = event.target.closest("[data-mix-ai-suggest]");
+        if (aiSuggest) {
+          const group = aiSuggest.closest("[data-mix-persona-group]");
+          if (group) applyMixManualAiSuggestion(group, aiSuggest.dataset.mixAiSuggest);
           return;
         }
         if (event.target.closest("[data-mix-select-all]")) {
@@ -5849,6 +7060,7 @@
           return;
         }
         if (event.target.closest("[data-mix-regenerate-copy]")) {
+          if (root.dataset.mixPlanMode === "copy") root._mixCopyRewriteVersion = Number(root._mixCopyRewriteVersion || 0) + 1;
           syncMixPlanToConfirmation();
           showToast(root.dataset.mixPlanMode === "ai" ? "已按当前爆款结构重新生成文案" : "已恢复第一步选择的来源内容");
           return;
@@ -5861,27 +7073,11 @@
           syncMixDuration();
           return;
         }
-        if (event.target.closest("[data-mix-fit-duration]")) {
-          fitMixCopyToTarget(true);
-          return;
-        }
         const speedDelta = event.target.closest("[data-mix-speed-minus]") ? -0.05 : event.target.closest("[data-mix-speed-plus]") ? 0.05 : 0;
         if (speedDelta) {
           const input = root.querySelector("[data-mix-speed]");
           input.value = Math.max(.8, Math.min(1.3, Number(input.value) + speedDelta)).toFixed(2);
           syncMixDuration();
-          return;
-        }
-        const previewVoice = event.target.closest("[data-mix-voice-preview]");
-        if (previewVoice) {
-          const playing = previewVoice.classList.toggle("playing");
-          previewVoice.querySelector("span").textContent = playing ? "■" : "▶";
-          previewVoice.querySelector("strong").textContent = playing ? "正在试听…" : "试听当前配音";
-          if (playing) setTimeout(() => {
-            previewVoice.classList.remove("playing");
-            previewVoice.querySelector("span").textContent = "▶";
-            previewVoice.querySelector("strong").textContent = "试听当前配音";
-          }, 2400);
           return;
         }
         const toggleRow = event.target.closest("[data-mix-toggle-row]");
@@ -5912,29 +7108,38 @@
         }
       });
       root.addEventListener("input", event => {
+        if (event.target.matches("[data-mix-age-min], [data-mix-age-max]")) {
+          syncMixManualPersonaSummary(root);
+          return;
+        }
         if (event.target.matches("[data-mix-material-search]")) {
           root.dataset.mixMaterialQuery = event.target.value;
           renderMixMaterialPage(1);
         }
         if (event.target.matches("[data-mix-copy], [data-mix-speed], [data-mix-target-duration]")) {
+          if (event.target.matches("[data-mix-copy]")) root._mixChatCopy = "";
           if (event.target.matches("[data-mix-target-duration]")) {
             root.querySelectorAll("[data-mix-duration-preset]").forEach(button => button.classList.toggle("active", Number(button.dataset.mixDurationPreset) === Number(event.target.value)));
           }
           syncMixDuration();
         }
-        if (event.target.matches("[data-mix-row-copy]")) {
-          const index = Number(event.target.dataset.mixRowCopy || 0);
-          root._mixRowCopyOverrides = { ...(root._mixRowCopyOverrides || {}), [index]:event.target.value };
+        if (event.target.matches("[data-mix-row-visual]")) {
+          const index = Number(event.target.dataset.mixRowVisual || 0);
+          root._mixRowVisualOverrides = { ...(root._mixRowVisualOverrides || {}), [index]:event.target.value };
           if (!root._mixRowNeedsRematch) root._mixRowNeedsRematch = new Set();
           root._mixRowNeedsRematch.add(index);
           const card = event.target.closest(".mix-script-card");
           card?.classList.add("needs-rematch");
-          if (card && !card.querySelector(".mix-row-rematch-hint")) {
-            const hint = document.createElement("div");
+          let hint = card?.querySelector(".mix-row-rematch-hint");
+          if (!hint && card) {
+            hint = document.createElement("div");
             hint.className = "mix-row-rematch-hint";
-            hint.innerHTML = "<b>口播文案已变更</b><span>当前镜头可能不再匹配，请重新匹配或手动调整画面。</span>";
-            card.querySelector(".mix-row-materials")?.before(hint);
+            hint.innerHTML = "<b>画面内容描述已变更</b><span>请重新匹配镜头，系统会重新计算景别、运镜方式和素材。</span>";
+            card.querySelector("footer")?.before(hint);
           }
+          // Phase 3.4 A: 字符数实时更新
+          const counter = event.target.closest("label")?.querySelector("[data-mix-row-visual-count]");
+          if (counter) counter.textContent = `${event.target.value.length} 字`;
           updateMixScriptCompletion();
         }
       });
@@ -5969,6 +7174,7 @@
     function taskSteps() { return agentStepPlans[activeType] || ["基础信息", "创作设置", "确认生成"]; }
 
     function appendTaskGreeting() {
+      if (activeType === "mix") return;
       if (chatOutput.querySelector(`[data-task-greeting="${activeType}"]`)) return;
       const greeting = document.createElement("div");
       greeting.className = "message assistant";
@@ -6068,6 +7274,15 @@
         back.addEventListener("click", () => setTaskStep(taskStep - 1));
         taskActionButtons.append(back);
       }
+      // Phase 3.5: 智能混剪 Step 3 在底部放"重新匹配全部"按钮
+      if (activeType === "mix" && taskStep === 3) {
+        const rematchAll = document.createElement("button");
+        rematchAll.className = "ghost-btn task-rematch-all-button";
+        rematchAll.type = "button";
+        rematchAll.textContent = "重新匹配全部";
+        rematchAll.addEventListener("click", () => openMixRematchAllDialog());
+        taskActionButtons.append(rematchAll);
+      }
       if (isStructuredCopyFlow() && taskStep === 1) {
         const advanced = document.createElement("button");
         advanced.className = "ghost-btn footer-advanced-toggle";
@@ -6080,7 +7295,7 @@
         });
         taskActionButtons.append(advanced);
       }
-      if (!isStructuredCopyFlow() && !contextStatus.hidden) taskActionButtons.append(contextStatus);
+      if (activeType !== "mix" && !isStructuredCopyFlow() && !contextStatus.hidden) taskActionButtons.append(contextStatus);
       const next = document.createElement("button");
       next.className = "primary-btn";
       next.type = "button";
@@ -6152,6 +7367,7 @@
 
     function setTaskStep(nextStep) {
       const steps = taskSteps();
+      const previousStep = taskStep;
       taskStep = Math.max(1, Math.min(nextStep, steps.length));
       if (taskCompleted && taskStep < steps.length) taskEditing = true;
       dynamicForm.querySelectorAll("[data-task-step]").forEach(section => { section.hidden = Number(section.dataset.taskStep) !== taskStep; });
@@ -6160,12 +7376,54 @@
       taskFormActions.hidden = false;
       renderTaskStepper();
       renderTaskActions();
-      if (activeType === "mix" && taskStep === 3) updateMixScriptCompletion();
+      if (activeType === "mix" && taskStep === 3 && previousStep < 3) {
+        renderMixScriptLoading();
+      } else if (activeType === "mix" && taskStep === 3) {
+        updateMixScriptCompletion();
+      }
+      if (activeType === "mix") syncMixStepChat();
       taskFormScroll.scrollTo({ top: 0, behavior: "smooth" });
       // 智能脚本 Agent 步骤 3 = 结果页(由 renderScriptTaskResult 接管)
       if (activeType === "script" && taskStep === 3) {
         captureScriptContext();
       }
+    }
+
+    // 阶段1 G: 智能混剪进入第三步时的 loading + 逐条出现
+    function renderMixScriptLoading() {
+      const host = dynamicForm.querySelector("[data-mix-script-list]");
+      if (!host) return;
+      const steps = [
+        { title: "AI 正在分镜", sub: "根据口播与素材分析结果,切分镜头分段…" },
+        { title: "正在匹配镜头", sub: "按景别 / 运镜 / 场景匹配最佳素材…" },
+        { title: "正在校准时长", sub: "按配音语速重新分配每段时长…" },
+        { title: "分镜完成", sub: "即将展示结果,可继续用对话调整" }
+      ];
+      host.innerHTML = `<div class="mix-script-loading">
+        <div class="mix-spinner"></div>
+        <ol class="mix-loading-steps" data-mix-loading-steps>${steps.map((s, i) => `<li data-mix-step="${i}"><span class="mix-loading-step-dot"></span><div class="mix-loading-step-text"><b>${s.title}</b><small>${s.sub}</small></div></li>`).join("")}</ol>
+        <div class="mix-loading-tip">预计 1-2 秒完成演示 · 生成后可继续用对话调整</div>
+      </div>`;
+      const stepNodes = host.querySelectorAll("[data-mix-step]");
+      stepNodes.forEach((n, i) => { if (i === 0) n.classList.add("is-active"); });
+      steps.forEach((_, i) => {
+        setTimeout(() => {
+          if (i > 0) stepNodes[i - 1]?.classList.replace("is-active", "is-done");
+          if (i < steps.length - 1) stepNodes[i]?.classList.add("is-active");
+        }, i * 350);
+      });
+      const total = mixScriptSegments().length || 5;
+      setTimeout(() => {
+        renderMixScript();
+        const cards = host.querySelectorAll(".mix-script-card");
+        cards.forEach((card, i) => {
+          card.classList.add("is-entering");
+          card.style.animationDelay = `${i * 90}ms`;
+        });
+        updateMixScriptCompletion();
+        const counter = dynamicForm.querySelector("[data-mix-script-count]");
+        if (counter) counter.textContent = String(total);
+      }, 1200);
     }
 
     // 智能脚本 Agent:提交生成,先切到步骤 3 显示 spinner,2 秒后调 showTaskResult
@@ -6230,7 +7488,8 @@
           versionLabel: `V${idx + 1}`,
           versionAngle: anglePool[idx % anglePool.length],
           versionRhythm: rhythmPool[idx % rhythmPool.length],
-          meta: `${ctx.duration || 30}s · ${ctx.voice || "未选择配音"} · ${(ctx.materialGroups || []).length} 个素材分组`,
+          ratio: ctx.ratio || "9:16",
+          meta: `${ctx.ratio || "9:16"} · ${ctx.duration || 30}s · ${ctx.voice || "未选择配音"} · ${(ctx.materialGroups || []).length} 个素材分组`,
           materialMode: ctx.materialMode,
           materialIds: ctx.materialIds || [],
           materialGroups: ctx.materialGroups || [],
@@ -6256,6 +7515,264 @@
     function syncTaskChatTitle() {
       const title = document.getElementById("taskChatTitle");
       if (title) title.textContent = activeCreationSessionTitle();
+    }
+
+    function adjustMixCopyByChat(request) {
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      const source = mixEffectiveCopy(root);
+      const sentences = source.match(/[^。！？!?]+[。！？!?]?/g)?.map(item => item.trim()).filter(Boolean) || [];
+      const normalized = request.replace(/\s/g, "");
+      let next = source;
+      if (/短|精简|缩短|控制时长/.test(normalized)) {
+        next = sentences.slice(0, 4).join("");
+        if (next.length > 120) next = `${next.slice(0, 116)}。`;
+      } else if (/开头|钩子|前3秒|前三秒/.test(normalized)) {
+        next = `先看真实清洁结果，再看产品怎么做到。${sentences.slice(1).join("") || source}`;
+      } else if (/口语|自然|更像人说/.test(normalized)) {
+        next = source.replace(/不代表/g, "不一定").replace(/能够/g, "能").replace(/进行/g, "做").replace(/可以/g, "能");
+      } else if (/结尾|行动引导|CTA|点击/.test(normalized)) {
+        next = `${source.replace(/点击商品[^。！？!?]*[。！？!?]?$/, "").trim()} 点击商品，查看完整实测。`;
+      } else {
+        next = generateMixCopyRewrite(source);
+      }
+      return next.trim();
+    }
+
+    // ── 阶段2 H: 第三步对话 4 能力 ────────────────────────────────────────
+    function injectMixQuickChips(isScriptStep) {
+      const composer = document.getElementById("taskComposerHost") || promptInput?.closest?.(".composer")?.parentElement;
+      const anchor = promptInput?.closest?.(".composer") || document.getElementById("taskComposerHost");
+      if (!anchor) return;
+      const existing = anchor.querySelector(":scope > .mix-composer-quick");
+      if (existing) existing.remove();
+      if (!isScriptStep) return;
+      const wrap = document.createElement("div");
+      wrap.className = "mix-composer-quick";
+      wrap.innerHTML = `
+        <button type="button" class="mix-quick-chip" data-mix-quick="split" title="把当前选中行拆成两段">拆成两段</button>
+        <button type="button" class="mix-quick-chip" data-mix-quick="merge" title="把当前行和下一行合并">合并上下段</button>
+        <button type="button" class="mix-quick-chip" data-mix-quick="optimize" title="让 AI 改写当前行的画面描述">优化画面</button>
+        <button type="button" class="mix-quick-chip" data-mix-quick="diagnose" title="解释为什么是这个镜头">为什么选这个</button>
+      `;
+      anchor.insertBefore(wrap, promptInput.closest(".composer") || anchor.firstChild);
+      wrap.addEventListener("click", event => {
+        const btn = event.target.closest("[data-mix-quick]");
+        if (!btn) return;
+        const sampleMap = {
+          split: "把第 1 段拆成两段",
+          merge: "把第 1 段和第 2 段合并",
+          optimize: "优化第 1 段画面",
+          diagnose: "为什么第 1 段选这个镜头"
+        };
+        const sample = sampleMap[btn.dataset.mixQuick] || "";
+        if (!promptInput) return;
+        promptInput.value = sample;
+        promptInput.focus();
+      });
+    }
+
+    function appendMixUserTurn(text) {
+      const userTurn = document.createElement("div");
+      userTurn.className = "message user";
+      userTurn.textContent = text;
+      chatOutput.append(userTurn);
+    }
+
+    function appendMixAssistantTurn(html) {
+      const turn = document.createElement("div");
+      turn.className = "message assistant";
+      turn.dataset.agentType = "mix";
+      turn.innerHTML = `<div class="message-head"><strong>✦ 智能混剪</strong></div>${html}`;
+      chatOutput.append(turn);
+      conversationTurnCount += 1;
+      agentTurnCounts.mix = (agentTurnCounts.mix || 0) + 1;
+      renderConversationLocator();
+      chatOutput.scrollTo({ top: chatOutput.scrollHeight, behavior: "smooth" });
+    }
+
+    function detectMixScriptIntent(text) {
+      const t = (text || "").replace(/\s/g, "");
+      // 提取显式 index: "第 3 段" / "第3段" / "3 段"
+      const explicit = t.match(/第?\s*(\d{1,2})\s*段/);
+      let explicitIdx = explicit ? Math.max(0, parseInt(explicit[1], 10) - 1) : null;
+      if (/拆/.test(t)) return { kind: "split", explicitIdx };
+      if (/合/.test(t) || /并入|并到|合并到|合并到第/.test(t)) return { kind: "merge", explicitIdx };
+      if (/优化|改写|重写|画面.*改|改.*画面/.test(t)) return { kind: "optimize", explicitIdx };
+      if (/重新匹配|换个?镜头|再匹配|换.*镜头/.test(t)) return { kind: "rematch", explicitIdx };
+      if (/为什么|解释|说明|匹配.*原因|怎么选/.test(t)) return { kind: "diagnose", explicitIdx };
+      return { kind: "fallback", explicitIdx };
+    }
+
+    function pickMixTargetRow(segs, explicitIdx) {
+      if (explicitIdx != null && explicitIdx >= 0 && explicitIdx < segs.length) return explicitIdx;
+      // 缺省:优先 needs-rematch,否则最后段,再退到 0
+      const flagged = segs.findIndex(s => s.needsRematch);
+      if (flagged >= 0) return flagged;
+      return Math.max(0, segs.length - 1);
+    }
+
+    function handleMixSplit(idx, segs) {
+      const seg = segs[idx];
+      if (!seg) return appendMixAssistantTurn(`<p class="assistant-summary">没找到第 ${idx + 1} 段,请刷新页面后重试。</p>`);
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      if (!root) return;
+      root._mixRowSplit = root._mixRowSplit || new Map();
+      root._mixInsertedSegments = root._mixInsertedSegments || [];
+      root._mixRowFlag = root._mixRowFlag || new Set();
+      // 拆 _origIndex(0-based),在前段之后插入新行
+      root._mixRowSplit.set(seg._origIndex, { mode: "half" });
+      root._mixInsertedSegments.push({
+        afterIndex: seg._origIndex,
+        stage: "新分镜",
+        copy: "",
+        visual: "请补充该分镜的画面内容描述",
+        _dropOnDelete: true
+      });
+      root._mixRowInserted?.add?.(seg._origIndex);
+      root._mixRowFlag.add(seg._origIndex);
+      renderMixScript();
+      appendMixAssistantTurn(`<p class="assistant-summary">已把第 ${idx + 1} 段按句号切分为两段,新分镜默认口播为空,可在卡片底部补全。</p>`);
+    }
+
+    function handleMixMerge(idx, segs) {
+      const seg = segs[idx];
+      if (!seg) return appendMixAssistantTurn(`<p class="assistant-summary">没找到第 ${idx + 1} 段,请刷新页面后重试。</p>`);
+      const next = segs[idx + 1];
+      if (!next) return appendMixAssistantTurn(`<p class="assistant-summary">第 ${idx + 1} 段已是末段,无法向下合并。请选前面的段,或合并到上一段。</p>`);
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      if (!root) return;
+      root._mixRowMergedCopy = root._mixRowMergedCopy || {};
+      root._mixRowDeleted = root._mixRowDeleted || new Set();
+      root._mixRowFlag = root._mixRowFlag || new Set();
+      const mergedCopy = (seg.copy || "") + (next.copy || "");
+      root._mixRowMergedCopy[seg._origIndex] = mergedCopy;
+      root._mixRowDeleted.add(next._origIndex);
+      root._mixRowFlag.add(seg._origIndex);
+      // 同步清掉被合行的 overrides
+      if (root._mixRowOverrides) delete root._mixRowOverrides[next._origIndex];
+      if (root._mixRowVisualOverrides) delete root._mixRowVisualOverrides[next._origIndex];
+      if (root._mixRowMaterialDurations) delete root._mixRowMaterialDurations[next._origIndex];
+      renderMixScript();
+      appendMixAssistantTurn(`<p class="assistant-summary">已把第 ${idx + 1} 段和第 ${idx + 2} 段合并,合并后继承前段口播/画面/镜头,总时长已重算。</p>`);
+    }
+
+    function handleMixOptimize(idx, segs) {
+      const seg = segs[idx];
+      if (!seg) return appendMixAssistantTurn(`<p class="assistant-summary">没找到第 ${idx + 1} 段,请刷新页面后重试。</p>`);
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      if (!root) return;
+      appendMixAssistantTurn(`<p class="assistant-summary">正在改写第 ${idx + 1} 段画面描述,镜头匹配状态会同步刷新…</p>`);
+      setTimeout(() => {
+        const origVisual = (seg.visual || "暂无").trim();
+        const enhanced = `${origVisual} · 镜头推进自然,主体居中,光影柔和,关键细节特写`;
+        root._mixRowVisualOverrides = root._mixRowVisualOverrides || {};
+        // visual 存的是渲染位置 index,不是 origIndex
+        root._mixRowVisualOverrides[idx] = enhanced;
+        if (seg._origIndex >= 0) root._mixRowNeedsRematch?.delete?.(seg._origIndex);
+        renderMixScript();
+        appendMixAssistantTurn(`<p class="assistant-summary">已用 AI 改写第 ${idx + 1} 段画面描述,镜头匹配状态已重置。</p>`);
+      }, 800);
+    }
+
+    function handleMixDiagnose(idx, segs) {
+      const seg = segs[idx];
+      if (!seg) return appendMixAssistantTurn(`<p class="assistant-summary">没找到第 ${idx + 1} 段,请刷新页面后重试。</p>`);
+      const m = seg.assigned?.[0];
+      const visualShort = (seg.visual || "").slice(0, 30);
+      if (m) {
+        appendMixAssistantTurn(`<div class="message-head"><strong>✦ 智能混剪</strong></div>
+          <p class="assistant-summary">第 ${idx + 1} 段匹配依据:</p>
+          <ul class="assistant-facts">
+            <li>画面描述关键词:<b>"${escapeHtml(visualShort)}…"</b> → 命中分镜阶段 <b>${escapeHtml(seg.stage || "")}</b></li>
+            <li>已选素材中场景最接近:<b>${escapeHtml(m.name)}</b>(场景:${escapeHtml(m.scene || "")})</li>
+            <li>景别 <b>${escapeHtml(seg.shotType || "—")}</b> · 运镜 <b>${escapeHtml(seg.cameraMove || "—")}</b> 与素材最契合</li>
+          </ul>
+          <p class="assistant-summary assistant-hint">如需替换:可点击卡片底部「重新匹配镜头」或说"换第 ${idx + 1} 段的镜头"。</p>`);
+      } else {
+        appendMixAssistantTurn(`<div class="message-head"><strong>✦ 智能混剪</strong></div>
+          <p class="assistant-summary">第 ${idx + 1} 段暂未匹配到镜头。</p>
+          <p class="assistant-summary assistant-hint">建议操作:① 补全画面描述让 AI 重新匹配 ② 切换为 <b>口播驱动</b> 模式 ③ 点击卡片底部「替换镜头」手动选素材。</p>`);
+      }
+    }
+
+    function openMixRowRematchDialogFromIndex(idx) {
+      const card = document.querySelector(`.mix-script-card[data-mix-script-row="${idx}"]`);
+      if (card) openMixRowRematchDialog(card);
+      else showToast("未找到对应分镜卡片");
+    }
+
+    function submitMixScriptChat(request) {
+      appendMixUserTurn(request);
+      promptInput.value = "";
+      chatOutput.scrollTo({ top: chatOutput.scrollHeight, behavior: "smooth" });
+      const segs = mixScriptSegments();
+      const intent = detectMixScriptIntent(request);
+      const idx = pickMixTargetRow(segs, intent.explicitIdx);
+      switch (intent.kind) {
+        case "split": handleMixSplit(idx, segs); return;
+        case "merge": handleMixMerge(idx, segs); return;
+        case "optimize": handleMixOptimize(idx, segs); return;
+        case "diagnose": handleMixDiagnose(idx, segs); return;
+        case "rematch": openMixRowRematchDialogFromIndex(idx); return;
+        default: appendMixAssistantTurn(`<p class="assistant-summary">我已收到。可以试试:<br>· "把第 ${idx + 1} 段拆成两段"<br>· "把第 ${idx + 1} 段和第 ${idx + 2} 段合并"<br>· "优化第 ${idx + 1} 段画面"<br>· "为什么第 ${idx + 1} 段选这个镜头"</p>`);
+      }
+    }
+
+    function submitMixCopyChat(request) {
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      const nextCopy = adjustMixCopyByChat(request);
+      if (!root || !nextCopy) return;
+      root._mixChatCopy = nextCopy;
+      const userTurn = document.createElement("div");
+      userTurn.className = "message user";
+      userTurn.textContent = request;
+      const assistantTurn = document.createElement("div");
+      assistantTurn.className = "message assistant";
+      assistantTurn.dataset.agentType = "mix";
+      assistantTurn.innerHTML = `<div class="message-head"><strong>✦ 智能混剪</strong></div><p class="assistant-summary">已按你的要求生成一版新的口播文案，复制下方内容到左侧口播文本即可生效。</p><div class="mix-chat-copy-result"><strong>调整后的口播文案</strong><button class="mix-chat-copy-btn" type="button" data-mix-chat-copy aria-label="复制" title="复制"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg></button><p>${escapeHtml(nextCopy)}</p></div>`;
+      chatOutput.append(userTurn, assistantTurn);
+      conversationTurnCount += 1;
+      agentTurnCounts.mix = (agentTurnCounts.mix || 0) + 1;
+      promptInput.value = "";
+      syncMixDuration();
+      renderConversationLocator();
+      chatOutput.scrollTo({ top:chatOutput.scrollHeight, behavior:"smooth" });
+      showToast("已生成调整后的口播文案，复制下方内容到左侧口播文本即可生效");
+    }
+
+    function syncMixStepChat() {
+      if (activeType !== "mix") return;
+      const enabled = [2, 3].includes(taskStep);
+      taskShell.classList.toggle("mix-chat-unavailable", !enabled);
+      if (!enabled) {
+        taskShell.classList.remove("mix-chat-can-edit", "mix-chat-script-mode");
+        setTaskChatCollapsed(false);
+        injectMixQuickChips(false);
+        return;
+      }
+      const guideText = taskStep === 2
+        ? "我可以协助你优化当前口播文案、调整表达节奏或配音语速。确认后再进入脚本与素材匹配。"
+        : "我可以协助你检查分镜与素材匹配，定位需要补充或替换的画面；确认后再生成视频。";
+      setTaskChatCollapsed(false);
+      document.getElementById("taskChatSubtitle").textContent = taskStep === 2 ? "可协助调整文案" : "可协助调整脚本与素材";
+      let guide = chatOutput.querySelector("[data-mix-step-chat-guide]");
+      if (!guide) {
+        guide = document.createElement("div");
+        guide.className = "message assistant";
+        guide.dataset.mixStepChatGuide = "";
+        chatOutput.append(guide);
+      }
+      guide.innerHTML = `<div class="message-head"><strong>✦ 智能混剪</strong></div><p class="assistant-summary">${guideText}</p>`;
+      // 阶段2 H: 取消 canAdjustCopy,step 2/3 统一可输入(语义不同的 prompt 由 chat handler 路由)
+      taskShell.classList.add("mix-chat-can-edit");
+      taskShell.classList.toggle("mix-chat-script-mode", taskStep === 3);
+      promptInput.disabled = false;
+      sendPromptButton.disabled = false;
+      promptInput.placeholder = taskStep === 2
+        ? "描述你想怎么调整文案，例如：开头更直接、精简到 30 秒、结尾加强行动引导"
+        : "分镜助手模式：第 N 段拆成两段 / 第 N 段画面优化 / 为什么选这个镜头";
+      // 阶段2 H: 注入 / 移除 quick chip
+      injectMixQuickChips(taskStep === 3);
     }
 
     function syncTaskChatTarget() {
@@ -6299,6 +7816,16 @@
       scriptTaskAssetIds = [];
       originalCopySequence = 0;
       originalCopyTargetId = "";
+      // 阶段2 J: 重置分镜增删 override
+      const prevRoot = dynamicForm?.querySelector?.(".mix-flow-form");
+      if (prevRoot) {
+        prevRoot._mixRowInserted = new Set();
+        prevRoot._mixRowDeleted = new Set();
+        prevRoot._mixInsertedSegments = [];
+        prevRoot._mixRowMergedCopy = {};
+        prevRoot._mixRowSplit = new Map();
+        prevRoot._mixRowFlag = new Set();
+      }
       syncTaskChatTarget();
       if (activeType === "script") window.__scriptMaterialSelected = [];
       taskShell.dataset.agentType = isStructuredCopyFlow() ? "original" : activeType;
@@ -6423,27 +7950,26 @@
       const voice = dynamicForm.querySelector("[data-mix-final-voice]")?.textContent || "许念 · 1.00×";
       const materialCount = mixSelectedMaterialIds().length || 6;
       const productName = mixProductNames[dynamicForm.querySelector("[data-mix-product]")?.value] || "当前产品";
+      const ratio = dynamicForm.querySelector("[data-mix-ratio]")?.value || "9:16";
+      const playerStageClass = ratio === "16:9" ? "mix-video-stage is-horizontal" : "mix-video-stage";
       const segments = mixScriptSegments();
       const timelineHtml = segments.map(item => {
         const weight = Math.max(1, Math.round(item.duration * 10));
         return `<button style="flex:${weight}" data-mix-seek="${mixTimeLabel(item.start)}">${escapeHtml(item.stage)}<small>${item.duration.toFixed(1)}s</small></button>`;
       }).join("");
+      const spec = ratio === "16:9" ? "16:9 · 1920×1080 · 30fps" : "9:16 · 1080×1920 · 30fps";
       taskResultHost.innerHTML = `
         <div class="mix-result-page">
           <div class="task-result-top"><div><strong>混剪视频已生成</strong><small>全部画面来自已确认的创作素材，可继续检查或局部重剪。</small></div><span class="mix-result-status">✓ 自动质检通过</span></div>
           <div class="mix-result-hero">
-            <div class="mix-video-player" data-mix-video-player><div class="mix-video-stage"><span class="mix-video-product">${escapeHtml(productName)}</span><button type="button" data-mix-result-play>▶</button><div><strong>已有素材混剪成片</strong><small>9:16 · ${escapeHtml(duration)}</small></div></div><div class="mix-player-bar"><span data-mix-player-time>00:00</span><div><i></i></div><span>${escapeHtml(duration.replace(" 秒", ""))}</span></div></div>
+            <div class="mix-video-player" data-mix-video-player><div class="${playerStageClass}"><span class="mix-video-product">${escapeHtml(productName)}</span><button type="button" data-mix-result-play>▶</button><div><strong>已有素材混剪成片</strong><small>${escapeHtml(ratio)} · ${escapeHtml(duration)}</small></div></div><div class="mix-player-bar"><span data-mix-player-time>00:00</span><div><i></i></div><span>${escapeHtml(duration.replace(" 秒", ""))}</span></div></div>
             <div class="mix-result-insight"><div class="mix-result-metrics"><div><span>实际时长</span><b>${escapeHtml(duration)}</b></div><div><span>配音</span><b>${escapeHtml(voice)}</b></div><div><span>素材使用</span><b>${materialCount} 个</b></div><div><span>阻断问题</span><b class="success">0 项</b></div></div><div class="mix-result-quality"><strong>自动质检</strong><p><span>✓</span> 画面已覆盖全部配音时间段</p><p><span>✓</span> 无黑帧、静音或异常变速</p><p><span>✓</span> 产品事实与禁用话术校验通过</p></div></div>
           </div>
           <article class="mix-result-timeline"><header><strong>成片时间轴</strong><small>点击任一段定位预览</small></header><div class="mix-timeline-track">${timelineHtml}</div><div class="mix-result-operations"><span>裁切 8 处</span><span>硬切 7 处</span><span>轻微变速 2 处</span><span>短定帧 2 处</span><span>无转场 / 字幕 / 特效</span></div></article>
           <div class="mix-result-actions"><button class="ghost-btn" type="button" data-mix-result-action="back-script">返回修改脚本</button><button class="ghost-btn" type="button" data-mix-result-action="remix">局部重新混剪</button><button class="soft-btn" type="button" data-mix-result-action="save">保存到成片视频库</button><button class="primary-btn" type="button" data-mix-result-action="download">下载视频</button></div>
         </div>`;
       taskShell.classList.add("is-complete");
-      setTaskChatCollapsed(false);
-      document.getElementById("taskChatSubtitle").textContent = "可继续用自然语言修改本次成片";
-      promptInput.disabled = false;
-      promptInput.placeholder = "例如：把第 3 段换成沙发清洁素材，结尾定帧延长 0.5 秒";
-      sendPromptButton.disabled = false;
+      syncMixStepChat();
       agentPillButton.disabled = false;
       renderTaskStepper();
       showToast("智能混剪已完成，可播放预览或局部调整");
@@ -6912,69 +8438,11 @@
         .replaceAll('"', "&quot;");
     }
 
-    const SCRIPT_MATERIAL_CATALOG = {
-      "产品特写": [
-        { id:"M-CL-101", duration:2.0, tags:["尘杯特写","透明可视","脏污证据"] },
-        { id:"M-CL-102", duration:1.5, tags:["主机特写","按钮细节"] },
-        { id:"M-CL-103", duration:1.0, tags:["握把近景","手持姿势"] }
-      ],
-      "产品全景": [
-        { id:"M-PF-201", duration:2.0, tags:["白色家电","卧室全景"] },
-        { id:"M-PF-202", duration:1.5, tags:["沙发场景","客厅全景"] },
-        { id:"M-PF-203", duration:1.0, tags:["布艺椅","俯视全景"] }
-      ],
-      "使用场景": [
-        { id:"M-SC-301", duration:1.5, tags:["床垫推进","清洁中"] },
-        { id:"M-SC-302", duration:1.5, tags:["沙发表面","灰尘扬起"] },
-        { id:"M-SC-303", duration:1.0, tags:["儿童房间","温馨感"] }
-      ],
-      "痛点对比": [
-        { id:"M-PC-401", duration:1.2, tags:["脏污特写","毛发碎屑"] },
-        { id:"M-PC-402", duration:1.5, tags:["使用前","床面脏污"] },
-        { id:"M-PC-403", duration:1.3, tags:["使用后","干净对比"] }
-      ],
-      "活动物料": [
-        { id:"M-AT-501", duration:1.5, tags:["品牌角标","行动按钮"] },
-        { id:"M-AT-502", duration:2.0, tags:["暑期活动","优惠信息"] },
-        { id:"M-AT-503", duration:1.0, tags:["产品定帧","CTA收口"] }
-      ]
-    };
-
-    const SCRIPT_MATERIAL_SAMPLE_META = {
-      "M-CL-101": { name:"透明尘杯脏污特写", scene:"床垫清洁", duration:2, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/08 09:14", tags:["脏污证据", "结果直给"] },
-      "M-CL-102": { name:"拍打吸尘动作特写", scene:"床垫使用", duration:3, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/08 08:42", tags:["真实操作", "拍打吸尘"] },
-      "M-CL-103": { name:"机身按键与吸口细节", scene:"产品卖点", duration:5, type:"video", status:"pending", product:"轻净 Pro 除螨仪", created:"08/07 17:35", tags:["功能展示", "产品特写"] },
-      "M-PF-201": { name:"卧室床垫清洁全景", scene:"家庭卧室", duration:2, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/07 15:20", tags:["使用场景", "床垫清洁"] },
-      "M-PF-202": { name:"沙发布艺清洁全景", scene:"客厅沙发", duration:3, type:"video", status:"ok", product:"", created:"08/07 11:36", tags:["养宠家庭", "毛发清理"] },
-      "M-PF-203": { name:"多场景使用切换", scene:"床垫与沙发", duration:5, type:"video", status:"analyzing", product:"轻净 Pro 除螨仪", created:"08/06 18:24", tags:["一机多用", "家庭清洁"] },
-      "M-SC-301": { name:"床垫表面推进清洁", scene:"卧室日常", duration:3, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/06 16:11", tags:["使用过程", "镜头推进"] },
-      "M-SC-302": { name:"沙发表面拍打吸尘", scene:"养宠家庭", duration:5, type:"video", status:"fail", product:"", created:"08/06 10:08", tags:["毛发清理", "真实使用"] },
-      "M-SC-303": { name:"儿童房床垫深度清洁", scene:"亲子家庭", duration:10, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/05 19:42", tags:["完整过程", "家庭场景"] },
-      "M-PC-401": { name:"毛发皮屑脏污特写", scene:"清洁痛点", duration:0, type:"image", status:"ok", product:"轻净 Pro 除螨仪", created:"08/05 15:50", tags:["视觉冲击", "脏污特写"] },
-      "M-PC-402": { name:"床面使用前对比", scene:"床垫卫生", duration:0, type:"image", status:"ok", product:"轻净 Pro 除螨仪", created:"08/05 13:27", tags:["前后对比", "痛点呈现"] },
-      "M-PC-403": { name:"床面使用后对比", scene:"清洁结果", duration:5, type:"video", status:"pending", product:"轻净 Pro 除螨仪", created:"08/05 11:08", tags:["前后对比", "结果直给"] },
-      "M-AT-501": { name:"品牌角标与行动按钮", scene:"品牌收口", duration:0, type:"image", status:"ok", product:"轻净 Pro 除螨仪", created:"08/04 18:30", tags:["CTA", "品牌露出"] },
-      "M-AT-502": { name:"夏季深度清洁活动", scene:"营销活动", duration:0, type:"image", status:"analyzing", product:"轻净 Pro 除螨仪", created:"08/04 14:12", tags:["促销信息", "活动氛围"] },
-      "M-AT-503": { name:"产品定帧与购买引导", scene:"品牌收口", duration:0, type:"image", status:"ok", product:"", created:"08/03 19:02", tags:["完整尾帧", "购买引导"] }
-    };
-
-    const SCRIPT_MATERIAL_FOLDERS = [
-      { name:"产品素材", children:["产品特写", "产品全景"] },
-      { name:"场景表达", children:["使用场景", "痛点对比"] },
-      { name:"包装物料", children:["活动物料"] }
-    ];
-    function allScriptMaterials() {
-      return Object.entries(SCRIPT_MATERIAL_CATALOG).flatMap(([group, items]) => items.map(item => ({
-        ...item, ...SCRIPT_MATERIAL_SAMPLE_META[item.id],
-        group,
-        name: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.name || item.tags[0] || item.id,
-        scene: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.scene || item.tags[1] || group,
-        type: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.type || "video",
-        status: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.status || "ok",
-        product: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.product || "",
-        created: SCRIPT_MATERIAL_SAMPLE_META[item.id]?.created || ""
-      })));
-    }
+    const SCRIPT_MATERIAL_CATALOG = window.ScriptMaterialLib?.SCRIPT_MATERIAL_CATALOG;
+    const SCRIPT_MATERIAL_SAMPLE_META = window.ScriptMaterialLib?.SCRIPT_MATERIAL_SAMPLE_META;
+    const SCRIPT_MATERIAL_FOLDERS = window.ScriptMaterialLib?.SCRIPT_MATERIAL_FOLDERS;
+    const allScriptMaterials = () => window.ScriptMaterialLib?.allScriptMaterials() || [];
+    const findScriptMaterial = id => window.ScriptMaterialLib?.findScriptMaterial(id);
 
     function openScriptMaterialReplacement(assetId, rowIndex) {
       const asset = sessionAssets.find(item => item.id === assetId);
@@ -7008,9 +8476,6 @@
         showToast("已替换素材并同步更新镜头方案");
       });
       render();
-    }
-    function findScriptMaterial(id) {
-      return allScriptMaterials().find(item => item.id === id);
     }
 
     function materialShotFields(material) {
@@ -7080,64 +8545,8 @@
       showToast("已更新素材、景别、运镜与画面描述");
     }
 
-    // 构造一个镜头时长 = 镜头总时长 的推荐素材方案
-    function buildMaterialPlan(shotDuration, groupIds) {
-      shotDuration = Number(shotDuration) || 3;
-      const sourceIds = groupIds?.length ? groupIds : allScriptMaterials().map(item => item.id);
-      const pool = [...new Map(sourceIds.flatMap(id => {
-        const material = findScriptMaterial(id);
-        return material ? [material] : allScriptMaterials().filter(item => item.group === id);
-      }).map(item => [item.id, item])).values()];
-      if (!pool.length) return [];
-      const plans = [], seen = new Set();
-      const add = (items, label) => {
-        const key = items.map(item => item.id).join("+");
-        if (seen.has(key) || plans.length >= 8) return;
-        seen.add(key);
-        plans.push({ planId:label, items, duration:items.reduce((sum, item) => sum + (item.useDuration || item.duration), 0) });
-      };
-      pool.filter(item => Math.abs(item.duration - shotDuration) < .05).forEach(item => add([{ ...item, useDuration:shotDuration }], "完整素材"));
-      for (let i = 0; i < pool.length; i++) for (let j = i + 1; j < pool.length; j++) {
-        const total = pool[i].duration + pool[j].duration;
-        if (Math.abs(total - shotDuration) < .1) add([pool[i], pool[j]], "拼接素材");
-        if (total > shotDuration && pool[i].duration < shotDuration) {
-          add([pool[i], { ...pool[j], useDuration:shotDuration - pool[i].duration, clipped:true }], "拼接截取");
-        }
-      }
-      pool.filter(item => item.duration > shotDuration).forEach(item => add([{ ...item, useDuration:shotDuration, clipped:true }], "截取素材"));
-      if (!plans.length) add([{ ...pool[0], useDuration:shotDuration || pool[0].duration, clipped:true }], "智能匹配");
-      return plans;
-      /* legacy matcher retained below for reference
-      // 简化算法:先尽量用单段最长素材;不行就用拼接(2 段)
-      const sorted = [...pool].sort((a, b) => b.duration - a.duration);
-      // 试单段
-      for (const item of sorted) {
-        if (Math.abs(item.duration - shotDuration) < 0.05) {
-          return [{ planId: `P-${item.id}`, items: [item] }];
-        }
-      }
-      // 试拼接 2 段
-      for (let i = 0; i < sorted.length; i++) {
-        for (let j = 0; j < sorted.length; j++) {
-          if (i === j) continue;
-          if (Math.abs(sorted[i].duration + sorted[j].duration - shotDuration) < 0.1) {
-            return [{ planId: `P-${sorted[i].id}+${sorted[j].id}`, items: [sorted[i], sorted[j]] }];
-          }
-        }
-      }
-      // 试拼接 3 段
-      for (let i = 0; i < sorted.length; i++) {
-        for (let j = 0; j < sorted.length; j++) {
-          for (let k = 0; k < sorted.length; k++) {
-            if (i === j || i === k || j === k) continue;
-            if (Math.abs(sorted[i].duration + sorted[j].duration + sorted[k].duration - shotDuration) < 0.15) {
-              return [{ planId: `P-${sorted[i].id}+${sorted[j].id}+${sorted[k].id}`, items: [sorted[i], sorted[j], sorted[k]] }];
-            }
-          }
-        }
-      }
-      return []; */
-    }
+    // 构造一个镜头时长 = 镜头总时长 的推荐素材方案(委托至 window.ScriptMaterialLib 共享池)
+    const buildMaterialPlan = (shotDuration, groupIds) => window.ScriptMaterialLib?.buildMaterialPlan(shotDuration, groupIds) || [];
 
     const completeScriptRows = [
       {
@@ -7818,7 +9227,7 @@
       }
       const existingProduct = event.target.closest("[data-use-existing-product]");
       if (existingProduct) {
-        applyProductToForm(existingProduct.dataset.useExistingProduct || "mite-pro");
+        applyProductToForm(existingProduct.dataset.useExistingProduct || "mite-pro", false, isStructuredCopyFlow());
         const feedback = dynamicForm.querySelector("[data-recognition-feedback]");
         if (feedback) {
           feedback.hidden = false;
@@ -8072,7 +9481,7 @@
       if (event.target.matches("[data-mode-control]")) setFormFeedback(`已切换为“${event.target.options[event.target.selectedIndex].text}”，输入槽位已更新。`);
       if (event.target.matches("[data-reference-source]")) refreshReferenceSource();
       if (event.target.matches("[data-rewrite-source]")) refreshRewriteSource();
-      if (event.target.matches("[data-product-select]")) applyProductToForm(event.target.value, true);
+      if (event.target.matches("[data-product-select]")) applyProductToForm(event.target.value, true, isStructuredCopyFlow());
       if (event.target.matches("[data-creation-preset]")) applyCreationPreset(event.target.value);
     });
 
@@ -8124,6 +9533,19 @@
       if (!activeAgent) return;
       if (activeType !== "chat" && !taskShell.classList.contains("show")) {
         openAgentTask();
+        return;
+      }
+      if (activeType === "mix" && taskShell.classList.contains("show") && taskStep === 2) {
+        const request = promptInput.value.trim();
+        if (!request) return showToast("请输入需要调整的文案要求");
+        submitMixCopyChat(request);
+        return;
+      }
+      // 阶段2 H: 第三步 chat 4 能力
+      if (activeType === "mix" && taskShell.classList.contains("show") && taskStep === 3) {
+        const request = promptInput.value.trim();
+        if (!request) return showToast("请输入需要让分镜助手执行的动作,例如:第 1 段拆成两段 / 优化第 2 段画面");
+        submitMixScriptChat(request);
         return;
       }
       if (activeType !== "chat" && !taskCompleted) {
@@ -10838,12 +12260,60 @@
         setFormFeedback("人群画像选择器加载失败，请刷新页面后重试。", "error");
         return;
       }
-      const context = personaPickerProductContext();
+      const mixRoot = dynamicForm.querySelector(".mix-flow-form");
+      const mixProductId = mixRoot?.querySelector("[data-mix-product]")?.value || "";
+      const isMix = picker.dataset.personaContext === "mix";
+      const context = isMix
+        ? { name:mixProductNames[mixProductId] || "", brand:"", category:"" }
+        : personaPickerProductContext();
       const items = personaCatalog.map(persona => ({ ...persona, recommended:isPersonaRecommended(persona, context) }));
+      if (isMix) {
+        const current = String(mixRoot?.querySelector("[data-mix-audience]")?.dataset.personaIds || "").split("|").filter(Boolean);
+        const manualValues = String(mixRoot?.querySelector("[data-mix-audience]")?.value || "").split("、").map(value => value.trim()).filter(Boolean)
+          .filter(name => !personaCatalog.some(persona => persona.name === name || persona.audience === name));
+        window.CreationPersonaPicker.open({
+          items,
+          productName: context.name,
+          multiple: true,
+          maxSelected: 3,
+          selectedIds: current,
+          allowManual: true,
+          manualValues,
+          onConfirm(personas) {
+            const selected = (Array.isArray(personas) ? personas : [personas]).filter(Boolean)
+              .filter((item, index, list) => list.findIndex(candidate => candidate.id === item.id) === index);
+            const input = mixRoot?.querySelector("[data-mix-audience]");
+            const label = mixRoot?.querySelector("[data-mix-audience-label]");
+            const applied = picker.querySelector("[data-persona-applied]");
+            const personaNames = selected.map(p => p.name || p.audience);
+            if (input) {
+              input.value = personaNames.join("、");
+              input.dataset.personaId = selected[0]?.id || "";
+              input.dataset.personaIds = selected.map(p => p.id).join("|");
+            }
+            if (label) {
+              label.innerHTML = personaNames.length
+                ? `<span class="mix-audience-summary"><span class="mix-audience-secondary-list">${personaNames.map(name => `<em>${escapeHtml(name)}</em>`).join("")}</span>${personaNames.length > 1 ? `<em class="mix-audience-more">+${personaNames.length - 1}</em>` : ""}</span>`
+                : "请选择人群";
+            }
+            const selectedLabel = picker.querySelector("[data-persona-selected]");
+            if (selectedLabel) selectedLabel.textContent = personaNames.length ? `已选 ${personaNames.length} 个人群画像` : "选择人群画像模板";
+            if (applied) {
+              applied.hidden = !personaNames.length;
+              const span = applied.querySelector("span");
+              if (span) span.textContent = personaNames.length ? `已应用：${personaNames.join("、")}` : "";
+            }
+            picker.dataset.personaId = selected[0]?.id || "";
+            picker.dataset.personaIds = selected.map(p => p.id).join("|");
+            showToast(`已应用 ${selected.length} 个人群画像`);
+          }
+        });
+        return;
+      }
       window.CreationPersonaPicker.open({
         items,
-        productName:context.name,
-        selectedId:picker.dataset.personaId || "",
+        productName: context.name,
+        selectedId: picker.dataset.personaId || "",
         onConfirm(persona) {
           const source = personaCatalog.find(item => item.id === persona?.id);
           if (source) applyPersonaToCurrentForm(picker, source);
@@ -10873,6 +12343,19 @@
       }
     }
     function applyPersonaToCurrentForm(picker, persona) {
+      if (picker.dataset.personaContext === "mix") {
+        const root = dynamicForm.querySelector(".mix-flow-form");
+        if (!root) return;
+        const input = root.querySelector("[data-mix-audience]");
+        if (input) { input.value = persona.name || persona.audience; input.dataset.personaId = persona.id; input.dataset.personaIds = persona.id; }
+        renderMixAudienceEditor(root, [persona.name || persona.audience]);
+        picker.dataset.personaId = persona.id;
+        picker.querySelector("[data-persona-selected]").textContent = persona.name;
+        const applied = picker.querySelector("[data-persona-applied]");
+        applied.hidden = false;
+        applied.querySelector("span").textContent = `已应用：${persona.name} · ${persona.audience} · ${persona.gender} · ${persona.age}岁`;
+        return;
+      }
       const rewrite = picker.dataset.personaContext === "rewrite";
       if (rewrite) {
         const box = dynamicForm.querySelector("[data-rewrite-audience-box]");
@@ -10937,7 +12420,23 @@
       const clear = event.target.closest("[data-persona-clear]");
       if (clear) {
         const picker = clear.closest("[data-persona-picker]");
-        setPersonaPickerMode(picker, "manual");
+        if (picker) {
+          setPersonaPickerMode(picker, "manual");
+        } else {
+          const field = clear.closest("[data-mix-audience-field]");
+          const root = field ? dynamicForm.querySelector(".mix-flow-form") : null;
+          if (field && root) {
+            const input = field.querySelector("[data-mix-audience]");
+            const placeholder = field.querySelector("[data-mix-audience-placeholder]");
+            const chips = field.querySelector("[data-mix-audience-chips]");
+            const trigger = field.querySelector("[data-mix-pick-audience]");
+            if (input) { input.value = ""; delete input.dataset.personaId; delete input.dataset.personaIds; }
+            if (placeholder) placeholder.hidden = false;
+            if (chips) { chips.hidden = true; chips.innerHTML = ""; }
+            if (clear) clear.hidden = true;
+            trigger?.classList.remove("is-filled");
+          }
+        }
       }
     });
     renderPersonaLibrary();
@@ -10990,13 +12489,14 @@
         const sourceLabel = r.source === "AI" ? "AI生成" : r.source;
         const sourceTag = '<span class="cl-source-tag ' + (isAI ? 'ai' : 'import') + '">' + sourceLabel + '</span>';
         const editBtn = '<button class="cl-act-btn" onclick="clEditText(\'' + r.id + '\')">编辑</button>';
+        const viewBtn = '<button class="cl-act-btn cl-act-view" onclick="clViewText(\'' + r.id + '\')">查看</button>';
         const aiDropBtn = '<div class="cl-ai-drop"><button class="cl-ai-btn" onclick="clToggleAIMenu(event)">AI <span class="cl-ai-caret">▼</span></button><div class="cl-ai-menu"><button onclick="clAIAction(&quot;rewrite&quot;,&quot;' + r.id + '&quot;)">智能改写</button><button onclick="clAIAction(&quot;clone&quot;,&quot;' + r.id + '&quot;)">爆款仿写</button><button onclick="clAIAction(&quot;script&quot;,&quot;' + r.id + '&quot;)">智能脚本</button><button onclick="clAIAction(&quot;remix&quot;,&quot;' + r.id + '&quot;)">智能混剪</button></div></div>';
         const delBtn = '<button class="cl-act-btn cl-act-danger" onclick="clDelete(&quot;' + r.id + '&quot;)">删除</button>';
         const moreItems = [];
         if (isAI) moreItems.push('<button onclick="clLocate(\'' + r.id + '\')">定位至会话</button>');
         moreItems.push('<button onclick="AssetAudit.showHistory(\'文案\',\'' + r.product.replace(/'/g, "") + '文案\')">查看变更</button>');
         const moreBtn = '<div class="cl-more-drop"><button class="cl-act-btn cl-more-btn" onclick="clToggleMoreMenu(event)" title="更多操作">⋯</button><div class="cl-more-menu">' + moreItems.join('') + '</div></div>';
-        const actBtns = editBtn + aiDropBtn + delBtn + moreBtn;
+        const actBtns = viewBtn + editBtn + aiDropBtn + delBtn + moreBtn;
         return '<tr>'
           + '<td class="cl-col-text"><span class="cl-copy-text" data-id="' + r.id + '" title="' + escapeHtml(r.text) + '">' + r.text + '</span></td>'
           + '<td>' + sourceTag + '</td>'
@@ -11020,7 +12520,10 @@
       if (!item) return;
       clEditingId = id;
       // 填充字段
-      document.getElementById("clEditProduct").value = item.product || "";
+      // 关联产品:从文本反查 productId(可能在档案库中)
+      const matchedEntry = Object.entries(productCatalog).find(function(entry) { return entry[1].name === item.product; });
+      const productId = matchedEntry ? matchedEntry[0] : "";
+      setClEditProduct(productId, matchedEntry ? matchedEntry[1] : null, item.product);
       document.getElementById("clEditText").value = item.text || "";
       // 元信息(只读)
       document.getElementById("clEditMetaSource").textContent = item.source || "—";
@@ -11032,7 +12535,28 @@
       clUpdateEditCounter();
       // 打开弹窗
       clEditModal.classList.add("show");
-      setTimeout(function() { document.getElementById("clEditProduct").focus(); }, 0);
+      setTimeout(function() { clEditModal.querySelector("[data-cl-edit-product-picker]")?.focus(); }, 0);
+    }
+
+    function setClEditProduct(productId, product, fallbackName) {
+      const input = document.getElementById("clEditProduct");
+      const label = clEditModal.querySelector("[data-cl-edit-product-label]");
+      if (!input || !label) return;
+      input.value = productId || "";
+      const displayName = product?.name || fallbackName || "选择产品";
+      label.textContent = displayName;
+      label.classList.toggle("placeholder", !displayName || displayName === "选择产品");
+    }
+
+    function openClEditProductPicker() {
+      if (!window.CreationProductPicker) return showToast("产品选择器加载失败，请刷新页面后重试。");
+      window.CreationProductPicker.open({
+        items: Object.entries(productCatalog).map(function(entry) { return { id: entry[0], ...entry[1] }; }),
+        selectedId: document.getElementById("clEditProduct").value,
+        onConfirm: function(productId, product) {
+          setClEditProduct(productId, product, product?.name);
+        }
+      });
     }
 
     function clClearEditValidation() {
@@ -11053,6 +12577,44 @@
     function clCloseEditModal() {
       clEditModal.classList.remove("show");
       clEditingId = null;
+    }
+
+    // ===== 文案查看弹窗(只读) =====
+    const clViewModal = document.getElementById("clViewModal");
+    let clViewingId = null;
+
+    function clViewText(id) {
+      const item = clData.find(function(r) { return r.id === id; });
+      if (!item) return;
+      clViewingId = id;
+      // 元信息
+      const sourceLabel = item.source === "AI" ? "AI生成" : (item.source || "—");
+      document.getElementById("clViewMetaSource").textContent = sourceLabel;
+      document.getElementById("clViewMetaChars").textContent = (item.chars || (item.text || "").length) + "字 / " + (item.duration || "—") + "s";
+      document.getElementById("clViewMetaUpdated").textContent = item.updated || "—";
+      // 基础信息
+      document.getElementById("clViewProduct").textContent = item.product || "—";
+      document.getElementById("clViewText").textContent = item.text || "—";
+      // 人群快照(优先快照,无快照取顶层)
+      const p = item.personaSnapshot || {
+        audiences: item.crowd ? [item.crowd] : [],
+        gender: "不限",
+        age: "",
+        pain: [],
+        scenes: []
+      };
+      document.getElementById("clViewAudience").textContent = (p.audiences || []).join("、") || "—";
+      document.getElementById("clViewGender").textContent = p.gender || "不限";
+      document.getElementById("clViewAge").textContent = p.age || "—";
+      document.getElementById("clViewPain").textContent = (p.pain || []).length ? (p.pain || []).map(function(line) { return "· " + line; }).join("\n") : "—";
+      document.getElementById("clViewScenes").textContent = (p.scenes || []).length ? (p.scenes || []).map(function(line) { return "· " + line; }).join("\n") : "—";
+      // 打开弹窗
+      clViewModal.classList.add("show");
+    }
+
+    function clCloseViewModal() {
+      clViewModal.classList.remove("show");
+      clViewingId = null;
     }
 
     function clHydrateEditPersona(item) {
@@ -11127,7 +12689,7 @@
 
     function clOpenEditPersonaTemplatePicker() {
       if (!window.CreationPersonaPicker) return showToast("人群模板选择器加载失败，请刷新页面后重试。");
-      const product = document.getElementById("clEditProduct").value.trim();
+      const product = (clEditModal.querySelector("[data-cl-edit-product-label]")?.textContent || "").trim();
       window.CreationPersonaPicker.open({
         items: personaCatalog,
         productName:product,
@@ -11156,7 +12718,7 @@
     }
 
     function clApplyEditAiSuggestion(type) {
-      const product = document.getElementById("clEditProduct").value.trim() || "产品";
+      const product = (clEditModal.querySelector("[data-cl-edit-product-label]")?.textContent || "").trim() || "产品";
       const samples = type === "pain"
         ? [[`担心${product}使用效果不稳定`, "不想花太多时间处理日常麻烦"], ["希望一次解决核心问题", "更在意使用过程是否省心"]]
         : [[`${product}的日常使用场景`, "需要快速处理问题的即时场景"], ["周末集中使用场景", "家人共同使用的生活场景"]];
@@ -11168,7 +12730,7 @@
 
     function clSaveEditModal() {
       if (!clEditingId) return;
-      const product = document.getElementById("clEditProduct").value.trim();
+      const product = (clEditModal.querySelector("[data-cl-edit-product-label]")?.textContent || "").trim();
       const persona = clReadEditPersona();
       const text = document.getElementById("clEditText").value.trim();
       // 校验
@@ -11218,6 +12780,7 @@
     if (clEditModal) {
       clEditModal.addEventListener("click", function(e) {
         if (e.target === clEditModal) clCloseEditModal();
+        if (e.target.closest("[data-cl-edit-product-picker]")) return openClEditProductPicker();
         const modeButton = e.target.closest("[data-cl-audience-mode]");
         if (modeButton) {
           clSetEditAudienceMode(modeButton.dataset.clAudienceMode, modeButton.dataset.clAudienceMode === "template");
@@ -11244,6 +12807,23 @@
       clEditModal.addEventListener("keydown", function(e) {
         if (e.key === "Escape") { e.preventDefault(); clCloseEditModal(); }
         else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); clSaveEditModal(); }
+      });
+    }
+
+    // 文案查看弹窗事件绑定
+    if (clViewModal) {
+      clViewModal.addEventListener("click", function(e) {
+        if (e.target === clViewModal) clCloseViewModal();
+      });
+      document.querySelectorAll("[data-close-cl-view]").forEach(function(b) { b.addEventListener("click", clCloseViewModal); });
+      document.getElementById("clViewEditBtn")?.addEventListener("click", function() {
+        if (!clViewingId) return;
+        const id = clViewingId;
+        clCloseViewModal();
+        clEditText(id);
+      });
+      clViewModal.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") { e.preventDefault(); clCloseViewModal(); }
       });
     }
 

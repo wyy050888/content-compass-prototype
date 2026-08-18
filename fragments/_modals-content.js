@@ -36,6 +36,43 @@
     </div>
   </div>
 
+  <!-- 文案库：查看文案(只读) -->
+  <div class="modal-backdrop" id="clViewModal" role="dialog" aria-modal="true">
+    <div class="modal cl-view-modal">
+      <div class="modal-head"><div class="modal-head-title"><i>查</i><div><h3>查看文案</h3><small>只读视图,如需修改请切换至编辑模式</small></div></div><button class="close-btn" type="button" data-close-cl-view aria-label="关闭">×</button></div>
+      <div class="modal-body">
+        <div class="cl-view-banner"><span class="cl-view-banner-tag">只读模式</span><span>所有字段不可编辑,如需修改请关闭后点击「编辑」</span></div>
+        <div class="cl-edit-meta" id="clViewMeta">
+          <span class="cl-edit-meta-item"><label>来源</label><b id="clViewMetaSource">—</b></span>
+          <span class="cl-edit-meta-item"><label>字数 / 时长</label><b id="clViewMetaChars">—</b></span>
+          <span class="cl-edit-meta-item"><label>最后更新</label><b id="clViewMetaUpdated">—</b></span>
+        </div>
+        <section class="cl-edit-section">
+          <div class="cl-edit-section-head"><h4>基础信息</h4></div>
+          <div class="cl-edit-form">
+            <label class="cl-edit-field full"><span>关联产品</span><div class="cl-view-readonly" id="clViewProduct">—</div></label>
+            <div class="cl-edit-field cl-edit-persona-field full" id="clViewPersonaField">
+              <span>人群画像</span>
+              <div class="cl-edit-audience-block">
+                <div class="cl-edit-audience-label">核心目标人群</div>
+                <div class="cl-edit-audience-row"><span>抖音八大人群</span><div class="cl-view-readonly" id="clViewAudience">—</div></div>
+                <div class="cl-edit-audience-row"><span>性别</span><div class="cl-view-readonly" id="clViewGender">—</div></div>
+                <div class="cl-edit-audience-row"><span>年龄</span><div class="cl-view-readonly" id="clViewAge">—</div></div>
+              </div>
+              <div class="cl-edit-field"><div class="cl-edit-field-title"><span>人群核心痛点</span></div><div class="cl-view-readonly block" id="clViewPain">—</div></div>
+              <div class="cl-edit-field"><div class="cl-edit-field-title"><span>使用场景</span></div><div class="cl-view-readonly block" id="clViewScenes">—</div></div>
+            </div>
+          </div>
+        </section>
+        <section class="cl-edit-section">
+          <div class="cl-edit-section-head"><h4>文案内容</h4></div>
+          <div class="cl-edit-field full"><span>文案详情</span><div class="cl-view-readonly block cl-view-text" id="clViewText">—</div></div>
+        </section>
+      </div>
+      <div class="modal-foot"><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close-cl-view>关闭</button><button class="primary-btn" type="button" id="clViewEditBtn">去编辑</button></div></div>
+    </div>
+  </div>
+
   <!-- 文案库：编辑文案 -->
   <div class="modal-backdrop" id="clEditModal" role="dialog" aria-modal="true">
     <div class="modal cl-edit-modal">
@@ -49,7 +86,7 @@
         <section class="cl-edit-section">
           <div class="cl-edit-section-head"><h4>基础信息</h4></div>
           <div class="cl-edit-form">
-            <label class="cl-edit-field full"><span>关联产品 <b style="color:#e14b53;">*</b></span><input type="text" id="clEditProduct" placeholder="如：除螨仪、空气炸锅"></label>
+            <label class="cl-edit-field full"><span>关联产品 <b style="color:#e14b53;">*</b></span><button class="cl-create-product-trigger cl-edit-product-trigger" type="button" data-cl-edit-product-picker aria-haspopup="dialog"><span class="placeholder" data-cl-edit-product-label>选择产品</span><b>⌄</b></button><input type="hidden" id="clEditProduct"></label>
             <div class="cl-edit-field cl-edit-persona-field full" id="clEditPersonaField">
               <span>人群画像</span>
               <div class="cl-edit-persona-source" role="group" aria-label="人群画像来源"><button class="active" type="button" data-cl-audience-mode="manual">自行输入</button><button type="button" data-cl-audience-mode="template">从模板库选择</button></div>
