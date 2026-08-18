@@ -7393,6 +7393,13 @@
     function renderMixScriptLoading() {
       const host = dynamicForm.querySelector("[data-mix-script-list]");
       if (!host) return;
+      // 进入 loading 阶段先把"段落待完善"提示隐藏,等真实分镜完成后再重算
+      const alert = dynamicForm.querySelector("[data-mix-script-alert]");
+      if (alert) { alert.hidden = true; alert.innerHTML = ""; }
+      // loading 阶段也不应禁用"确认脚本"按钮
+      const next = taskActionButtons?.querySelector(".primary-btn");
+      if (next) next.disabled = true;
+      if (taskActionNote) taskActionNote.textContent = "正在分镜,稍候…";
       const steps = [
         { title: "AI 正在分镜", sub: "根据口播与素材分析结果,切分镜头分段…" },
         { title: "正在匹配镜头", sub: "按景别 / 运镜 / 场景匹配最佳素材…" },
