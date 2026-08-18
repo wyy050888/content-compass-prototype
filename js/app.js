@@ -1999,22 +1999,6 @@
         field.classList.toggle("is-locked", locked);
         field.title = locked ? "已绑定产品库,不可修改;如需调整请切到商品链接或手工输入" : "";
       });
-      // 配套提示条(仅锁定时显示)
-      const existing = dynamicForm?.querySelector("[data-product-lock-hint]");
-      if (locked) {
-        if (existing) return;
-        const panel = dynamicForm?.querySelector(".original-group-fields");
-        if (!panel) return;
-        const firstNameField = panel.querySelector("[data-original-product-name]")?.closest(".original-field");
-        if (!firstNameField) return;
-        const hint = document.createElement("div");
-        hint.className = "product-lock-hint";
-        hint.dataset.productLockHint = "true";
-        hint.innerHTML = "<span>🔒</span>已绑定产品库:<b>产品名称 / 品牌 / 类目</b>不可修改;如需调整请切到<b>商品链接 / 手工输入</b>";
-        firstNameField.before(hint);
-      } else if (existing) {
-        existing.remove();
-      }
     }
 
     function clearLibraryProductFields() {

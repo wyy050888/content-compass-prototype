@@ -5437,15 +5437,6 @@
       border-color:#e3e4ec;
       box-shadow:none;
     }
-    .product-lock-hint {
-      grid-column:1 / -1;
-      display:flex; align-items:center; gap:6px;
-      margin:2px 0 8px; padding:8px 12px;
-      background:#f4f1ff; color:#5b48c4;
-      border:1px solid #e1d8f7; border-radius:8px;
-      font-size:12px; line-height:1.6;
-    }
-    .product-lock-hint b { color:#4a37a8; font-weight:600; }
     #agentTaskShell[data-agent-type="original"] .source-switch {
       display:inline-flex;
       width:auto;
