@@ -1988,6 +1988,35 @@
       });
     }
 
+    // 产品库选中时锁定"产品名称/品牌/类目"三件套,避免用户改写与产品库数据冲突;
+    // 切换到商品链接 / 手工输入时解锁。
+    function setLibraryProductFieldLock(locked) {
+      const selectors = ["[data-original-product-name]", "[data-original-brand]", "[data-original-category]"];
+      selectors.forEach(selector => {
+        const field = dynamicForm?.querySelector(selector);
+        if (!field) return;
+        field.readOnly = locked;
+        field.classList.toggle("is-locked", locked);
+        field.title = locked ? "已绑定产品库,不可修改;如需调整请切到商品链接或手工输入" : "";
+      });
+      // 配套提示条(仅锁定时显示)
+      const existing = dynamicForm?.querySelector("[data-product-lock-hint]");
+      if (locked) {
+        if (existing) return;
+        const panel = dynamicForm?.querySelector(".original-group-fields");
+        if (!panel) return;
+        const firstNameField = panel.querySelector("[data-original-product-name]")?.closest(".original-field");
+        if (!firstNameField) return;
+        const hint = document.createElement("div");
+        hint.className = "product-lock-hint";
+        hint.dataset.productLockHint = "true";
+        hint.innerHTML = "<span>🔒</span>已绑定产品库:<b>产品名称 / 品牌 / 类目</b>不可修改;如需调整请切到<b>商品链接 / 手工输入</b>";
+        firstNameField.before(hint);
+      } else if (existing) {
+        existing.remove();
+      }
+    }
+
     function clearLibraryProductFields() {
       creationContext.productId = "";
       creationContext.productName = "";
@@ -1997,6 +2026,7 @@
         const field = dynamicForm.querySelector(selector);
         if (field) field.value = "";
       };
+      setLibraryProductFieldLock(false);
       clear("[data-original-product-name]");
       clear("[data-original-brand]");
       clear("[data-original-category]");
@@ -2041,6 +2071,8 @@
         clearOriginalProductFields(source);
         creationContext.productConfirmed = false;
         creationContext.productSaved = false;
+        // 切到商品链接 / 手工输入,解锁三件套让用户重新填写
+        setLibraryProductFieldLock(false);
       }
       updateModalContext();
       setFormFeedback("");
@@ -2111,6 +2143,8 @@
       }
       if (activeType === "rewrite") refreshRewriteSetting();
       updateModalContext();
+      // 产品库场景下,产品名称 / 品牌 / 类目 锁死,避免与产品库数据冲突
+      if (creationContext.productSource === "library") setLibraryProductFieldLock(true);
       if (announce) setFormFeedback(`已切换至“${product.name}”，并重新带入卖点、人群建议和禁用词。`);
     }
 
@@ -3682,6 +3716,13 @@
       if (isStructuredCopyFlow(type)) hydrateOriginalContext();
       else applyProductToForm(creationContext.productId);
       updateModalContext();
+      // 产品库场景下,产品名称/品牌/类目三件套锁死(智能文案/爆款仿写/智能改写);
+      // 首次进入没有 productId 时,applyProductToForm 不会触发锁定,
+      // 这里补一次"表单已带默认产品"的锁定。
+      if (creationContext.productSource === "library" && (isStructuredCopyFlow(type) || type === "clone" || type === "rewrite")) {
+        const locked = dynamicForm.querySelector("[data-original-product-name]")?.readOnly;
+        if (!locked) setLibraryProductFieldLock(true);
+      }
     }
 
     function refreshConditionalSlots() {

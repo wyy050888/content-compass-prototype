@@ -5422,6 +5422,30 @@
     #agentTaskShell[data-agent-type="original"] .original-field.invalid input,
     #agentTaskShell[data-agent-type="original"] .original-field.invalid textarea,
     #agentTaskShell[data-agent-type="original"] .original-field.invalid select { border-color:#ee6474; }
+    /* 产品库锁定态:产品名称/品牌/类目三件套不可改 */
+    #agentTaskShell[data-agent-type="original"] .original-field input.is-locked,
+    #agentTaskShell[data-agent-type="original"] .original-field select.is-locked,
+    #agentTaskShell[data-agent-type="original"] .original-field textarea.is-locked {
+      background:#f5f5f8;
+      color:#7a7c8a;
+      cursor:not-allowed;
+      border-color:#e3e4ec;
+    }
+    #agentTaskShell[data-agent-type="original"] .original-field input.is-locked:hover,
+    #agentTaskShell[data-agent-type="original"] .original-field select.is-locked:hover,
+    #agentTaskShell[data-agent-type="original"] .original-field textarea.is-locked:hover {
+      border-color:#e3e4ec;
+      box-shadow:none;
+    }
+    .product-lock-hint {
+      grid-column:1 / -1;
+      display:flex; align-items:center; gap:6px;
+      margin:2px 0 8px; padding:8px 12px;
+      background:#f4f1ff; color:#5b48c4;
+      border:1px solid #e1d8f7; border-radius:8px;
+      font-size:12px; line-height:1.6;
+    }
+    .product-lock-hint b { color:#4a37a8; font-weight:600; }
     #agentTaskShell[data-agent-type="original"] .source-switch {
       display:inline-flex;
       width:auto;
