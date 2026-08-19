@@ -4331,6 +4331,42 @@
     #page-creation .agent-task-shell.show { display: grid; }
     #page-creation .agent-task-shell.mix-chat-unavailable { grid-template-columns: minmax(0, 1fr); }
     #page-creation .agent-task-shell.mix-chat-unavailable .task-chat-pane { display: none; }
+    /* 智能脚本模式:全 3 步都隐藏右侧 chat 整列,work-pane 占满(由 app.js:8530 把 taskShell.dataset.agentType 设为 'script') */
+    #page-creation .agent-task-shell[data-agent-type="script"] { grid-template-columns: minmax(0, 1fr); }
+    #page-creation .agent-task-shell[data-agent-type="script"] .task-chat-pane { display: none; }
+    /* 智能脚本模式:work-pane 强制占满 grid cell(原 default 是 min-content,导致右侧大片留白) */
+    #page-creation .agent-task-shell[data-agent-type="script"] .task-work-pane { width: 100%; align-self: stretch; min-width: 0; }
+    #page-creation .agent-task-shell[data-agent-type="script"] .task-form-scroll { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="script"] #dynamicForm { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="script"] .task-result-host { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="script"] .task-result-host .script-scroll { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="script"] .form-section { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="script"] .section-grid { width: 100%; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    /* 智能混剪 Step 3「分镜确认」:不要 chat,work-pane 占满(用户要求) */
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="3"] { grid-template-columns: minmax(0, 1fr); }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="3"] .task-chat-pane { display: none; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="3"] .task-work-pane { width: 100%; align-self: stretch; min-width: 0; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="3"] .task-form-scroll { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="3"] #dynamicForm { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="3"] .task-result-host { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="3"] .task-result-host .script-scroll { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="3"] .form-section { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="3"] .section-grid { width: 100%; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    /* 智能混剪 Step 4「生成视频」:成片已生成,隐藏右侧 chat 整列,work-pane 占满(由 app.js setTaskStep 把 taskShell.dataset.step 设为 '4') */
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] { grid-template-columns: minmax(0, 1fr); }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] .task-chat-pane { display: none; }
+    /* 智能混剪 Step 4:4 个区域(标题/视频/时间轴/按钮)和左右两边留间距 — 直接给 .mix-result-page 加 padding,内部子元素限制最大宽度 */
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] .mix-result-page { padding-top: 24px !important; padding-left: 24px !important; padding-right: 24px !important; box-sizing: border-box !important; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] .mix-result-page > * { max-width: 100%; box-sizing: border-box; }
+    /* timeline 内部 track 不能再溢出 */
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] .mix-result-timeline { overflow: hidden; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] .task-work-pane { width: 100%; align-self: stretch; min-width: 0; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] .task-form-scroll { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] #dynamicForm { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] .task-result-host { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] .task-result-host .script-scroll { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] .form-section { width: 100%; }
+    #page-creation .agent-task-shell[data-agent-type="mix"][data-step="4"] .section-grid { width: 100%; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
     .task-work-pane, .task-chat-pane {
       min-width: 0;
       min-height: 0;
@@ -4377,7 +4413,8 @@
     .task-form-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 20px; border-top: 1px solid #ededf1; background: #fff; }
     .task-form-actions .task-action-note { color: #9697a0; font-size: 11px; }
     .task-form-actions .task-action-buttons { display: flex; gap: 8px; }
-    .task-result-host { flex: 1 1 auto; min-height: 0; padding: 18px 20px; overflow-y: auto; }
+    .task-result-host { flex: 1 1 auto; min-height: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+    .task-result-host .script-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 18px 20px; }
     .task-result-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
     .task-result-top strong { color: #2b2c34; }
     .task-result-top small { display: block; margin-top: 4px; color: #8b8c96; }
@@ -6602,7 +6639,6 @@
     /* 结果页 — 纵向卡片栈 */
     .script-result-stack { display: flex; flex-direction: column; gap: 16px; }
     .script-result-card { background: #fff; border: 1px solid #ebecf3; border-radius: 12px; padding: 18px 20px; transition: all .15s; }
-    .script-result-card.is-chat-target { border-color: #5b3df5; box-shadow: 0 0 0 2px rgba(91,61,245,0.12); }
     .script-result-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
     .script-result-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .script-result-version { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 22px; padding: 0 8px; background: #2a2c3f; color: #fff; border-radius: 6px; font-size: 12px; font-weight: 700; }
@@ -6842,6 +6878,22 @@
     .script-replace-card:hover, .script-replace-card.selected { border-color:#765bea; background:#f8f5ff; }
     .script-result-actions { display:flex; justify-content:flex-end; gap:7px; margin-top:12px; }
     .script-result-actions .asset-action { min-height:32px; padding:6px 10px; border-radius:8px; font-size:11px; }
+
+    /* 智能脚本第三步底部固定栏 — 作为 task-result-host 内的最后一个 flex item,始终贴底 */
+    .script-result-bar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 16px;
+      padding: 12px 20px;
+      background: #ffffff;
+      border-top: 1px solid #ecebf3;
+      box-shadow: 0 -8px 16px -10px rgba(36, 24, 86, 0.08);
+      z-index: 4;
+    }
+    .script-result-bar-actions { display: flex; gap: 7px; flex: 0 0 auto; }
+    .script-result-bar-actions .asset-action { min-height: 32px; padding: 6px 12px; border-radius: 8px; font-size: 12px; }
 
     .task-chat-toggle { display:grid; place-items:center; flex:0 0 28px; width:28px; height:28px; padding:0; border:1px solid #e5e2eb; border-radius:8px; color:#6c6478; background:#fff; cursor:pointer; font-size:18px; line-height:1; }
     .task-chat-toggle:hover { color:#5b42c0; border-color:#bcaeeb; background:#f7f4ff; }
@@ -7083,7 +7135,12 @@
     .mix-rematch-progress[hidden] { display: none; }
     .mix-rematch-progress > span { position: relative; z-index: 2; color: #5d4ee8; font-size: 11px; font-weight: 600; letter-spacing: .3px; flex: 0 0 auto; }
     .mix-rematch-progress-track { position: relative; flex: 1 1 auto; height: 3px; border-radius: 3px; background: #d8d2eb; overflow: hidden; }
-    .mix-rematch-progress-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 3px; background: linear-gradient(90deg, #a993e9, #6c5cf0); transition: width 3s cubic-bezier(.55, .1, .25, 1); }
+    .mix-rematch-progress-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 3px; background: linear-gradient(90deg, #a993e9, #6c5cf0); transform: scaleX(0); transform-origin: left center; transition: transform 3s cubic-bezier(.55, .1, .25, 1); }
+    /* 智能脚本端用 @keyframes 推进(绕开 innerHTML 重建后 transition 不触发的坑);
+       智能混剪端继续用上面的 transition(JS 设 style.transform=scaleX(0) → void offsetWidth → scaleX(1))。
+       用 transform: scaleX 而不是 width:GPU 加速,绝对稳定,不会因为 innerHTML 重建的"初始值"问题不动画。 */
+    .mix-rematch-progress-bar.is-rematch-running { animation: mix-rematch-bar-fill 3s cubic-bezier(.55, .1, .25, 1) forwards; }
+    @keyframes mix-rematch-bar-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
     .mix-rematch-progress-bar::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .55) 50%, transparent 100%); animation: mix-rematch-shine 1.2s linear infinite; }
     @keyframes mix-rematch-shine { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 

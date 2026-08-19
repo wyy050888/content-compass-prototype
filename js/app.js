@@ -1661,7 +1661,7 @@
           </section>
 
           <section class="form-section" data-task-step="3" hidden>
-            <div class="form-section-head"><div><strong>AI 生成脚本</strong><small>分镜结果将在此处展示,生成后可使用右侧对话继续修改</small></div></div>
+            <div class="form-section-head"><div><strong>分镜脚本</strong><small>分镜结果将在此处展示,生成后可使用右侧对话继续修改</small></div></div>
             <div class="script-result-card" data-script-result-card>
               <div class="script-result-loading">
                 <span class="spinner"></span>
@@ -4729,7 +4729,7 @@
       rewrite: ["文案与产品信息", "改写设置", "AI生成文案"],
       "image-main": ["产品与主图目标", "画面要求", "选择模型", "确认生成"],
       "image-detail": ["产品与详情页模块", "画面约束", "选择模型", "确认生成"],
-      script: ["文案信息", "脚本策略", "AI 生成脚本"],
+      script: ["文案信息", "脚本策略", "分镜脚本"],
       "script-copy": ["参考脚本", "重构策略", "确认生成"],
       mix: ["创作方案", "文案与配音", "分镜确认", "生成视频"],
     };
@@ -5641,7 +5641,7 @@
         grid.innerHTML = "";
         empty.hidden = false;
         empty.querySelector("[data-mix-material-empty-title]").textContent = "请先选择目标产品";
-        empty.querySelector("[data-mix-material-empty-detail]").textContent = "选择或创建产品后，即可关联、筛选或添加本次混剪所需的创作素材。";
+        empty.querySelector("[data-mix-material-empty-detail]").textContent = "选择产品后，即可关联、筛选或添加本次混剪所需的创作素材。";
         if (pager) pager.hidden = true;
         dynamicForm.querySelector("[data-mix-total-count]")?.replaceChildren("0");
         syncMixMaterialSelection([]);
@@ -6572,9 +6572,9 @@
       // 进度条 0% → 100%(CSS 已定义 3s cubic-bezier 过渡)
       if (progressWrap) progressWrap.removeAttribute("hidden");
       if (progressBar) {
-        progressBar.style.width = "0%";
+        progressBar.style.transform = "scaleX(0)";
         void progressBar.offsetWidth; // 强制重排,使过渡生效
-        progressBar.style.width = "100%";
+        progressBar.style.transform = "scaleX(1)";
       }
       setTimeout(() => {
         const candidates = materials.filter(item => mixStageMatchesMaterial(seg.stage, item));
@@ -6804,8 +6804,62 @@
       });
     }
 
+    // mix 端薄壳(已迁移到 openConcatTrimDialog 公共函数,保留旧名让混剪已有调用方继续工作)
     function openMixConcatTrimDialog(root, rowIndex, ids, limit, materials) {
       const selected = materials.filter(item => ids.includes(item.id));
+      openConcatTrimDialog({
+        rowIndex, limit,
+        materials: selected,
+        stateAdapter: {
+          writeToState: (idx, idsArr, durMap) => {
+            root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [idx]:idsArr };
+            root._mixRowMaterialDurations = { ...(root._mixRowMaterialDurations || {}), [idx]:durMap };
+          },
+          clearNeedsRematch: (idx) => root._mixRowNeedsRematch?.delete(idx)
+        },
+        onApply: () => renderMixScript()
+      });
+    }
+
+    // script 端薄壳:把素材替换写到 asset.scriptRows[row] + taskResultHost override
+    function openScriptConcatTrimDialog(assetId, rowIndex, ids, limit, materials) {
+      const asset = sessionAssets.find(item => item.id === assetId);
+      const row = asset?.scriptRows?.[rowIndex];
+      if (!row) return;
+      const selected = materials.filter(item => ids.includes(item.id));
+      openConcatTrimDialog({
+        rowIndex, limit,
+        materials: selected,
+        stateAdapter: {
+          writeToState: (idx, idsArr, durMap) => {
+            // 写主数据源(asset.scriptRows[row])
+            row.materialIds = idsArr.slice();
+            row.materialDurations = { ...durMap };
+            row.materialOverride = idsArr[0];
+            // 同步到 taskResultHost override,让 scriptRowsWithOverrides 合并层感知
+            taskResultHost._scriptRowMaterialOverrides = taskResultHost._scriptRowMaterialOverrides || {};
+            taskResultHost._scriptRowMaterialOverrides[idx] = { ids: idsArr.slice(), dur: { ...durMap } };
+            taskResultHost._scriptRowFlag = taskResultHost._scriptRowFlag || new Set();
+            taskResultHost._scriptRowFlag.add(idx);
+          },
+          clearNeedsRematch: (idx) => {
+            taskResultHost._scriptRowNeedsRematch?.delete(idx);
+          }
+        },
+        onApply: () => {
+          refreshScriptResultFromCurrent();
+          const tabIndex = scriptTaskAssetIds.indexOf(asset.id);
+          if (tabIndex > 0) taskResultHost.querySelector(`[data-script-result-tab="${tabIndex}"]`)?.click();
+        }
+      });
+    }
+
+    // 公共:拼接与裁剪剪映式对话框(mix + script 共用,纯 DOM + 状态回调)
+    // opts: { rowIndex, limit, materials, onApply(values), stateAdapter }
+    //   values = [{ id, duration }]  最终确认时回调
+    //   stateAdapter: { writeToState, clearNeedsRematch } 两个回调
+    function openConcatTrimDialog({ rowIndex, limit, materials, onApply, stateAdapter = {} }) {
+      const selected = Array.isArray(materials) ? materials : [];
       const totalSelected = selected.length;
       // 单镜头:不进入剪映式,直接套用
       if (totalSelected <= 1) {
@@ -6818,11 +6872,10 @@
         });
         overlay.querySelector("[data-mix-confirm-trim]").addEventListener("click", () => {
           const dur = Math.min(limit, Number(selected[0]?.duration) || limit);
-          root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [rowIndex]:[selected[0].id] };
-          root._mixRowMaterialDurations = { ...(root._mixRowMaterialDurations || {}), [rowIndex]:{ [selected[0].id]: dur } };
-          root._mixRowNeedsRematch?.delete(rowIndex);
+          stateAdapter.writeToState?.(rowIndex, [selected[0].id], { [selected[0].id]: dur });
+          stateAdapter.clearNeedsRematch?.(rowIndex);
           overlay.remove();
-          renderMixScript();
+          onApply?.([{ id: selected[0].id, duration: dur }]);
           showToast("镜头已替换,本阶段时长已适配");
         });
         return;
@@ -7231,11 +7284,12 @@
           progressText.textContent = `裁剪后总时长 ${total.toFixed(1)}s,仍超 ${(total - limit).toFixed(1)}s,请继续调整。`;
           return;
         }
-        root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [rowIndex]:values.map(v => v.id) };
-        root._mixRowMaterialDurations = { ...(root._mixRowMaterialDurations || {}), [rowIndex]:Object.fromEntries(values.map(v => [v.id, v.duration])) };
-        root._mixRowNeedsRematch?.delete(rowIndex);
+        const durMap = Object.fromEntries(values.map(v => [v.id, v.duration]));
+        const ids = values.map(v => v.id);
+        stateAdapter.writeToState?.(rowIndex, ids, durMap);
+        stateAdapter.clearNeedsRematch?.(rowIndex);
         overlay.remove();
-        renderMixScript();
+        onApply?.(values);
         showToast(`已按 1/${values.length} 拼接裁剪并替换`);
       });
       // ── 全局 mousemove/mouseup + 关闭清理 ──
@@ -7286,6 +7340,42 @@
           }
         }
       });
+    }
+
+    // 公共:行内画面描述 / 口播文案 input 事件(混剪和脚本 Step 3 共用,不再复制)
+    // ctx = { stateAdapter:{writeVisualOverride,writeCopyOverride,markNeedsRematch}, onVisualEdit, onCopyEdit }
+    function handleRowEditInput(event, ctx) {
+      if (event.target.matches("[data-mix-row-visual]")) {
+        const index = Number(event.target.dataset.mixRowVisual || 0);
+        ctx.stateAdapter.writeVisualOverride(index, event.target.value);
+        if (ctx.stateAdapter.markNeedsRematch) ctx.stateAdapter.markNeedsRematch(index);
+        // 局部刷新:高亮"重新匹配" + 启用"↶ 回到默认" + label 末加"需重新匹配"
+        const card = event.target.closest("[data-mix-script-row], [data-script-row]");
+        const rematchBtn = card?.querySelector("[data-mix-rematch-row]");
+        if (rematchBtn) rematchBtn.classList.add("is-highlight");
+        const resetBtn = card?.querySelector("[data-mix-visual-reset]");
+        if (resetBtn) {
+          resetBtn.removeAttribute("disabled");
+          resetBtn.removeAttribute("aria-disabled");
+        }
+        const label = event.target.closest("label");
+        let flag = label?.querySelector(".mix-visual-rematch-flag");
+        if (!flag && label) {
+          flag = document.createElement("em");
+          flag.className = "mix-visual-rematch-flag";
+          flag.title = "已修改描述,需要重新匹配镜头";
+          flag.textContent = "需重新匹配";
+          label.querySelector("span").appendChild(flag);
+        }
+        ctx.onVisualEdit?.(index);
+      }
+      if (event.target.matches("[data-mix-row-copy]")) {
+        const index = Number(event.target.dataset.mixRowCopy || 0);
+        ctx.stateAdapter.writeCopyOverride(index, event.target.value);
+        const copyCounter = event.target.closest("label")?.querySelector("[data-mix-row-copy-count]");
+        if (copyCounter) copyCounter.textContent = `${event.target.value.length} 字`;
+        ctx.onCopyEdit?.(index, event.target.value);
+      }
     }
 
     function bindMixAgentEvents() {
@@ -7681,47 +7771,34 @@
           }
           syncMixDuration();
         }
-        if (event.target.matches("[data-mix-row-visual]")) {
-          const index = Number(event.target.dataset.mixRowVisual || 0);
-          root._mixRowVisualOverrides = { ...(root._mixRowVisualOverrides || {}), [index]:event.target.value };
-          if (!root._mixRowNeedsRematch) root._mixRowNeedsRematch = new Set();
-          root._mixRowNeedsRematch.add(index);
-          // 局部刷新:高亮"重新匹配"按钮 + 启用"↶ 回到默认"按钮 + 在画面描述 label 末尾插入"需重新匹配"标记
-          const card = event.target.closest("[data-mix-script-row]");
-          const rematchBtn = card?.querySelector("[data-mix-rematch-row]");
-          if (rematchBtn) rematchBtn.classList.add("is-highlight");
-          const resetBtn = card?.querySelector("[data-mix-visual-reset]");
-          if (resetBtn) {
-            resetBtn.removeAttribute("disabled");
-            resetBtn.removeAttribute("aria-disabled");
-          }
-          const label = event.target.closest("label");
-          let flag = label?.querySelector(".mix-visual-rematch-flag");
-          if (!flag && label) {
-            flag = document.createElement("em");
-            flag.className = "mix-visual-rematch-flag";
-            flag.title = "已修改描述,需要重新匹配镜头";
-            flag.textContent = "需重新匹配";
-            label.querySelector("span").appendChild(flag);
-          }
-          updateMixScriptCompletion();
-        }
-        if (event.target.matches("[data-mix-row-copy]")) {
-          const index = Number(event.target.dataset.mixRowCopy || 0);
-          // 写出口播文案覆盖:走与第二步同源的 mixCopySegments 复用(写入 _mixRowCopyOverrides)
-          root._mixRowCopyOverrides = { ...(root._mixRowCopyOverrides || {}), [index]:event.target.value };
-          // 同步回 dynamicForm [data-mix-copy] 大文本框(让时长重算参考同一份)
-          const bigCopy = dynamicForm.querySelector("[data-mix-copy]");
-          if (bigCopy) {
-            // 用 draft 重新计算:把每段 copy 串起来
-            const segs = mixScriptSegments();
-            segs[index] = { ...segs[index], copy: event.target.value };
-            const parts = segs.map(s => (s.copy || "").trim()).filter(Boolean);
-            bigCopy.value = parts.join("\n");
-            bigCopy.dispatchEvent(new Event("input", { bubbles: true }));
-          }
-          const copyCounter = event.target.closest("label")?.querySelector("[data-mix-row-copy-count]");
-          if (copyCounter) copyCounter.textContent = `${event.target.value.length} 字`;
+        if (event.target.matches("[data-mix-row-visual], [data-mix-row-copy]")) {
+          // 走公共行内编辑函数,混剪端额外需要"同步回大文本框"和"刷新完成度"
+          handleRowEditInput(event, {
+            stateAdapter: {
+              writeVisualOverride(idx, val) {
+                root._mixRowVisualOverrides = { ...(root._mixRowVisualOverrides || {}), [idx]:val };
+              },
+              writeCopyOverride(idx, val) {
+                root._mixRowCopyOverrides = { ...(root._mixRowCopyOverrides || {}), [idx]:val };
+              },
+              markNeedsRematch(idx) {
+                if (!root._mixRowNeedsRematch) root._mixRowNeedsRematch = new Set();
+                root._mixRowNeedsRematch.add(idx);
+              }
+            },
+            onVisualEdit: () => updateMixScriptCompletion(),
+            onCopyEdit: (index, val) => {
+              // 同步回 dynamicForm [data-mix-copy] 大文本框(让时长重算参考同一份)
+              const bigCopy = dynamicForm.querySelector("[data-mix-copy]");
+              if (bigCopy) {
+                const segs = mixScriptSegments();
+                segs[index] = { ...segs[index], copy: val };
+                const parts = segs.map(s => (s.copy || "").trim()).filter(Boolean);
+                bigCopy.value = parts.join("\n");
+                bigCopy.dispatchEvent(new Event("input", { bubbles: true }));
+              }
+            }
+          });
         }
       });
       root.addEventListener("change", event => {
@@ -7961,6 +8038,7 @@
       const steps = taskSteps();
       const previousStep = taskStep;
       taskStep = Math.max(1, Math.min(nextStep, steps.length));
+      if (taskShell) taskShell.dataset.step = String(taskStep);
       if (taskCompleted && taskStep < steps.length) taskEditing = true;
       dynamicForm.querySelectorAll("[data-task-step]").forEach(section => { section.hidden = Number(section.dataset.taskStep) !== taskStep; });
       taskFormScroll.hidden = false;
@@ -8366,6 +8444,7 @@
 
     function syncMixStepChat() {
       if (activeType !== "mix") return;
+      // 混剪只有 step 2(文案与配音)显示口播调整对话,step 1(创作方案)/ step 3(分镜确认)/ step 4(生成视频)都不显示
       const enabled = taskStep === 2;
       taskShell.classList.toggle("mix-chat-unavailable", !enabled);
       if (!enabled) {
@@ -8374,11 +8453,11 @@
         injectMixQuickChips(false);
         return;
       }
-      const guideText = taskStep === 2
-        ? "我可以协助你优化当前口播文案、调整表达节奏或配音语速。确认后再进入分镜确认。"
-        : "我可以协助你检查分镜与素材匹配，定位需要补充或替换的画面；确认后再生成视频。";
       setTaskChatCollapsed(false);
-      document.getElementById("taskChatSubtitle").textContent = taskStep === 2 ? "可协助调整文案" : "可协助调整分镜";
+      const guideText = "我可以协助你改写或精简口播文案，调整后复制到左侧口播文本即可生效。";
+      const subtitle = "可协助调整口播";
+      const placeholder = "口播助手模式：精简文案 / 改写语气 / 补充卖点";
+      document.getElementById("taskChatSubtitle").textContent = subtitle;
       let guide = chatOutput.querySelector("[data-mix-step-chat-guide]");
       if (!guide) {
         guide = document.createElement("div");
@@ -8387,16 +8466,13 @@
         chatOutput.append(guide);
       }
       guide.innerHTML = `<div class="message-head"><strong>✦ 智能混剪</strong></div><p class="assistant-summary">${guideText}</p>`;
-      // 阶段2 H: 取消 canAdjustCopy,step 2/3 统一可输入(语义不同的 prompt 由 chat handler 路由)
       taskShell.classList.add("mix-chat-can-edit");
-      taskShell.classList.toggle("mix-chat-script-mode", taskStep === 3);
+      taskShell.classList.toggle("mix-chat-script-mode", false);
       promptInput.disabled = false;
       sendPromptButton.disabled = false;
-      promptInput.placeholder = taskStep === 2
-        ? "描述你想怎么调整文案，例如：开头更直接、精简到 30 秒、结尾加强行动引导"
-        : "分镜助手模式：第 N 段拆成两段 / 第 N 段画面优化 / 为什么选这个镜头";
-      // 阶段2 H: 注入 / 移除 quick chip
-      injectMixQuickChips(taskStep === 3);
+      promptInput.placeholder = placeholder;
+      // step 2 不注入分镜调整 chip(那是分镜助手的事,这里只管口播)
+      injectMixQuickChips(false);
     }
 
     function syncTaskChatTarget() {
@@ -8417,6 +8493,8 @@
       const stage = document.querySelector("#page-creation .creation-stage");
       taskShell.classList.remove("show", "is-complete");
       taskShell.classList.remove("chat-collapsed");
+      // 清掉混剪 step 3+ 残留的 class,避免切到其他 agent 后聊天面板仍被 display:none 隐藏
+      taskShell.classList.remove("mix-chat-unavailable", "mix-chat-can-edit", "mix-chat-script-mode");
       stage.insertBefore(conversationLocator, taskShell);
       stage.insertBefore(chatOutput, taskShell);
       stage.insertBefore(composerWrap, taskShell);
@@ -8566,6 +8644,7 @@
       taskCompleted = true;
       taskEditing = false;
       taskStep = 4;
+      if (taskShell) taskShell.dataset.step = String(taskStep);
       taskFormScroll.hidden = true;
       taskFormActions.hidden = true;
       taskResultHost.hidden = false;
@@ -8658,77 +8737,86 @@
     function renderScriptTaskResult(response, generatedAssets) {
       const scriptCtx = creationContext.script || {};
       const product = productCatalog[scriptCtx.product] || { ...currentProduct(), name: scriptCtx.productName || currentProduct().name };
-      const versionCount = generatedAssets.length;
       const modelLabels = { "gpt-5-6-terra":"GPT-5.6 Terra", "claude-sonnet-5":"Claude Sonnet 5", "gemini-3-6-flash":"Gemini 3.6 Flash", "doubao-seed-2-pro":"豆包 Seed 2.0 Pro", "deepseek-v4-pro":"DeepSeek V4 Pro", "qwen-3-7-max":"通义千问 Qwen3.7-Max" };
       const modelLabel = modelLabels[scriptCtx.model] || scriptCtx.model || "—";
 
-      // 计算每个脚本的状态
-      const cards = generatedAssets.map((asset, idx) => {
-        const rows = asset.scriptRows || completeScriptRows;
-        const showMaterial = (asset.materialMode || "depend") === "depend";
-        const statusBadge = "";
-        const saved = sessionAssets.find(a => a.id === asset.id)?.saved;
-        const versionNo = `V${idx + 1}`;
-        const isTarget = scriptTargetId === asset.id;
-        return `
-        <article class="script-result-card${isTarget ? " is-chat-target" : ""}" data-asset-id="${escapeHtml(asset.id)}" data-script-version-panel="${idx}" ${idx ? "hidden" : ""}>
-          <header class="script-result-head">
-            <div class="script-result-title">
-              <span class="script-result-version">${versionNo}</span>
-              <strong>${escapeHtml(asset.title || `${product.name}_脚本_${idx + 1}`)}</strong>
-              ${statusBadge}
-              ${isTarget ? '<span class="script-target-badge">当前修改对象</span>' : ''}
-            </div>
-          </header>
-          <div class="script-result-table">
-            ${scriptTableHtml(rows, asset.materialMode || "depend", asset.materialIds?.length ? asset.materialIds : (asset.materialGroups || []).map(g => g.id || g.name), asset.id)}
-          </div>
-          <footer class="script-result-actions">
-            <button class="asset-action" type="button" data-action="save-script-to-library" data-asset-id="${escapeHtml(asset.id)}">${saved ? "✓ 已保存" : "保存至脚本库"}</button>
-            <button class="asset-action" type="button" data-action="download-script" data-asset-id="${escapeHtml(asset.id)}">下载脚本</button>
-            <button class="asset-action primary" type="button" data-action="chat-edit-script" data-asset-id="${escapeHtml(asset.id)}">用对话修改</button>
-          </footer>
-        </article>
-      `}).join("");
+      // 用 override 合并后的统一 rows
+      const mergedRows = scriptRowsWithOverrides(generatedAssets);
+
+      // 智能脚本不生成多版本(无 V1/V2 tabs,无版本概念),只展示当前 target asset
+      const asset = generatedAssets[0];
+      const saved = sessionAssets.find(a => a.id === asset.id)?.saved;
+      const isTarget = scriptTargetId === asset.id || !scriptTargetId;
+      const cardHtml = mergedRows.map((item, index) => renderSingleScriptCard(item, index, asset, { isTarget, totalRows: mergedRows.length })).join("");
 
       taskResultHost.innerHTML = `
-        <div class="task-result-top">
-          <div>
-            <strong>${escapeHtml(product.name)}｜分镜脚本 ${versionCount > 1 ? "· " + versionCount + " 个脚本" : ""}</strong>
-            <small>${escapeHtml(response.summary)}</small>
-          </div>
+        <div class="script-scroll">
+          <article class="script-result-card" data-asset-id="${escapeHtml(asset.id)}">
+            <div class="mix-script-list" data-script-card-list>${cardHtml}</div>
+          </article>
         </div>
-        ${versionCount > 1 ? `<div class="script-version-tabs" role="tablist">${generatedAssets.map((asset, idx) => `<button type="button" role="tab" aria-selected="${idx === 0}" class="${idx === 0 ? "active" : ""}" data-script-result-tab="${idx}">版本 ${idx + 1}</button>`).join("")}</div>` : ""}
-        <div class="script-result-stack">${cards}</div>
+        <footer class="script-result-bar" data-script-result-bar>
+          <div class="script-result-bar-actions">
+            <button class="asset-action" type="button" data-action="save-script-to-library" data-asset-id="${escapeHtml(asset.id)}">${saved ? "✓ 已保存" : "保存至脚本库"}</button>
+            <button class="asset-action" type="button" data-action="download-script" data-asset-id="${escapeHtml(asset.id)}">下载脚本</button>
+            <button class="asset-action primary" type="button" data-action="mix-from-script" data-asset-id="${escapeHtml(asset.id)}">智能混剪</button>
+          </div>
+        </footer>
       `;
 
-      taskResultHost.querySelectorAll("[data-script-result-tab]").forEach(tab => {
-        tab.addEventListener("click", () => {
-          const target = tab.dataset.scriptResultTab;
-          taskResultHost.querySelectorAll("[data-script-result-tab]").forEach(item => {
-            const active = item === tab;
-            item.classList.toggle("active", active);
-            item.setAttribute("aria-selected", String(active));
-          });
-          taskResultHost.querySelectorAll("[data-script-version-panel]").forEach(panel => {
-            panel.hidden = panel.dataset.scriptVersionPanel !== target;
-          });
+      // 卡片行 ✕ 删除操作
+      taskResultHost.querySelectorAll("[data-mix-delete-row]").forEach(btn => {
+        btn.addEventListener("click", event => {
+          event.stopPropagation();
+          const card = btn.closest("[data-script-row]");
+          if (card) openScriptDeleteRowConfirm(card);
         });
       });
 
-      taskResultHost.querySelectorAll("[data-edit-script-row]").forEach(cell => {
-        cell.addEventListener("click", event => {
-          if (event.target.closest("button, textarea")) return;
-          const tr = cell.closest("tr");
-          const asset = tr && sessionAssets.find(item => item.id === tr.dataset.assetId);
-          if (tr && asset?.materialMode === "free") openScriptRowEditor(tr);
+      // 重新匹配 / 替换镜头 — 用原 _origIndex 定位 asset.scriptRows(因 mergedRows 已合并 inserted/deleted,rowIdx 不再对齐)
+      taskResultHost.querySelectorAll("[data-mix-rematch-row]").forEach(btn => {
+        btn.addEventListener("click", event => {
+          event.stopPropagation();
+          const card = btn.closest("[data-script-row]");
+          if (!card) return;
+          const origIndex = Number(card.dataset.scriptOrigRow);
+          if (!Number.isFinite(origIndex) || origIndex < 0) {
+            showToast("新插入的分镜需先在产品策略中勾选素材,再使用重新匹配");
+            return;
+          }
+          switchScriptShotGroup(card.dataset.assetId, origIndex);
         });
       });
-      taskResultHost.querySelectorAll("[data-action='switch-script-shot']").forEach(button => button.addEventListener("click", () => switchScriptShotGroup(button.dataset.assetId, Number(button.dataset.rowIdx))));
-      taskResultHost.querySelectorAll("[data-action='replace-script-material']").forEach(button => {
-        button.addEventListener("click", () => openScriptMaterialReplacement(button.dataset.assetId, Number(button.dataset.rowIdx)));
+      taskResultHost.querySelectorAll("[data-mix-replace-row]").forEach(btn => {
+        btn.addEventListener("click", event => {
+          event.stopPropagation();
+          const card = btn.closest("[data-script-row]");
+          if (!card) return;
+          const origIndex = Number(card.dataset.scriptOrigRow);
+          if (!Number.isFinite(origIndex) || origIndex < 0) {
+            showToast("新插入的分镜需先在产品策略中勾选素材,再使用替换");
+            return;
+          }
+          openScriptMaterialReplacement(card.dataset.assetId, origIndex);
+        });
       });
-      // 复制视频提示词
+
+      // 收起 / 展开卡片 body
+      taskResultHost.querySelectorAll("[data-mix-toggle-row]").forEach(btn => {
+        btn.addEventListener("click", event => {
+          event.stopPropagation();
+          const card = btn.closest("[data-script-row]");
+          const body = card?.querySelector(".mix-script-body");
+          if (!body) return;
+          const expanded = btn.getAttribute("aria-expanded") !== "false";
+          const next = !expanded;
+          btn.setAttribute("aria-expanded", String(next));
+          btn.textContent = next ? "收起" : "展开";
+          body.hidden = !next;
+        });
+      });
+
+      // 复制视频提示词(在右侧 textarea 旁的小按钮)
       taskResultHost.querySelectorAll("[data-action='copy-video-prompt']").forEach(btn => {
         btn.addEventListener("click", () => {
           const prompt = btn.dataset.prompt || "";
@@ -8746,10 +8834,115 @@
       taskResultHost.querySelectorAll("[data-action='save-script-to-library']").forEach(btn => {
         btn.addEventListener("click", () => toggleScriptSaved(btn.dataset.assetId, btn));
       });
-      // 用对话修改
-      taskResultHost.querySelectorAll("[data-action='chat-edit-script']").forEach(btn => {
-        btn.addEventListener("click", () => setScriptChatTarget(btn.dataset.assetId));
+
+      // 智能混剪(占位,仅 toast)
+      taskResultHost.querySelectorAll("[data-action='mix-from-script']").forEach(btn => {
+        btn.addEventListener("click", () => {
+          setScriptChatTarget(btn.dataset.assetId);
+          showToast("已选择此脚本作为混剪输入");
+        });
       });
+
+      // 一次性绑定 taskResultHost 的行内 input/click:走 handleRowEditInput 公共函数(1:1 对齐混剪)
+      if (!taskResultHost._scriptRowEditBound) {
+        taskResultHost._scriptRowEditBound = true;
+        taskResultHost.addEventListener("input", event => {
+          if (event.target.matches("[data-mix-row-visual], [data-mix-row-copy]")) {
+            handleRowEditInput(event, {
+              stateAdapter: {
+                writeVisualOverride(idx, val) {
+                  taskResultHost._scriptRowVisualOverrides = taskResultHost._scriptRowVisualOverrides || {};
+                  taskResultHost._scriptRowVisualOverrides[idx] = val;
+                },
+                writeCopyOverride(idx, val) {
+                  taskResultHost._scriptRowCopyOverrides = taskResultHost._scriptRowCopyOverrides || {};
+                  taskResultHost._scriptRowCopyOverrides[idx] = val;
+                },
+                markNeedsRematch(idx) {
+                  if (!taskResultHost._scriptRowNeedsRematch) taskResultHost._scriptRowNeedsRematch = new Set();
+                  taskResultHost._scriptRowNeedsRematch.add(idx);
+                }
+              },
+              // 脚本端 onVisualEdit / onCopyEdit 不需要混剪那种"同步大文本框"或"刷新完成度",留空即可
+              onVisualEdit: () => {},
+              onCopyEdit: () => {}
+            });
+          }
+        });
+        // 回到默认按钮(走公共 applyScriptRowVisualReset)
+        taskResultHost.addEventListener("click", event => {
+          const reset = event.target.closest("[data-mix-visual-reset]");
+          if (!reset) return;
+          const card = reset.closest("[data-script-row]");
+          if (card) applyScriptRowVisualReset(card);
+        });
+      }
+
+      // 进入 Step 3 时挂上紫色 composer 主题(只在首次结果渲染时)
+      if (taskShell) taskShell.classList.add("mix-chat-script-mode");
+      injectScriptQuickChips(true);
+    }
+
+    // 1:1 镜像 applyMixRowVisualReset:清除 _scriptRowVisualOverrides / _scriptRowNeedsRematch / 关闭 rematch
+    function applyScriptRowVisualReset(card) {
+      if (!card) return;
+      const origIndex = Number(card.dataset.scriptOrigRow);
+      if (!Number.isFinite(origIndex) || origIndex < 0) {
+        showToast("该段无默认画面描述可恢复");
+        return;
+      }
+      const needsSet = taskResultHost._scriptRowNeedsRematch;
+      const overrideObj = taskResultHost._scriptRowVisualOverrides || {};
+      const hasOverride = Object.prototype.hasOwnProperty.call(overrideObj, origIndex) || Object.prototype.hasOwnProperty.call(overrideObj, Number(card.dataset.rowIdx));
+      const isNeeds = needsSet?.has(origIndex);
+      if (!isNeeds && !hasOverride) {
+        showToast("该段画面描述已是默认状态");
+        return;
+      }
+      needsSet?.delete(origIndex);
+      if (taskResultHost._scriptRowVisualOverrides) {
+        delete taskResultHost._scriptRowVisualOverrides[origIndex];
+        delete taskResultHost._scriptRowVisualOverrides[Number(card.dataset.rowIdx)];
+      }
+      delete taskResultHost._scriptRowRematching?.[origIndex];
+      refreshScriptResultFromCurrent();
+      showToast(`已恢复第 ${Number(card.dataset.rowIdx) + 1} 段画面描述为默认`);
+    }
+
+    // 单张脚本卡片(1:1 镜像混剪 renderSingleMixCard 模板,去掉 +/已匹配素材)
+    function renderSingleScriptCard(item, index, asset, opts = {}) {
+      const totalRows = opts.totalRows ?? 0;
+      const isFirst = index === 0;
+      const isFlagged = Boolean(item._isFlagged);
+      const isInserted = Boolean(item._isInserted);
+      const hasNoMaterial = !(item.materialIds?.length) && !item.materialOverride;
+      const flagMark = isFlagged ? `<i class="mix-row-flag" title="本行已变更" aria-label="本行已变更"></i>` : "";
+      const deleteAttr = isFirst
+        ? ` disabled aria-disabled="true" title="首段不可删除"`
+        : ` data-mix-delete-row="${index}" title="删除第 ${index + 1} 段" aria-label="删除分镜"`;
+      const showMaterial = (asset.materialMode || "depend") === "depend";
+      const previewHtml = hasNoMaterial
+        ? `<div class="mix-stage-preview mix-stage-preview-empty" data-mix-replace-row tabindex="0" role="button" aria-label="为第 ${index + 1} 段选择镜头"><div class="mix-stage-preview-empty-text">点击此处选择素材</div><div class="mix-stage-preview-empty-hint">第 ${index + 1} 段尚未匹配镜头</div></div>`
+        : `<div class="mix-stage-preview" data-mix-replace-row tabindex="0" role="button" aria-label="预览第 ${index + 1} 个镜头"><b>▶</b></div>`;
+      // 视频提示词(scripts 默认就有 videoPrompt 字段);脚本不做混剪式的 material-plan-item 列表,改为只读提示词 textarea
+      const promptCell = !showMaterial
+        ? `<div class="video-prompt-cell"><textarea readonly rows="3" data-video-prompt>${escapeHtml(item.videoPrompt || "")}</textarea><button class="ghost-btn ghost-btn-sm" type="button" data-action="copy-video-prompt" data-prompt="${escapeHtml(item.videoPrompt || "")}">一键复制</button></div>`
+        : "";
+      const stage = item.stage || "新分镜";
+      const timeText = `${mixTimeLabel(item.start)}–${mixTimeLabel(item.end)}`;
+      const isRematching = Boolean(item._isRematching);
+      const needsRematch = Boolean(item.needsRematch);
+      // 1:1 对齐混剪卡片的视觉字段(画面描述):带 ↶ 回到默认 按钮 + 需重新匹配 标记 + 进度条
+      const resetDisabledAttr = needsRematch ? "" : " disabled aria-disabled=\"true\"";
+      const visualFlag = needsRematch && !isRematching ? `<em class="mix-visual-rematch-flag" title="已修改描述,需要重新匹配镜头">需重新匹配</em>` : "";
+      return `<article class="mix-script-card${isFlagged ? " is-flagged" : ""}${isInserted ? " is-inserted" : ""}${hasNoMaterial ? " is-needs-shot" : ""}${needsRematch ? " is-needs-rematch" : ""}${isRematching ? " is-rematching" : ""}" data-script-row data-row-idx="${index}" data-asset-id="${escapeHtml(asset.id)}" data-script-orig-row="${item._origIndex}">${flagMark}<header><div><span class="mix-row-index" title="第 ${index + 1} 段">${String(index + 1).padStart(2, "0")}</span><b>${timeText}</b><strong>${escapeHtml(stage)}</strong><span>${item.duration.toFixed(1)}s</span></div><div class="mix-row-header-actions">
+        <button type="button" class="mix-row-icon-btn"${deleteAttr}>
+          <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"/></svg>
+        </button>
+        <button type="button" class="mix-row-action-btn" data-mix-rematch-row>重新匹配</button>
+        <button type="button" class="mix-row-action-btn mix-row-action-primary" data-mix-replace-row>替换镜头</button>
+        <button type="button" class="mix-row-toggle-btn" data-mix-toggle-row aria-expanded="true">收起</button>
+      </div></header><div class="mix-rematch-progress" data-mix-rematch-progress${isRematching ? "" : " hidden"}><span>AI 换镜中…</span><div class="mix-rematch-progress-track"><div class="mix-rematch-progress-bar${isRematching ? " is-rematch-running" : ""}"></div></div></div><div class="mix-script-body"><div class="mix-script-detail-layout">${previewHtml}<div class="mix-stage-attributes"><label class="mix-stage-visual-edit mix-stage-visual-primary"><span>画面描述<button type="button" class="mix-visual-reset" data-mix-visual-reset="${index}" title="恢复到默认画面描述" aria-label="回到默认"${resetDisabledAttr}>↶ 回到默认</button>${visualFlag}</span><textarea data-mix-row-visual="${index}" placeholder="用一句自然语言描述这个分镜的画面">${escapeHtml(item.visual || "")}</textarea></label><i class="mix-field-divider" aria-hidden="true"></i><label class="mix-stage-copy-edit mix-stage-copy-primary"><span>口播文案<i class="mix-stage-copy-readonly-hint" aria-hidden="true">可在行内继续修改</i></span><textarea data-mix-row-copy="${index}" placeholder="本段口播文案,直接编辑即可触发分镜自动重算">${escapeHtml(item.voice || "")}</textarea></label></div></div>${promptCell}</div></article>`;
     }
 
     function downloadScript(assetId) {
@@ -8795,21 +8988,7 @@
     // 设置当前对话修改的脚本对象(类似 originalCopyTargetId 的模式)
     function setScriptChatTarget(assetId) {
       scriptTargetId = assetId || "";
-      // 刷新高亮
-      taskResultHost.querySelectorAll(".script-result-card").forEach(card => {
-        const isTarget = card.dataset.assetId === assetId;
-        card.classList.toggle("is-chat-target", isTarget);
-        const head = card.querySelector(".script-result-title");
-        let badge = card.querySelector(".script-target-badge");
-        if (isTarget && !badge) {
-          badge = document.createElement("span");
-          badge.className = "script-target-badge";
-          badge.textContent = "当前修改对象";
-          head.appendChild(badge);
-        } else if (!isTarget && badge) {
-          badge.remove();
-        }
-      });
+      // 不再在卡片上添加紫色高亮 / "当前修改对象" badge
       const asset = sessionAssets.find(a => a.id === assetId);
       if (asset) {
         const subtitle = document.getElementById("taskChatSubtitle");
@@ -8822,6 +9001,382 @@
         const subtitle = document.getElementById("taskChatSubtitle");
         if (subtitle) subtitle.textContent = "可继续用自然语言修改本次结果";
         promptInput.placeholder = "继续修改本次分镜,例如:把第 2 个镜头改成全景,时长调整为 4s";
+      }
+    }
+
+    // ── 阶段2 H/J 镜像:智能脚本 Step 3 — chat 4 能力 + 分镜增删 ────────────
+    // 6 个 override 挂在 taskResultHost 上(脚本 Step 3 的渲染根),key 用 _scriptRow* 前缀与混剪端区分
+    function ensureScriptOverrides() {
+      taskResultHost._scriptRowInserted = taskResultHost._scriptRowInserted || new Set();
+      taskResultHost._scriptRowDeleted = taskResultHost._scriptRowDeleted || new Set();
+      taskResultHost._scriptInsertedSegments = taskResultHost._scriptInsertedSegments || [];
+      taskResultHost._scriptRowMergedCopy = taskResultHost._scriptRowMergedCopy || {};
+      taskResultHost._scriptRowSplit = taskResultHost._scriptRowSplit || new Map();
+      taskResultHost._scriptRowFlag = taskResultHost._scriptRowFlag || new Set();
+      taskResultHost._scriptRowVisualOverrides = taskResultHost._scriptRowVisualOverrides || {};
+      taskResultHost._scriptRowMaterialOverrides = taskResultHost._scriptRowMaterialOverrides || {};
+    }
+    function resetScriptOverrides() {
+      taskResultHost._scriptRowInserted = new Set();
+      taskResultHost._scriptRowDeleted = new Set();
+      taskResultHost._scriptInsertedSegments = [];
+      taskResultHost._scriptRowMergedCopy = {};
+      taskResultHost._scriptRowSplit = new Map();
+      taskResultHost._scriptRowFlag = new Set();
+      taskResultHost._scriptRowVisualOverrides = {};
+      taskResultHost._scriptRowMaterialOverrides = {};
+    }
+
+    // 把 completeScriptRows 按 6 个 override 合并成渲染数组,每行带 _origIndex
+    function scriptRowsWithOverrides(generatedAssets) {
+      ensureScriptOverrides();
+      // 数据源优先级(与 refreshScriptResultFromCurrent 一致):generatedAssets[0] → scriptTargetId → scriptTaskAssetIds[0] → completeScriptRows(兜底 demo)
+      // 这样 switchScriptShotGroup / applyMaterialToScriptRow 改的 sessionAssets.asset.scriptRows 才能在重渲染时被读到
+      const fallbackAssetId = scriptTargetId || (scriptTaskAssetIds && scriptTaskAssetIds[0]);
+      const resolvedAsset = generatedAssets?.[0] || (fallbackAssetId ? sessionAssets.find(a => a.id === fallbackAssetId) : null);
+      const baseSource = (resolvedAsset?.scriptRows?.length ? resolvedAsset.scriptRows : completeScriptRows);
+      const draftsRaw = baseSource.map((item, index) => ({
+        ...item,
+        copy: taskResultHost._scriptRowMergedCopy?.[index] ?? item.voice
+      }));
+      const deletedSet = taskResultHost._scriptRowDeleted;
+      const splitMap = taskResultHost._scriptRowSplit;
+      const baseDrafts = draftsRaw
+        .map((item, i) => ({ ...item, _origIndex: i, voice: item.copy }))
+        .filter(item => !deletedSet.has(item._origIndex));
+      const splitBuckets = [];
+      const baseRows = baseDrafts.map(item => {
+        const origIdx = item._origIndex;
+        if (splitMap.has(origIdx)) {
+          const text = item.voice || "";
+          const match = text.match(/[^。！？!?]+[。！？!?]/g);
+          if (match && match.length >= 2) {
+            const cut = Math.floor(match.length / 2);
+            const first = match.slice(0, cut).join("");
+            const second = match.slice(cut).join("");
+            splitBuckets.push({ afterOrigIndex: origIdx, halfCopy: second });
+            return { ...item, voice: first };
+          }
+        }
+        return item;
+      });
+      const insertedFromSplit = splitBuckets.map(b => ({
+        _origIndex: -1,
+        _isInserted: true,
+        stage: "新分镜",
+        voice: b.halfCopy,
+        visual: "请补充该分镜的画面内容描述"
+      }));
+      const userInserted = (taskResultHost._scriptInsertedSegments || []).map(payload => ({
+        _origIndex: -1,
+        _isInserted: true,
+        ...payload,
+        voice: payload.voice ?? payload.copy ?? ""
+      }));
+      const result = [...baseRows];
+      const allInserted = [...insertedFromSplit, ...userInserted];
+      allInserted.forEach(payload => {
+        if (payload.afterIndex === undefined) {
+          result.push(payload);
+          return;
+        }
+        const targetIdx = result.findIndex(s => s._origIndex === payload.afterIndex);
+        if (targetIdx === -1) result.push(payload);
+        else result.splice(targetIdx + 1, 0, payload);
+      });
+      // 重新算 #id 连续编号,time 同步重算
+      const total = result.length;
+      const totalChars = result.reduce((s, r) => s + (r.voice || "").replace(/\s/g, "").length, 0) || 1;
+      const speed = 1;
+      const actual = Math.max(4, totalChars / 3.35 / speed);
+      let acc = 0;
+      return result.map((item, index) => {
+        const chars = (item.voice || "").replace(/\s/g, "").length;
+        const dur = index === total - 1 ? Math.max(0.1, actual - acc) : Math.max(1.2, actual * chars / totalChars);
+        const start = acc;
+        acc += dur;
+        const startSec = Math.floor(start);
+        const endSec = Math.max(startSec + 1, Math.floor(start + dur));
+        const pad = n => String(n).padStart(2, "0");
+        const isInserted = item._isInserted || taskResultHost._scriptRowInserted.has(item._origIndex);
+        const isFlagged = taskResultHost._scriptRowFlag.has(item._origIndex) || isInserted;
+        // 渲染时,每张卡片拿到的是合并后的 stage / voice / visual;若该行被"优化画面"改写过,visual 用 override
+        const visualOverride = taskResultHost._scriptRowVisualOverrides?.[index];
+        // 1:1 对齐混剪:needsRematch / _isRematching 决定进度条 + 需重新匹配 flag + 回到默认按钮
+        const origIdx = item._origIndex;
+        const needsRematchFlag = Boolean(taskResultHost._scriptRowNeedsRematch?.has(origIdx));
+        const isRematching = Boolean(taskResultHost._scriptRowRematching?.[origIdx]);
+        // 1:1 镜像混剪 _mixRowOverrides:先读 taskResultHost._scriptRowMaterialOverrides[origIdx](由 switchScriptShotGroup 3s 后写入)
+        // 这样无论 baseSource 来自 sessionAssets.asset 还是 fallback demo,override 一定能覆盖 materialIds
+        const materialOverrideIds = taskResultHost._scriptRowMaterialOverrides?.[origIdx];
+        const finalMaterialIds = materialOverrideIds !== undefined ? materialOverrideIds.slice() : item.materialIds;
+        const finalMaterialOverride = materialOverrideIds !== undefined ? materialOverrideIds[0] : item.materialOverride;
+        return {
+          ...item,
+          id: index + 1,
+          time: `${pad(startSec)}—${pad(endSec)}s`,
+          duration: dur,
+          start, end: start + dur,
+          materialIds: finalMaterialIds,
+          materialOverride: finalMaterialOverride,
+          visual: visualOverride || item.visual,
+          _isInserted: Boolean(isInserted),
+          _isFlagged: Boolean(isFlagged),
+          _isRematching: isRematching,
+          needsRematch: needsRematchFlag,
+          _origIndex: origIdx
+        };
+      });
+    }
+
+    // ── 删除分镜(插入由 chat 4 能力 接管) ──
+    function openScriptDeleteRowConfirm(row) {
+      if (!row) return;
+      const assetId = row.dataset.assetId;
+      const rowIdx = Number(row.dataset.rowIdx);
+      const origIndex = Number(row.dataset.scriptOrigRow);
+      const stage = row.querySelector("header strong")?.textContent?.trim() || "新分镜";
+      const time = row.querySelector("header b")?.textContent?.trim() || "—";
+      const durationText = row.querySelector("header span:last-of-type")?.textContent?.trim() || "—";
+      const overlay = createMixDialog({
+        title: "删除该分镜?",
+        subtitle: "删除后总时长与口播分配会自动重算,后续可重新插入。",
+        label: "删除分镜",
+        body: `<div class="mix-delete-dialog-body">
+          <p>将删除第 <b>${rowIdx + 1}</b> 段<b>${escapeHtml(stage)}</b>(${escapeHtml(time)},${escapeHtml(durationText)})。</p>
+          <p style="color:#8d91a0;font-size:12px">该分镜关联的口播将一并从总时长中扣除。如需保留内容,建议先"合并到上一段"。</p>
+        </div>`,
+        footer: `<div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close>取消</button><button class="primary-btn danger" type="button" data-mix-confirm-delete>确认删除</button></div>`
+      });
+      overlay.querySelector("[data-mix-confirm-delete]").addEventListener("click", () => {
+        overlay.remove();
+        // 删除要按"行身份"删除:如果是新插入的(_origIndex < 0),按 rowIdx 找最近匹配;否则按 origIndex
+        const isInserted = origIndex < 0 || isNaN(origIndex);
+        applyScriptRowDelete(assetId, rowIdx, { isInserted, origIndex });
+      });
+    }
+
+    function applyScriptRowDelete(assetId, rowIdx, opts = {}) {
+      ensureScriptOverrides();
+      const rows = scriptRowsWithOverrides();
+      if (rows.length <= 1) {
+        showToast("至少需要保留 1 段分镜");
+        return;
+      }
+      const seg = rows[rowIdx];
+      // 三种身份:① 原始行(origIndex >= 0)→ 写 _scriptRowDeleted;② 新插入的 split half(afterIndex 指向某 orig)→ 写 deleted orig(让 _dropOnDelete 把它过滤);③ 用户手动插入的(afterIndex undefined)→ 直接从 _scriptInsertedSegments 过滤
+      if (seg?._isInserted) {
+        // 从 _scriptInsertedSegments 删;按 _isInserted && 行号匹配
+        const allInserted = taskResultHost._scriptInsertedSegments || [];
+        // 取该行在 mergedRows 之前已经 inserted 的"身份":用 rowIdx 倒推到 user-inserted 数组
+        const userInsertedCount = (taskResultHost._scriptInsertedSegments || []).filter(p => !p._fromSplit).length;
+        // 简化:删 _scriptInsertedSegments 里 afterIndex 唯一匹配的那一条(若有)
+        // 兜底:按 _assetId + 位置
+        taskResultHost._scriptInsertedSegments = (taskResultHost._scriptInsertedSegments || []).filter(p => p._assetId !== assetId || p !== allInserted[rowIdx]);
+      }
+      const origIndex = seg ? seg._origIndex : rowIdx;
+      const targetOrig = origIndex >= 0 ? origIndex : -rowIdx - 100;
+      taskResultHost._scriptRowDeleted.add(targetOrig);
+      if (taskResultHost._scriptRowVisualOverrides) delete taskResultHost._scriptRowVisualOverrides[targetOrig];
+      taskResultHost._scriptRowFlag.add(targetOrig);
+      // 清理 _scriptInsertedSegments 里 afterIndex 指向被删 orig 的"前向插入"行
+      taskResultHost._scriptInsertedSegments = (taskResultHost._scriptInsertedSegments || []).filter(p => !(p.afterIndex === targetOrig && p._dropOnDelete));
+      refreshScriptResultFromCurrent();
+      showToast("已删除 1 个分镜,总时长已重算");
+    }
+
+    // 重新渲染脚本结果页(保留 override、current target、focused version)
+    function refreshScriptResultFromCurrent() {
+      const focusAssetId = scriptTargetId || (scriptTaskAssetIds[0]);
+      const assets = scriptTaskAssetIds.map(id => sessionAssets.find(item => item.id === id)).filter(Boolean);
+      if (!assets.length) return;
+      const summary = taskResultHost.querySelector(".task-result-top small")?.textContent || "智能脚本结果";
+      renderScriptTaskResult({ summary }, assets);
+      // 恢复 focus 版本
+      const idx = scriptTaskAssetIds.indexOf(focusAssetId);
+      if (idx > 0) taskResultHost.querySelector(`[data-script-result-tab="${idx}"]`)?.click();
+    }
+
+    // ── chat 4 能力(分镜助手模式) ──
+    function injectScriptQuickChips(isScriptStep) {
+      const composer = document.getElementById("taskComposerHost") || promptInput?.closest?.(".composer")?.parentElement;
+      const anchor = promptInput?.closest?.(".composer") || document.getElementById("taskComposerHost");
+      if (!anchor) return;
+      const existing = anchor.querySelector(":scope > .script-composer-quick");
+      if (existing) existing.remove();
+      if (!isScriptStep) return;
+      const wrap = document.createElement("div");
+      wrap.className = "mix-composer-quick script-composer-quick";
+      wrap.innerHTML = `
+        <button type="button" class="mix-quick-chip" data-script-quick="split" title="把当前选中行拆成两段">拆成两段</button>
+        <button type="button" class="mix-quick-chip" data-script-quick="merge" title="把当前行和下一行合并">合并上下段</button>
+        <button type="button" class="mix-quick-chip" data-script-quick="optimize" title="让 AI 改写当前行的画面描述">优化画面</button>
+        <button type="button" class="mix-quick-chip" data-script-quick="diagnose" title="解释为什么选这个素材">为什么选这个</button>
+      `;
+      anchor.insertBefore(wrap, promptInput || anchor.firstChild);
+      wrap.addEventListener("click", event => {
+        const btn = event.target.closest("[data-script-quick]");
+        if (!btn) return;
+        const sampleMap = {
+          split: "把第 1 段拆成两段",
+          merge: "把第 1 段和第 2 段合并",
+          optimize: "优化第 1 段画面",
+          diagnose: "为什么第 1 段选这个素材"
+        };
+        const sample = sampleMap[btn.dataset.scriptQuick] || "";
+        if (!promptInput) return;
+        promptInput.value = sample;
+        promptInput.focus();
+      });
+    }
+
+    function appendScriptUserTurn(text) {
+      const userTurn = document.createElement("div");
+      userTurn.className = "message user";
+      userTurn.textContent = text;
+      chatOutput.append(userTurn);
+    }
+
+    function appendScriptAssistantTurn(html) {
+      const turn = document.createElement("div");
+      turn.className = "message assistant";
+      turn.dataset.agentType = "script";
+      turn.innerHTML = `<div class="message-head"><strong>✦ 智能脚本</strong></div>${html}`;
+      chatOutput.append(turn);
+      conversationTurnCount += 1;
+      agentTurnCounts.script = (agentTurnCounts.script || 0) + 1;
+      renderConversationLocator();
+      chatOutput.scrollTo({ top: chatOutput.scrollHeight, behavior: "smooth" });
+    }
+
+    function detectScriptScriptIntent(text) {
+      const t = (text || "").replace(/\s/g, "");
+      const explicit = t.match(/第?\s*(\d{1,2})\s*段/);
+      let explicitIdx = explicit ? Math.max(0, parseInt(explicit[1], 10) - 1) : null;
+      if (/拆/.test(t)) return { kind: "split", explicitIdx };
+      if (/合/.test(t) || /并入|并到|合并到/.test(t)) return { kind: "merge", explicitIdx };
+      if (/优化|改写|重写|画面.*改|改.*画面/.test(t)) return { kind: "optimize", explicitIdx };
+      if (/重新匹配|换个?素材|再匹配|换.*素材|换.*镜头/.test(t)) return { kind: "rematch", explicitIdx };
+      if (/为什么|解释|说明|匹配.*原因|怎么选/.test(t)) return { kind: "diagnose", explicitIdx };
+      return { kind: "fallback", explicitIdx };
+    }
+
+    function pickScriptTargetRow(rows, explicitIdx) {
+      if (explicitIdx != null && explicitIdx >= 0 && explicitIdx < rows.length) return explicitIdx;
+      // 缺省:优先 _isFlagged 行,否则最后段,再退到 0
+      const flagged = rows.findIndex(r => r._isFlagged);
+      if (flagged >= 0) return flagged;
+      return Math.max(0, rows.length - 1);
+    }
+
+    function handleScriptSplit(idx, rows) {
+      const seg = rows[idx];
+      if (!seg) return appendScriptAssistantTurn(`<p class="assistant-summary">没找到第 ${idx + 1} 段,请刷新页面后重试。</p>`);
+      const focusAssetId = scriptTargetId || (scriptTaskAssetIds[0]);
+      ensureScriptOverrides();
+      const origIdx = seg._origIndex;
+      taskResultHost._scriptRowSplit.set(origIdx, { mode: "half" });
+      taskResultHost._scriptInsertedSegments.push({
+        afterIndex: origIdx,
+        stage: "新分镜",
+        voice: "",
+        copy: "",
+        visual: "请补充该分镜的画面内容描述",
+        _afterOrig: origIdx,
+        _dropOnDelete: true,
+        _assetId: focusAssetId
+      });
+      if (origIdx >= 0) taskResultHost._scriptRowInserted.add(origIdx);
+      taskResultHost._scriptRowFlag.add(origIdx);
+      refreshScriptResultFromCurrent();
+      appendScriptAssistantTurn(`<p class="assistant-summary">已把第 ${idx + 1} 段按句号切分为两段,新分镜默认口播为空,可在行内补全。</p>`);
+    }
+
+    function handleScriptMerge(idx, rows) {
+      const seg = rows[idx];
+      if (!seg) return appendScriptAssistantTurn(`<p class="assistant-summary">没找到第 ${idx + 1} 段,请刷新页面后重试。</p>`);
+      const next = rows[idx + 1];
+      if (!next) return appendScriptAssistantTurn(`<p class="assistant-summary">第 ${idx + 1} 段已是末段,无法向下合并。请选前面的段,或合并到上一段。</p>`);
+      ensureScriptOverrides();
+      const mergedVoice = (seg.voice || "") + (next.voice || "");
+      const targetOrig = seg._origIndex;
+      const nextOrig = next._origIndex;
+      taskResultHost._scriptRowMergedCopy[targetOrig] = mergedVoice;
+      if (nextOrig >= 0) {
+        taskResultHost._scriptRowDeleted.add(nextOrig);
+      } else {
+        // next 是 inserted,直接删 _scriptInsertedSegments 里那条
+        taskResultHost._scriptInsertedSegments = (taskResultHost._scriptInsertedSegments || []).filter(p => !(p.afterIndex === seg._origIndex && p._isInserted));
+      }
+      taskResultHost._scriptRowFlag.add(targetOrig);
+      refreshScriptResultFromCurrent();
+      appendScriptAssistantTurn(`<p class="assistant-summary">已把第 ${idx + 1} 段和第 ${idx + 2} 段合并,合并后继承前段口播,总时长已重算。</p>`);
+    }
+
+    function handleScriptOptimize(idx, rows) {
+      const seg = rows[idx];
+      if (!seg) return appendScriptAssistantTurn(`<p class="assistant-summary">没找到第 ${idx + 1} 段,请刷新页面后重试。</p>`);
+      ensureScriptOverrides();
+      appendScriptAssistantTurn(`<p class="assistant-summary">正在改写第 ${idx + 1} 段画面描述…</p>`);
+      setTimeout(() => {
+        const origVisual = (seg.visual || "暂无").trim();
+        const enhanced = `${origVisual} · 镜头推进自然,主体居中,光影柔和,关键细节特写`;
+        taskResultHost._scriptRowVisualOverrides[idx] = enhanced;
+        refreshScriptResultFromCurrent();
+        appendScriptAssistantTurn(`<p class="assistant-summary">已用 AI 改写第 ${idx + 1} 段画面描述。</p>`);
+      }, 800);
+    }
+
+    function handleScriptDiagnose(idx, rows) {
+      const seg = rows[idx];
+      if (!seg) return appendScriptAssistantTurn(`<p class="assistant-summary">没找到第 ${idx + 1} 段,请刷新页面后重试。</p>`);
+      const visualShort = (seg.visual || "").slice(0, 30);
+      const stage = seg.stage || "新分镜";
+      const hasMaterial = Boolean(seg.materialIds?.length || seg.materialGroups?.length);
+      if (hasMaterial) {
+        appendScriptAssistantTurn(`<div class="message-head"><strong>✦ 智能脚本</strong></div>
+          <p class="assistant-summary">第 ${idx + 1} 段匹配依据:</p>
+          <ul class="assistant-facts">
+            <li>画面描述关键词:<b>"${escapeHtml(visualShort)}…"</b> → 命中分镜阶段 <b>${escapeHtml(stage)}</b></li>
+            <li>本分镜在产品策略中已勾选素材分组:<b>${escapeHtml((seg.materialIds || seg.materialGroups || []).map(g => g.name || g.id || g).join("、") || "—")}</b></li>
+            <li>景别 <b>${escapeHtml(seg.shotType || "—")}</b> · 运镜 <b>${escapeHtml(seg.cameraMove || "—")}</b> 已写入视频生成提示词</li>
+          </ul>
+          <p class="assistant-summary assistant-hint">如需替换:可点击行末「替换」按钮,或说"换第 ${idx + 1} 段的素材"。</p>`);
+      } else {
+        appendScriptAssistantTurn(`<div class="message-head"><strong>✦ 智能脚本</strong></div>
+          <p class="assistant-summary">第 ${idx + 1} 段暂未指定素材分组。</p>
+          <p class="assistant-summary assistant-hint">建议操作:① 在产品策略中勾选对应素材分组 ② 在行末点「AI 换一组」让 AI 推荐 ③ 点击「替换」手动选素材。</p>`);
+      }
+    }
+
+    function openScriptRematchFromIndex(idx) {
+      const focusAssetId = scriptTargetId || scriptTaskAssetIds[0];
+      const row = taskResultHost.querySelector(`.script-result-card[data-asset-id="${focusAssetId}"] [data-script-row][data-row-idx="${idx}"]`);
+      if (row) {
+        if (focusAssetId && window.openScriptMaterialReplacement) {
+          openScriptMaterialReplacement(focusAssetId, idx);
+        } else {
+          showToast("请打开对应脚本版本后再操作");
+        }
+      } else {
+        showToast("未找到对应分镜行");
+      }
+    }
+
+    function submitScriptScriptChat(request) {
+      appendScriptUserTurn(request);
+      promptInput.value = "";
+      chatOutput.scrollTo({ top: chatOutput.scrollHeight, behavior: "smooth" });
+      const rows = scriptRowsWithOverrides();
+      const intent = detectScriptScriptIntent(request);
+      const idx = pickScriptTargetRow(rows, intent.explicitIdx);
+      switch (intent.kind) {
+        case "split": handleScriptSplit(idx, rows); return;
+        case "merge": handleScriptMerge(idx, rows); return;
+        case "optimize": handleScriptOptimize(idx, rows); return;
+        case "diagnose": handleScriptDiagnose(idx, rows); return;
+        case "rematch": openScriptRematchFromIndex(idx); return;
+        default: appendScriptAssistantTurn(`<p class="assistant-summary">我已收到。可以试试:<br>· "把第 ${idx + 1} 段拆成两段"<br>· "把第 ${idx + 1} 段和第 ${idx + 2} 段合并"<br>· "优化第 ${idx + 1} 段画面"<br>· "为什么第 ${idx + 1} 段选这个素材"</p>`);
       }
     }
 
@@ -8961,6 +9516,7 @@
       const target = Number(stepButton.dataset.taskStep);
       if (taskCompleted && !taskEditing && target === taskSteps().length) {
         taskStep = target;
+        if (taskShell) taskShell.dataset.step = String(taskStep);
         taskFormScroll.hidden = true;
         taskResultHost.hidden = false;
         taskFormActions.hidden = true;
@@ -9118,35 +9674,31 @@
     function openScriptMaterialReplacement(assetId, rowIndex) {
       const asset = sessionAssets.find(item => item.id === assetId);
       if (!asset?.scriptRows?.[rowIndex]) return;
-      let selectedId = asset.scriptRows[rowIndex].materialOverride || "";
-      const overlay = document.createElement("div");
-      overlay.className = "modal-overlay show";
-      overlay.innerHTML = `<div class="modal-card script-material-replace-modal" role="dialog" aria-label="替换匹配镜头"><header class="modal-head"><div><strong>替换匹配镜头</strong><small>选择一条 9:16 素材替换当前镜头</small></div><button class="modal-close" type="button" data-modal-close>×</button></header><div class="script-replace-grid" data-replace-grid></div><footer class="modal-foot"><div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-modal-close>取消</button><button class="primary-btn" type="button" data-replace-confirm disabled>确认替换</button></div></footer></div>`;
-      document.body.appendChild(overlay);
-      const grid = overlay.querySelector("[data-replace-grid]");
-      const confirm = overlay.querySelector("[data-replace-confirm]");
-      const render = () => {
-        grid.innerHTML = allScriptMaterials().map(item => `<button class="script-replace-card${item.id === selectedId ? " selected" : ""}" type="button" data-replace-material="${escapeHtml(item.id)}"><span>${escapeHtml(item.id)}</span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.scene)} · 9:16 · ${item.duration}s</small></button>`).join("");
-        grid.querySelectorAll("[data-replace-material]").forEach(card => card.addEventListener("click", () => { selectedId = card.dataset.replaceMaterial; render(); }));
-        confirm.disabled = !selectedId;
-      };
-      overlay.addEventListener("click", event => { if (event.target === overlay || event.target.matches("[data-modal-close]")) overlay.remove(); });
-      confirm.addEventListener("click", () => {
-        const selected = findScriptMaterial(selectedId);
-        if (!selected) return;
-        overlay.remove();
-        const shotDuration = parseShotSeconds(asset.scriptRows[rowIndex].time);
-        if (selected.duration > shotDuration) {
-          openScriptMaterialCropper(assetId, rowIndex, selected, shotDuration);
-          return;
+      const row = asset.scriptRows[rowIndex];
+      const shotDuration = parseShotSeconds(row.time);
+      const currentMaterialIds = (row.materialIds || []).filter(Boolean);
+      // 1:1 复用混剪的素材多选选择器(支持多选,选完再决定 1 段直接套用 / 多段剪映式拼接)
+      openScriptMaterialPicker({
+        title: "替换镜头",
+        selectedIds: currentMaterialIds,
+        defaultSelectionHint: "可多选素材进行拼接,确认替换时仅使用已分析的素材;",
+        onConfirm(ids) {
+          const chosenIds = (Array.isArray(ids) ? ids : []).filter(Boolean);
+          if (!chosenIds.length) return showToast("请至少选择 1 个镜头");
+          const selectedMaterials = chosenIds.map(findScriptMaterial).filter(item => item?.status === "ok" || item?.status === "已分析");
+          if (!selectedMaterials.length) return showToast("所选素材尚未分析");
+          const totalDuration = selectedMaterials.reduce((sum, item) => sum + Math.max(1, Number(item.duration) || 0), 0);
+          if (selectedMaterials.length > 1 && totalDuration > shotDuration) {
+            // 多段拼接 + 走剪映式裁剪(用公共 openConcatTrimDialog)
+            openScriptConcatTrimDialog(assetId, rowIndex, chosenIds, shotDuration, selectedMaterials);
+            return;
+          }
+          // 单段或总时长没超 → 直接套用首个
+          applyMaterialToScriptRow(row, selectedMaterials[0]);
+          refreshScriptResultFromCurrent();
+          showToast("已替换素材并同步更新镜头方案");
         }
-        applyMaterialToScriptRow(asset.scriptRows[rowIndex], selected);
-        renderScriptTaskResult({ summary:"已替换镜头素材，并同步更新景别、运镜与画面描述。" }, scriptTaskAssetIds.map(id => sessionAssets.find(item => item.id === id)).filter(Boolean));
-        const tabIndex = scriptTaskAssetIds.indexOf(asset.id);
-        if (tabIndex > 0) taskResultHost.querySelector(`[data-script-result-tab="${tabIndex}"]`)?.click();
-        showToast("已替换素材并同步更新镜头方案");
       });
-      render();
     }
 
     function materialShotFields(material) {
@@ -9200,20 +9752,136 @@
       render();
     }
 
+    // 1:1 镜像 runMixRowRematch:卡片上展示 3s 进度条 → 完成后自动应用新素材 + toast(不弹 dialog)
     function switchScriptShotGroup(assetId, rowIndex) {
       const asset = sessionAssets.find(item => item.id === assetId);
       const row = asset?.scriptRows?.[rowIndex];
       if (!row || asset.materialMode !== "depend") return;
-      const allowed = asset.materialIds?.length ? asset.materialIds.map(findScriptMaterial).filter(Boolean) : allScriptMaterials();
-      const current = row.materialOverride || row.materialIds?.[0] || "";
-      const index = allowed.findIndex(item => item.id === current);
-      const next = allowed[(index + 1 + allowed.length) % allowed.length];
-      if (!next) return showToast("当前素材分组暂无可替换镜头");
-      applyMaterialToScriptRow(row, next);
-      renderScriptTaskResult({ summary:"已为当前镜头匹配一组新的素材与画面方案。" }, scriptTaskAssetIds.map(id => sessionAssets.find(item => item.id === id)).filter(Boolean));
-      const tabIndex = scriptTaskAssetIds.indexOf(asset.id);
-      if (tabIndex > 0) taskResultHost.querySelector(`[data-script-result-tab="${tabIndex}"]`)?.click();
-      showToast("已更新素材、景别、运镜与画面描述");
+      if (!taskResultHost._scriptRowRematching) taskResultHost._scriptRowRematching = {};
+      if (taskResultHost._scriptRowRematching[rowIndex]) return; // 防重复点击
+      // 取该 asset 已选素材(同混剪端 mixSelectedMaterials 的语义)。
+      // 注意:script 端素材的 status 字段是 "ok|analyzing|pending|fail",不是混剪端的"已分析",所以不过滤
+      const materials = asset.materialIds?.length ? asset.materialIds.map(findScriptMaterial).filter(Boolean) : allScriptMaterials();
+      if (!materials.length) return showToast("当前素材分组暂无可匹配镜头");
+      // 标记进入 rematch 状态 → 重渲染时模板自动给 bar 加 is-rematch-running class,CSS @keyframes 立即跑 3s 动画
+      taskResultHost._scriptRowRematching[rowIndex] = true;
+      renderScriptTaskResult({ summary:"正在为该段匹配新镜头…" }, scriptTaskAssetIds.map(id => sessionAssets.find(item => item.id === id)).filter(Boolean));
+      // 3s 后自动应用新素材 + toast(完全照搬混剪 runMixRowRematch 3s 后的行为,不弹 dialog)
+      setTimeout(() => {
+        let picked = null;
+        try {
+          const candidates = materials.filter(item => mixStageMatchesMaterial(row.stage, item));
+          const pool = candidates.slice(0, 4);
+          picked = pool[0] || materials[0];
+          // 1:1 镜像混剪:只写 override(混剪端也只写 root._mixRowOverrides 一行,这里挂到 taskResultHost)
+          if (picked) {
+            taskResultHost._scriptRowMaterialOverrides = taskResultHost._scriptRowMaterialOverrides || {};
+            taskResultHost._scriptRowMaterialOverrides[rowIndex] = [picked.id];
+          }
+        } catch (e) {
+          console.error("[switchScriptShotGroup] 选素材失败:", e);
+        }
+        // 进度条收尾必须执行(放在 try/catch 外,防止前面 throw 把 delete 跳过、进度条卡在 AI 换镜中…)
+        if (!taskResultHost._scriptRowNeedsRematch) taskResultHost._scriptRowNeedsRematch = new Set();
+        taskResultHost._scriptRowNeedsRematch.delete(rowIndex);
+        delete taskResultHost._scriptRowRematching?.[rowIndex];
+        try {
+          renderScriptTaskResult({ summary:"已重新匹配镜头。" }, scriptTaskAssetIds.map(id => sessionAssets.find(item => item.id === id)).filter(Boolean));
+        } catch (e) {
+          console.error("[switchScriptShotGroup] 重渲染失败:", e);
+        }
+        showToast(picked ? `已重新匹配镜头:${picked.name || "AI 推荐"}` : "暂无可匹配的素材,镜头未变化");
+      }, 3000);
+    }
+
+    // 1:1 镜像 openMixRowRematchDialog:候选素材弹窗 → 选一个 → 1s 模拟 loading → 替换
+    function openScriptRowRematchDialog(assetId, rowIndex, card) {
+      const asset = sessionAssets.find(item => item.id === assetId);
+      const row = asset?.scriptRows?.[rowIndex];
+      if (!asset || !row) return;
+      const pool = (asset.materialIds?.length ? asset.materialIds.map(findScriptMaterial).filter(Boolean) : allScriptMaterials())
+        .filter(material => mixStageMatchesMaterial(row.stage, material))
+        .slice(0, 4);
+      if (!pool.length) return showToast("当前素材分组暂无可匹配镜头");
+      let selectedId = pool[0]?.id || "";
+      const overlay = createMixDialog({
+        title:"重新匹配镜头",
+        subtitle:"",
+        label:"重新匹配镜头",
+        body:`<div class="mix-rematch-dialog-body">
+          <p class="mix-rematch-prompt" style="margin:0;color:#4c505d;font-size:14px">请确认是否重新匹配镜头？</p>
+          <div class="mix-rematch-candidates" data-mix-rematch-candidates hidden></div>
+          <div class="mix-rematch-loading" data-mix-rematch-loading hidden>
+            <span class="mix-rematch-spinner" aria-hidden="true"></span>
+            <strong>正在匹配镜头…</strong>
+            <small>系统正在根据画面描述匹配景别、运镜和素材</small>
+          </div>
+          <div class="mix-rematch-status" data-mix-rematch-status hidden></div>
+        </div>`,
+        footer:`<div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close>取消</button><button class="primary-btn" type="button" data-mix-confirm-rematch>确认</button></div>`
+      });
+      const candidateHost = overlay.querySelector("[data-mix-rematch-candidates]");
+      const loadingHost = overlay.querySelector("[data-mix-rematch-loading]");
+      const statusHost = overlay.querySelector("[data-mix-rematch-status]");
+      const promptEl = overlay.querySelector(".mix-rematch-prompt");
+      const confirmBtn = overlay.querySelector("[data-mix-confirm-rematch]");
+      const footActions = overlay.querySelector(".modal-foot-actions");
+      const renderCandidates = () => {
+        candidateHost.innerHTML = pool.map((item, i) => `<button type="button" class="mix-rematch-candidate${item.id === selectedId ? " selected" : ""}" data-mix-rematch-candidate="${escapeHtml(item.id)}"><span class="mix-rematch-cover tone-${(rowIndex + i) % 6 + 1}">${escapeHtml(item.scene)}</span><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.scene)} · ${item.duration}s 可用</small></span><i>${item.id === selectedId ? "✓" : ""}</i></button>`).join("");
+        candidateHost.querySelectorAll("[data-mix-rematch-candidate]").forEach(btn => btn.addEventListener("click", () => {
+          selectedId = btn.dataset.mixRematchCandidate;
+          renderCandidates();
+        }));
+      };
+      const enterLoading = () => {
+        promptEl.hidden = true;
+        candidateHost.hidden = true;
+        loadingHost.hidden = false;
+        statusHost.hidden = true;
+        footActions.querySelectorAll("button").forEach(button => { button.disabled = true; });
+      };
+      const enterFailed = msg => {
+        promptEl.hidden = true;
+        candidateHost.hidden = true;
+        loadingHost.hidden = true;
+        statusHost.hidden = false;
+        statusHost.className = "mix-rematch-status is-failed";
+        statusHost.innerHTML = `<span class="mix-rematch-status-icon" aria-hidden="true">✕</span><div><b>匹配失败</b><p>${escapeHtml(msg)}</p></div>`;
+        footActions.innerHTML = `<button class="primary-btn" type="button" data-close>关闭</button>`;
+      };
+      const enterSuccess = () => {
+        promptEl.hidden = true;
+        candidateHost.hidden = true;
+        loadingHost.hidden = true;
+        statusHost.hidden = false;
+        statusHost.className = "mix-rematch-status is-success";
+        statusHost.innerHTML = `<span class="mix-rematch-status-icon" aria-hidden="true">✓</span><div><b>匹配成功</b><p>已为本段应用推荐镜头。</p></div>`;
+        footActions.innerHTML = `<button class="primary-btn" type="button" data-close>完成</button>`;
+      };
+      confirmBtn.addEventListener("click", () => {
+        if (!selectedId) {
+          enterFailed("当前已选素材中没有符合画面描述的镜头，请手动替换镜头。");
+          return;
+        }
+        enterLoading();
+        setTimeout(() => {
+          if (!overlay.isConnected) return;
+          if (!pool.length) {
+            enterFailed("当前已选素材中没有符合条件的镜头。");
+            return;
+          }
+          const picked = pool.find(material => material.id === selectedId) || pool[0];
+          applyMaterialToScriptRow(row, picked);
+          enterSuccess();
+          setTimeout(() => {
+            if (!overlay.isConnected) return;
+            overlay.remove();
+            renderScriptTaskResult({ summary:"已为当前镜头匹配一组新的素材与画面方案。" }, scriptTaskAssetIds.map(id => sessionAssets.find(item => item.id === id)).filter(Boolean));
+            showToast("已更新素材、景别、运镜与画面描述");
+          }, 500);
+        }, 1000);
+      });
+      renderCandidates();
     }
 
     // 构造一个镜头时长 = 镜头总时长 的推荐素材方案(委托至 window.ScriptMaterialLib 共享池)
@@ -9231,7 +9899,9 @@
         subject: "透明尘杯",
         subtitle: "刚换床单 ≠ 床垫干净",
         execution: "竖屏近景；尘杯居中；前1秒必须出现脏污证据；无合适素材时进入补拍清单。",
-        videoPrompt: "透明尘杯特写,内部可见毛发与碎屑,自然光,竖屏9:16,产品居中,镜头固定,3秒。"
+        videoPrompt: "透明尘杯特写,内部可见毛发与碎屑,自然光,竖屏9:16,产品居中,镜头固定,3秒。",
+        materialIds: ["M-PC-401"],
+        materialOverride: "M-PC-401"
       },
       {
         id: 2,
@@ -9257,7 +9927,9 @@
         subject: "真人+产品",
         subtitle: "边拍边吸｜深层清洁",
         execution: "真人实拍优先；产品型号必须清晰；禁止使用其他型号或无法确认型号的镜头。",
-        videoPrompt: "真人手持轻净 Pro 在床垫表面匀速推进,镜头从侧面平移跟拍,4秒,真实使用感。"
+        videoPrompt: "真人手持轻净 Pro 在床垫表面匀速推进,镜头从侧面平移跟拍,4秒,真实使用感。",
+        materialIds: ["M-SC-301"],
+        materialOverride: "M-SC-301"
       },
       {
         id: 4,
@@ -9270,7 +9942,9 @@
         subject: "尘杯内部+床面",
         subtitle: "脏东西看得见",
         execution: "使用前后结果必须来自同一产品；推进、吸入、尘杯三镜头按因果顺序排列。",
-        videoPrompt: "透明尘杯内部变化过程,毛发碎屑逐渐累积,镜头固定在尘杯近景,4秒,竖屏。"
+        videoPrompt: "透明尘杯内部变化过程,毛发碎屑逐渐累积,镜头固定在尘杯近景,4秒,竖屏。",
+        materialIds: ["M-CL-101"],
+        materialOverride: "M-CL-101"
       },
       {
         id: 5,
@@ -9283,7 +9957,9 @@
         subject: "产品+布艺家具",
         subtitle: "一机清洁多种布艺场景",
         execution: "3个场景各1.2—1.4秒；场景光线与产品颜色保持一致；避免重复使用同一动作镜头。",
-        videoPrompt: "床垫、沙发、布艺椅三个真实家庭场景快切,每个1.3秒,镜头平移跟拍,4秒。"
+        videoPrompt: "床垫、沙发、布艺椅三个真实家庭场景快切,每个1.3秒,镜头平移跟拍,4秒。",
+        materialIds: ["M-PF-202"],
+        materialOverride: "M-PF-202"
       },
       {
         id: 6,
@@ -9296,7 +9972,9 @@
         subject: "真人+产品",
         subtitle: "拿起就能用",
         execution: "连续动作优先；不做无法由产品档案证明的重量或省力对比；保留真实环境声作转场。",
-        videoPrompt: "单手拿起轻净 Pro,放至床面,启动使用,连续动作,镜头中景固定,4秒。"
+        videoPrompt: "单手拿起轻净 Pro,放至床面,启动使用,连续动作,镜头中景固定,4秒。",
+        materialIds: ["M-CL-103"],
+        materialOverride: "M-CL-103"
       },
       {
         id: 7,
@@ -9309,7 +9987,9 @@
         subject: "尘杯+水流",
         subtitle: "可拆尘杯｜清洗方便",
         execution: "动作顺序不可打乱；涉及水洗的部件必须与产品说明一致；画面增加操作步骤小字。",
-        videoPrompt: "关闭机器、拆下尘杯、倒出脏污、清水冲洗,四个动作依次展示,特写固定,4秒。"
+        videoPrompt: "关闭机器、拆下尘杯、倒出脏污、清水冲洗,四个动作依次展示,特写固定,4秒。",
+        materialIds: ["M-CL-102"],
+        materialOverride: "M-CL-102"
       },
       {
         id: 8,
@@ -9322,7 +10002,9 @@
         subject: "产品+干净床面",
         subtitle: "轻净 Pro｜给床垫做一次深层清洁",
         execution: "品牌收口4秒；产品不得被字幕遮挡；CTA使用平台允许表达；最后0.5秒保留安全尾帧。",
-        videoPrompt: "干净床面全景,产品摆放在画面右侧,镜头缓慢拉远,4秒,品牌角标+CTA。"
+        videoPrompt: "干净床面全景,产品摆放在画面右侧,镜头缓慢拉远,4秒,品牌角标+CTA。",
+        materialIds: ["M-AT-503"],
+        materialOverride: "M-AT-503"
       }
     ];
 
@@ -10233,6 +10915,13 @@
         const request = promptInput.value.trim();
         if (!request) return showToast("请输入需要让分镜助手执行的动作,例如:第 1 段拆成两段 / 优化第 2 段画面");
         submitMixScriptChat(request);
+        return;
+      }
+      // 阶段2 H/J 镜像:智能脚本第三步 chat 4 能力
+      if (activeType === "script" && taskShell.classList.contains("show") && taskStep === 3) {
+        const request = promptInput.value.trim();
+        if (!request) return showToast("请输入需要让脚本助手执行的动作,例如:把第 1 段拆成两段 / 优化第 2 段画面");
+        submitScriptScriptChat(request);
         return;
       }
       if (activeType !== "chat" && !taskCompleted) {
