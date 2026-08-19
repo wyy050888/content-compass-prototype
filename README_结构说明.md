@@ -12,7 +12,7 @@
 │   ├── competitor.css              # 竞品分析弹窗样式(9.6KB)
 │   └── lapan-detail.css             # 智能拉片结果页样式(作用域隔离,仅 #page-pull 生效)
 ├── js/
-│   ├── app.js                      # 主逻辑:页面路由+交互
+│   ├── modules/                    # 主逻辑:页面路由+交互(拆分为10个功能模块,见 CLAUDE.md)
 │   ├── competitor.js               # 竞品分析交互逻辑
 │   ├── product-detail-assets.js    # 产品详情非媒体资产与操作
 │   ├── product-detail-media-cards.js # 产品详情媒体卡片渲染
@@ -56,7 +56,7 @@
 | 全局样式(颜色/间距/布局/组件) | `css/main.css` |
 | 竞品分析弹窗样式 | `css/competitor.css` |
 | 智能拉片结果页样式 | `css/lapan-detail.css` |
-| 页面切换 / 通用交互逻辑 | `js/app.js` |
+| 页面切换 / 通用交互逻辑 | `js/modules/`(见 CLAUDE.md 速查表) |
 | 竞品分析交互逻辑 | `js/competitor.js` |
 | 智能拉片结果页交互 | `js/lapan-detail.js` |
 | 某个页面内容(如品牌库) | `fragments/page-brands.js` |
@@ -90,7 +90,7 @@ fragment 文件结构如下,HTML 包在反引号(`` ` ``)之间:
 ## 原理简述
 
 - 每个 fragment 用 `document.currentScript.insertAdjacentHTML('beforebegin', ...)` 把自身 HTML 注入到 `<script src>` 标签所在位置,保证 DOM 顺序与原文件**完全一致**。
-- `js/app.js` 在所有片段之后加载,此时 DOM 已完整,原逻辑无需任何改动。
+- `js/modules/*.js` 在所有片段之后按顺序加载,此时 DOM 已完整,共享全局作用域,原逻辑无需任何改动。
 - 已通过三层校验:静态 DOM 还原(216998 字符一致)、运行时模拟执行(206496 字符一致)、文件结构核对。
 
 ## 回退方法

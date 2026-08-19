@@ -6,12 +6,12 @@
 
 | 能力 | 唯一数据源 | 选择入口 | 详情 |
 | --- | --- | --- | --- |
-| 智能文案 / 混剪结构选择 | `embedded-pages/js/misc.js` 的 `contentStructures` | `js/app.js` 的结构选择器 | 模板库 iframe 的 `clOpenDetail` |
+| 智能文案 / 混剪结构选择 | `embedded-pages/js/misc.js` 的 `contentStructures` | `js/modules/app-creation-home.js` 的结构选择器 | 模板库 iframe 的 `clOpenDetail` |
 
 - 智能文案与混剪选择器只消费模板库桥接字段：`id`、`name`、`formula`、`source`、`status`、`sampleCount`、`stageNames`、`mixProfile`、`autoProductIds`、`productNames`、`scriptTypes`、`defaultForScriptTypes`。
 - `提炼失败`只留在模板库处理，不进入混剪选择器。
 - 混剪中的文案样稿可按 `mixProfile` 配置；不得再保存结构名称、公式、阶段或来源副本。
-- 结构名称、公式、来源、阶段、适用脚本类型和默认匹配关系均不得在 `js/app.js` 维护副本。
+- 结构名称、公式、来源、阶段、适用脚本类型和默认匹配关系均不得在 `js/modules/` 维护副本。
 
 ## 组件复用规则
 
@@ -23,10 +23,10 @@
 
 | 改动类型 | 首选文件 |
 | --- | --- |
-| 壳层、路由、跨页编排 | `js/app.js` |
+| 壳层、路由、跨页编排 | `js/modules/app-shell.js` |
 | 模板库结构、状态、样本、详情 | `embedded-pages/js/misc.js` |
-| 混剪结构选择与结果回填 | `js/app.js` 的 `mix*Structure*` 函数 |
-| 模板库与主应用通信 | `embedded-pages/js/misc.js` 的 `templateBridge*` + `js/app.js` 的 `mixTemplate*` |
+| 混剪结构选择与结果回填 | `js/modules/app-creation-mix.js` 的 `mix*Structure*` 函数 |
+| 模板库与主应用通信 | `embedded-pages/js/misc.js` 的 `templateBridge*` + `js/modules/app-creation-mix.js` 的 `mixTemplate*` |
 | 全局样式 | `css/main.css`；新样式必须按功能命名并紧邻所属区块 |
 
 ## 删除前检查
