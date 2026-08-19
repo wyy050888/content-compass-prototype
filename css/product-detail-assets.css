@@ -94,13 +94,13 @@
 .pda-media-card.pda-selected{border-color:#6c5cf0;box-shadow:0 0 0 1px #6c5cf0 inset}
 
 /* ============== 创作素材分支(对齐 创作素材.html .mat-card) ============== */
-.pda-mat-cover{position:relative;aspect-ratio:9/16;border-radius:11px 11px 0 0;background:linear-gradient(135deg,#e5e6ff,#ccebf0);cursor:pointer;overflow:hidden}
-.pda-mat:nth-child(6n+1) .pda-mat-cover{background:linear-gradient(135deg,#e5e6ff,#ccebf0)}
-.pda-mat:nth-child(6n+2) .pda-mat-cover{background:linear-gradient(135deg,#fde7d8,#f3c5c5)}
-.pda-mat:nth-child(6n+3) .pda-mat-cover{background:linear-gradient(135deg,#d8f1df,#c6dfe8)}
-.pda-mat:nth-child(6n+4) .pda-mat-cover{background:linear-gradient(135deg,#efe3ff,#d5d6f5)}
-.pda-mat:nth-child(6n+5) .pda-mat-cover{background:linear-gradient(135deg,#dce9ff,#f4e4bc)}
-.pda-mat:nth-child(6n)   .pda-mat-cover{background:linear-gradient(135deg,#ffe1d6,#e9debd)}
+.pda-mat-cover{position:relative;aspect-ratio:9/16;border-radius:11px 11px 0 0;background:#fff;cursor:pointer;overflow:hidden}
+.pda-mat:nth-child(6n+1) .pda-mat-cover,
+.pda-mat:nth-child(6n+2) .pda-mat-cover,
+.pda-mat:nth-child(6n+3) .pda-mat-cover,
+.pda-mat:nth-child(6n+4) .pda-mat-cover,
+.pda-mat:nth-child(6n+5) .pda-mat-cover,
+.pda-mat:nth-child(6n)   .pda-mat-cover{background:#fff}
 
 .pda-mat-status{position:absolute;top:8px;left:8px;z-index:3;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:11px;color:#fff;font-size:11px;font-weight:600;line-height:1;backdrop-filter:blur(4px);cursor:pointer}
 .pda-mat-status .pda-mat-ico{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;color:#fff}
