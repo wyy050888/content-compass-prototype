@@ -32,13 +32,13 @@
   };
 
   const SCRIPT_MATERIAL_SAMPLE_META = {
-    "M-CL-101": { name:"透明尘杯脏污特写", scene:"床垫清洁", duration:2, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/08 09:14", tags:["脏污证据", "结果直给"] },
-    "M-CL-102": { name:"拍打吸尘动作特写", scene:"床垫使用", duration:3, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/08 08:42", tags:["真实操作", "拍打吸尘"] },
+    "M-CL-101": { name:"透明尘杯脏污特写", scene:"结果证明", duration:2, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/08 09:14", tags:["脏污证据", "结果直给"] },
+    "M-CL-102": { name:"拍打吸尘动作特写", scene:"功能演示", duration:3, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/08 08:42", tags:["真实操作", "拍打吸尘"] },
     "M-CL-103": { name:"机身按键与吸口细节", scene:"产品卖点", duration:5, type:"video", status:"pending", product:"轻净 Pro 除螨仪", created:"08/07 17:35", tags:["功能展示", "产品特写"] },
-    "M-PF-201": { name:"卧室床垫清洁全景", scene:"家庭卧室", duration:2, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/07 15:20", tags:["使用场景", "床垫清洁"] },
-    "M-PF-202": { name:"沙发布艺清洁全景", scene:"客厅沙发", duration:3, type:"video", status:"ok", product:"", created:"08/07 11:36", tags:["养宠家庭", "毛发清理"] },
+    "M-PF-201": { name:"卧室床垫清洁全景", scene:"使用场景", duration:2, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/07 15:20", tags:["使用场景", "床垫清洁"] },
+    "M-PF-202": { name:"沙发布艺清洁全景", scene:"多场景", duration:3, type:"video", status:"ok", product:"", created:"08/07 11:36", tags:["养宠家庭", "毛发清理"] },
     "M-PF-203": { name:"多场景使用切换", scene:"床垫与沙发", duration:5, type:"video", status:"analyzing", product:"轻净 Pro 除螨仪", created:"08/06 18:24", tags:["一机多用", "家庭清洁"] },
-    "M-SC-301": { name:"床垫表面推进清洁", scene:"卧室日常", duration:3, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/06 16:11", tags:["使用过程", "镜头推进"] },
+    "M-SC-301": { name:"床垫表面推进清洁", scene:"使用过程", duration:3, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/06 16:11", tags:["使用过程", "镜头推进"] },
     "M-SC-302": { name:"沙发表面拍打吸尘", scene:"养宠家庭", duration:5, type:"video", status:"fail", product:"", created:"08/06 10:08", tags:["毛发清理", "真实使用"] },
     "M-SC-303": { name:"儿童房床垫深度清洁", scene:"亲子家庭", duration:10, type:"video", status:"ok", product:"轻净 Pro 除螨仪", created:"08/05 19:42", tags:["完整过程", "家庭场景"] },
     "M-PC-401": { name:"毛发皮屑脏污特写", scene:"清洁痛点", duration:0, type:"image", status:"ok", product:"轻净 Pro 除螨仪", created:"08/05 15:50", tags:["视觉冲击", "脏污特写"] },
@@ -46,7 +46,7 @@
     "M-PC-403": { name:"床面使用后对比", scene:"清洁结果", duration:5, type:"video", status:"pending", product:"轻净 Pro 除螨仪", created:"08/05 11:08", tags:["前后对比", "结果直给"] },
     "M-AT-501": { name:"品牌角标与行动按钮", scene:"品牌收口", duration:0, type:"image", status:"ok", product:"轻净 Pro 除螨仪", created:"08/04 18:30", tags:["CTA", "品牌露出"] },
     "M-AT-502": { name:"夏季深度清洁活动", scene:"营销活动", duration:0, type:"image", status:"analyzing", product:"轻净 Pro 除螨仪", created:"08/04 14:12", tags:["促销信息", "活动氛围"] },
-    "M-AT-503": { name:"产品定帧与购买引导", scene:"品牌收口", duration:0, type:"image", status:"ok", product:"", created:"08/03 19:02", tags:["完整尾帧", "购买引导"] }
+    "M-AT-503": { name:"产品定帧与购买引导", scene:"成片定帧", duration:0, type:"image", status:"ok", product:"", created:"08/03 19:02", tags:["完整尾帧", "购买引导"] }
   };
 
   const SCRIPT_MATERIAL_FOLDERS = [

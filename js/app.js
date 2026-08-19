@@ -1783,12 +1783,12 @@
                   <select data-mix-material-filter aria-label="素材类型"><option value="all">全部类型</option><option value="video">视频</option><option value="image">图片</option></select>
                 </div>
                 <div class="mix-material-grid" data-mix-material-grid>
-                  <article class="mix-material-card selected" data-mix-material="M-CL-101"><button class="mix-material-select" type="button" aria-label="选择透明尘杯脏污特写">✓</button><div class="mix-material-cover tone-1"><span>尘杯<br>脏污特写</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览透明尘杯脏污特写">▶</button><em>00:02</em></div><strong>透明尘杯脏污特写</strong><small>结果证明 · 已分析</small></article>
-                  <article class="mix-material-card selected" data-mix-material="M-SC-301"><button class="mix-material-select" type="button" aria-label="选择床垫表面推进清洁">✓</button><div class="mix-material-cover tone-2"><span>床垫<br>推进清洁</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览床垫表面推进清洁">▶</button><em>00:06</em></div><strong>床垫表面推进清洁</strong><small>使用过程 · 已分析</small></article>
-                  <article class="mix-material-card selected" data-mix-material="M-CL-102"><button class="mix-material-select" type="button" aria-label="选择拍打吸尘动作特写">✓</button><div class="mix-material-cover tone-3"><span>拍打头<br>动作特写</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览拍打吸尘动作特写">▶</button><em>00:05</em></div><strong>拍打吸尘动作特写</strong><small>功能演示 · 已分析</small></article>
-                  <article class="mix-material-card selected" data-mix-material="M-PF-201"><button class="mix-material-select" type="button" aria-label="选择卧室床垫清洁全景">✓</button><div class="mix-material-cover tone-4"><span>卧室<br>清洁全景</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览卧室床垫清洁全景">▶</button><em>00:08</em></div><strong>卧室床垫清洁全景</strong><small>使用场景 · 已分析</small></article>
-                  <article class="mix-material-card selected" data-mix-material="M-PF-202"><button class="mix-material-select" type="button" aria-label="选择沙发布艺清洁全景">✓</button><div class="mix-material-cover tone-5"><span>沙发<br>布艺清洁</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览沙发布艺清洁全景">▶</button><em>00:07</em></div><strong>沙发布艺清洁全景</strong><small>多场景 · 已分析</small></article>
-                  <article class="mix-material-card selected" data-mix-material="M-AT-503"><button class="mix-material-select" type="button" aria-label="选择产品定帧与购买引导">✓</button><div class="mix-material-cover tone-6"><span>产品<br>定帧收口</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览产品定帧与购买引导">▶</button><em>00:04</em></div><strong>产品定帧与购买引导</strong><small>行动引导 · 已分析</small></article>
+                  <article class="mix-material-card selected" data-mix-material="M-CL-101" data-mix-material-status="ok" data-mix-material-scene="结果证明"><button class="mix-material-select" type="button" aria-label="选择透明尘杯脏污特写">✓</button><div class="mix-material-cover tone-1"><span>尘杯<br>脏污特写</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览透明尘杯脏污特写">▶</button><em>00:02</em></div><strong>透明尘杯脏污特写</strong><small>结果证明 · 已分析</small></article>
+                  <article class="mix-material-card selected" data-mix-material="M-SC-301" data-mix-material-status="ok" data-mix-material-scene="使用过程"><button class="mix-material-select" type="button" aria-label="选择床垫表面推进清洁">✓</button><div class="mix-material-cover tone-2"><span>床垫<br>推进清洁</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览床垫表面推进清洁">▶</button><em>00:06</em></div><strong>床垫表面推进清洁</strong><small>使用过程 · 已分析</small></article>
+                  <article class="mix-material-card selected" data-mix-material="M-CL-102" data-mix-material-status="ok" data-mix-material-scene="功能演示"><button class="mix-material-select" type="button" aria-label="选择拍打吸尘动作特写">✓</button><div class="mix-material-cover tone-3"><span>拍打头<br>动作特写</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览拍打吸尘动作特写">▶</button><em>00:05</em></div><strong>拍打吸尘动作特写</strong><small>功能演示 · 已分析</small></article>
+                  <article class="mix-material-card selected" data-mix-material="M-PF-201" data-mix-material-status="ok" data-mix-material-scene="使用场景"><button class="mix-material-select" type="button" aria-label="选择卧室床垫清洁全景">✓</button><div class="mix-material-cover tone-4"><span>卧室<br>清洁全景</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览卧室床垫清洁全景">▶</button><em>00:08</em></div><strong>卧室床垫清洁全景</strong><small>使用场景 · 已分析</small></article>
+                  <article class="mix-material-card selected" data-mix-material="M-PF-202" data-mix-material-status="ok" data-mix-material-scene="多场景"><button class="mix-material-select" type="button" aria-label="选择沙发布艺清洁全景">✓</button><div class="mix-material-cover tone-5"><span>沙发<br>布艺清洁</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览沙发布艺清洁全景">▶</button><em>00:07</em></div><strong>沙发布艺清洁全景</strong><small>多场景 · 已分析</small></article>
+                  <article class="mix-material-card selected" data-mix-material="M-AT-503" data-mix-material-status="ok" data-mix-material-scene="成片定帧"><button class="mix-material-select" type="button" aria-label="选择产品定帧与购买引导">✓</button><div class="mix-material-cover tone-6"><span>产品<br>定帧收口</span><button class="mix-material-preview" type="button" data-mix-preview-material aria-label="预览产品定帧与购买引导">▶</button><em>00:04</em></div><strong>产品定帧与购买引导</strong><small>成片定帧 · 已分析</small></article>
                 </div>
                 <div class="mix-material-pagination" data-mix-material-pagination hidden></div>
                 <div class="mix-empty-material" data-mix-material-empty hidden><b data-mix-material-empty-title></b><span data-mix-material-empty-detail></span></div>
@@ -4941,7 +4941,7 @@
           complete: Boolean((item.copy || "").trim() && assigned.length) && !needsRematch,
           _origIndex: origIdx,
           _isInserted: Boolean(item._isInserted),
-          _isAutoRematching: Boolean(root?._mixAutoRematch?.[index])
+          _isRematching: Boolean(root?._mixRowRematching?.[index])
         };
         start += duration;
         return segment;
@@ -4966,8 +4966,9 @@
             chips.push(`<button type="button" class="mix-alert-chip" data-mix-alert-goto="copy"><b>${noCopySegs.length}</b> 段口播未补全 <small>(${indices}段)→ 步骤 2</small></button>`);
           }
           if (noShotSegs.length) {
-            const indices = noShotSegs.map(x => x.i + 1).join(",");
-            chips.push(`<button type="button" class="mix-alert-chip" data-mix-alert-goto="shot" data-mix-alert-shot-idx="${noShotSegs[0].i}"><b>${noShotSegs.length}</b> 段镜头未匹配 <small>(${indices}段)→ 定位</small></button>`);
+            const firstIdx = noShotSegs[0].i + 1;
+            const more = noShotSegs.length - 1;
+            chips.push(`<button type="button" class="mix-alert-chip" data-mix-alert-goto="shot" data-mix-alert-shot-idx="${noShotSegs[0].i}"><b>${noShotSegs.length}</b> 段镜头未匹配 <small>(第 ${firstIdx} 段${more > 0 ? ` 等 ${noShotSegs.length} 段` : ""})→ 定位</small></button>`);
           }
           alert.innerHTML = `<b class="mix-alert-title">还有 ${incomplete.length} 个段落待完善</b><div class="mix-alert-chips">${chips.join("")}</div><span class="mix-alert-hint">完成全部段落后才可确认脚本</span>`;
         }
@@ -5013,17 +5014,8 @@
         updateMixScriptCompletion(segments);
         return;
       }
-      // E4: needs-rematch banner(>0 段待重新匹配)
-      const needRematchSegs = segments.map((s, i) => ({ ...s, index: i })).filter(s => s.needsRematch);
-      const banner = needRematchSegs.length > 0
-        ? `<div class="mix-rematch-banner">
-            <div><b>${needRematchSegs.length}</b> 段镜头可能不再匹配当前画面<b>·</b>推荐:点击下方"重新匹配"逐段调整,或一键全部重新匹配。</div>
-            <div class="mix-rematch-banner-actions">
-              <button type="button" class="ghost-btn-sm" data-mix-rematch-all>一键重新匹配</button>
-            </div>
-          </div>`
-        : "";
-      host.innerHTML = banner + segments.map((item, index) => renderSingleMixCard(item, index, flagSet, insertedSet, { totalCards: segments.length })).join("");
+      // E4: needs-rematch 状态由各卡片自身的高亮按钮 + 内联 flag 处理,不再使用顶部 banner
+      host.innerHTML = segments.map((item, index) => renderSingleMixCard(item, index, flagSet, insertedSet, { totalCards: segments.length })).join("");
       dynamicForm.querySelector("[data-mix-script-count]")?.replaceChildren(String(segments.length));
       updateMixScriptCompletion(segments);
     }
@@ -5046,14 +5038,14 @@
       ].join("");
       const shotTypeOptions = MIX_SHOT_TYPES.map(s => `<option value="${s}" ${s === item.shotType ? "selected" : ""}>${s}</option>`).join("");
       const cameraMoveOptions = MIX_CAMERA_MOVES.map(s => `<option value="${s}" ${s === item.cameraMove ? "selected" : ""}>${s}</option>`).join("");
-      return `<article class="mix-script-card${item.needsRematch ? " needs-rematch" : ""}${isFlagged ? " is-flagged" : ""}${item._isInserted ? " is-inserted" : ""}${(item.assigned.length === 0) ? " is-needs-shot" : ""}${item._isAutoRematching ? " is-auto-rematching" : ""}" data-mix-script-row="${index}" data-mix-orig-row="${item._origIndex}" data-mix-material-ids="${escapeHtml(item.assigned.map(material => material.id).join(","))}">${flagMark}<header><div><span class="mix-row-index" title="第 ${index + 1} 段">${String(index + 1).padStart(2, "0")}</span><b>${mixTimeLabel(item.start)}–${mixTimeLabel(item.end)}</b><strong>${escapeHtml(item.stage)}</strong><span>${item.duration.toFixed(1)}s</span></div><div class="mix-row-header-actions">
+      return `<article class="mix-script-card${item.needsRematch ? " needs-rematch" : ""}${isFlagged ? " is-flagged" : ""}${item._isInserted ? " is-inserted" : ""}${(item.assigned.length === 0) ? " is-needs-shot" : ""}${item._isRematching ? " is-rematching" : ""}" data-mix-script-row="${index}" data-mix-orig-row="${item._origIndex}" data-mix-material-ids="${escapeHtml(item.assigned.map(material => material.id).join(","))}">${flagMark}<header><div><span class="mix-row-index" title="第 ${index + 1} 段">${String(index + 1).padStart(2, "0")}</span><b>${mixTimeLabel(item.start)}–${mixTimeLabel(item.end)}</b><strong>${escapeHtml(item.stage)}</strong><span>${item.duration.toFixed(1)}s</span></div><div class="mix-row-header-actions">
         <button type="button" class="mix-row-icon-btn" data-mix-delete-row="${index}"${deleteDisabledAttr}>
           <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"/></svg>
         </button>
-        <button type="button" class="mix-row-action-btn" data-mix-rematch-row>重新匹配</button>
+        <button type="button" class="mix-row-action-btn${item.needsRematch ? " is-highlight" : ""}" data-mix-rematch-row>重新匹配</button>
         <button type="button" class="mix-row-action-btn mix-row-action-primary" data-mix-replace-row>替换镜头</button>
-        <button type="button" class="mix-row-toggle-btn" data-mix-toggle-row aria-expanded="${index === 0 ? "true" : "false"}">${index === 0 ? "收起" : "展开"}</button>
-      </div></header><div class="mix-script-body"${index === 0 ? "" : " hidden"}><div class="mix-script-detail-layout">${item.assigned.length ? `<div class="mix-stage-preview" data-mix-preview-row tabindex="0" role="button" aria-label="预览第 ${index + 1} 个镜头"><b>▶</b></div>` : `<div class="mix-stage-preview mix-stage-preview-empty" data-mix-replace-row tabindex="0" role="button" aria-label="为第 ${index + 1} 段选择镜头"><div class="mix-stage-preview-empty-text">点击此处选择素材</div><div class="mix-stage-preview-empty-hint">第 ${index + 1} 段尚未匹配镜头</div></div>`}<div class="mix-stage-attributes"><label class="mix-stage-visual-edit mix-stage-visual-primary"><span>画面描述</span><textarea data-mix-row-visual="${index}" placeholder="用一句自然语言描述这个分镜的画面,例如:机器沿墙边清洁,特写展示贴边效果。">${escapeHtml(item.visual)}</textarea></label><i class="mix-field-divider" aria-hidden="true"></i><label class="mix-stage-copy-edit mix-stage-copy-primary"><span>口播文案<i class="mix-stage-copy-readonly-hint" aria-hidden="true">请回上一步修改</i></span><textarea data-mix-row-copy="${index}" readonly aria-readonly="true" title="口播文案不可直接编辑,请返回上一步调整" placeholder="本段口播文案,直接编辑即可触发分镜自动重算">${escapeHtml(item.copy)}</textarea></label>${item._isAutoRematching ? `<div class="mix-auto-rematch-status"><span class="mix-auto-rematch-spinner" aria-hidden="true"></span><b>正在重新匹配镜头…</b><small>系统已根据修改后的画面描述匹配新的镜头</small></div>` : ""}</div></div>${hint}</div></article>`;
+        <button type="button" class="mix-row-toggle-btn" data-mix-toggle-row aria-expanded="true">收起</button>
+      </div></header><div class="mix-rematch-progress" data-mix-rematch-progress${item._isRematching ? "" : " hidden"}><span>AI 换镜中…</span><div class="mix-rematch-progress-track"><div class="mix-rematch-progress-bar"></div></div></div><div class="mix-script-body"><div class="mix-script-detail-layout">${item.assigned.length ? `<div class="mix-stage-preview" data-mix-preview-row tabindex="0" role="button" aria-label="预览第 ${index + 1} 个镜头"><b>▶</b></div>` : `<div class="mix-stage-preview mix-stage-preview-empty" data-mix-replace-row tabindex="0" role="button" aria-label="为第 ${index + 1} 段选择镜头"><div class="mix-stage-preview-empty-text">点击此处选择素材</div><div class="mix-stage-preview-empty-hint">第 ${index + 1} 段尚未匹配镜头</div></div>`}<div class="mix-stage-attributes"><label class="mix-stage-visual-edit mix-stage-visual-primary"><span>画面描述<button type="button" class="mix-visual-reset" data-mix-visual-reset="${index}" title="恢复到第二步进入第三步时的画面描述" aria-label="回到默认"${item.needsRematch ? "" : " disabled aria-disabled=\"true\""}>↶ 回到默认</button>${item.needsRematch && !item._isRematching ? `<em class="mix-visual-rematch-flag" title="已修改描述,需要重新匹配镜头">需重新匹配</em>` : ""}</span><textarea data-mix-row-visual="${index}" placeholder="用一句自然语言描述这个分镜的画面,例如:机器沿墙边清洁,特写展示贴边效果。">${escapeHtml(item.visual)}</textarea></label><i class="mix-field-divider" aria-hidden="true"></i><label class="mix-stage-copy-edit mix-stage-copy-primary"><span>口播文案<i class="mix-stage-copy-readonly-hint" aria-hidden="true">请回上一步修改</i></span><textarea data-mix-row-copy="${index}" readonly aria-readonly="true" title="口播文案不可直接编辑,请返回上一步调整" placeholder="本段口播文案,直接编辑即可触发分镜自动重算">${escapeHtml(item.copy)}</textarea></label></div></div>${hint}</div></article>`;
     }
 
     function syncMixDuration() {
@@ -6556,35 +6548,72 @@
       renderCandidates();
     }
 
-    // 自动静默重新匹配:用户改画面描述后调用,无弹窗,直接应用新镜头
+    // 死代码(主动工作流接管),保留为空占位以防旧引用;不再被调用。
     function applyMixRowAutoRematch(row) {
+      return;
+    }
+
+    // 主动工作流:用户点击"重新匹配"按钮 → 进度条 0%→100%(3s) → 应用新镜头
+    function runMixRowRematch(card) {
       const root = dynamicForm.querySelector(".mix-flow-form");
-      const { index, segment } = getMixRowSegment(row);
-      if (!segment) return;
+      if (!root || !card) return;
+      const rowIndex = Number(card.dataset.mixScriptRow || 0);
+      if (!root._mixRowRematching) root._mixRowRematching = {};
+      if (root._mixRowRematching[rowIndex]) return; // 防重复点击
       const materials = mixSelectedMaterials().filter(item => item.status === "已分析");
-      if (!materials.length) {
-        root._mixRowNeedsRematch?.delete(index);
-        renderMixScript();
-        return;
-      }
-      // 标记自动重匹配中,渲染时显示"正在重新匹配镜头…"
-      root._mixAutoRematch = { ...(root._mixAutoRematch || {}), [index]: true };
+      const { segment: seg } = getMixRowSegment(card);
+      if (!seg) return;
+      // 标记进入 rematch 状态 → 渲染时显示进度条、隐藏 3 个动作按钮
+      root._mixRowRematching[rowIndex] = true;
       renderMixScript();
+      const liveCard = dynamicForm.querySelector(`[data-mix-script-row="${rowIndex}"]`);
+      const progressWrap = liveCard?.querySelector(".mix-rematch-progress");
+      const progressBar = liveCard?.querySelector(".mix-rematch-progress-bar");
+      // 进度条 0% → 100%(CSS 已定义 3s cubic-bezier 过渡)
+      if (progressWrap) progressWrap.removeAttribute("hidden");
+      if (progressBar) {
+        progressBar.style.width = "0%";
+        void progressBar.offsetWidth; // 强制重排,使过渡生效
+        progressBar.style.width = "100%";
+      }
       setTimeout(() => {
-        const candidates = materials.filter(item => mixStageMatchesMaterial(segment.stage, item));
+        const candidates = materials.filter(item => mixStageMatchesMaterial(seg.stage, item));
         const pool = candidates.slice(0, 4);
         const picked = pool[0] || materials[0];
-        if (!picked) {
-          delete root._mixAutoRematch?.[index];
-          renderMixScript();
-          return;
+        if (picked) {
+          root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [rowIndex]:[picked.id] };
         }
-        root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [index]:[picked.id] };
-        root._mixRowNeedsRematch?.delete(index);
-        delete root._mixAutoRematch?.[index];
+        if (!root._mixRowNeedsRematch) root._mixRowNeedsRematch = new Set();
+        root._mixRowNeedsRematch.delete(rowIndex);
+        delete root._mixRowRematching[rowIndex];
         renderMixScript();
-        showToast(`已根据新画面描述自动匹配「${picked.name}」`);
-      }, 700);
+        showToast(picked ? `已重新匹配镜头:${picked.name || "AI 推荐"}` : "暂无可匹配的素材,镜头未变化");
+      }, 3000);
+    }
+
+    // 把画面描述还原到 sourceRow.visual(进入 Step 3 时的初值)
+    function applyMixRowVisualReset(card) {
+      const root = dynamicForm.querySelector(".mix-flow-form");
+      if (!root || !card) return;
+      const rowIndex = Number(card.dataset.mixScriptRow || 0);
+      const { segment: seg } = getMixRowSegment(card);
+      if (!seg) return;
+      // 允许两种情况触发:(1) 当前段被标记为需要重新匹配;(2) 当前段存在 override
+      const isNeedsRematch = root?._mixRowNeedsRematch?.has(rowIndex);
+      const hasOverride = Object.prototype.hasOwnProperty.call(root._mixRowVisualOverrides || {}, rowIndex);
+      if (!isNeedsRematch && !hasOverride) {
+        showToast("该段画面描述已是默认状态");
+        return;
+      }
+      // 清除 override + needsRematch + 关闭任何进行中的 rematch
+      if (root._mixRowVisualOverrides) {
+        root._mixRowVisualOverrides = { ...root._mixRowVisualOverrides };
+        delete root._mixRowVisualOverrides[rowIndex];
+      }
+      root._mixRowNeedsRematch?.delete(rowIndex);
+      delete root._mixRowRematching?.[rowIndex];
+      renderMixScript();
+      showToast("已恢复第 " + (rowIndex + 1) + " 段画面描述为默认");
     }
 
     function openMixRematchAllDialog() {
@@ -6603,10 +6632,46 @@
         setTimeout(() => {
           root._mixRowOverrides = {};
           root._mixRowNeedsRematch = new Set();
+          // 演示用:重新匹配全部后,把所有 stage 都没匹配到的段落强制指派到第一个素材,保证 0 段未匹配。
+          // 实际情况由开发决定,这里只保证 demo 演示时用户能看到"全部已匹配"的最终态。
+          const allMaterials = mixSelectedMaterials().filter(item => item.status === "已分析");
+          if (allMaterials.length) {
+            const segments = mixScriptSegments();
+            segments.forEach(seg => {
+              if (!seg.assigned.length) {
+                root._mixRowOverrides[seg._origIndex] = [allMaterials[0].id];
+              }
+            });
+          }
           overlay.remove();
           renderMixScript();
+          // 演示用:重新匹配后默认所有分镜都展开,方便用户一眼看到全部分镜
+          dynamicForm.querySelectorAll(".mix-script-card").forEach(card => {
+            const body = card.querySelector(".mix-script-body");
+            const toggle = card.querySelector("[data-mix-toggle-row]");
+            if (body) body.hidden = false;
+            if (toggle) {
+              toggle.textContent = "收起";
+              toggle.setAttribute("aria-expanded", "true");
+            }
+          });
           showToast("所有段落已重新匹配完成");
         }, 650);
+      });
+    }
+
+    // ── 阶段3 上一步确认弹窗(Step 3 → Step 2) ─────────────────────
+    function openMixBackToStep2Confirm(onConfirm) {
+      const overlay = createMixDialog({
+        title: "返回修改文案与配音?",
+        subtitle: "",
+        label: "返回上一步确认",
+        body: `<div class="mix-back-confirm-body"><p>返回后若修改文案或配音,当前分镜、镜头匹配结果及本页调整将不会保留。</p></div>`,
+        footer: `<div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close>取消</button><button class="primary-btn" type="button" data-mix-confirm-back>上一步</button></div>`
+      });
+      overlay.querySelector("[data-mix-confirm-back]").addEventListener("click", () => {
+        overlay.remove();
+        if (typeof onConfirm === "function") onConfirm();
       });
     }
 
@@ -6728,7 +6793,8 @@
           const availableMaterials = [...new Map([...currentMaterials, ...trimPool].map(item => [item.id, item])).values()];
           // 替换镜头也进入本次创作素材，步骤三回显与后续成片始终使用同一份素材。
           syncMixMaterialSelection([...new Set([...mixSelectedMaterialIds(), ...trimPool.map(item => item.id)])]);
-          const totalDuration = trimPool.reduce((sum, item) => sum + Math.max(1, Number(item.duration) || 0), 0);
+          // 时长判定用"全选素材的总和"才算合理:用户全选时哪怕前 3 个短、总和也可能超
+          const totalDuration = selectedMaterials.reduce((sum, item) => sum + Math.max(1, Number(item.duration) || 0), 0);
           if (totalDuration > (segment?.duration || 0)) return openMixConcatTrimDialog(root, rowIndex, trimPool.map(item => item.id), segment?.duration || 0, availableMaterials);
           root._mixRowOverrides = { ...(root._mixRowOverrides || {}), [rowIndex]:trimPool.map(item => item.id) };
           root._mixRowNeedsRematch?.delete(rowIndex);
@@ -7267,7 +7333,13 @@
             return;
           }
           if (target.matches("[data-mix-rematch-row]")) {
-            openMixRowRematchDialog(target.closest("[data-mix-script-row]"));
+            const card = target.closest("[data-mix-script-row]");
+            if (card) runMixRowRematch(card);
+            return;
+          }
+          if (target.matches("[data-mix-visual-reset]")) {
+            const card = target.closest("[data-mix-script-row]");
+            if (card) applyMixRowVisualReset(card);
             return;
           }
           if (target.matches("[data-mix-rematch-all]")) openMixRematchAllDialog();
@@ -7579,7 +7651,14 @@
         }
         const rematch = event.target.closest("[data-mix-rematch-row]");
         if (rematch) {
-          openMixRowRematchDialog(rematch.closest("[data-mix-script-row]"));
+          const card = rematch.closest("[data-mix-script-row]");
+          if (card) runMixRowRematch(card);
+          return;
+        }
+        const visualReset = event.target.closest("[data-mix-visual-reset]");
+        if (visualReset) {
+          const card = visualReset.closest("[data-mix-script-row]");
+          if (card) applyMixRowVisualReset(card);
           return;
         }
         if (event.target.closest("[data-mix-rematch-all]")) {
@@ -7607,17 +7686,25 @@
           root._mixRowVisualOverrides = { ...(root._mixRowVisualOverrides || {}), [index]:event.target.value };
           if (!root._mixRowNeedsRematch) root._mixRowNeedsRematch = new Set();
           root._mixRowNeedsRematch.add(index);
-          // 字符数实时更新
-          const counter = event.target.closest("label")?.querySelector("[data-mix-row-visual-count]");
-          if (counter) counter.textContent = `${event.target.value.length} 字`;
+          // 局部刷新:高亮"重新匹配"按钮 + 启用"↶ 回到默认"按钮 + 在画面描述 label 末尾插入"需重新匹配"标记
+          const card = event.target.closest("[data-mix-script-row]");
+          const rematchBtn = card?.querySelector("[data-mix-rematch-row]");
+          if (rematchBtn) rematchBtn.classList.add("is-highlight");
+          const resetBtn = card?.querySelector("[data-mix-visual-reset]");
+          if (resetBtn) {
+            resetBtn.removeAttribute("disabled");
+            resetBtn.removeAttribute("aria-disabled");
+          }
+          const label = event.target.closest("label");
+          let flag = label?.querySelector(".mix-visual-rematch-flag");
+          if (!flag && label) {
+            flag = document.createElement("em");
+            flag.className = "mix-visual-rematch-flag";
+            flag.title = "已修改描述,需要重新匹配镜头";
+            flag.textContent = "需重新匹配";
+            label.querySelector("span").appendChild(flag);
+          }
           updateMixScriptCompletion();
-          // 去抖:用户停手 800ms 后自动重新匹配镜头,无弹窗
-          if (!root._mixAutoRematchTimers) root._mixAutoRematchTimers = {};
-          clearTimeout(root._mixAutoRematchTimers[index]);
-          const card = event.target.closest(".mix-script-card");
-          root._mixAutoRematchTimers[index] = setTimeout(() => {
-            if (card && document.contains(card)) applyMixRowAutoRematch(card);
-          }, 800);
         }
         if (event.target.matches("[data-mix-row-copy]")) {
           const index = Number(event.target.dataset.mixRowCopy || 0);
@@ -7768,7 +7855,11 @@
         back.className = "ghost-btn task-back-button";
         back.type = "button";
         back.textContent = "上一步";
-        back.addEventListener("click", () => setTaskStep(taskStep - 1));
+        if (activeType === "mix" && taskStep === 3) {
+          back.addEventListener("click", () => openMixBackToStep2Confirm(() => setTaskStep(taskStep - 1)));
+        } else {
+          back.addEventListener("click", () => setTaskStep(taskStep - 1));
+        }
         taskActionButtons.append(back);
       }
       // Phase 3.5: 智能混剪 Step 3 在底部放"重新匹配全部"按钮
@@ -7800,7 +7891,7 @@
       if (activeType === "script") {
         next.textContent = taskStep === 2 ? "生成脚本" : "下一步";
       } else if (activeType === "mix") {
-        next.textContent = ["确认方案", "确认文案与配音", "确认脚本", taskCompleted ? "重新生成视频" : "生成视频"][taskStep - 1];
+        next.textContent = ["确认方案", "确认文案与配音", "生成视频", taskCompleted ? "重新生成视频" : "生成视频"][taskStep - 1];
       } else if (isStructuredCopyFlow()) {
         next.textContent = taskStep === 1 ? "下一步" : "生成文案";
       } else {
@@ -7810,9 +7901,13 @@
       }
       next.addEventListener("click", () => {
         if (activeType === "mix") {
-          if (taskStep < 4) {
+          if (taskStep < 3) {
             if (!validateMixStep(taskStep)) return;
             return setTaskStep(taskStep + 1);
+          }
+          if (taskStep === 3) {
+            if (!validateMixStep(3)) return;
+            return submitMixGeneration();
           }
           if (!validateMixStep(2)) return;
           return submitMixGeneration();
@@ -7948,16 +8043,27 @@
     function submitScriptGeneration() {
       captureScriptContext();
       setTaskStep(3);
-      // 在结果容器里显示生成中
+      // 在结果容器里显示 4 步生成中(对齐智能混剪第三步 loading)
       const resultCard = dynamicForm.querySelector("[data-script-result-card]");
       if (resultCard) {
-        resultCard.innerHTML = `
-          <div class="script-result-loading">
-            <span class="spinner"></span>
-            <strong>正在生成分镜脚本……</strong>
-            <small>系统将根据本次配置匹配素材、生成口播与画面</small>
-          </div>
-        `;
+        const steps = [
+          { title: "AI 正在拆解产品卖点", sub: "把口播与产品事实拆为可拍摄单元…" },
+          { title: "正在切分镜头分段", sub: "按总时长、运镜与景别切分每个分镜…" },
+          { title: "正在匹配推荐素材", sub: "按场景 / 景别 / 运镜匹配最佳素材…" },
+          { title: "正在校准口播时长", sub: "按语速重新分配每段口播与画面时长…" }
+        ];
+        resultCard.innerHTML = `<div class="mix-script-loading">
+          <div class="mix-spinner"></div>
+          <ol class="mix-loading-steps" data-mix-loading-steps>${steps.map((s, i) => `<li data-mix-step="${i}"><span class="mix-loading-step-dot"></span><div class="mix-loading-step-text"><b>${s.title}</b><small>${s.sub}</small></div></li>`).join("")}</ol>
+        </div>`;
+        const stepNodes = resultCard.querySelectorAll("[data-mix-step]");
+        stepNodes.forEach((n, i) => { if (i === 0) n.classList.add("is-active"); });
+        steps.forEach((_, i) => {
+          setTimeout(() => {
+            if (i > 0) stepNodes[i - 1]?.classList.replace("is-active", "is-done");
+            if (i < steps.length - 1) stepNodes[i]?.classList.add("is-active");
+          }, i * 350);
+        });
       }
       setTimeout(() => {
         const response = { summary: "本次分镜脚本已生成，可在右侧继续对话修改" };
@@ -8260,7 +8366,7 @@
 
     function syncMixStepChat() {
       if (activeType !== "mix") return;
-      const enabled = [2, 3].includes(taskStep);
+      const enabled = taskStep === 2;
       taskShell.classList.toggle("mix-chat-unavailable", !enabled);
       if (!enabled) {
         taskShell.classList.remove("mix-chat-can-edit", "mix-chat-script-mode");
@@ -8478,13 +8584,33 @@
       const spec = ratio === "16:9" ? "16:9 · 1920×1080 · 30fps" : "9:16 · 1080×1920 · 30fps";
       taskResultHost.innerHTML = `
         <div class="mix-result-page">
-          <div class="task-result-top"><div><strong>混剪视频已生成</strong><small>全部画面来自已确认的创作素材，可继续检查或局部重剪。</small></div><span class="mix-result-status">✓ 自动质检通过</span></div>
+          <div class="task-result-top">
+            <div><strong>混剪视频已生成</strong></div>
+            <div class="mix-result-quality-wrap">
+              <button class="mix-result-quality-chip" type="button" data-mix-quality-toggle aria-expanded="false" aria-controls="mixQualityPanel">
+                <span class="mix-result-status">✓ 自动质检通过</span>
+                <i class="mix-result-quality-caret" aria-hidden="true">›</i>
+              </button>
+              <div class="mix-result-quality-panel" id="mixQualityPanel" data-mix-quality-panel hidden>
+                <strong>自动质检通过</strong>
+                <p class="mix-result-quality-intro">成片已完成以下检查,未发现异常。</p>
+                <ul class="mix-result-quality-list">
+                  <li><span>✓</span> 画面完整,无黑帧或空白片段</li>
+                  <li><span>✓</span> 所有确认分镜均已进入成片</li>
+                  <li><span>✓</span> 配音完整,无缺失或异常静音</li>
+                  <li><span>✓</span> 字幕完整,无越界或截断</li>
+                  <li><span>✓</span> 音画时长一致</li>
+                  <li><span>✓</span> 无异常短镜头或长时间定帧</li>
+                  <li><span>✓</span> 素材读取正常,无丢失片段</li>
+                </ul>
+              </div>
+            </div>
+          </div>
           <div class="mix-result-hero">
             <div class="mix-video-player" data-mix-video-player><div class="${playerStageClass}"><span class="mix-video-product">${escapeHtml(productName)}</span><button type="button" data-mix-result-play>▶</button><div><strong>已有素材混剪成片</strong><small>${escapeHtml(ratio)} · ${escapeHtml(duration)}</small></div></div><div class="mix-player-bar"><span data-mix-player-time>00:00</span><div><i></i></div><span>${escapeHtml(duration.replace(" 秒", ""))}</span></div></div>
-            <div class="mix-result-insight"><div class="mix-result-metrics"><div><span>实际时长</span><b>${escapeHtml(duration)}</b></div><div><span>配音</span><b>${escapeHtml(voice)}</b></div><div><span>素材使用</span><b>${materialCount} 个</b></div><div><span>阻断问题</span><b class="success">0 项</b></div></div><div class="mix-result-quality"><strong>自动质检</strong><p><span>✓</span> 画面已覆盖全部配音时间段</p><p><span>✓</span> 无黑帧、静音或异常变速</p><p><span>✓</span> 产品事实与禁用话术校验通过</p></div></div>
           </div>
-          <article class="mix-result-timeline"><header><strong>成片时间轴</strong><small>点击任一段定位预览</small></header><div class="mix-timeline-track">${timelineHtml}</div><div class="mix-result-operations"><span>裁切 8 处</span><span>硬切 7 处</span><span>轻微变速 2 处</span><span>短定帧 2 处</span><span>无转场 / 字幕 / 特效</span></div></article>
-          <div class="mix-result-actions"><button class="ghost-btn" type="button" data-mix-result-action="back-script">返回修改脚本</button><button class="ghost-btn" type="button" data-mix-result-action="remix">局部重新混剪</button><button class="soft-btn" type="button" data-mix-result-action="save">保存到成片视频库</button><button class="primary-btn" type="button" data-mix-result-action="download">下载视频</button></div>
+          <article class="mix-result-timeline"><header><strong>成片时间轴</strong><small>点击任一段定位预览</small></header><div class="mix-timeline-track">${timelineHtml}</div></article>
+          <div class="mix-result-actions"><button class="ghost-btn" type="button" data-mix-result-action="back-script">返回修改脚本</button><button class="soft-btn" type="button" data-mix-result-action="save">保存到成片视频库</button><button class="primary-btn" type="button" data-mix-result-action="download">下载视频</button><button class="ghost-btn" type="button" data-mix-result-action="download-jianying">下载剪映工程文件</button></div>
         </div>`;
       taskShell.classList.add("is-complete");
       syncMixStepChat();
@@ -8494,10 +8620,37 @@
     }
 
     function submitMixGeneration() {
-      const host = dynamicForm.querySelector("[data-mix-generation-host]");
-      if (host) host.innerHTML = `<div class="mix-generating"><span class="spinner"></span><strong>正在生成混剪视频…</strong><small>正在裁切素材、校准配音时间轴并完成质量检查</small><div><i></i></div></div>`;
+      // 像第 2 步 → 第 3 步的 renderMixScriptLoading 一样,展示"生成视频"多步骤 loading
+      // 4 步:裁切素材 → 对齐配音时间轴 → 质量检查 → 生成完成
+      // 之后调用 showMixTaskResult 跳到结果页
+      const list = dynamicForm.querySelector("[data-mix-script-list]");
+      const alert = dynamicForm.querySelector("[data-mix-script-alert]");
+      if (alert) { alert.hidden = true; alert.innerHTML = ""; }
       taskActionButtons.querySelector(".primary-btn")?.setAttribute("disabled", "disabled");
-      setTimeout(showMixTaskResult, 1200);
+      if (taskActionNote) taskActionNote.textContent = "正在生成视频,稍候…";
+      const steps = [
+        { title: "正在裁切素材", sub: "按每段时长精确截取镜头…" },
+        { title: "正在对齐配音时间轴", sub: "把分镜时长与口播节奏对齐…" },
+        { title: "正在完成质量检查", sub: "校验画面完整性、产品事实与禁用话术…" },
+        { title: "生成完成", sub: "即将展示成片,可播放或局部调整" }
+      ];
+      // 把多步骤 loading 渲染到分镜列表位置(保留 Step 3 的步骤标题,只替换列表区)
+      if (list) {
+        list.innerHTML = `<div class="mix-script-loading">
+          <div class="mix-spinner"></div>
+          <ol class="mix-loading-steps" data-mix-loading-steps>${steps.map((s, i) => `<li data-mix-step="${i}"><span class="mix-loading-step-dot"></span><div class="mix-loading-step-text"><b>${s.title}</b><small>${s.sub}</small></div></li>`).join("")}</ol>
+        </div>`;
+        const stepNodes = list.querySelectorAll("[data-mix-step]");
+        if (stepNodes[0]) stepNodes[0].classList.add("is-active");
+        steps.forEach((_, i) => {
+          setTimeout(() => {
+            if (i > 0) stepNodes[i - 1]?.classList.replace("is-active", "is-done");
+            if (i < steps.length - 1) stepNodes[i]?.classList.add("is-active");
+          }, i * 380);
+        });
+      }
+      // 总动画 ~1.9s 后跳到结果页
+      setTimeout(showMixTaskResult, steps.length * 380 + 300);
     }
 
     // 智能脚本 Agent 多版本 Tab 渲染
@@ -10422,6 +10575,17 @@
         showToast(playing ? "正在播放成片预览" : "已暂停预览");
         return;
       }
+      // 智能混剪结果页 · 顶部"自动质检通过"chip 展开/收起面板
+      const qualityToggle = event.target.closest("[data-mix-quality-toggle]");
+      if (qualityToggle) {
+        const panel = taskResultHost.querySelector("[data-mix-quality-panel]");
+        if (!panel) return;
+        const willOpen = panel.hidden;
+        panel.hidden = !willOpen;
+        qualityToggle.setAttribute("aria-expanded", String(willOpen));
+        qualityToggle.classList.toggle("is-open", willOpen);
+        return;
+      }
       const seek = event.target.closest("[data-mix-seek]");
       if (seek) {
         taskResultHost.querySelectorAll("[data-mix-seek]").forEach(button => button.classList.toggle("active", button === seek));
@@ -10459,6 +10623,16 @@
             mixAction.disabled = false;
             showToast("成片导出任务已创建，可在下载中心查看");
           }, 700);
+          return;
+        }
+        if (action === "download-jianying") {
+          mixAction.textContent = "正在打包…";
+          mixAction.disabled = true;
+          setTimeout(() => {
+            mixAction.textContent = "下载剪映工程文件";
+            mixAction.disabled = false;
+            showToast("剪映工程文件已开始打包，可在下载中心查看 .jianying 工程");
+          }, 800);
           return;
         }
       }

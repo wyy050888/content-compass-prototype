@@ -4,3 +4,6 @@ Thumbs.db
 *.log
 *.tmp
 
+# 本地调试脚本与备份
+_cleanup.ps1
+js/*.bak
