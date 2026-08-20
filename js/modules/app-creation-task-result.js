@@ -49,8 +49,10 @@
         originalCopyTargetId = "";
         renderOriginalTaskResult();
       } else if (activeType === "script" && generatedAssets.length > 0) {
+        // 智能脚本单 target:每次生成的最新结果应成为当前展示对象,而非累积后仍渲染旧的第一个 asset
+        scriptTargetId = "";
         generatedAssets.forEach(asset => {
-          if (!scriptTaskAssetIds.includes(asset.id)) scriptTaskAssetIds.push(asset.id);
+          if (!scriptTaskAssetIds.includes(asset.id)) scriptTaskAssetIds.unshift(asset.id);
         });
         renderScriptTaskResult(response, scriptTaskAssetIds.map(id => sessionAssets.find(asset => asset.id === id)).filter(Boolean));
         requestAnimationFrame(() => {
