@@ -141,12 +141,20 @@
             });
           }
         });
-        // 回到默认按钮(走公共 applyScriptRowVisualReset)
+        // 回到默认按钮(走公共 applyScriptRowVisualReset / applyScriptRowVideoPromptReset)
         taskResultHost.addEventListener("click", event => {
-          const reset = event.target.closest("[data-mix-visual-reset]");
-          if (!reset) return;
-          const card = reset.closest("[data-script-row]");
-          if (card) applyScriptRowVisualReset(card);
+          const visualReset = event.target.closest("[data-mix-visual-reset]");
+          if (visualReset) {
+            const card = visualReset.closest("[data-script-row]");
+            if (card) applyScriptRowVisualReset(card);
+            return;
+          }
+          const promptReset = event.target.closest("[data-mix-video-prompt-reset]");
+          if (promptReset) {
+            const card = promptReset.closest("[data-script-row]");
+            if (card) applyScriptRowVideoPromptReset(card);
+            return;
+          }
         });
       }
 
@@ -181,6 +189,102 @@
       showToast(`已恢复第 ${Number(card.dataset.rowIdx) + 1} 段画面描述为默认`);
     }
 
+    // 根据分镜的口播文案/主体/场景/镜头信息,生成结构化的「生视频提示词」(不依赖素材库模式默认值)
+    function buildStructuredVideoPrompt(item, dur) {
+      const voice = (item.voice || "").trim() || "展示产品核心卖点";
+      const subject = (item.subject || "产品主体").trim();
+      const scene = (item.scene || "真实生活场景").trim();
+      const shotType = item.shotType || "中景";
+      const cameraMove = item.cameraMove || "固定";
+      const subtitle = (item.subtitle || "").trim();
+      const visual = (item.visual || "").trim();
+      const durationSec = Math.max(1, Math.round(dur || item.duration || 3));
+      const hasPerson = /人/.test(subject) || /人/.test(visual);
+
+      const shotCfg = {
+        "特写": { type: "特写", depth: "浅景深（背景虚化）", focal: "85mm 长焦 / 微距" },
+        "近景": { type: "近景", depth: "浅景深", focal: "50mm 中长焦" },
+        "中景": { type: "中景", depth: "适中景深", focal: "35mm 标准镜头" },
+        "全景": { type: "全景", depth: "大景深（前后景均清晰）", focal: "24mm 广角" }
+      }[shotType] || { type: shotType, depth: "适中景深", focal: "标准镜头" };
+
+      const camCfg = {
+        "固定": "固定机位，画面稳定不晃动",
+        "推进": "镜头由远及近缓慢推近，逐步聚焦主体",
+        "平移跟拍": "横向平移跟拍，跟随主体运动",
+        "拉远": "镜头缓慢拉远，由主体过渡到环境全貌",
+        "环绕": "环绕运镜，多角度呈现主体形态"
+      }[cameraMove] || `${cameraMove}运镜`;
+
+      const coreTitle = subtitle || voice.slice(0, 16);
+      const motionLine = visual || voice;
+
+      return [
+        "【视频主题/核心画面】",
+        `${coreTitle}。${subject}，${voice}`,
+        "",
+        "【主体细节】",
+        "物体：",
+        `- ${subject}：画面主体，形态完整、质感真实、细节清晰。`,
+        "人物：",
+        hasPerson ? "- 真人出镜：自然肤色、真实表情、连贯动作，避免僵硬与重复。" : "- 无人物出镜，以产品/物体为画面主体。",
+        "",
+        "【场景环境】",
+        `地点：${scene}。`,
+        "时间：自然光环境（白天室内/居家场景）。",
+        "天气：室内环境，无特殊天气要求。",
+        "背景元素：简洁生活化背景，避免杂乱元素干扰主体。",
+        "空间氛围：温馨、真实、可信赖。",
+        "",
+        "【动作与动态】",
+        "主体如何运动：",
+        `- ${motionLine}`,
+        "动作速度：自然速度，符合真实使用节奏。",
+        "动作连续性：动作连贯流畅，无跳帧、无重复。",
+        "",
+        "【镜头语言】",
+        `镜头类型：${shotCfg.type}。`,
+        `镜头运动：${camCfg}。`,
+        `景深：${shotCfg.depth}。`,
+        `焦距：${shotCfg.focal}。`,
+        "",
+        "【视觉风格】",
+        "风格：广告片 / 产品演示，真实写实。",
+        "色调：明亮通透，自然还原真实颜色。",
+        "质感：高细节、真实材质纹理。",
+        "参考风格：产品宣传片。",
+        "",
+        "【光影设计】",
+        "光源：柔和自然光 + 室内环境光。",
+        "阴影：柔和自然阴影，无明显硬阴影。",
+        "氛围：明亮、干净、舒适。",
+        "",
+        "【视频参数】",
+        `时长：${durationSec}秒。`,
+        "比例：9:16 竖屏。",
+        "画质：4K 高清。",
+        "帧率：30fps 或更高。",
+        "运动流畅度：流畅自然，无卡顿。",
+        "",
+        "【负面限制】",
+        "避免：面部/肢体畸形、多余手指、文字水印、画面闪烁、抖动、低质量、模糊。"
+      ].join("\n");
+    }
+
+    // 恢复「生视频提示词」为默认结构化提示词
+    function applyScriptRowVideoPromptReset(card) {
+      if (!card) return;
+      const idx = Number(card.dataset.rowIdx);
+      const overrideObj = taskResultHost._scriptRowVideoPromptOverrides || {};
+      if (!Object.prototype.hasOwnProperty.call(overrideObj, idx)) {
+        showToast("该段生视频提示词已是默认状态");
+        return;
+      }
+      delete overrideObj[idx];
+      refreshScriptResultFromCurrent();
+      showToast(`已恢复第 ${idx + 1} 段生视频提示词为默认`);
+    }
+
     // 单张脚本卡片(1:1 镜像混剪 renderSingleMixCard 模板,去掉 +/已匹配素材)
     function renderSingleScriptCard(item, index, asset, opts = {}) {
       const totalRows = opts.totalRows ?? 0;
@@ -199,10 +303,6 @@
           ? `<div class="mix-stage-preview mix-stage-preview-empty" data-mix-replace-row tabindex="0" role="button" aria-label="为第 ${index + 1} 段选择镜头"><div class="mix-stage-preview-empty-text">点击此处选择素材</div><div class="mix-stage-preview-empty-hint">第 ${index + 1} 段尚未匹配镜头</div></div>`
           : `<div class="mix-stage-preview" data-mix-replace-row tabindex="0" role="button" aria-label="预览第 ${index + 1} 个镜头"><b>▶</b></div>`)
         : "";
-      // 不依赖素材库(free)模式:新增可编辑的「生视频提示词」字段,替代素材预览
-      const promptCell = !showMaterial
-        ? `<i class="mix-field-divider" aria-hidden="true"></i><label class="mix-stage-video-prompt-edit"><span>生视频提示词</span><textarea rows="3" data-mix-row-video-prompt="${index}" placeholder="描述生成视频的画面、运镜、时长等,可直接编辑">${escapeHtml(item.videoPrompt || "")}</textarea></label>`
-        : "";
       const stage = item.stage || "新分镜";
       const timeText = `${mixTimeLabel(item.start)}–${mixTimeLabel(item.end)}`;
       const isRematching = Boolean(item._isRematching);
@@ -210,14 +310,21 @@
       // 1:1 对齐混剪卡片的视觉字段(画面描述):带 ↶ 回到默认 按钮 + 需重新匹配 标记 + 进度条
       const resetDisabledAttr = needsRematch ? "" : " disabled aria-disabled=\"true\"";
       const visualFlag = needsRematch && !isRematching ? `<em class="mix-visual-rematch-flag" title="已修改描述,需要重新匹配镜头">需重新匹配</em>` : "";
+      // 画面描述字段(仅依赖素材库模式显示;free 模式由「生视频提示词」替代)
+      const visualCell = showMaterial
+        ? `<label class="mix-stage-visual-edit mix-stage-visual-primary"><span>画面描述<button type="button" class="mix-visual-reset" data-mix-visual-reset="${index}" title="恢复到默认画面描述" aria-label="回到默认"${resetDisabledAttr}>↶ 回到默认</button>${visualFlag}</span><textarea data-mix-row-visual="${index}" placeholder="用一句自然语言描述这个分镜的画面">${escapeHtml(item.visual || "")}</textarea></label><i class="mix-field-divider" aria-hidden="true"></i>`
+        : "";
+      // 不依赖素材库(free)模式:可编辑的「生视频提示词」字段,替代素材预览 + 画面描述
+      const promptCell = !showMaterial
+        ? `<label class="mix-stage-video-prompt-edit"><span>生视频提示词<button type="button" class="mix-visual-reset" data-mix-video-prompt-reset="${index}" title="恢复到默认生视频提示词" aria-label="回到默认">↶ 回到默认</button></span><textarea rows="14" data-mix-row-video-prompt="${index}" placeholder="描述生成视频的画面、运镜、时长等,可直接编辑">${escapeHtml(item.videoPrompt || "")}</textarea></label>`
+        : "";
       return `<article class="mix-script-card${isFlagged ? " is-flagged" : ""}${isInserted ? " is-inserted" : ""}${showMaterial ? "" : " is-no-material"}${hasNoMaterial ? " is-needs-shot" : ""}${needsRematch ? " is-needs-rematch" : ""}${isRematching ? " is-rematching" : ""}" data-script-row data-row-idx="${index}" data-asset-id="${escapeHtml(asset.id)}" data-script-orig-row="${item._origIndex}">${flagMark}<header><div><span class="mix-row-index" title="第 ${index + 1} 段">${String(index + 1).padStart(2, "0")}</span><b>${timeText}</b><strong>${escapeHtml(stage)}</strong><span>${item.duration.toFixed(1)}s</span></div><div class="mix-row-header-actions">
         <button type="button" class="mix-row-icon-btn"${deleteAttr}>
           <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"/></svg>
         </button>
-        <button type="button" class="mix-row-action-btn" data-mix-rematch-row>重新匹配</button>
-        <button type="button" class="mix-row-action-btn mix-row-action-primary" data-mix-replace-row>替换镜头</button>
+        ${showMaterial ? `<button type="button" class="mix-row-action-btn" data-mix-rematch-row>重新匹配</button><button type="button" class="mix-row-action-btn mix-row-action-primary" data-mix-replace-row>替换镜头</button>` : ""}
         <button type="button" class="mix-row-toggle-btn" data-mix-toggle-row aria-expanded="true">收起</button>
-      </div></header><div class="mix-rematch-progress" data-mix-rematch-progress${isRematching ? "" : " hidden"}><span>AI 换镜中…</span><div class="mix-rematch-progress-track"><div class="mix-rematch-progress-bar${isRematching ? " is-rematch-running" : ""}"></div></div></div><div class="mix-script-body"><div class="mix-script-detail-layout">${previewHtml}<div class="mix-stage-attributes"><label class="mix-stage-visual-edit mix-stage-visual-primary"><span>画面描述<button type="button" class="mix-visual-reset" data-mix-visual-reset="${index}" title="恢复到默认画面描述" aria-label="回到默认"${resetDisabledAttr}>↶ 回到默认</button>${visualFlag}</span><textarea data-mix-row-visual="${index}" placeholder="用一句自然语言描述这个分镜的画面">${escapeHtml(item.visual || "")}</textarea></label><i class="mix-field-divider" aria-hidden="true"></i><label class="mix-stage-copy-edit mix-stage-copy-primary"><span>口播文案<i class="mix-stage-copy-readonly-hint" aria-hidden="true">可在行内继续修改</i></span><textarea data-mix-row-copy="${index}" placeholder="本段口播文案,直接编辑即可触发分镜自动重算">${escapeHtml(item.voice || "")}</textarea></label>${promptCell}</div></div></div></article>`;
+      </div></header><div class="mix-rematch-progress" data-mix-rematch-progress${isRematching ? "" : " hidden"}><span>AI 换镜中…</span><div class="mix-rematch-progress-track"><div class="mix-rematch-progress-bar${isRematching ? " is-rematch-running" : ""}"></div></div></div><div class="mix-script-body"><div class="mix-script-detail-layout">${previewHtml}<div class="mix-stage-attributes">${visualCell}<label class="mix-stage-copy-edit mix-stage-copy-primary"><span>口播文案<i class="mix-stage-copy-readonly-hint" aria-hidden="true">可在行内继续修改</i></span><textarea data-mix-row-copy="${index}" placeholder="本段口播文案,直接编辑即可触发分镜自动重算">${escapeHtml(item.voice || "")}</textarea></label>${promptCell}</div></div></div></article>`;
     }
 
     function downloadScript(assetId) {
@@ -398,7 +505,7 @@
           materialIds: finalMaterialIds,
           materialOverride: finalMaterialOverride,
           visual: visualOverride || item.visual,
-          videoPrompt: videoPromptOverride ?? item.videoPrompt,
+          videoPrompt: videoPromptOverride ?? buildStructuredVideoPrompt(item, dur),
           _isInserted: Boolean(isInserted),
           _isFlagged: Boolean(isFlagged),
           _isRematching: isRematching,
