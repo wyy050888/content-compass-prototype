@@ -530,16 +530,11 @@
       const assetId = row.dataset.assetId;
       const rowIdx = Number(row.dataset.rowIdx);
       const origIndex = Number(row.dataset.scriptOrigRow);
-      const stage = row.querySelector("header strong")?.textContent?.trim() || "新分镜";
-      const time = row.querySelector("header b")?.textContent?.trim() || "—";
-      const durationText = row.querySelector("header span:last-of-type")?.textContent?.trim() || "—";
       const overlay = createMixDialog({
-        title: "删除该分镜?",
-        subtitle: "删除后总时长与口播分配会自动重算,后续可重新插入。",
+        title: "删除该分镜？",
         label: "删除分镜",
         body: `<div class="mix-delete-dialog-body">
-          <p>将删除第 <b>${rowIdx + 1}</b> 段<b>${escapeHtml(stage)}</b>(${escapeHtml(time)},${escapeHtml(durationText)})。</p>
-          <p style="color:#8d91a0;font-size:12px">该分镜关联的口播将一并从总时长中扣除。如需保留内容,建议先"合并到上一段"。</p>
+          <p>是否确认删除该段分镜，操作不可恢复？</p>
         </div>`,
         footer: `<div></div><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-close>取消</button><button class="primary-btn danger" type="button" data-mix-confirm-delete>确认删除</button></div>`
       });

@@ -103,6 +103,13 @@
     if (!match) return 0;
     return Math.max(1, Number(match[2]) - Number(match[1]));
   };
+  // 解析 "00—03s" 为 {start,end,duration} 秒(用于查看态卡片时间段与时长展示)
+  const parseShotRange = timeText => {
+    const match = String(timeText || "").match(/(\d+)\s*[-—]\s*(\d+)/);
+    const start = match ? Number(match[1]) : 0;
+    const end = match ? Number(match[2]) : 3;
+    return { start, end, duration: Math.max(0.1, end - start) };
+  };
   // 取一个脚本的素材池(优先 materialIds;没有则全量)
   const scriptMaterialPoolIds = script => {
     const ids = script.materialIds?.length ? script.materialIds : null;
@@ -169,8 +176,8 @@
     const lib = window.ScriptMaterialLib;
     if (!lib) return;
     host.querySelectorAll("[data-shot-material-cell]").forEach(cell => {
-      const tr = cell.closest("tr");
-      const rowIndex = Number(tr?.dataset.shotIdx);
+      const holder = cell.closest("[data-shot-idx]");
+      const rowIndex = Number(holder?.dataset.shotIdx);
       const row = script.rows[rowIndex];
       if (!row) return;
       let planIdx = 0;
@@ -200,6 +207,32 @@
         });
       };
       rerender();
+    });
+  }
+
+  // 给查看态 free 模式绑定"复制生视频提示词"
+  function bindScriptCopyPrompt(host) {
+    host.querySelectorAll("[data-sl-copy-prompt]").forEach(button => {
+      button.addEventListener("click", () => {
+        const el = host.querySelector(`[data-sl-prompt-text="${button.dataset.slCopyPrompt}"]`);
+        const text = el ? (el.value ?? el.textContent ?? "") : "";
+        if (!navigator.clipboard?.writeText) return toast("复制失败");
+        navigator.clipboard.writeText(text).then(() => toast("生视频提示词已复制"), () => toast("复制失败"));
+      });
+    });
+  }
+
+  // 给查看态卡片右上角"收起/展开"绑定切换(对齐智能脚本结果页)
+  function bindScriptToggleRow(host) {
+    host.querySelectorAll("[data-sl-toggle-row]").forEach(button => {
+      button.addEventListener("click", () => {
+        const body = button.closest(".mix-script-card")?.querySelector(".mix-script-body");
+        if (!body) return;
+        const collapsed = !body.hidden;
+        body.hidden = collapsed;
+        button.textContent = collapsed ? "展开" : "收起";
+        button.setAttribute("aria-expanded", String(!collapsed));
+      });
     });
   }
 
@@ -280,36 +313,44 @@
     }));
   }
 
-  function storyTable(script, editable = false) {
+  // 查看态分镜卡片:1:1 对齐智能脚本结果页(依赖素材库 = 视频预览 + 画面描述 + 口播;不依赖 = 口播 + 结构化生视频提示词)
+  function scriptStoryCards(script, opts = {}) {
+    const isDepend = script.materialMode === "depend";
+    const showRowActions = opts.showRowActions !== false;
+    const promptFor = (row, dur) => (typeof buildStructuredVideoPrompt === "function" ? buildStructuredVideoPrompt(row, dur) : (row.videoPrompt || ""));
+    const deleteSvg = `<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"/></svg>`;
+    const cards = script.rows.map((row, index) => {
+      const { start, end, duration } = parseShotRange(row.time);
+      const seq = String(index + 1).padStart(2, "0");
+      const stage = row.shotType || "新分镜";
+      const timeText = `${mixTimeLabel(start)}–${mixTimeLabel(end)}`;
+      const hasMaterial = isDepend && (buildScriptMaterialPlan(script, index)[0]?.items?.length > 0);
+      // 视频预览:依赖素材库才渲染;无匹配镜头显示空占位(对齐结果页)
+      const previewHtml = isDepend
+        ? (hasMaterial
+          ? `<div class="mix-stage-preview" aria-label="预览第 ${index + 1} 个镜头"><b>▶</b></div>`
+          : `<div class="mix-stage-preview mix-stage-preview-empty"><div class="mix-stage-preview-empty-text">该分组下无匹配素材</div><div class="mix-stage-preview-empty-hint">第 ${index + 1} 段尚未匹配镜头</div></div>`)
+        : "";
+      // 画面描述(依赖素材库模式);口播文案两种模式都显示;生视频提示词仅 free 模式
+      const visualCell = isDepend
+        ? `<label class="mix-stage-visual-edit mix-stage-visual-primary"><span>画面描述</span><textarea readonly data-sl-visual="${index}">${escapeHtml(row.visual || "")}</textarea></label><i class="mix-field-divider" aria-hidden="true"></i>`
+        : "";
+      const promptCell = !isDepend
+        ? `<label class="mix-stage-video-prompt-edit"><span>生视频提示词<button type="button" class="mix-visual-reset" data-sl-copy-prompt="${index}" title="复制生视频提示词" aria-label="复制">⧉ 复制</button></span><textarea rows="14" readonly data-sl-prompt-text="${index}">${escapeHtml(promptFor(row, duration))}</textarea></label>`
+        : "";
+      // 右上角操作:选择脚本抽屉(只读)只保留收起/展开,不提供删除/重匹配/替换
+      const rowActions = showRowActions
+        ? `<button type="button" class="mix-row-icon-btn" data-sl-delete-row="${index}" title="删除第 ${index + 1} 段" aria-label="删除分镜">${deleteSvg}</button>${isDepend ? `<button type="button" class="mix-row-action-btn" data-sl-rematch-row="${index}">重新匹配</button><button type="button" class="mix-row-action-btn mix-row-action-primary" data-sl-replace-row="${index}">替换镜头</button>` : ""}`
+        : "";
+      const header = `<header><div><span class="mix-row-index">${seq}</span><b>${timeText}</b><strong>${escapeHtml(stage)}</strong><span>${duration.toFixed(1)}s</span></div><div class="mix-row-header-actions">${rowActions}<button type="button" class="mix-row-toggle-btn" data-sl-toggle-row aria-expanded="true">收起</button></div></header>`;
+      return `<article class="mix-script-card${isDepend ? "" : " is-no-material"}" data-shot-idx="${index}">${header}<div class="mix-script-body"><div class="mix-script-detail-layout">${previewHtml}<div class="mix-stage-attributes">${visualCell}<label class="mix-stage-copy-edit mix-stage-copy-primary"><span>口播文案</span><textarea readonly data-sl-copy="${index}">${escapeHtml(row.voice || "")}</textarea></label>${promptCell}</div></div></div></article>`;
+    }).join("");
+    return `<div class="sl-story-cards">${cards}</div>`;
+  }
+
+  function storyTable(script, editable = false, opts = {}) {
     const dynamicHeader = script.materialMode === "depend" ? "推荐素材" : "生视频提示词";
-    if (!editable) {
-      // 查看模式:depend 走"AI 换一组 + 可点素材卡"列(对齐智能脚本最后结果页);free 走提示词
-      const materialRows = script.materialMode === "depend" ? script.rows.map((row, index) => {
-        const plan = buildScriptMaterialPlan(script, index);
-        const items = plan[0]?.items || [];
-        return `<tr data-shot-idx="${index}">
-          <td><span class="sl-shot">#${row.id}</span></td>
-          <td>${escapeHtml(row.time)}</td>
-          <td><span class="sl-cell-clamp">${escapeHtml(row.voice)}</span></td>
-          <td>${escapeHtml(row.shotType)}</td>
-          <td>${escapeHtml(row.cameraMove)}</td>
-          <td><span class="sl-cell-clamp">${escapeHtml(row.visual)}</span></td>
-          <td>${items.length ? `<div class="sl-shot-material-cell" data-shot-material-cell>
-            <button class="sl-shot-ai-switch" type="button" data-sl-shot-ai-switch>✦ AI 换一组</button>
-            <div class="sl-shot-material-list">${items.map((it, itemIdx) => renderShotMaterialCard(it, itemIdx, items.length)).join("")}</div>
-          </div>` : `<div class="sl-shot-material-empty">该分组下无匹配素材</div>`}</td>
-        </tr>`;
-      }).join("") : script.rows.map((row, index) => `<tr data-shot-idx="${index}">
-        <td><span class="sl-shot">#${row.id}</span></td>
-        <td>${escapeHtml(row.time)}</td>
-        <td><span class="sl-cell-clamp">${escapeHtml(row.voice)}</span></td>
-        <td>${escapeHtml(row.shotType)}</td>
-        <td>${escapeHtml(row.cameraMove)}</td>
-        <td><span class="sl-cell-clamp">${escapeHtml(row.visual)}</span></td>
-        <td><span class="sl-video-prompt">${escapeHtml(row.videoPrompt || "")}</span></td>
-      </tr>`).join("");
-      return `<div class="sl-story-wrap"><table class="sl-story-table"><thead><tr><th>镜头</th><th>时间段</th><th>对应口播片段</th><th>景别</th><th>运镜方式</th><th>画面内容描述</th><th>${dynamicHeader}</th></tr></thead><tbody>${materialRows}</tbody></table></div>`;
-    }
+    if (!editable) return scriptStoryCards(script, opts);
     return `<div class="sl-story-wrap"><table class="sl-edit-table"><thead><tr><th>顺序</th><th>时间段</th><th>对应口播片段</th><th>景别</th><th>运镜方式</th><th>画面内容描述</th><th>${dynamicHeader}</th><th>操作</th></tr></thead><tbody data-edit-rows>${script.rows.map((row, index) => editRowHtml(row, index, script.materialMode)).join("")}</tbody></table></div><button class="sl-btn sl-add-row" type="button" data-add-row>＋ 新增分镜</button>`;
   }
   const editRowHtml = (row, index, mode) => `<tr data-row-index="${index}"><td><span class="sl-shot">#${index + 1}</span></td><td><input data-field="time" value="${escapeHtml(row.time)}"></td><td><textarea data-field="voice">${escapeHtml(row.voice)}</textarea></td><td><input data-field="shotType" value="${escapeHtml(row.shotType)}"></td><td><input data-field="cameraMove" value="${escapeHtml(row.cameraMove)}"></td><td><textarea data-field="visual">${escapeHtml(row.visual)}</textarea></td><td>${mode === "depend" ? `<input data-field="material" value="${escapeHtml(row.material || "智能匹配")}" aria-label="匹配素材">` : `<textarea data-field="videoPrompt" aria-label="生视频提示词">${escapeHtml(row.videoPrompt || "")}</textarea>`}</td><td class="sl-row-actions"><button class="sl-icon-btn" data-row-action="up" title="上移">↑</button><button class="sl-icon-btn" data-row-action="down" title="下移">↓</button><button class="sl-icon-btn delete" data-row-action="delete" title="删除">×</button></td></tr>`;
@@ -321,8 +362,9 @@
     host.querySelector("[data-expand-source]").addEventListener("click", event => { const box = event.currentTarget.closest(".sl-source-block"); box.classList.toggle("expanded"); event.currentTarget.textContent = box.classList.contains("expanded") ? "收起全文" : "展开全文"; });
     host.querySelector("[data-view-locate]").addEventListener("click", () => { host.remove(); locateSession(script); });
     host.querySelector("[data-view-download]").addEventListener("click", () => downloadScript(script));
-    // 推荐素材列支持点击替换(对齐智能脚本最后结果页)
-    bindScriptMaterialReplace(host, script);
+    // free 模式复制提示词 + 卡片右上角收起/展开(对齐智能脚本最后结果页)
+    bindScriptCopyPrompt(host);
+    bindScriptToggleRow(host);
   }
 
   function collectRows(host, draft) {
@@ -758,9 +800,11 @@
       const detail = document.createElement("div");
       detail.className = "sl-script-pick-detail";
       detail.dataset.scriptPickDetail = "";
-      detail.innerHTML = `<div class="sl-script-pick-detail-mask" data-close-script-detail></div><aside class="sl-script-pick-drawer" role="dialog" aria-modal="true" aria-label="脚本详情"><header><div><small>脚本详情</small><h2>${escapeHtml(script.name)}</h2><p>最近更新：${escapeHtml(script.updated || "—")}</p></div><button type="button" data-close-script-detail aria-label="关闭">×</button></header><div class="sl-script-pick-drawer-body"><div class="sl-meta-grid"><div class="sl-meta"><small>对应产品</small><strong>${escapeHtml(script.product)}</strong></div><div class="sl-meta"><small>画面比例</small><strong>${escapeHtml(script.ratio || "9:16")}</strong></div><div class="sl-meta"><small>规格</small><strong>${escapeHtml(specs(script))}</strong></div><div class="sl-meta"><small>素材策略</small><strong>${escapeHtml(modeText(script.materialMode))}</strong></div></div><section class="sl-meta-block"><div class="sl-meta-block-head">目标人群 <small>${personas.length} 组</small></div>${personasViewHtml(personas)}</section><div class="sl-meta-grid"><div class="sl-meta"><small>素材状态</small><strong>${escapeHtml(materialStatus(script))}</strong></div><div class="sl-meta"><small>最近更新</small><strong>${escapeHtml(script.updated || "—")} · ${escapeHtml(script.updatedBy || script.createdBy || "—")}</strong></div><div class="sl-meta"><small>创建</small><strong>${escapeHtml(script.createdBy || "—")} · ${escapeHtml(script.createdAt || "—")}</strong></div><div class="sl-meta"><small>来源会话</small><strong>${escapeHtml(script.sessionId || "—")}</strong></div></div><section class="sl-source-block expanded"><div><span>生成文案</span></div><p>${escapeHtml(script.sourceFull)}</p></section><section class="sl-script-pick-story"><h3>脚本分镜</h3>${storyTable(script)}</section></div></aside>`;
+      detail.innerHTML = `<div class="sl-script-pick-detail-mask" data-close-script-detail></div><aside class="sl-script-pick-drawer" role="dialog" aria-modal="true" aria-label="脚本详情"><header><div><small>脚本详情</small><h2>${escapeHtml(script.name)}</h2><p>最近更新：${escapeHtml(script.updated || "—")}</p></div><button type="button" data-close-script-detail aria-label="关闭">×</button></header><div class="sl-script-pick-drawer-body"><div class="sl-meta-grid"><div class="sl-meta"><small>对应产品</small><strong>${escapeHtml(script.product)}</strong></div><div class="sl-meta"><small>画面比例</small><strong>${escapeHtml(script.ratio || "9:16")}</strong></div><div class="sl-meta"><small>规格</small><strong>${escapeHtml(specs(script))}</strong></div><div class="sl-meta"><small>素材策略</small><strong>${escapeHtml(modeText(script.materialMode))}</strong></div></div><section class="sl-meta-block"><div class="sl-meta-block-head">目标人群 <small>${personas.length} 组</small></div>${personasViewHtml(personas)}</section><div class="sl-meta-grid"><div class="sl-meta"><small>素材状态</small><strong>${escapeHtml(materialStatus(script))}</strong></div><div class="sl-meta"><small>最近更新</small><strong>${escapeHtml(script.updated || "—")} · ${escapeHtml(script.updatedBy || script.createdBy || "—")}</strong></div><div class="sl-meta"><small>创建</small><strong>${escapeHtml(script.createdBy || "—")} · ${escapeHtml(script.createdAt || "—")}</strong></div><div class="sl-meta"><small>来源会话</small><strong>${escapeHtml(script.sessionId || "—")}</strong></div></div><section class="sl-source-block expanded"><div><span>生成文案</span></div><p>${escapeHtml(script.sourceFull)}</p></section><section class="sl-script-pick-story"><h3>脚本分镜</h3>${storyTable(script, false, { showRowActions: false })}</section></div></aside>`;
       detail.addEventListener("click", event => { if (event.target.closest("[data-close-script-detail]")) detail.remove(); });
       document.body.appendChild(detail);
+      bindScriptCopyPrompt(detail);
+      bindScriptToggleRow(detail);
       requestAnimationFrame(() => detail.classList.add("show"));
     };
     const renderPicker = () => {
