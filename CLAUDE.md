@@ -5,7 +5,7 @@
 ## 核心规则（先读这个）
 
 1. **改主逻辑去 `js/modules/`，不要改 `js/app.js`**。`js/app.js` 是拆分前的旧文件，已废弃，仅作回退参考。
-2. `js/modules/` 下 10 个文件是**共享同一个全局作用域**的经典脚本，`index.html` 按顺序加载。**切分点都是顶层函数/注释边界，模块之间函数互相引用、共享 `let/const` 状态，不需要 import/export。**
+2. `js/modules/` 下 20 个文件是**共享同一个全局作用域**的经典脚本，`index.html` 按顺序加载。**切分点都是顶层函数/注释边界，模块之间函数互相引用、共享 `let/const` 状态，不需要 import/export。**
 3. 新增/修改功能时，只改它所属的那个模块文件，别动其他模块。每个模块独立 `?v=` 版本号做缓存刷新。
 4. 中文内容一律 UTF-8 读写；避免引入反引号模板串里的 `` `${` ``/`` ` ``/`\` 未转义（fragments 同理）。
 5. 改完用 `node --check` 验语法；拆分类大动作用「拼接字节一致 + 共享作用域 smoke test」验等价（见文末）。
@@ -24,7 +24,12 @@
 | 智能混剪：结构/素材/人群配置 | `js/modules/app-creation-mix-form.js` |
 | 智能混剪：分镜结果 + 行级操作 | `js/modules/app-creation-mix-script.js` |
 | 混剪任务编排：任务步骤条、结果渲染、Agent 任务提交、混剪 chat | `js/modules/app-creation-task-mix.js` |
-| 智能脚本任务：结果渲染 + 分镜行级操作 | `js/modules/app-creation-task-script.js` |
+| 智能脚本任务：结果渲染 + 分镜增删/合并/优化/诊断 + chat | `js/modules/app-creation-task-script.js` |
+| 智能脚本任务：镜头/素材替换、批量追加、重匹配弹窗 | `js/modules/app-script-shot.js` |
+| 智能脚本任务：Agent 生成/会话、事实校验、受众默认、生成结果 | `js/modules/app-agent-session.js` |
+| 资产抽屉：toast、资产计数、资产操作 | `js/modules/app-agent-assets.js` |
+| 品牌库：列表、详情与增删改查 | `js/modules/app-asset-brand.js` |
+| 产品库/详情/场景/会话管理 | `js/modules/app-asset-product.js` |
 | 经营自动化、推广配置子Tab | `js/modules/app-promotion-org.js` |
 | 文案结构库 | `js/modules/app-copy-structure.js` |
 | 人群画像 | `js/modules/app-persona-library.js` |
