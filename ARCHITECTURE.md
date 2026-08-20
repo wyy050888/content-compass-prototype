@@ -25,9 +25,9 @@
 | --- | --- |
 | 壳层、路由、跨页编排 | `js/modules/app-shell.js` |
 | 模板库结构、状态、样本、详情 | `embedded-pages/js/misc.js` |
-| 混剪结构选择 | `js/modules/app-creation-mix-form.js` 的 `mix*Structure*` 函数 |
+| 混剪结构选择 | `js/modules/app-creation-mix-catalog.js` 的 `mix*Structure*` 函数 |
 | 混剪结构决策回填 | `js/modules/app-creation-mix-script.js` 的 `syncMixStructureDecision` |
-| 模板库与主应用通信 | `embedded-pages/js/misc.js` 的 `templateBridge*` + `js/modules/app-creation-mix-form.js` 的 `mixTemplate*` |
+| 模板库与主应用通信 | `embedded-pages/js/misc.js` 的 `templateBridge*` + `js/modules/app-creation-mix-catalog.js` 的 `mixTemplate*` |
 | 全局样式 | `css/main.css`；新样式必须按功能命名并紧邻所属区块 |
 
 ## 删除前检查
