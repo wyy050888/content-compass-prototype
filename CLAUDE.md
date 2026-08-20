@@ -21,9 +21,14 @@
 | 智能文案表单：产品选择、卖点提炼、原文建议、表单校验、文案库数据 | `js/modules/app-creation-copy.js` |
 | 智能脚本 Agent：来源文案、素材库、脚本库选择器、素材弹窗 | `js/modules/app-creation-script.js` |
 | 参考视频 / 文案改写 / 聊天 | `js/modules/app-creation-reference.js` |
-| 智能混剪：结构选择、素材选择、混剪数据同步、行级操作 | `js/modules/app-creation-mix.js` |
-| 混剪任务编排：任务步骤条、结果渲染、Agent 任务提交 | `js/modules/app-creation-task.js` |
-| 经营自动化、推广配置子Tab、文案编辑/查看弹窗、组织权限、人群画像 | `js/modules/app-promotion-org.js` |
+| 智能混剪：结构/素材/人群配置 | `js/modules/app-creation-mix-form.js` |
+| 智能混剪：分镜结果 + 行级操作 | `js/modules/app-creation-mix-script.js` |
+| 混剪任务编排：任务步骤条、结果渲染、Agent 任务提交、混剪 chat | `js/modules/app-creation-task-mix.js` |
+| 智能脚本任务：结果渲染 + 分镜行级操作 | `js/modules/app-creation-task-script.js` |
+| 经营自动化、推广配置子Tab | `js/modules/app-promotion-org.js` |
+| 文案结构库 | `js/modules/app-copy-structure.js` |
+| 人群画像 | `js/modules/app-persona-library.js` |
+| 文案库渲染、文案编辑/查看弹窗 | `js/modules/app-copy-edit.js` |
 | 某个页面 HTML 片段 | `fragments/page-{page-id}.js` |
 | 产品/品牌/创作弹窗 | `fragments/_modals-core.js` |
 | 推广自动化弹窗 | `fragments/_modals-promotion.js` |
@@ -45,7 +50,7 @@
 
 ## 已知问题（改之前先知道）
 
-- `js/modules/app-promotion-org.js` 里 `copyStructureCatalog` **全项目从未定义**（只有引用）。它在真实浏览器里被 `renderCopyStructureLibrary()` 首行 `if (!copyStructureTbody) return` 提前返回掩盖（`#copyStructureTbody` DOM 不存在）。若以后要接这个「文案结构库」功能，需先补 `copyStructureCatalog` 数据定义。
+- `js/modules/app-copy-structure.js` 里 `copyStructureCatalog` **全项目从未定义**（只有引用）。它在真实浏览器里被 `renderCopyStructureLibrary()` 首行 `if (!copyStructureTbody) return` 提前返回掩盖（`#copyStructureTbody` DOM 不存在）。若以后要接这个「文案结构库」功能，需先补 `copyStructureCatalog` 数据定义。
 
 ## 拆分校验方法（改拆分结构时用）
 
