@@ -57,11 +57,22 @@
 | 全局样式：经营自动化/广告账户 | `css/main-automation.css` |
 | 全局样式：拉片入口/脚本 Agent/混剪 | `css/main-mix.css` |
 | 竞品 / 拉片 / 产品详情资产 / 脚本库 等局部样式 | `css/{competitor,lapan-detail,product-detail-assets,script-library,...}.css` |
-| 嵌入页（图片库/创作素材/外部参考/成片） | `embedded-pages/*.html` + `embedded-pages/*.css/js` |
+| 嵌入页·智能拉片入口/进度/历史/示例 | `embedded-pages/js/pull-entry.js` |
+| 嵌入页·拉片结果 复制/agent/模型/创意图 | `embedded-pages/js/pull-result-agent.js` |
+| 嵌入页·拉片结果 表单/参考/chat/人群 | `embedded-pages/js/pull-result-form.js` |
+| 嵌入页·拉片结果 任务流/文案批次/工具 | `embedded-pages/js/pull-result-task.js` |
+| 嵌入页·拉片结果 输出/资产抽屉/图预览 | `embedded-pages/js/pull-result-output.js` |
+| 嵌入页·品牌库 | `embedded-pages/js/pull-brands.js` |
+| 嵌入页·人群画像 | `embedded-pages/js/misc-persona.js` |
+| 嵌入页·AI 生图提示词库 | `embedded-pages/js/misc-prompt.js` |
+| 嵌入页·无限画布/成片/竞品/产品 | `embedded-pages/js/misc-library.js` |
+| 嵌入页·爆款内容结构 | `embedded-pages/js/misc-structure.js` |
+| 嵌入页·模板库桥接 | `embedded-pages/js/misc-structure-bridge.js` |
+| 嵌入页 HTML/CSS（图片库/创作素材/外部参考/成片） | `embedded-pages/*.html` + `embedded-pages/*.css` |
 
 ## 数据源唯一性（避免复制数据）
 
-- 内容结构（智能文案/混剪选择器）的唯一数据源是模板库 iframe（`embedded-pages/js/misc.js` 的 `contentStructures`）；`js/modules/` 里**不得维护结构名称/公式/阶段/来源的副本**，只消费桥接字段。
+- 内容结构（智能文案/混剪选择器）的唯一数据源是模板库 iframe（`embedded-pages/js/misc-structure.js` 的 `contentStructures`）；`js/modules/` 里**不得维护结构名称/公式/阶段/来源的副本**，只消费桥接字段。
 - 文案库数据唯一源：`js/modules/app-creation-copy.js` 的 `window.ContentCompassCopyLibrary`。
 - 模板库详情由模板库自身渲染，主应用只负责开关 iframe。
 

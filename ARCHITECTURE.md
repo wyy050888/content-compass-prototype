@@ -6,7 +6,7 @@
 
 | 能力 | 唯一数据源 | 选择入口 | 详情 |
 | --- | --- | --- | --- |
-| 智能文案 / 混剪结构选择 | `embedded-pages/js/misc.js` 的 `contentStructures` | `js/modules/app-creation-home.js` 的结构选择器 | 模板库 iframe 的 `clOpenDetail` |
+| 智能文案 / 混剪结构选择 | `embedded-pages/js/misc-structure.js` 的 `contentStructures` | `js/modules/app-creation-home.js` 的结构选择器 | 模板库 iframe 的 `clOpenDetail` |
 
 - 智能文案与混剪选择器只消费模板库桥接字段：`id`、`name`、`formula`、`source`、`status`、`sampleCount`、`stageNames`、`mixProfile`、`autoProductIds`、`productNames`、`scriptTypes`、`defaultForScriptTypes`。
 - `提炼失败`只留在模板库处理，不进入混剪选择器。
@@ -24,10 +24,10 @@
 | 改动类型 | 首选文件 |
 | --- | --- |
 | 壳层、路由、跨页编排 | `js/modules/app-shell.js` |
-| 模板库结构、状态、样本、详情 | `embedded-pages/js/misc.js` |
+| 模板库结构、状态、样本、详情 | `embedded-pages/js/misc-structure.js` |
 | 混剪结构选择 | `js/modules/app-creation-mix-catalog.js` 的 `mix*Structure*` 函数 |
 | 混剪结构决策回填 | `js/modules/app-creation-mix-script.js` 的 `syncMixStructureDecision` |
-| 模板库与主应用通信 | `embedded-pages/js/misc.js` 的 `templateBridge*` + `js/modules/app-creation-mix-catalog.js` 的 `mixTemplate*` |
+| 模板库与主应用通信 | `embedded-pages/js/misc-structure-bridge.js` 的 `templateBridge*` + `js/modules/app-creation-mix-catalog.js` 的 `mixTemplate*` |
 | 全局样式 | `css/main-{base,ai-create,ai-home,pull,qianchuan,pull-result,ai-agent,library,automation,mix}.css`；新样式必须按功能命名并紧邻所属区块 |
 
 ## 删除前检查
