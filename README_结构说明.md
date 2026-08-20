@@ -8,7 +8,16 @@
 内容罗盘/
 ├── index.html                       # 骨架:导航+顶栏+片段加载点+脚本引用
 ├── css/
-│   ├── main.css                    # 全局样式(263KB)
+│   ├── main-base.css               # 全局基础(reset/变量/通用)
+│   ├── main-ai-create.css          # AI 创建
+│   ├── main-ai-home.css            # AI 创作首页
+│   ├── main-pull.css               # 拉片深色/通用业务/模态框
+│   ├── main-qianchuan.css          # 千川智能投放
+│   ├── main-pull-result.css        # 智能拉片结果页
+│   ├── main-ai-agent.css           # AI 创作 Agent
+│   ├── main-library.css            # 文案/产品/品牌库
+│   ├── main-automation.css         # 经营自动化/广告账户
+│   ├── main-mix.css                # 拉片入口/脚本 Agent/混剪
 │   ├── competitor.css              # 竞品分析弹窗样式(9.6KB)
 │   └── lapan-detail.css             # 智能拉片结果页样式(作用域隔离,仅 #page-pull 生效)
 ├── js/
@@ -53,7 +62,7 @@
 
 | 需求 | 修改文件 |
 |------|---------|
-| 全局样式(颜色/间距/布局/组件) | `css/main.css` |
+| 全局样式(颜色/间距/布局/组件) | `css/main-*.css`(10 个文件,见 CLAUDE.md 速查表) |
 | 竞品分析弹窗样式 | `css/competitor.css` |
 | 智能拉片结果页样式 | `css/lapan-detail.css` |
 | 页面切换 / 通用交互逻辑 | `js/modules/`(见 CLAUDE.md 速查表) |

@@ -46,7 +46,16 @@
 | 产品/品牌/创作弹窗 | `fragments/_modals-core.js` |
 | 推广自动化弹窗 | `fragments/_modals-promotion.js` |
 | 文案/模板/脚本弹窗 | `fragments/_modals-content.js` |
-| 全局样式 | `css/main.css` |
+| 全局样式：基础 reset/变量/通用 | `css/main-base.css` |
+| 全局样式：AI 创建 | `css/main-ai-create.css` |
+| 全局样式：AI 创作首页 | `css/main-ai-home.css` |
+| 全局样式：拉片深色/通用业务/模态框 | `css/main-pull.css` |
+| 全局样式：千川智能投放 | `css/main-qianchuan.css` |
+| 全局样式：智能拉片结果页 | `css/main-pull-result.css` |
+| 全局样式：AI 创作 Agent | `css/main-ai-agent.css` |
+| 全局样式：文案/产品/品牌库 | `css/main-library.css` |
+| 全局样式：经营自动化/广告账户 | `css/main-automation.css` |
+| 全局样式：拉片入口/脚本 Agent/混剪 | `css/main-mix.css` |
 | 竞品 / 拉片 / 产品详情资产 / 脚本库 等局部样式 | `css/{competitor,lapan-detail,product-detail-assets,script-library,...}.css` |
 | 嵌入页（图片库/创作素材/外部参考/成片） | `embedded-pages/*.html` + `embedded-pages/*.css/js` |
 
