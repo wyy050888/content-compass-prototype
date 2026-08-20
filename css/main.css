@@ -4334,6 +4334,8 @@
     /* 智能脚本模式:全 3 步都隐藏右侧 chat 整列,work-pane 占满(由 app.js:8530 把 taskShell.dataset.agentType 设为 'script') */
     #page-creation .agent-task-shell[data-agent-type="script"] { grid-template-columns: minmax(0, 1fr); }
     #page-creation .agent-task-shell[data-agent-type="script"] .task-chat-pane { display: none; }
+    /* 脚本模式 chat 整列 display:none,但 openAgentTask 仍会加 chat-collapsed(两列 52px),覆盖掉折叠列避免右侧空列 */
+    #page-creation .agent-task-shell[data-agent-type="script"].chat-collapsed { grid-template-columns: minmax(0, 1fr); }
     /* 智能脚本模式:work-pane 强制占满 grid cell(原 default 是 min-content,导致右侧大片留白) */
     #page-creation .agent-task-shell[data-agent-type="script"] .task-work-pane { width: 100%; align-self: stretch; min-width: 0; }
     #page-creation .agent-task-shell[data-agent-type="script"] .task-form-scroll { width: 100%; }
@@ -7739,6 +7741,7 @@
     .mix-result-timeline { padding:15px; border:1px solid #e5e7ed; border-radius:13px; background:#fff; }.mix-result-timeline header { display:flex; align-items:center; justify-content:space-between; margin-bottom:11px; }.mix-result-timeline header strong { font-size:12px; }.mix-result-timeline header small { color:#9498a5; font-size:9px; }
     .mix-timeline-track { display:flex; gap:3px; min-height:56px; }.mix-timeline-track button { min-width:54px; border:0; border-radius:7px; color:#55456e; background:#eee9ff; font:inherit; font-size:9px; cursor:pointer; }.mix-timeline-track button:nth-child(even) { background:#e7f0f8; }.mix-timeline-track button.active { color:#fff; background:#7053d1; }.mix-timeline-track small { display:block; margin-top:4px; opacity:.75; }
     .mix-result-operations { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }.mix-result-operations span { padding:4px 7px; border-radius:6px; color:#6c6678; background:#f4f3f6; font-size:9px; }
+    .mix-result-top-right { display:flex; align-items:center; justify-content:flex-end; gap:12px; flex-wrap:wrap; }
     .mix-result-actions { display:flex; justify-content:flex-end; gap:8px; }
     @media (max-width:1280px) {
       .mix-step-panel[data-task-step="1"] { grid-template-columns:1fr; }
