@@ -149,6 +149,18 @@
             if (card) applyScriptRowVisualReset(card);
             return;
           }
+          const promptCopy = event.target.closest("[data-mix-video-prompt-copy]");
+          if (promptCopy) {
+            const idx = Number(promptCopy.dataset.mixVideoPromptCopy);
+            const textarea = taskResultHost.querySelector(`[data-mix-row-video-prompt="${idx}"]`);
+            const value = textarea?.value || "";
+            if (!value.trim()) { showToast("该段生视频提示词为空,无需复制"); return; }
+            navigator.clipboard?.writeText(value).then(
+              () => showToast("生视频提示词已复制到剪贴板"),
+              () => showToast("复制失败,请手动选择文本复制")
+            );
+            return;
+          }
           const promptReset = event.target.closest("[data-mix-video-prompt-reset]");
           if (promptReset) {
             const card = promptReset.closest("[data-script-row]");
@@ -288,14 +300,11 @@
     // 单张脚本卡片(1:1 镜像混剪 renderSingleMixCard 模板,去掉 +/已匹配素材)
     function renderSingleScriptCard(item, index, asset, opts = {}) {
       const totalRows = opts.totalRows ?? 0;
-      const isFirst = index === 0;
       const isFlagged = Boolean(item._isFlagged);
       const isInserted = Boolean(item._isInserted);
       const hasNoMaterial = !(item.materialIds?.length) && !item.materialOverride;
       const flagMark = isFlagged ? `<i class="mix-row-flag" title="本行已变更" aria-label="本行已变更"></i>` : "";
-      const deleteAttr = isFirst
-        ? ` disabled aria-disabled="true" title="首段不可删除"`
-        : ` data-mix-delete-row="${index}" title="删除第 ${index + 1} 段" aria-label="删除分镜"`;
+      const deleteAttr = ` data-mix-delete-row="${index}" title="删除第 ${index + 1} 段" aria-label="删除分镜"`;
       const showMaterial = (asset.materialMode || "depend") === "depend";
       // 依赖素材库才渲染素材预览;不依赖素材库(free)不显示素材预览
       const previewHtml = showMaterial
@@ -316,7 +325,7 @@
         : "";
       // 不依赖素材库(free)模式:可编辑的「生视频提示词」字段,替代素材预览 + 画面描述
       const promptCell = !showMaterial
-        ? `<label class="mix-stage-video-prompt-edit"><span>生视频提示词<button type="button" class="mix-visual-reset" data-mix-video-prompt-reset="${index}" title="恢复到默认生视频提示词" aria-label="回到默认">↶ 回到默认</button></span><textarea rows="14" data-mix-row-video-prompt="${index}" placeholder="描述生成视频的画面、运镜、时长等,可直接编辑">${escapeHtml(item.videoPrompt || "")}</textarea></label>`
+        ? `<label class="mix-stage-video-prompt-edit"><span>生视频提示词<button type="button" class="mix-visual-reset" data-mix-video-prompt-copy="${index}" title="复制生视频提示词" aria-label="复制">⧉ 复制</button><button type="button" class="mix-visual-reset" data-mix-video-prompt-reset="${index}" title="恢复到默认生视频提示词" aria-label="回到默认">↶ 回到默认</button></span><textarea rows="14" data-mix-row-video-prompt="${index}" placeholder="描述生成视频的画面、运镜、时长等,可直接编辑">${escapeHtml(item.videoPrompt || "")}</textarea></label>`
         : "";
       return `<article class="mix-script-card${isFlagged ? " is-flagged" : ""}${isInserted ? " is-inserted" : ""}${showMaterial ? "" : " is-no-material"}${hasNoMaterial ? " is-needs-shot" : ""}${needsRematch ? " is-needs-rematch" : ""}${isRematching ? " is-rematching" : ""}" data-script-row data-row-idx="${index}" data-asset-id="${escapeHtml(asset.id)}" data-script-orig-row="${item._origIndex}">${flagMark}<header><div><span class="mix-row-index" title="第 ${index + 1} 段">${String(index + 1).padStart(2, "0")}</span><b>${timeText}</b><strong>${escapeHtml(stage)}</strong><span>${item.duration.toFixed(1)}s</span></div><div class="mix-row-header-actions">
         <button type="button" class="mix-row-icon-btn"${deleteAttr}>
