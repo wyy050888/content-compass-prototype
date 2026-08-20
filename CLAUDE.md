@@ -68,7 +68,16 @@
 | 嵌入页·无限画布/成片/竞品/产品 | `embedded-pages/js/misc-library.js` |
 | 嵌入页·爆款内容结构 | `embedded-pages/js/misc-structure.js` |
 | 嵌入页·模板库桥接 | `embedded-pages/js/misc-structure-bridge.js` |
-| 嵌入页 HTML/CSS（图片库/创作素材/外部参考/成片） | `embedded-pages/*.html` + `embedded-pages/*.css` |
+| 嵌入页样式·基础/AI 创建 | `embedded-pages/styles-base.css` |
+| 嵌入页样式·AI 创作首页 | `embedded-pages/styles-ai-home.css` |
+| 嵌入页样式·拉片/通用业务/模态框 | `embedded-pages/styles-pull.css` |
+| 嵌入页样式·千川智能投放 | `embedded-pages/styles-qianchuan.css` |
+| 嵌入页样式·拉片结果+入口 | `embedded-pages/styles-pull-entry.css` |
+| 嵌入页样式·Agent/产品/品牌 | `embedded-pages/styles-agent.css` |
+| 嵌入页样式·智能文案/人群/画布 | `embedded-pages/styles-copy.css` |
+| 嵌入页样式·文案库/爆款结构 | `embedded-pages/styles-structure.css` |
+| 嵌入页样式·经营自动化/资产库 | `embedded-pages/styles-automation.css` |
+| 嵌入页 HTML（图片库/创作素材/外部参考/成片） | `embedded-pages/*.html` |
 
 ## 数据源唯一性（避免复制数据）
 
