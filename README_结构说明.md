@@ -5,47 +5,42 @@
 ## 目录结构
 
 ```
-内容罗盘/
+内容罗盘原型/
 ├── index.html                       # 骨架:导航+顶栏+片段加载点+脚本引用
-├── css/
-│   ├── main-base.css               # 全局基础(reset/变量/通用)
-│   ├── main-ai-create.css          # AI 创建
-│   ├── main-ai-home.css            # AI 创作首页
-│   ├── main-pull.css               # 拉片深色/通用业务/模态框
-│   ├── main-qianchuan.css          # 千川智能投放
-│   ├── main-pull-result.css        # 智能拉片结果页
-│   ├── main-ai-agent.css           # AI 创作 Agent
-│   ├── main-library.css            # 文案/产品/品牌库
-│   ├── main-automation.css         # 经营自动化/广告账户
-│   ├── main-mix.css                # 拉片入口/脚本 Agent/混剪
-│   ├── competitor.css              # 竞品分析弹窗样式(9.6KB)
-│   └── lapan-detail.css             # 智能拉片结果页样式(作用域隔离,仅 #page-pull 生效)
+├── CLAUDE.md                        # Claude 工作地图(改哪→改哪完整速查表)
+├── README_结构说明.md               # 本文档
+│
+├── css/                             # 主应用样式(共 19 个)
+│   ├── main-*.css                   # 全局样式 10 个:base / ai-create / ai-home / pull /
+│   │                                #   qianchuan / pull-result / ai-agent / library /
+│   │                                #   automation / mix
+│   └── 局部样式 9 个:competitor / lapan-detail / product-detail-assets /
+│       script-library / script-agent / embedded-library / creation-persona-picker /
+│       creation-product-picker / creation-video-picker
+│
 ├── js/
-│   ├── modules/                    # 主逻辑:页面路由+交互(拆分为10个功能模块,见 CLAUDE.md)
-│   ├── competitor.js               # 竞品分析交互逻辑
-│   ├── product-detail-assets.js    # 产品详情非媒体资产与操作
-│   ├── product-detail-media-cards.js # 产品详情媒体卡片渲染
-│   ├── product-detail-media-bridge.js # 产品详情复用视频库交互层
-│   └── lapan-detail.js              # 智能拉片结果页交互(独立 IIFE,选择器限定 #page-pull)
-├── fragments/                       # 页面/弹窗 HTML 片段
-│   ├── page-creation.js            # AI创作页
-│   ├── page-pull.js                # 智能拉片结果页(由 lapan-detail.html 替换,去顶部导航)
-│   ├── page-brands.js              # 品牌库
-│   ├── page-products.js            # 产品库
-│   ├── page-product-detail.js      # 产品详情
-│   ├── ...(共30个页面)
-│   ├── _modals-core.js             # 产品、品牌、创作等核心弹窗
-│   ├── _modals-promotion.js        # 推广自动化弹窗
-│   └── _modals-content.js          # 文案、模板、脚本弹窗
-├── embedded-pages/
-│   ├── 图片库.html                 # 图片/模板/画板/竞品共用工作台,由 entry 参数定位
-│   ├── 创作素材.html               # 创作素材页面结构
-│   ├── creation-material.css       # 创作素材样式
-│   └── creation-material.js        # 创作素材交互
+│   ├── modules/                     # 主逻辑:页面路由+交互(28 个功能模块,逐个映射见 CLAUDE.md)
+│   └── 独立交互 11 个:competitor / lapan-detail / product-detail-assets /
+│       product-detail-media-cards / product-detail-media-bridge / script-library /
+│       script-material-catalog / asset-audit / creation-persona-picker /
+│       creation-product-picker / creation-video-picker
+│
+├── fragments/                       # 页面/弹窗 HTML 片段(共 32 个)
+│   ├── page-*.js                    # 29 个页面(creation/pull/brands/products/promotion/...)
+│   └── _modals-*.js                 # 3 个弹窗:core / promotion / content
+│
+└── embedded-pages/                  # 嵌入 iframe 页(图片库/创作素材/外部参考/成片视频)
+    ├── 图片库.html / 创作素材.html / 外部参考视频.html / 成片视频.html
+    ├── styles-*.css                 # 嵌入页全局样式 9 个:base / ai-home / pull / qianchuan /
+    │                                #   pull-entry / agent / copy / structure / automation
+    ├── js/                          # 嵌入页脚本 15 个:pull-* / misc-* / business / core /
+    │                                #   image-library / finished-videos(逐个映射见 CLAUDE.md)
+    └── 局部文件:creation-material.* / external-reference.*(-overrides) /
+        finished-videos.*(-overrides) / host-embed.css
 ```
 
 ### 关于智能拉片结果页(page-pull)
-该页由独立设计稿 `lapan-detail.html` 替换而来,涉及三个文件协同:
+该页由独立设计稿拆分而来,涉及三个文件协同:
 - `fragments/page-pull.js` —— 页面 HTML(已去掉原独立页的顶部导航 `header.topbar`)
 - `css/lapan-detail.css` —— 该页专用样式,全部选择器已加 `#page-pull` 前缀,**不影响其他页面**
 - `js/lapan-detail.js` —— 该页专用交互(分镜渲染、tab 切换等),独立 IIFE 不污染全局
@@ -99,4 +94,3 @@ fragment 文件结构如下,HTML 包在反引号(`` ` ``)之间:
 - 每个 fragment 用 `document.currentScript.insertAdjacentHTML('beforebegin', ...)` 把自身 HTML 注入到 `<script src>` 标签所在位置,保证 DOM 顺序与原文件**完全一致**。
 - `js/modules/*.js` 在所有片段之后按顺序加载,此时 DOM 已完整,共享全局作用域,原逻辑无需任何改动。
 - 已通过三层校验:静态 DOM 还原(216998 字符一致)、运行时模拟执行(206496 字符一致)、文件结构核对。
-
