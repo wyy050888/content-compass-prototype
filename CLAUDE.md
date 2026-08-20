@@ -4,7 +4,7 @@
 
 ## 核心规则（先读这个）
 
-1. **改主逻辑去 `js/modules/`，不要改 `js/app.js`**。`js/app.js` 是拆分前的旧文件，已废弃，仅作回退参考。
+1. **改主逻辑去 `js/modules/`**（28 个功能模块，见下方「改哪里 → 改哪个文件」速查表）。
 2. `js/modules/` 下 28 个文件是**共享同一个全局作用域**的经典脚本，`index.html` 按顺序加载。**切分点都是顶层函数/注释边界，模块之间函数互相引用、共享 `let/const` 状态，不需要 import/export。**
 3. 新增/修改功能时，只改它所属的那个模块文件，别动其他模块。每个模块独立 `?v=` 版本号做缓存刷新。
 4. 中文内容一律 UTF-8 读写；避免引入反引号模板串里的 `` `${` ``/`` ` ``/`\` 未转义（fragments 同理）。
@@ -23,9 +23,9 @@
 | 参考视频 / 文案改写 / 聊天 | `js/modules/app-creation-reference.js` |
 | 智能混剪：素材选择与分段计算 | `js/modules/app-creation-mix-form.js` |
 | 智能混剪：分镜渲染、模式字段、产品选择 | `js/modules/app-creation-mix-render.js` |
-| 智能混剪：模板结构选择、素材卡片 | `js/modules/app-creation-mix-catalog.js` |
+| 智能混剪：模板结构选择、素材卡片 | `js/modules/app-creation-mix-catalog.js` 的 `mix*Structure*` |
 | 智能混剪：人群配置 | `js/modules/app-creation-mix-audience.js` |
-| 智能混剪：结构决策、计划同步、校验、弹窗工具 | `js/modules/app-creation-mix-script.js` |
+| 智能混剪：结构决策、计划同步、校验、弹窗工具 | `js/modules/app-creation-mix-script.js` 的 `syncMixStructureDecision` |
 | 智能混剪：分镜行级预览/重匹配/增删 | `js/modules/app-creation-mix-row.js` |
 | 智能混剪：素材选择、裁剪弹窗、行编辑 | `js/modules/app-creation-mix-trim.js` |
 | 混剪任务：Agent 事件、任务步骤条 | `js/modules/app-creation-task-mix.js` |
@@ -82,6 +82,9 @@
 ## 数据源唯一性（避免复制数据）
 
 - 内容结构（智能文案/混剪选择器）的唯一数据源是模板库 iframe（`embedded-pages/js/misc-structure.js` 的 `contentStructures`）；`js/modules/` 里**不得维护结构名称/公式/阶段/来源的副本**，只消费桥接字段。
+- 选择器只消费这些桥接字段：`id`、`name`、`formula`、`source`、`status`、`sampleCount`、`stageNames`、`mixProfile`、`autoProductIds`、`productNames`、`scriptTypes`、`defaultForScriptTypes`。`提炼失败`只留在模板库处理，不进入混剪选择器。
+- 混剪中的文案样稿可按 `mixProfile` 配置；结构名称、公式、来源、阶段、适用脚本类型和默认匹配关系均不得在 `js/modules/` 维护副本。
+- 模板库与主应用通信：`embedded-pages/js/misc-structure-bridge.js` 的 `templateBridge*` + `js/modules/app-creation-mix-catalog.js` 的 `mixTemplate*`。
 - 文案库数据唯一源：`js/modules/app-creation-copy.js` 的 `window.ContentCompassCopyLibrary`。
 - 模板库详情由模板库自身渲染，主应用只负责开关 iframe。
 
@@ -89,6 +92,15 @@
 
 - 弹层优先 `.modal-overlay + .modal-card`；已有 `.modal-backdrop + .modal` 的功能原样维护，不新增第三种写法。
 - 新页面继续放 `fragments/page-{page-id}.js`，只有导航存在对应 `data-page` 才在 `index.html` 加载。
+- 新样式按功能命名并紧邻所属区块，不放全局。
+
+## 删除前检查
+
+删除页面/组件前必须确认：
+
+1. `index.html` 未加载该片段；
+2. 没有 `data-page`、`switchPage(...)` 或事件处理器引用；
+3. 嵌入页与桥接消息未依赖该 DOM ID。
 
 ## 已知问题（改之前先知道）
 
@@ -99,10 +111,8 @@
 ```bash
 # 1) 语法完整
 for f in js/modules/*.js; do node --check "$f" || echo "FAIL $f"; done
-# 2) 拼接字节 == 原 app.js（若 app.js 仍在）
-cat js/modules/*.js | cmp - js/app.js && echo 一致
-# 3) 共享作用域 smoke test：用 node vm 按顺序 runInContext 加载 10 个模块，
-#    原 app.js 与拆分后 modules 报相同的错误即为等价（对照实验）。
+# 2) 共享作用域 smoke test：用 node vm 按顺序 runInContext 加载全部模块，
+#    各模块能正常加载、共享全局状态即视为等价。
 ```
 
 ## 版本号约定
