@@ -72,10 +72,13 @@
       // 在结果容器里显示 4 步生成中(对齐智能混剪第三步 loading)
       const resultCard = dynamicForm.querySelector("[data-script-result-card]");
       if (resultCard) {
+        const isFree = (creationContext.script?.materialMode || "depend") === "free";
         const steps = [
           { title: "AI 正在拆解产品卖点", sub: "把口播与产品事实拆为可拍摄单元…" },
           { title: "正在切分镜头分段", sub: "按总时长、运镜与景别切分每个分镜…" },
-          { title: "正在匹配推荐素材", sub: "按场景 / 景别 / 运镜匹配最佳素材…" },
+          isFree
+            ? { title: "正在生成生视频提示词", sub: "按主体 / 场景 / 镜头 / 运镜生成结构化提示词…" }
+            : { title: "正在匹配推荐素材", sub: "按场景 / 景别 / 运镜匹配最佳素材…" },
           { title: "正在校准口播时长", sub: "按语速重新分配每段口播与画面时长…" }
         ];
         resultCard.innerHTML = `<div class="mix-script-loading">
