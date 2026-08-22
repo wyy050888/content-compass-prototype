@@ -49,8 +49,8 @@
       clear("[data-original-product-name]");
       clear("[data-original-brand]");
       clear("[data-original-category]");
-      ["core", "secondary", "trust"].forEach(key => setPointEditorValues(key, [""]));
-      ["difference", "marketing", "pain", "scenes"].forEach(key => clear(`[data-field="${key}"]`));
+      ["core", "secondary", "difference", "trust"].forEach(key => setPointEditorValues(key, [""]));
+      ["marketing", "pain", "scenes"].forEach(key => clear(`[data-field="${key}"]`));
       dynamicForm.querySelectorAll(".audience-chip").forEach(chip => chip.classList.remove("active"));
     }
 
@@ -114,7 +114,7 @@
       Object.entries(fieldMap).forEach(([key, value]) => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
         if (field) field.value = value;
-        if (key === "core" || key === "secondary") setPointEditorValues(key, String(value || "").split(/[；\n]/).map(item => item.trim()).filter(Boolean));
+        if (key === "core" || key === "secondary" || key === "difference") setPointEditorValues(key, String(value || "").split(/[；\n]/).map(item => item.trim()).filter(Boolean));
       });
       const factHint = dynamicForm.querySelector("[data-product-fact-hint]");
       if (factHint) factHint.textContent = product.facts;
@@ -171,7 +171,7 @@
       Object.entries(fields).forEach(([key, value]) => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
         if (field && typeof value === "string") field.value = value;
-        if ((key === "core" || key === "secondary" || key === "trust") && typeof value === "string") setPointEditorValues(key, value.split("\n").filter(Boolean));
+        if ((key === "core" || key === "secondary" || key === "difference" || key === "trust") && typeof value === "string") setPointEditorValues(key, value.split("\n").filter(Boolean));
       });
       const wordCount = dynamicForm.querySelector("[data-word-count]");
       if (wordCount && fields.wordCount) wordCount.value = fields.wordCount;
@@ -247,7 +247,7 @@
       ["core", "secondary", "difference"].forEach(key => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
         if (field) field.value = product[key];
-        if (key === "core" || key === "secondary") setPointEditorValues(key, String(product[key] || "").split(/[；\n]/).map(item => item.trim()).filter(Boolean));
+        if (key === "core" || key === "secondary" || key === "difference") setPointEditorValues(key, String(product[key] || "").split(/[；\n]/).map(item => item.trim()).filter(Boolean));
       });
       setActiveAudience(product.audiences);
       ["marketing", "trust", "pain", "scenes"].forEach(key => {
@@ -272,7 +272,7 @@
       Object.entries(refined).forEach(([key, value]) => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
         if (field) field.value = value;
-        if (key === "core" || key === "secondary") setPointEditorValues(key, String(value).split(/[；\n]/).map(item => item.trim()).filter(Boolean));
+        if (key === "core" || key === "secondary" || key === "difference") setPointEditorValues(key, String(value).split(/[；\n]/).map(item => item.trim()).filter(Boolean));
       });
       const feedback = dynamicForm.querySelector("[data-selling-feedback]");
       if (feedback) {
@@ -431,6 +431,11 @@
         ["机身轻巧，日常取用方便", "清洁后尘杯可直接拆洗"],
         ["拍打与吸尘同步进行", "操作结束后清理步骤简单"]
       ],
+      difference: [
+        ["清洁结果可视化，操作完成后尘杯清理方便"],
+        ["拍打吸尘同步完成，比单纯吸尘更深入织物", "透明尘杯让清洁结果直接可见"],
+        ["摆脱电源线限制，床垫与沙发切换清洁更方便", "多种软装场景无需更换工具"]
+      ],
       trust: [
         ["整机质保 1 年，产品参数与包装清单可核验"],
         ["产品型号、参数与售后信息均可查询", "核心功能有真实产品资料支持"],
@@ -454,7 +459,7 @@
       if (!groups.length) return;
       originalSuggestionIndex[type] = ((originalSuggestionIndex[type] || 0) + 1) % groups.length;
       const values = groups[originalSuggestionIndex[type]];
-      if (type === "core" || type === "secondary" || type === "trust") setPointEditorValues(type, values);
+      if (type === "core" || type === "secondary" || type === "difference" || type === "trust") setPointEditorValues(type, values);
       if (type === "pain") {
         const field = dynamicForm.querySelector('[data-field="pain"]');
         if (field) field.value = values.join("\n");
@@ -997,11 +1002,18 @@
                   <textarea data-field="secondary" hidden>透明尘杯可拆卸水洗\n床垫、沙发和布艺均可使用</textarea>
                 </div>
               </div>
-              <div class="original-field advanced-field" hidden><label>差异化卖点</label><textarea data-field="difference">清洁效果可视化，操作完成后尘杯清理方便</textarea></div>
+              <div class="original-field full advanced-field" hidden>
+                <div class="original-field-head"><label>差异化卖点</label><button class="ai-refresh" type="button" data-ai-suggest="difference">AI 换一组</button></div>
+                <div class="point-editor" data-point-editor="difference" data-limit="3">
+                  <div class="point-row"><span class="point-index">●</span><input data-point-value value="清洁效果可视化，操作完成后尘杯清理方便"><span class="point-actions"><button type="button" data-point-action="up" title="上移">↑</button><button type="button" data-point-action="down" title="下移">↓</button><button type="button" data-point-action="remove" title="删除">×</button></span></div>
+                  <button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button>
+                  <textarea data-field="difference" hidden>清洁效果可视化，操作完成后尘杯清理方便</textarea>
+                </div>
+              </div>
               <div class="original-field"><label>营销场景<span class="required-star">*</span></label><div class="choice-row original-choices" data-single="marketing-scene" data-role="marketing-scene"><span class="choice-chip active">短视频带货</span><span class="choice-chip">直播间引流</span></div></div>
               <div class="original-field full"><label>营销策略</label><textarea data-field="marketing" placeholder="填写价格、优惠、赠品或活动信息；没有可留空">暑期活动，到手赠送 3 个替换滤网</textarea></div>
               <div class="original-field full advanced-field" hidden>
-                <div class="original-field-head"><label>信任背书</label><button class="ai-refresh" type="button" data-ai-suggest="trust">AI 换一组</button></div>
+                <div class="original-field-head"><label>信任背书</label></div>
                 <div class="point-editor" data-point-editor="trust" data-limit="5">
                   <div class="point-row"><span class="point-index">●</span><input data-point-value value="整机质保 1 年，产品参数与包装清单可核验"></div>
                   <button class="point-add" type="button" data-point-action="add">＋ 添加背书</button>
@@ -1120,10 +1132,17 @@
                 <div class="point-editor" data-point-editor="core" data-limit="3"><div class="point-row"><span class="point-index">●</span><input data-point-value value="大吸力深层清洁，拍打吸尘同步完成"><span class="point-actions"><button type="button" data-point-action="up" title="上移">↑</button><button type="button" data-point-action="down" title="下移">↓</button><button type="button" data-point-action="remove" title="删除">×</button></span></div><button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button><textarea data-field="core" data-required hidden>大吸力深层清洁，拍打吸尘同步完成</textarea></div>
               </div>
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>次要卖点（最多 3 个）</label><button class="ai-refresh" type="button" data-ai-suggest="secondary">AI 换一组</button></div><div class="point-editor" data-point-editor="secondary" data-limit="3"><div class="point-row"><span class="point-index">●</span><input data-point-value value="透明尘杯可拆卸水洗"></div><div class="point-row"><span class="point-index">●</span><input data-point-value value="床垫、沙发和布艺均可使用"></div><button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button><textarea data-field="secondary" hidden>透明尘杯可拆卸水洗\n床垫、沙发和布艺均可使用</textarea></div></div>
-              <div class="original-field full advanced-field" hidden><label>差异化卖点</label><textarea data-field="difference">清洁效果可视化，操作完成后尘杯清理方便</textarea></div>
+              <div class="original-field full advanced-field" hidden>
+                <div class="original-field-head"><label>差异化卖点</label><button class="ai-refresh" type="button" data-ai-suggest="difference">AI 换一组</button></div>
+                <div class="point-editor" data-point-editor="difference" data-limit="3">
+                  <div class="point-row"><span class="point-index">●</span><input data-point-value value="清洁效果可视化，操作完成后尘杯清理方便"><span class="point-actions"><button type="button" data-point-action="up" title="上移">↑</button><button type="button" data-point-action="down" title="下移">↓</button><button type="button" data-point-action="remove" title="删除">×</button></span></div>
+                  <button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button>
+                  <textarea data-field="difference" hidden>清洁效果可视化，操作完成后尘杯清理方便</textarea>
+                </div>
+              </div>
               <div class="original-field advanced-field" hidden><label>营销场景</label><div class="choice-row original-choices" data-single="marketing-scene" data-role="marketing-scene"><span class="choice-chip active">短视频带货</span><span class="choice-chip">直播间引流</span></div></div>
               <div class="original-field advanced-field" hidden><label>营销策略</label><textarea data-field="marketing" placeholder="填写当前产品真实价格、优惠、赠品或活动信息">暑期活动，到手赠送 3 个替换滤网</textarea></div>
-              <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>信任背书</label><button class="ai-refresh" type="button" data-ai-suggest="trust">AI 换一组</button></div><div class="point-editor" data-point-editor="trust" data-limit="5"><div class="point-row"><span class="point-index">●</span><input data-point-value value="整机质保 1 年，产品参数与包装清单可核验"></div><button class="point-add" type="button" data-point-action="add">＋ 添加背书</button><textarea data-field="trust" hidden>整机质保 1 年，产品参数与包装清单可核验</textarea></div></div>
+              <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>信任背书</label></div><div class="point-editor" data-point-editor="trust" data-limit="5"><div class="point-row"><span class="point-index">●</span><input data-point-value value="整机质保 1 年，产品参数与包装清单可核验"></div><button class="point-add" type="button" data-point-action="add">＋ 添加背书</button><textarea data-field="trust" hidden>整机质保 1 年，产品参数与包装清单可核验</textarea></div></div>
             </div>
           </div>
 
@@ -1185,10 +1204,17 @@
             <div class="original-group-fields">
               <div class="original-field full"><div class="original-field-head"><label>核心卖点<span class="required-star">*</span></label><button class="ai-refresh" type="button" data-ai-suggest="core">AI 换一组</button></div><div class="point-editor" data-point-editor="core" data-limit="3"><div class="point-row"><span class="point-index">●</span><input data-point-value value="大吸力深层清洁，拍打吸尘同步完成"><span class="point-actions"><button type="button" data-point-action="up">↑</button><button type="button" data-point-action="down">↓</button><button type="button" data-point-action="remove">×</button></span></div><button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button><textarea data-field="core" data-required hidden>大吸力深层清洁，拍打吸尘同步完成</textarea></div></div>
               <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>次要卖点（最多 3 个）</label><button class="ai-refresh" type="button" data-ai-suggest="secondary">AI 换一组</button></div><div class="point-editor" data-point-editor="secondary" data-limit="3"><div class="point-row"><span class="point-index">●</span><input data-point-value value="透明尘杯可拆卸水洗"></div><div class="point-row"><span class="point-index">●</span><input data-point-value value="床垫、沙发和布艺均可使用"></div><button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button><textarea data-field="secondary" hidden>透明尘杯可拆卸水洗\n床垫、沙发和布艺均可使用</textarea></div></div>
-              <div class="original-field full advanced-field" hidden><label>差异化卖点</label><textarea data-field="difference">清洁结果可视化，操作完成后尘杯清理方便</textarea></div>
+              <div class="original-field full advanced-field" hidden>
+                <div class="original-field-head"><label>差异化卖点</label><button class="ai-refresh" type="button" data-ai-suggest="difference">AI 换一组</button></div>
+                <div class="point-editor" data-point-editor="difference" data-limit="3">
+                  <div class="point-row"><span class="point-index">●</span><input data-point-value value="清洁结果可视化，操作完成后尘杯清理方便"><span class="point-actions"><button type="button" data-point-action="up" title="上移">↑</button><button type="button" data-point-action="down" title="下移">↓</button><button type="button" data-point-action="remove" title="删除">×</button></span></div>
+                  <button class="point-add" type="button" data-point-action="add">＋ 添加卖点</button>
+                  <textarea data-field="difference" hidden>清洁结果可视化，操作完成后尘杯清理方便</textarea>
+                </div>
+              </div>
               <div class="original-field"><label>营销场景<span class="required-star">*</span></label><div class="choice-row original-choices" data-single="marketing-scene" data-role="marketing-scene"><span class="choice-chip active">短视频带货</span><span class="choice-chip">直播间引流</span></div></div>
               <div class="original-field"><label>营销策略</label><textarea data-field="marketing" placeholder="填写当前真实价格、优惠、赠品或活动信息">暑期活动，到手赠送 3 个替换滤网</textarea></div>
-              <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>信任背书</label><button class="ai-refresh" type="button" data-ai-suggest="trust">AI 换一组</button></div><div class="point-editor" data-point-editor="trust" data-limit="5"><div class="point-row"><span class="point-index">●</span><input data-point-value value="整机质保 1 年，产品参数与包装清单可核验"></div><button class="point-add" type="button" data-point-action="add">＋ 添加背书</button><textarea data-field="trust" hidden>整机质保 1 年，产品参数与包装清单可核验</textarea></div></div>
+              <div class="original-field full advanced-field" hidden><div class="original-field-head"><label>信任背书</label></div><div class="point-editor" data-point-editor="trust" data-limit="5"><div class="point-row"><span class="point-index">●</span><input data-point-value value="整机质保 1 年，产品参数与包装清单可核验"></div><button class="point-add" type="button" data-point-action="add">＋ 添加背书</button><textarea data-field="trust" hidden>整机质保 1 年，产品参数与包装清单可核验</textarea></div></div>
             </div>
           </div>
 

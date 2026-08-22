@@ -64,8 +64,8 @@
       clear("[data-original-product-name]");
       clear("[data-original-brand]");
       clear("[data-original-category]");
-      ["core", "secondary", "trust"].forEach(key => setPointEditorValues(key, [""]));
-      ["difference", "marketing", "pain", "scenes"].forEach(key => clear(`[data-field="${key}"]`));
+      ["core", "secondary", "difference", "trust"].forEach(key => setPointEditorValues(key, [""]));
+      ["marketing", "pain", "scenes"].forEach(key => clear(`[data-field="${key}"]`));
       dynamicForm.querySelectorAll(".audience-chip").forEach(chip => chip.classList.remove("active"));
       const factHint = dynamicForm.querySelector("[data-product-fact-hint]");
       if (factHint) factHint.textContent = "选择产品后读取产品事实、关联资产和禁用表达";
@@ -82,8 +82,8 @@
       clear("[data-original-product-name]");
       clear("[data-original-brand]");
       clear("[data-original-category]");
-      ["core", "secondary", "trust"].forEach(key => setPointEditorValues(key, [""]));
-      ["difference", "marketing", "pain", "scenes"].forEach(key => clear(`[data-field="${key}"]`));
+      ["core", "secondary", "difference", "trust"].forEach(key => setPointEditorValues(key, [""]));
+      ["marketing", "pain", "scenes"].forEach(key => clear(`[data-field="${key}"]`));
       dynamicForm.querySelectorAll(".audience-chip").forEach(chip => chip.classList.remove("active"));
     }
 
@@ -158,7 +158,7 @@
       Object.entries(fieldMap).forEach(([key, value]) => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
         if (field) field.value = value;
-        if (key === "core" || key === "secondary") setPointEditorValues(key, String(value || "").split(/[；\n]/).map(item => item.trim()).filter(Boolean));
+        if (key === "core" || key === "secondary" || key === "difference") setPointEditorValues(key, String(value || "").split(/[；\n]/).map(item => item.trim()).filter(Boolean));
       });
       const factHint = dynamicForm.querySelector("[data-product-fact-hint]");
       if (factHint) factHint.textContent = product.facts;
@@ -270,7 +270,7 @@
       Object.entries(fields).forEach(([key, value]) => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
         if (field && typeof value === "string") field.value = value;
-        if ((key === "core" || key === "secondary" || key === "trust") && typeof value === "string") setPointEditorValues(key, value.split("\n").filter(Boolean));
+        if ((key === "core" || key === "secondary" || key === "difference" || key === "trust") && typeof value === "string") setPointEditorValues(key, value.split("\n").filter(Boolean));
       });
       const wordCount = dynamicForm.querySelector("[data-word-count]");
       if (wordCount && fields.wordCount) wordCount.value = fields.wordCount;
@@ -371,7 +371,7 @@
       ["core", "secondary", "difference"].forEach(key => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
         if (field) field.value = product[key];
-        if (key === "core" || key === "secondary") setPointEditorValues(key, String(product[key] || "").split(/[；\n]/).map(item => item.trim()).filter(Boolean));
+        if (key === "core" || key === "secondary" || key === "difference") setPointEditorValues(key, String(product[key] || "").split(/[；\n]/).map(item => item.trim()).filter(Boolean));
       });
       ["marketing", "trust", "pain", "scenes"].forEach(key => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
@@ -404,7 +404,7 @@
       Object.entries(refined).forEach(([key, value]) => {
         const field = dynamicForm.querySelector(`[data-field="${key}"]`);
         if (field) field.value = value;
-        if (key === "core" || key === "secondary") setPointEditorValues(key, String(value).split(/[；\n]/).map(item => item.trim()).filter(Boolean));
+        if (key === "core" || key === "secondary" || key === "difference") setPointEditorValues(key, String(value).split(/[；\n]/).map(item => item.trim()).filter(Boolean));
       });
       const feedback = dynamicForm.querySelector("[data-selling-feedback]");
       if (feedback) {
@@ -585,6 +585,11 @@
         ["清洁后尘杯可直接拆洗", "电源线满足卧室日常清洁范围", "收纳体积小，不占家庭空间"],
         ["操作步骤简单，拿起即可使用", "多种软装场景无需更换工具", "使用结束后清理维护方便"]
       ],
+      difference: [
+        ["清洁结果可视化，操作完成后尘杯清理方便"],
+        ["拍打吸尘同步完成，比单纯吸尘更深入织物", "透明尘杯让清洁结果直接可见"],
+        ["摆脱电源线限制，床垫与沙发切换清洁更方便", "多种软装场景无需更换工具"]
+      ],
       trust: [
         ["整机质保 1 年，产品参数与包装清单可核验", "官方渠道销售，支持正品验证", "核心功能均有真实产品资料支持"],
         ["产品型号、参数与售后信息均可查询", "公司自有产品实拍可验证使用过程", "透明尘杯可直接展示清洁结果"],
@@ -610,7 +615,7 @@
     }
 
     function readOriginalSuggestion(type) {
-      if (type === "core" || type === "secondary" || type === "trust") {
+      if (type === "core" || type === "secondary" || type === "difference" || type === "trust") {
         return [...dynamicForm.querySelectorAll(`[data-point-editor="${type}"] [data-point-value]`)].map(input => input.value.trim()).filter(Boolean);
       }
       const fieldName = type === "scene" ? "scenes" : type;
@@ -618,7 +623,7 @@
     }
 
     function applyOriginalSuggestion(type, values) {
-      if (type === "core" || type === "secondary" || type === "trust") setPointEditorValues(type, values);
+      if (type === "core" || type === "secondary" || type === "difference" || type === "trust") setPointEditorValues(type, values);
       const fieldName = type === "scene" ? "scenes" : type;
       if (type === "pain" || type === "scene") {
         const field = dynamicForm.querySelector(`[data-field="${fieldName}"]`);
@@ -657,7 +662,7 @@
       if (!groups.length || button?.disabled) return;
       const requestAgentType = activeType;
       const key = originalSuggestionKey(type, requestAgentType);
-      const label = { core:"核心卖点", secondary:"次要卖点", trust:"信任背书", pain:"人群核心痛点", scene:"使用场景" }[type] || "当前内容";
+      const label = { core:"核心卖点", secondary:"次要卖点", difference:"差异化卖点", trust:"信任背书", pain:"人群核心痛点", scene:"使用场景" }[type] || "当前内容";
       if (originalSuggestionDirty.has(key) && !confirm(`${label}已被手动修改。继续换一组将覆盖当前内容，是否继续？`)) return;
       const defaultLabel = button?.textContent || "AI 换一组";
       if (button) { button.disabled = true; button.textContent = "生成中…"; }
