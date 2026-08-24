@@ -402,7 +402,8 @@
       host.innerHTML = ids.map(id => {
         const item = findScriptMaterial(id);
         if (!item) return "";
-        return `<article class="script-selected-material" data-selected-material="${escapeHtml(id)}"><div class="script-selected-material-cover">${escapeHtml(item.id)}</div><div><strong>${escapeHtml(item.name || item.id)}</strong><small>${escapeHtml(item.scene || item.group)} · 9:16 · ${item.duration}s</small></div><button type="button" aria-label="移除 ${escapeHtml(item.name || item.id)}" data-script-remove-material="${escapeHtml(id)}">×</button></article>`;
+        const status = { ok:"已分析", pending:"待分析", analyzing:"分析中", fail:"分析失败" }[item.status] || "待分析";
+        return `<article class="script-selected-material" data-selected-material="${escapeHtml(id)}"><div class="script-selected-material-cover">${escapeHtml(item.id)}</div><div><strong>${escapeHtml(item.name || item.id)}</strong><small>${escapeHtml(item.scene || item.group)} · ${status} · 9:16 · ${item.duration}s</small></div><button type="button" aria-label="移除 ${escapeHtml(item.name || item.id)}" data-script-remove-material="${escapeHtml(id)}">×</button></article>`;
       }).join("");
       host.querySelectorAll("[data-script-remove-material]").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -690,4 +691,3 @@
       });
       render();
     }
-

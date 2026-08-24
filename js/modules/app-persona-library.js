@@ -1,9 +1,10 @@
     /* ── 人群画像模板：增删改查、编辑记录与 Agent 调用 ── */
+    const personaLibraryRules = window.ContentCompassPersonaRules;
     const personaCatalog = [
-      { id:"persona-mom", name:"精致妈妈—母婴清洁人群", brand:"轻净", category:"清洁电器", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"女性", age:"24–30", pain:["孩子接触床褥后容易敏感不适","床单刚换仍担心深层毛发碎屑"], scenes:["宝宝家庭的床垫日常清洁","毛绒玩具和布艺沙发清洁"], usage:36, updated:"08-04 15:30" },
+      { id:"persona-mom", name:"精致妈妈—母婴清洁人群", brand:"轻净", category:"清洁电器", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"女", age:"25–40", pain:["孩子接触床褥后容易敏感不适","床单刚换仍担心深层毛发碎屑"], scenes:["宝宝家庭的床垫日常清洁","毛绒玩具和布艺沙发清洁"], usage:36, updated:"08-04 15:30" },
       { id:"persona-pet", name:"精致妈妈—养宠清洁人群", brand:"轻净", category:"清洁电器", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"不限", age:"31–40", pain:["宠物掉毛进入沙发和床褥缝隙","表面清理后仍有毛发碎屑"], scenes:["宠物活动区日常清洁","换季掉毛期的床褥与沙发清洁"], usage:24, updated:"08-04 11:18" },
-      { id:"persona-whitecollar", name:"新锐白领—一人食效率人群", brand:"轻享", category:"厨房电器", product:"轻享空气炸锅 A8", audience:"新锐白领", gender:"不限", age:"24–30", pain:["下班晚，没有时间准备复杂晚餐","做饭后不想处理大量油污"], scenes:["工作日晚间一人食","朋友到家时快速准备小食"], usage:19, updated:"08-03 16:42" },
-      { id:"persona-family", name:"资深中产—品质清洁人群", brand:"净界", category:"清洁电器", product:"净界洗地机 S5", audience:"资深中产", gender:"不限", age:"31–40", pain:["全屋清洁步骤多、耗时长","厨房和卫生间的干湿垃圾难一次处理"], scenes:["周末全屋深度清洁","餐后厨房地面即时清洁"], usage:17, updated:"08-02 10:15" },
+      { id:"persona-whitecollar", name:"都市白领—一人食效率人群", brand:"轻享", category:"厨房电器", product:"轻享空气炸锅 A8", audience:"都市白领", gender:"不限", age:"22–40", pain:["下班晚，没有时间准备复杂晚餐","做饭后不想处理大量油污"], scenes:["工作日晚间一人食","朋友到家时快速准备小食"], usage:19, updated:"08-03 16:42" },
+      { id:"persona-family", name:"资深中产—品质清洁人群", brand:"净界", category:"清洁电器", product:"净界洗地机 S5", audience:"资深中产", gender:"不限", age:"35–55", pain:["全屋清洁步骤多、耗时长","厨房和卫生间的干湿垃圾难一次处理"], scenes:["周末全屋深度清洁","餐后厨房地面即时清洁"], usage:17, updated:"08-02 10:15" },
       { id:"persona-general", name:"家庭日常清洁—通用人群", brand:"", category:"", product:"", audience:"精致妈妈", gender:"不限", age:"24–40", pain:["高频清洁后仍担心遗漏深层脏污","希望减少重复清洁和工具切换"], scenes:["工作日居家快速整理","卧室与客厅等家庭高频区域日常维护"], usage:12, updated:"08-05 10:20" }
     ];
     const personaHistories = {
@@ -12,7 +13,7 @@
         { time:"08-03 17:12", user:"林运营", field:"人群核心痛点", before:"1 条", after:"2 条" }
       ],
       "persona-pet":[{ time:"08-04 11:18", user:"嗡大发", field:"使用场景", before:"1 条", after:"2 条" }],
-      "persona-whitecollar":[{ time:"08-03 16:42", user:"林运营", field:"创建画像", before:"—", after:"新锐白领—一人食效率人群" }],
+      "persona-whitecollar":[{ time:"08-03 16:42", user:"林运营", field:"创建画像", before:"—", after:"都市白领—一人食效率人群" }],
       "persona-family":[{ time:"08-02 10:15", user:"嗡大发", field:"创建画像", before:"—", after:"资深中产—品质清洁人群" }]
     };
     const personaFieldLabels = { name:"画像名称", product:"关联产品", audience:"抖音八大人群", gender:"性别", age:"年龄", pain:"人群核心痛点", scenes:"使用场景" };
@@ -47,7 +48,7 @@
       });
       personaTbody.innerHTML = rows.map(persona => `<tr data-persona-row="${persona.id}">
         <td class="persona-name-cell"><strong>${escapeHtml(persona.name)}</strong><small>更新于 ${escapeHtml(persona.updated)}</small></td>
-        <td><span class="persona-attribute-summary">${escapeHtml(persona.audience)}<br>${escapeHtml(persona.gender)} · ${escapeHtml(persona.age)}岁</span></td>
+        <td><span class="persona-attribute-summary">${escapeHtml(persona.audience)}<br>${escapeHtml(persona.gender)} · ${escapeHtml(persona.age)}</span></td>
         <td class="lib-cell-text">${escapeHtml(personaText(persona.pain))}</td>
         <td class="lib-cell-text">${escapeHtml(personaText(persona.scenes))}</td>
         <td><span class="persona-scope-tag">${escapeHtml(personaScope(persona))}</span></td>
@@ -60,6 +61,29 @@
       const row = personaModal?.querySelector(`[data-persona-form-single="${group}"]`);
       if (!row) return;
       row.querySelectorAll(":scope > button").forEach(button => button.classList.toggle("active", button.textContent.trim() === value));
+    }
+    function syncPersonaAgePlus() {
+      const max = document.getElementById("personaFormAgeMax");
+      const plus = document.getElementById("personaFormAgePlus")?.checked || false;
+      const boundary = personaModal?.querySelector("[data-persona-age-boundary-toggle]");
+      if (max) { max.hidden = plus; max.disabled = plus; }
+      const separator = personaModal?.querySelector("[data-persona-age-separator]");
+      const suffix = personaModal?.querySelector("[data-persona-age-open-suffix]");
+      if (separator) separator.hidden = plus;
+      if (suffix) suffix.hidden = !plus;
+      if (boundary) boundary.textContent = plus ? "设为区间" : "设为以上";
+    }
+    function applyPersonaDefaults(audience) {
+      const profile = personaLibraryRules?.profileFor(audience);
+      if (!profile) return;
+      setPersonaChoice("gender", profile.gender);
+      setPersonaChoice("age", "自定义");
+      const custom = personaModal?.querySelector("[data-persona-custom-age]");
+      if (custom) custom.hidden = false;
+      document.getElementById("personaFormAgeMin").value = profile.min;
+      document.getElementById("personaFormAgeMax").value = profile.max ?? "";
+      document.getElementById("personaFormAgePlus").checked = profile.plus;
+      syncPersonaAgePlus();
     }
     const personaAiSuggestions = {
       pain: [
@@ -94,19 +118,19 @@
       document.getElementById("personaFormProduct").value = personaProducts(persona)[0] || "";
       document.getElementById("personaFormPain").value = persona?.pain?.join("\n") || "";
       document.getElementById("personaFormScenes").value = persona?.scenes?.join("\n") || "";
-      setPersonaChoice("audience", persona?.audience || "精致妈妈");
-      setPersonaChoice("gender", persona?.gender || "不限");
-      const standardAges = ["18–23", "24–30", "31–40", "41–50", "51+"];
-      const age = persona?.age || "24–30";
-      const custom = !standardAges.includes(age);
-      setPersonaChoice("age", custom ? "自定义" : age);
+      const audience = persona ? personaLibraryRules.normalizeAudience(persona.audience) : "";
+      const gender = persona ? personaLibraryRules.normalizeGender(persona.gender) : "";
+      setPersonaChoice("audience", audience);
+      setPersonaChoice("gender", gender);
+      const parsedAge = personaLibraryRules.parseAge(persona?.age || "");
+      const custom = Boolean(persona && !parsedAge.preset);
+      setPersonaChoice("age", persona ? (parsedAge.preset ? parsedAge.value : "自定义") : "");
       const customFields = personaModal?.querySelector("[data-persona-custom-age]");
       if (customFields) customFields.hidden = !custom;
-      if (custom) {
-        const parts = age.split(/[–-]/);
-        document.getElementById("personaFormAgeMin").value = parts[0] || "25";
-        document.getElementById("personaFormAgeMax").value = parts[1] || "35";
-      }
+      document.getElementById("personaFormAgeMin").value = custom ? parsedAge.min : "";
+      document.getElementById("personaFormAgeMax").value = custom ? parsedAge.max : "";
+      document.getElementById("personaFormAgePlus").checked = custom ? parsedAge.plus : false;
+      syncPersonaAgePlus();
     }
     function openPersonaModal(id = "") {
       editingPersonaId = id;
@@ -120,7 +144,11 @@
     function readPersonaForm() {
       const activeText = group => personaModal?.querySelector(`[data-persona-form-single="${group}"] > button.active`)?.textContent.trim() || "";
       let age = activeText("age");
-      if (age === "自定义") age = `${document.getElementById("personaFormAgeMin").value || 18}–${document.getElementById("personaFormAgeMax").value || 35}`;
+      if (age === "自定义") age = personaLibraryRules.formatCustomAge(
+        document.getElementById("personaFormAgeMin").value.trim(),
+        document.getElementById("personaFormAgeMax").value.trim(),
+        document.getElementById("personaFormAgePlus").checked
+      );
       const product = document.getElementById("personaFormProduct").value;
       return {
         name:document.getElementById("personaFormName").value.trim(), product, linkedProducts:product ? [product] : [],
@@ -209,10 +237,18 @@
       if (!choice) return;
       const row = choice.parentElement;
       row.querySelectorAll(":scope > button").forEach(button => button.classList.toggle("active", button === choice));
+      if (row.dataset.personaFormSingle === "audience") applyPersonaDefaults(choice.textContent.trim());
       if (row.dataset.personaFormSingle === "age") {
         const custom = row.querySelector("[data-persona-custom-age]");
         if (custom) custom.hidden = !choice.matches("[data-persona-custom-age-trigger]");
       }
+    });
+    document.getElementById("personaFormAgePlus")?.addEventListener("change", syncPersonaAgePlus);
+    personaModal?.querySelector("[data-persona-age-boundary-toggle]")?.addEventListener("click", () => {
+      const plus = document.getElementById("personaFormAgePlus");
+      if (!plus) return;
+      plus.checked = !plus.checked;
+      syncPersonaAgePlus();
     });
     document.getElementById("savePersonaTemplate")?.addEventListener("click", savePersonaTemplate);
     document.querySelectorAll("[data-close-persona-history]").forEach(button => button.addEventListener("click", () => personaHistoryModal?.classList.remove("show")));
@@ -259,7 +295,7 @@
         if (!record?.id || !record.name) return;
         const [audience = "", gender = "不限"] = String(record.audience || "").split(" · ");
         const next = {
-          id:record.id, name:record.name, audience, gender,
+          id:record.id, name:record.name, audience:personaLibraryRules.normalizeAudience(audience), gender:personaLibraryRules.normalizeGender(gender),
           age:String(record.age || "").replace(/岁$/, ""),
           pain:String(record.pain || "").split("；").filter(Boolean), scenes:String(record.scene || "").split("；").filter(Boolean),
           linkedProducts:Array.isArray(record.linkedProducts) && record.linkedProducts.length ? [record.linkedProducts[0]] : (record.product ? [record.product] : []), usage:Number(record.usage || 0),
@@ -351,11 +387,13 @@
       const custom = row.querySelector(rewrite ? "[data-rewrite-custom-age]" : "[data-custom-age]");
       if (custom) custom.hidden = Boolean(standard);
       if (!standard) {
-        const parts = persona.age.split(/[–-]/);
+        const parsed = personaLibraryRules.parseAge(persona.age);
         const min = row.querySelector(rewrite ? "[data-rewrite-age-min]" : "[data-age-min]");
         const max = row.querySelector(rewrite ? "[data-rewrite-age-max]" : "[data-age-max]");
-        if (min) min.value = parts[0] || "25";
-        if (max) max.value = parts[1] || "35";
+        const plus = row.querySelector(rewrite ? "[data-rewrite-age-plus]" : "[data-age-plus]");
+        if (min) min.value = parsed.min;
+        if (max) { max.value = parsed.max; max.hidden = parsed.plus; max.disabled = parsed.plus; }
+        if (plus) plus.checked = parsed.plus;
       }
     }
     function applyPersonaToCurrentForm(picker, persona) {
@@ -369,7 +407,7 @@
         picker.querySelector("[data-persona-selected]").textContent = persona.name;
         const applied = picker.querySelector("[data-persona-applied]");
         applied.hidden = false;
-        applied.querySelector("span").textContent = `已应用：${persona.name} · ${persona.audience} · ${persona.gender} · ${persona.age}岁`;
+        applied.querySelector("span").textContent = `已应用：${persona.name} · ${persona.audience} · ${persona.gender} · ${persona.age}`;
         return;
       }
       const rewrite = picker.dataset.personaContext === "rewrite";
@@ -392,7 +430,7 @@
       picker.querySelector("[data-persona-selected]").textContent = persona.name;
       const applied = picker.querySelector("[data-persona-applied]");
       applied.hidden = false;
-      applied.querySelector("span").textContent = `已应用：${persona.name} · ${persona.audience} · ${persona.gender} · ${persona.age}岁`;
+      applied.querySelector("span").textContent = `已应用：${persona.name} · ${persona.audience} · ${persona.gender} · ${persona.age}`;
       creationContext.originalFields.personaTemplateId = persona.id;
       creationContext.originalFields.personaSnapshot = JSON.parse(JSON.stringify(persona));
       persona.usage += 1;
@@ -456,4 +494,3 @@
       }
     });
     renderPersonaLibrary();
-

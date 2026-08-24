@@ -111,7 +111,7 @@
     ];
     const overlay = document.createElement("div");
     overlay.className = "creation-video-tag-overlay";
-    overlay.innerHTML = `<section class="creation-video-tag-modal" role="dialog" aria-modal="true"><header><div><small>视频标签</small><h3>按标签筛选</h3><p>可多选标签，筛选同时满足全部标签的视频。</p></div><button type="button" data-cvp-tag-close>×</button></header><div class="creation-video-tag-body"><aside data-cvp-tag-groups></aside><main><label class="creation-video-tag-search">⌕<input type="search" placeholder="搜索标签" data-cvp-tag-search></label><div class="creation-video-tag-choices" data-cvp-tag-choices></div><div class="creation-video-tag-create"><button type="button" data-cvp-tag-new>＋ 新建标签</button><div hidden data-cvp-tag-new-row><input maxlength="20" placeholder="输入标签名称" data-cvp-tag-new-input><button type="button" data-cvp-tag-add>添加</button></div></div><small data-cvp-tag-error></small></main></div><footer><span data-cvp-tag-selected></span><div><button type="button" data-cvp-tag-clear>清空</button><button type="button" class="primary" data-cvp-tag-apply>确认筛选</button></div></footer></section>`;
+    overlay.innerHTML = `<section class="creation-video-tag-modal" role="dialog" aria-modal="true"><header><div><small>视频标签</small><h3>按标签筛选</h3><p>可多选标签，筛选同时满足全部标签的视频。此处仅筛选，不会修改视频或标签库。</p></div><button type="button" data-cvp-tag-close>×</button></header><div class="creation-video-tag-body"><aside data-cvp-tag-groups></aside><main><label class="creation-video-tag-search">⌕<input type="search" placeholder="搜索标签" data-cvp-tag-search></label><div class="creation-video-tag-choices" data-cvp-tag-choices></div></main></div><footer><span data-cvp-tag-selected></span><div><button type="button" data-cvp-tag-clear>清空</button><button type="button" class="primary" data-cvp-tag-apply>确认筛选</button></div></footer></section>`;
     document.body.appendChild(overlay);
     const state = { group:"all", query:"" };
     const render = () => {
@@ -128,13 +128,6 @@
       const choice = event.target.closest("[data-cvp-tag-choice]");
       if (choice) { const tag = choice.dataset.cvpTagChoice; draft.has(tag) ? draft.delete(tag) : draft.add(tag); return render(); }
       if (event.target.closest("[data-cvp-tag-clear]")) { draft.clear(); return render(); }
-      if (event.target.closest("[data-cvp-tag-new]")) { const row = overlay.querySelector("[data-cvp-tag-new-row]"); row.hidden = !row.hidden; row.querySelector("input").focus(); return; }
-      if (event.target.closest("[data-cvp-tag-add]")) {
-        const input = overlay.querySelector("[data-cvp-tag-new-input]"); const tag = input.value.trim(); const error = overlay.querySelector("[data-cvp-tag-error]");
-        if (!tag) { error.textContent = "请输入标签名称"; return; }
-        if (allTags.includes(tag)) { error.textContent = "已存在同名标签"; return; }
-        allTags.push(tag); currentItems[0]?.tags?.push(tag); draft.add(tag); input.value = ""; error.textContent = ""; return render();
-      }
       if (event.target.closest("[data-cvp-tag-apply]")) { pickerState.filters.tags = [...draft]; close(); renderPicker(); }
     });
     overlay.querySelector("[data-cvp-tag-search]").addEventListener("input", event => { state.query = event.target.value.trim(); render(); });

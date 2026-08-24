@@ -113,7 +113,7 @@
     }
 
     function setActiveAudience(audiences = []) {
-      const audienceMap = { "宝妈家庭": "精致妈妈", "养宠家庭": "新锐白领", "精致生活人群": "资深中产", "租房人群": "小镇青年" };
+      const audienceMap = { "宝妈家庭": "精致妈妈", "养宠家庭": "都市白领", "精致生活人群": "资深中产", "租房人群": "小镇青年" };
       const normalized = audiences.map(item => audienceMap[item] || item);
       dynamicForm.querySelectorAll(".audience-chip").forEach(chip => {
         chip.classList.toggle("active", normalized.includes(chip.textContent.trim()));
@@ -847,6 +847,58 @@
       return true;
     }
 
+    function prepareScriptMaterialsForGeneration() {
+      const materialMode = dynamicForm.querySelector('[data-role="script-material-mode"] .choice-chip.active')?.dataset.materialMode || "depend";
+      if (materialMode !== "depend") return Promise.resolve(true);
+      const selected = (window.__scriptMaterialSelected || []).map(id => findScriptMaterial(id)).filter(Boolean);
+      const pending = selected.filter(item => item.status !== "ok");
+      if (!pending.length) return Promise.resolve(true);
+      return new Promise(resolve => {
+        let settled = false;
+        let completed = 0;
+        const overlay = document.createElement("div");
+        overlay.className = "modal-overlay show";
+        overlay.innerHTML = `<div class="modal-card mix-dialog" role="dialog" aria-label="并行分析脚本素材"><header class="modal-head"><div><strong>素材分析中</strong><small>${pending.length} 条素材将并行分析，完成后再生成分镜</small></div></header><div class="mix-analysis-body"><div class="mix-analysis-summary"><strong>正在并行处理 <b data-analysis-done>0</b> / ${pending.length}</strong><span>已分析素材直接复用；分析中任务复用原进度；失败素材自动重试。</span><i><b data-analysis-progress style="width:0%"></b></i></div><div class="mix-analysis-list">${pending.map((item, index) => `<div data-analysis-item="${index}"><span>${escapeHtml(item.name || item.id)}</span><em>等待分析</em></div>`).join("")}</div></div><footer class="modal-foot"><span class="mix-dialog-foot-note">取消只停止本次等待，不移除已选素材。</span><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-analysis-cancel>取消等待</button></div></footer></div>`;
+        document.body.append(overlay);
+        const finish = value => {
+          if (settled) return;
+          settled = true;
+          resolve(value);
+        };
+        overlay.querySelector("[data-analysis-cancel]")?.addEventListener("click", () => {
+          overlay.remove();
+          showToast("已取消等待，素材选择仍保留");
+          finish(false);
+        });
+        pending.forEach((item, index) => {
+          const row = overlay.querySelector(`[data-analysis-item="${index}"]`);
+          row?.classList.add("running");
+          if (row?.querySelector("em")) row.querySelector("em").textContent = "分析中";
+          setTimeout(() => {
+            if (settled) return;
+            if (window.ScriptMaterialLib?.SCRIPT_MATERIAL_SAMPLE_META?.[item.id]) {
+              window.ScriptMaterialLib.SCRIPT_MATERIAL_SAMPLE_META[item.id].status = "ok";
+            }
+            row?.classList.remove("running");
+            row?.classList.add("done");
+            if (row?.querySelector("em")) row.querySelector("em").textContent = "已完成";
+            completed += 1;
+            overlay.querySelector("[data-analysis-done]").textContent = String(completed);
+            overlay.querySelector("[data-analysis-progress]").style.width = `${Math.round(completed / pending.length * 100)}%`;
+            if (completed === pending.length) {
+              renderScriptMaterialSummary(window.__scriptMaterialSelected || []);
+              setTimeout(() => {
+                if (settled) return;
+                overlay.remove();
+                showToast(`素材分析完成，${completed} 条素材可参与分镜匹配`);
+                finish(true);
+              }, 450);
+            }
+          }, 650 + index * 220);
+        });
+      });
+    }
+
     // 读取目标时长(正整数秒)
     function getScriptDuration() {
       return Number(dynamicForm.querySelector("[data-script-duration]")?.value || 0);
@@ -1023,4 +1075,3 @@
       }
     };
     const SCRIPT_LIBRARY_PREVIEWS = Object.fromEntries(SCRIPT_LIBRARY_ITEMS.map(i => [i.id, i.text]));
-

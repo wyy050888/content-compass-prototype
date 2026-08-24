@@ -1137,6 +1137,9 @@
     .persona-custom-age[hidden] { display:none; }
     .persona-custom-age input { width:76px !important; height:34px; }
     .persona-custom-age i { color:#81838f; font-style:normal; }
+    .persona-custom-age input[hidden] { display:none; }
+    .age-boundary-toggle { height:30px; padding:0 9px; border:1px solid #dcd9ed; border-radius:7px; background:#fff; color:#684de1; font:inherit; font-size:12px; white-space:nowrap; cursor:pointer; }
+    .age-boundary-toggle:hover { border-color:#9e8de8; background:#f7f4ff; color:#513ac9; }
     .persona-form-note { color:#8c8f9d; font-size:11px; }
     .persona-history-list { display:grid; gap:10px; }
     .persona-history-item { padding:12px 14px; border:1px solid #e9e9f0; border-radius:10px; background:#fff; }

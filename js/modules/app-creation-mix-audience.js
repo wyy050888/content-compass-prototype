@@ -2,7 +2,7 @@
     function renderMixAudienceEditor(root, names = []) {
       const box = root.querySelector("[data-mix-audience-box]");
       if (!box) return;
-      const standardAudiences = ["精致妈妈", "新锐白领", "资深中产", "Z世代", "小镇青年", "小镇中老年", "都市蓝领", "都市银发"];
+      const standardAudiences = [...window.ContentCompassPersonaRules.audiences];
       box.querySelectorAll(".mix-source-audience-chip").forEach(item => item.remove());
       names.filter(name => !standardAudiences.includes(name)).forEach(name => {
         const chip = document.createElement("button");
@@ -164,11 +164,27 @@
       if (!groupNode || groupNode.dataset.pillsBound === "true") return;
       groupNode.dataset.pillsBound = "true";
       const handler = event => {
+        const boundary = event.target.closest("[data-mix-age-boundary-toggle]");
+        if (boundary) {
+          const plus = groupNode.querySelector("[data-mix-age-plus]");
+          const max = groupNode.querySelector("[data-mix-age-max]");
+          plus.checked = !plus.checked;
+          max.hidden = plus.checked;
+          max.disabled = plus.checked;
+          const separator = groupNode.querySelector("[data-mix-age-separator]");
+          const suffix = groupNode.querySelector("[data-mix-age-open-suffix]");
+          if (separator) separator.hidden = plus.checked;
+          if (suffix) suffix.hidden = !plus.checked;
+          boundary.textContent = plus.checked ? "设为区间" : "设为以上";
+          syncMixManualPersonaSummary(root);
+          return;
+        }
         const pill = event.target.closest(".mix-persona-pill");
         if (!pill || !groupNode.contains(pill)) return;
         const row = pill.closest(".mix-persona-chips-row");
         if (!row) return;
         row.querySelectorAll(".mix-persona-pill").forEach(button => button.classList.toggle("active", button === pill));
+        if (row.matches("[data-mix-audience-chips]")) applyManualPersonaDefault(groupNode, "mix", pill.dataset.value);
         const customAge = groupNode.querySelector("[data-mix-custom-age]");
         if (customAge) customAge.hidden = pill.dataset.value !== "自定义" || row !== groupNode.querySelector("[data-mix-age-chips]");
         syncMixManualPersonaSummary(root);
@@ -267,9 +283,33 @@
       });
     }
 
-    const MIX_PERSONA_AUDIENCES = ["精致妈妈", "新锐白领", "资深中产", "Z世代", "小镇青年", "小镇中老年", "都市蓝领", "都市银发"];
-    const MIX_PERSONA_GENDERS = ["不限", "女性", "男性"];
-    const MIX_PERSONA_AGES = ["18-23", "24-30", "31-40", "41-50", "50+", "自定义"];
+    const personaRules = window.ContentCompassPersonaRules;
+    const MIX_PERSONA_AUDIENCES = [...personaRules.audiences];
+    const MIX_PERSONA_GENDERS = [...personaRules.genders];
+    const MIX_PERSONA_AGES = [...personaRules.ages];
+
+    function applyManualPersonaDefault(group, kind, audience) {
+      const profile = personaRules.profileFor(audience);
+      if (!profile) return;
+      const genderRow = group.querySelector(`[data-${kind}-gender-chips]`);
+      const ageRow = group.querySelector(`[data-${kind}-age-chips]`);
+      genderRow?.querySelectorAll(`.${kind}-persona-pill`).forEach(button => button.classList.toggle("active", button.dataset.value === profile.gender));
+      ageRow?.querySelectorAll(`.${kind}-persona-pill`).forEach(button => button.classList.toggle("active", button.dataset.value === "自定义"));
+      const custom = group.querySelector(`[data-${kind}-custom-age]`);
+      if (custom) custom.hidden = false;
+      const min = group.querySelector(`[data-${kind}-age-min]`);
+      const max = group.querySelector(`[data-${kind}-age-max]`);
+      const plus = group.querySelector(`[data-${kind}-age-plus]`);
+      if (min) min.value = profile.min;
+      if (max) { max.value = profile.max ?? ""; max.hidden = profile.plus; max.disabled = profile.plus; }
+      if (plus) plus.checked = profile.plus;
+      const boundary = group.querySelector(`[data-${kind}-age-boundary-toggle]`);
+      const separator = group.querySelector(`[data-${kind}-age-separator]`);
+      const suffix = group.querySelector(`[data-${kind}-age-open-suffix]`);
+      if (separator) separator.hidden = profile.plus;
+      if (suffix) suffix.hidden = !profile.plus;
+      if (boundary) boundary.textContent = profile.plus ? "设为区间" : "设为以上";
+    }
 
     function mixPersonaGroupTemplate(index) {
       return `<div class="mix-persona-group" data-mix-persona-group data-mix-persona-index="${index}">
@@ -281,11 +321,11 @@
           </div>
           <div class="mix-persona-field">
             <label>性别 <em class="mix-persona-required">*</em></label>
-            <div class="mix-persona-chips-row" data-mix-gender-chips>${MIX_PERSONA_GENDERS.map(value => `<button type="button" class="mix-persona-pill${value === "不限" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}</div>
+            <div class="mix-persona-chips-row" data-mix-gender-chips>${MIX_PERSONA_GENDERS.map(value => `<button type="button" class="mix-persona-pill${value === "女" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}</div>
           </div>
           <div class="mix-persona-field">
             <label>年龄 <em class="mix-persona-required">*</em></label>
-            <div class="mix-persona-chips-row" data-mix-age-chips>${MIX_PERSONA_AGES.map(value => `<button type="button" class="mix-persona-pill${value === "24-30" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}<div class="mix-persona-custom-age" data-mix-custom-age hidden><input type="number" data-mix-age-min min="1" max="99" placeholder="最小"><i>至</i><input type="number" data-mix-age-max min="1" max="99" placeholder="最大"></div></div>
+            <div class="mix-persona-chips-row" data-mix-age-chips>${MIX_PERSONA_AGES.map(value => `<button type="button" class="mix-persona-pill${value === "自定义" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}<div class="mix-persona-custom-age" data-mix-custom-age><input type="number" value="25" data-mix-age-min min="1" max="99" placeholder="起始"><i data-mix-age-separator>至</i><input type="number" value="40" data-mix-age-max min="1" max="99" placeholder="结束"><span data-mix-age-open-suffix hidden>岁及以上</span><button type="button" class="age-boundary-toggle" data-mix-age-boundary-toggle>设为以上</button><input type="checkbox" data-mix-age-plus hidden></div></div>
           </div>
           <div class="mix-persona-field mix-persona-field-text">
             <label>人群核心痛点 <button type="button" class="mix-persona-ai-action" data-mix-ai-suggest="pain">AI 换一组</button></label>
@@ -353,7 +393,8 @@
         if (age === "自定义") {
           const min = group.querySelector("[data-mix-age-min]")?.value;
           const max = group.querySelector("[data-mix-age-max]")?.value;
-          if (min && max) age = `${min}–${max}`;
+          const plus = group.querySelector("[data-mix-age-plus]")?.checked;
+          if (min && (plus || max)) age = personaRules.formatCustomAge(min, max, plus);
           else age = "";
         }
         if (audience) {
@@ -384,9 +425,9 @@
     }
 
     // 智能脚本：目标人群双模式（模板库 / 自行输入），结构与混剪一致
-    const SCRIPT_PERSONA_AUDIENCES = ["精致妈妈", "新锐白领", "资深中产", "Z世代", "小镇青年", "小镇中老年", "都市蓝领", "都市银发"];
-    const SCRIPT_PERSONA_GENDERS = ["不限", "女性", "男性"];
-    const SCRIPT_PERSONA_AGES = ["18-23", "24-30", "31-40", "41-50", "50+", "自定义"];
+    const SCRIPT_PERSONA_AUDIENCES = [...personaRules.audiences];
+    const SCRIPT_PERSONA_GENDERS = [...personaRules.genders];
+    const SCRIPT_PERSONA_AGES = [...personaRules.ages];
 
     function scriptPersonaGroupTemplate(index) {
       return `<div class="script-persona-group" data-script-persona-group data-script-persona-index="${index}">
@@ -398,11 +439,11 @@
           </div>
           <div class="script-persona-field">
             <label>性别 <em class="script-persona-required">*</em></label>
-            <div class="script-persona-chips-row" data-script-gender-chips>${SCRIPT_PERSONA_GENDERS.map(value => `<button type="button" class="script-persona-pill${value === "不限" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}</div>
+            <div class="script-persona-chips-row" data-script-gender-chips>${SCRIPT_PERSONA_GENDERS.map(value => `<button type="button" class="script-persona-pill${value === "女" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}</div>
           </div>
           <div class="script-persona-field">
             <label>年龄 <em class="script-persona-required">*</em></label>
-            <div class="script-persona-chips-row" data-script-age-chips>${SCRIPT_PERSONA_AGES.map(value => `<button type="button" class="script-persona-pill${value === "24-30" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}<div class="script-persona-custom-age" data-script-custom-age hidden><input type="number" data-script-age-min min="1" max="99" placeholder="最小"><i>至</i><input type="number" data-script-age-max min="1" max="99" placeholder="最大"></div></div>
+            <div class="script-persona-chips-row" data-script-age-chips>${SCRIPT_PERSONA_AGES.map(value => `<button type="button" class="script-persona-pill${value === "自定义" ? " active" : ""}" data-value="${value}">${value}</button>`).join("")}<div class="script-persona-custom-age" data-script-custom-age><input type="number" value="25" data-script-age-min min="1" max="99" placeholder="起始"><i data-script-age-separator>至</i><input type="number" value="40" data-script-age-max min="1" max="99" placeholder="结束"><span data-script-age-open-suffix hidden>岁及以上</span><button type="button" class="age-boundary-toggle" data-script-age-boundary-toggle>设为以上</button><input type="checkbox" data-script-age-plus hidden></div></div>
           </div>
         </div>
       </div>`;
@@ -423,6 +464,7 @@
         const groups = field.querySelector("[data-script-persona-groups]");
         if (groups && !groups.children.length) {
           groups.insertAdjacentHTML("beforeend", scriptPersonaGroupTemplate(0));
+          bindScriptPersonaGroupPills(groups.lastElementChild, root);
         }
         ensureScriptAddPersonaBinding(root);
       }
@@ -437,6 +479,7 @@
       const index = groups.querySelectorAll("[data-script-persona-group]").length;
       groups.insertAdjacentHTML("beforeend", scriptPersonaGroupTemplate(index));
       const newGroup = groups.lastElementChild;
+      bindScriptPersonaGroupPills(newGroup, root);
       newGroup?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       syncScriptManualPersonaSummary(root);
     }
@@ -453,6 +496,36 @@
       });
     }
 
+    function bindScriptPersonaGroupPills(group, root) {
+      if (!group || group.dataset.pillsBound === "true") return;
+      group.dataset.pillsBound = "true";
+      group.addEventListener("click", event => {
+        const boundary = event.target.closest("[data-script-age-boundary-toggle]");
+        if (boundary) {
+          const plus = group.querySelector("[data-script-age-plus]");
+          const max = group.querySelector("[data-script-age-max]");
+          plus.checked = !plus.checked;
+          max.hidden = plus.checked;
+          max.disabled = plus.checked;
+          const separator = group.querySelector("[data-script-age-separator]");
+          const suffix = group.querySelector("[data-script-age-open-suffix]");
+          if (separator) separator.hidden = plus.checked;
+          if (suffix) suffix.hidden = !plus.checked;
+          boundary.textContent = plus.checked ? "设为区间" : "设为以上";
+          syncScriptManualPersonaSummary(root);
+          return;
+        }
+        const pill = event.target.closest(".script-persona-pill");
+        if (!pill) return;
+        const row = pill.closest(".script-persona-chips-row");
+        row?.querySelectorAll(".script-persona-pill").forEach(button => button.classList.toggle("active", button === pill));
+        if (row?.matches("[data-script-audience-chips]")) applyManualPersonaDefault(group, "script", pill.dataset.value);
+        const custom = group.querySelector("[data-script-custom-age]");
+        if (custom && row?.matches("[data-script-age-chips]")) custom.hidden = pill.dataset.value !== "自定义";
+        syncScriptManualPersonaSummary(root);
+      });
+    }
+
     function syncScriptManualPersonaSummary(root) {
       const field = root?.querySelector?.("[data-script-audience-field]");
       if (!field) return;
@@ -466,7 +539,8 @@
         if (age === "自定义") {
           const min = group.querySelector("[data-script-age-min]")?.value;
           const max = group.querySelector("[data-script-age-max]")?.value;
-          if (min && max) age = `${min}–${max}`;
+          const plus = group.querySelector("[data-script-age-plus]")?.checked;
+          if (min && (plus || max)) age = personaRules.formatCustomAge(min, max, plus);
           else age = "";
         }
         if (audience) {
@@ -481,4 +555,3 @@
         input.dataset.personaIds = personaIds.join("|");
       }
     }
-

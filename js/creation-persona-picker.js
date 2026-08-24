@@ -33,7 +33,7 @@
         <div class="creation-persona-picker-manual" data-persona-modal-manual hidden>
           <input type="text" data-persona-modal-manual-input placeholder="输入自定义人群，如：家庭清洁爱好者">
           <button type="button" data-persona-modal-manual-add>添加人群</button>
-          <div class="creation-persona-picker-quick" data-persona-modal-quick><span>常用人群</span><button type="button" data-persona-modal-quick-value="精致妈妈">精致妈妈</button><button type="button" data-persona-modal-quick-value="新锐白领">新锐白领</button><button type="button" data-persona-modal-quick-value="养宠人群">养宠人群</button><button type="button" data-persona-modal-quick-value="家庭清洁爱好者">家庭清洁爱好者</button></div>
+          <div class="creation-persona-picker-quick" data-persona-modal-quick><span>常用人群</span><button type="button" data-persona-modal-quick-value="精致妈妈">精致妈妈</button><button type="button" data-persona-modal-quick-value="都市白领">都市白领</button><button type="button" data-persona-modal-quick-value="小镇青年">小镇青年</button><button type="button" data-persona-modal-quick-value="资深中产">资深中产</button></div>
         </div>
         <div class="creation-persona-picker-summary"><span data-persona-modal-count></span><b data-persona-modal-context></b></div>
         <div class="creation-persona-picker-grid" data-persona-modal-grid></div>

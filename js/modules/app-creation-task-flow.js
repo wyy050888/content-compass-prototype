@@ -90,10 +90,11 @@
           ? (taskEditing ? "以新任务继续创作" : "生成结果")
           : "下一步";
       }
-      next.addEventListener("click", () => {
+      next.addEventListener("click", async () => {
         if (activeType === "mix") {
           if (taskStep < 3) {
             if (!validateMixStep(taskStep)) return;
+            if (taskStep === 1 && !(await prepareMixMaterialsForNextStep())) return;
             return setTaskStep(taskStep + 1);
           }
           if (taskStep === 3) {
@@ -110,6 +111,7 @@
           }
           if (taskStep === 2) {
             if (!validateScriptStep(2)) return;
+            if (!(await prepareScriptMaterialsForGeneration())) return;
             return submitScriptGeneration();
           }
           return;

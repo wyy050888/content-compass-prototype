@@ -154,8 +154,8 @@
           return false;
         }
         const targetDuration = Number(dynamicForm.querySelector("[data-mix-target-duration]")?.value || 0);
-        if (!Number.isFinite(targetDuration) || targetDuration <= 0) {
-          setFormFeedback("请设置视频生成时长。", "error");
+        if (!Number.isInteger(targetDuration) || targetDuration < 1 || targetDuration > 600) {
+          setFormFeedback("视频生成时长请输入 1–600 的正整数。", "error");
           dynamicForm.querySelector("[data-mix-target-duration]")?.focus();
           return false;
         }
@@ -176,11 +176,7 @@
           return false;
         }
         if (!mixSelectedMaterialIds().length) {
-          setFormFeedback("请至少选择 1 个已分析的创作素材。", "error");
-          return false;
-        }
-        if (!mixSelectedMaterials().some(item => item.status === "已分析")) {
-          setFormFeedback("当前选择的素材尚未完成分析，请选择至少 1 个已分析素材。", "error");
+          setFormFeedback("请至少选择 1 个创作素材。", "error");
           return false;
         }
         syncMixPlanToConfirmation();
@@ -216,6 +212,67 @@
         }
       }
       return true;
+    }
+
+    function prepareMixMaterialsForNextStep() {
+      const cards = [...dynamicForm.querySelectorAll("[data-mix-material].selected")];
+      const pendingCards = cards.filter(card => card.dataset.mixMaterialStatus !== "ok");
+      if (!pendingCards.length) return Promise.resolve(true);
+      return new Promise(resolve => {
+        let settled = false;
+        let completed = 0;
+        const finish = value => {
+          if (settled) return;
+          settled = true;
+          resolve(value);
+        };
+        const overlay = createMixDialog({
+          title:"素材分析中",
+          subtitle:`${pendingCards.length} 条素材将并行分析，完成后再进入文案与配音`,
+          label:"并行分析混剪素材",
+          body:`<div class="mix-analysis-body"><div class="mix-analysis-summary"><strong>正在并行处理 <b data-analysis-done>0</b> / ${pendingCards.length}</strong><span>已分析素材会直接复用；分析中任务复用原进度；失败素材自动重试。</span><i><b data-analysis-progress style="width:0%"></b></i></div><div class="mix-analysis-list">${pendingCards.map((card, index) => `<div data-analysis-item="${index}"><span>${escapeHtml(card.querySelector("strong")?.textContent || card.dataset.mixMaterial)}</span><em>等待分析</em></div>`).join("")}</div></div>`,
+          footer:`<span class="mix-dialog-foot-note">取消只停止本次等待，不移除已选素材。</span><div class="modal-foot-actions"><button class="ghost-btn" type="button" data-analysis-cancel>取消等待</button></div>`
+        });
+        const progress = overlay.querySelector("[data-analysis-progress]");
+        const done = overlay.querySelector("[data-analysis-done]");
+        overlay.addEventListener("click", event => {
+          if (event.target === overlay || event.target.closest("[data-close]")) finish(false);
+        });
+        overlay.querySelector("[data-analysis-cancel]")?.addEventListener("click", () => {
+          overlay.remove();
+          showToast("已取消等待，素材选择仍保留");
+          finish(false);
+        });
+        pendingCards.forEach((card, index) => {
+          card.dataset.mixMaterialStatus = "analyzing";
+          const scene = card.dataset.mixMaterialScene || "素材";
+          const meta = card.querySelector("small");
+          if (meta) meta.textContent = `${scene} · 分析中`;
+          const row = overlay.querySelector(`[data-analysis-item="${index}"]`);
+          row?.classList.add("running");
+          if (row?.querySelector("em")) row.querySelector("em").textContent = "分析中";
+          setTimeout(() => {
+            if (settled) return;
+            card.dataset.mixMaterialStatus = "ok";
+            if (meta) meta.textContent = `${scene} · 已分析`;
+            row?.classList.remove("running");
+            row?.classList.add("done");
+            if (row?.querySelector("em")) row.querySelector("em").textContent = "已完成";
+            completed += 1;
+            if (done) done.textContent = String(completed);
+            if (progress) progress.style.width = `${Math.round(completed / pendingCards.length * 100)}%`;
+            if (completed === pendingCards.length) {
+              updateMixMaterialSummary();
+              setTimeout(() => {
+                if (settled) return;
+                overlay.remove();
+                showToast(`素材分析完成，${completed} 条素材可参与混剪`);
+                finish(true);
+              }, 450);
+            }
+          }, 650 + index * 220);
+        });
+      });
     }
 
     function createMixDialog({ title, subtitle, label, body, footer = "", wide = false }) {

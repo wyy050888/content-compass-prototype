@@ -458,6 +458,18 @@
     .modal-overlay .modal-close:hover { background: #e3e6f0; color: #2a2c3f; }
     @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes modalSlideIn { from { transform: translateY(12px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+    .mix-analysis-body { min-width:min(560px,82vw); padding:18px 20px; }
+    .mix-analysis-summary { display:flex; flex-direction:column; gap:7px; padding:14px; border-radius:11px; background:#f6f4ff; }
+    .mix-analysis-summary strong { color:#363342; font-size:14px; }
+    .mix-analysis-summary span { color:#868291; font-size:11px; }
+    .mix-analysis-summary>i { display:block; height:6px; margin-top:3px; overflow:hidden; border-radius:999px; background:#e3dff2; }
+    .mix-analysis-summary>i>b { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#8b73ea,#5e49d4); transition:width .25s ease; }
+    .mix-analysis-list { display:flex; max-height:280px; flex-direction:column; gap:7px; margin-top:12px; overflow:auto; }
+    .mix-analysis-list>div { display:flex; align-items:center; justify-content:space-between; gap:14px; min-height:38px; padding:0 11px; border:1px solid #e8e6ed; border-radius:8px; color:#55515e; background:#fff; font-size:12px; }
+    .mix-analysis-list>div em { color:#96919d; font-style:normal; }
+    .mix-analysis-list>div.running { border-color:#d7cff7; background:#fbfaff; }
+    .mix-analysis-list>div.running em { color:#6952d7; }
+    .mix-analysis-list>div.done em { color:#23825d; }
 
     /* 自定义时长 — "秒" 不换行 */
     .script-duration-custom { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 130px; padding: 6px 10px; background: #fff; border: 1px solid #d8dae5; border-radius: 8px; }
@@ -1070,6 +1082,10 @@
     #agentTaskShell[data-agent-type="mix"] .mix-persona-custom-age input { width:78px; min-height:30px; padding:0 10px; border:1px solid #dfdfe7; border-radius:9px; background:#fff; font:inherit; font-size:12px; }
     #agentTaskShell[data-agent-type="mix"] .mix-persona-custom-age input:focus { outline:none; border-color:#a995e8; box-shadow:0 0 0 2px rgba(116,87,232,.1); }
     #agentTaskShell[data-agent-type="mix"] .mix-persona-custom-age i { color:#8c909d; font-style:normal; font-size:11px; }
+    #agentTaskShell[data-agent-type="mix"] .age-boundary-toggle,
+    #agentTaskShell[data-agent-type="script"] .age-boundary-toggle { height:28px; padding:0 8px; border:1px solid #dcd9ed; border-radius:7px; background:#fff; color:#684de1; font:inherit; font-size:11px; white-space:nowrap; cursor:pointer; }
+    #agentTaskShell[data-agent-type="mix"] .age-boundary-toggle:hover,
+    #agentTaskShell[data-agent-type="script"] .age-boundary-toggle:hover { border-color:#9e8de8; background:#f7f4ff; color:#513ac9; }
     #agentTaskShell[data-agent-type="mix"] .mix-persona-field-text textarea { width:100%; min-height:78px; padding:9px 10px; border:1px solid #dfe1e9; border-radius:9px; background:#fff; color:#333642; font:inherit; font-size:12px; line-height:1.5; resize:vertical; }
     #agentTaskShell[data-agent-type="mix"] .mix-persona-field-text textarea:focus { outline:none; border-color:#a995e8; box-shadow:0 0 0 2px rgba(116,87,232,.1); }
     #agentTaskShell[data-agent-type="mix"] .mix-persona-ai-action { float:right; padding:0; border:0; color:#795eed; background:transparent; font:inherit; font-size:11px; cursor:pointer; }

@@ -46,10 +46,25 @@
       const t = String(input).trim();
       return t.length <= 38 ? t : t.slice(0, 35) + "…";
     }
-    function isValidLink(s) {
-      return /^(https?:\/\/)?(www\.)?(douyin|iesdouyin|ixigua|kuaishou|weishi)\.com\//i.test(s)
-        || /v\.douyin\.com\//i.test(s)
-        || /^[a-zA-Z0-9_\-]{8,}$/.test(s);
+    const PULL_LINK_PLATFORMS = {
+      douyin: { label:"抖音", char:"抖", domains:["douyin.com", "iesdouyin.com"] },
+      tmall: { label:"天猫", char:"猫", domains:["tmall.com"] },
+      jd: { label:"京东", char:"京", domains:["jd.com", "3.cn"] },
+      pdd: { label:"拼多多", char:"拼", domains:["pinduoduo.com", "yangkeduo.com"] }
+    };
+    function normalizeLink(raw) {
+      const value = String(raw || "").trim();
+      return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+    }
+    function detectLinkPlatform(s) {
+      try {
+        const host = new URL(normalizeLink(s)).hostname.toLowerCase();
+        return Object.keys(PULL_LINK_PLATFORMS).find(platform =>
+          PULL_LINK_PLATFORMS[platform].domains.some(domain => host === domain || host.endsWith(`.${domain}`))
+        ) || "";
+      } catch {
+        return "";
+      }
     }
     function randomDuration() {
       const m = Math.floor(Math.random() * 3) + 1;
@@ -61,8 +76,8 @@
       const p = n => String(n).padStart(2, "0");
       return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
     }
-    function sourceChar(s) { return ({ link: "抖", library: "库", finished: "成", external: "外", upload: "本" })[s] || "视"; }
-    function sourceLabel(s) { return ({ link: "抖音链接", library: "视频库", finished: "成片视频", external: "外部参考视频", upload: "本地上传" })[s] || "—"; }
+    function sourceChar(s, platform) { return s === "link" ? (PULL_LINK_PLATFORMS[platform]?.char || "链") : ({ library: "库", finished: "成", external: "外", upload: "本" })[s] || "视"; }
+    function sourceLabel(s, platform) { return s === "link" ? `${PULL_LINK_PLATFORMS[platform]?.label || "平台"}链接` : ({ library: "视频库", finished: "成片视频", external: "外部参考视频", upload: "本地上传" })[s] || "—"; }
 
     function setVideo(newV) {
       videos = [newV];   // 单视频：直接替换
@@ -88,10 +103,10 @@
         row.className = "video-row";
         row.dataset.id = v.id;
         row.innerHTML = `
-          <div class="thumb">${sourceChar(v.source)}</div>
+          <div class="thumb">${sourceChar(v.source, v.platform)}</div>
           <div class="meta">
             <strong>${fmtName(v.name)}</strong>
-            <small>${v.duration || "—"} · ${sourceLabel(v.source)}</small>
+            <small>${v.duration || "—"} · ${sourceLabel(v.source, v.platform)}</small>
             <span class="status">待解析</span>
           </div>
           <div class="row-actions">
@@ -121,25 +136,32 @@
       linkError.style.display = "none";
     });
     document.getElementById("addLinks").addEventListener("click", () => {
-      const raw = linkInput.value.trim();
-      if (!raw) {
+      const links = linkInput.value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+      if (!links.length) {
         linkInputArea.classList.add("has-error");
-        linkError.textContent = "请粘贴至少一条视频链接";
+        linkError.textContent = "请粘贴1个抖音/天猫/京东/拼多多链接";
         linkError.style.display = "block";
         return;
       }
-      const first = raw.split(/\n+/).map(s => s.trim()).filter(Boolean)[0];
-      if (!isValidLink(first)) {
+      if (links.length > 1) {
         linkInputArea.classList.add("has-error");
-        linkError.textContent = "链接格式无效";
+        linkError.textContent = "一次只能解析 1 条链接，请删除多余内容";
+        linkError.style.display = "block";
+        return;
+      }
+      const first = links[0];
+      const platform = detectLinkPlatform(first);
+      if (!platform) {
+        linkInputArea.classList.add("has-error");
+        linkError.textContent = "仅支持抖音、天猫、京东、拼多多链接";
         linkError.style.display = "block";
         return;
       }
       linkInput.value = "";
       linkInputArea.classList.remove("has-error");
       linkError.style.display = "none";
-      setVideo({ id: "v" + (nextId++), name: first, link: first, source: "link", duration: randomDuration(), status: "pending" });
-      showToast("已添加视频");
+      setVideo({ id: "v" + (nextId++), name: first, link: normalizeLink(first), source: "link", platform, duration: randomDuration(), status: "pending" });
+      showToast(`已添加${PULL_LINK_PLATFORMS[platform].label}视频`);
     });
     linkInput.addEventListener("input", () => {
       if (linkInput.value.trim()) {
@@ -249,6 +271,10 @@
     const pullUploadBar = document.getElementById("pullUploadBar");
     function uploadLocalVideo(file) {
       if (!file) return;
+      if (!(/^video\//.test(file.type) || /\.(mp4|mov|m4v)$/i.test(file.name))) {
+        showToast("仅支持 MP4、MOV、M4V 视频");
+        return;
+      }
       if (file.size > 500 * 1024 * 1024) {
         showToast("视频文件不能超过 500MB");
         return;
@@ -322,6 +348,7 @@
         id: "h" + Date.now(),
         videoName: v.name,
         videoSource: v.source,
+        videoPlatform: v.platform || "",
         duration: v.duration || "—",
         startedAt: nowText(),
         finishedAt: null,
@@ -382,7 +409,7 @@
     function cancelParse() {
       if (parseTimer) { clearTimeout(parseTimer); parseTimer = null; }
       if (currentRecord) {
-        currentRecord.status = "failed";
+        currentRecord.status = "cancelled";
         currentRecord.finishedAt = nowText();
         currentRecord.stage = "已取消";
         renderHistory();
@@ -409,6 +436,8 @@
       (document.getElementById("resultTime") || {}).textContent = rec.finishedAt || rec.startedAt || nowText();
       (document.getElementById("resultSpec") || {}).textContent = `${dur} · 9:16`;
       (document.getElementById("resultTotal") || {}).textContent = dur;
+      const resultSource = document.getElementById("resultSource");
+      if (resultSource) resultSource.textContent = sourceLabel(rec.videoSource, rec.videoPlatform);
     }
 
     /* === 历史记录（动态数组） === */
@@ -421,6 +450,7 @@
       if (s === "parsing") return '<span class="badge" style="color:#4d6bd6;background:#eaf0ff;">解析中</span>';
       if (s === "done") return '<span class="badge" style="color:#19855d;background:#e7f6ef;">已完成</span>';
       if (s === "failed") return '<span class="badge" style="color:#c14545;background:#fde7e7;">失败</span>';
+      if (s === "cancelled") return '<span class="badge" style="color:#776b55;background:#f5f0e7;">已取消</span>';
       return '<span class="badge">—</span>';
     }
 
@@ -430,14 +460,14 @@
         return;
       }
       historyBody.innerHTML = history.map(h => {
-        const char = sourceChar(h.videoSource);
+        const char = sourceChar(h.videoSource, h.videoPlatform);
         const body = h.status === "parsing"
           ? `<div class="progress-bar"><span style="width:${Math.round(h.progress || 0)}%"></span></div>
              <span class="progress-text">${Math.round(h.progress || 0)}% · ${h.stage || "准备中"}</span>`
           : `<div class="status-line">${statusBadge(h.status)}${h.status === "done" ? '<span class="meta-pill">' + h.shots + ' 个分镜</span>' : ''}</div>`;
         const action = h.status === "done"
           ? `<button class="ghost-mini" data-act="view" data-id="${h.id}">查看</button>`
-          : h.status === "failed"
+          : ["failed", "cancelled"].includes(h.status)
           ? `<button class="ghost-mini" data-act="retry" data-id="${h.id}">重试</button>`
           : `<button class="ghost-mini" data-act="cancel" data-id="${h.id}">取消</button>`;
         return `
@@ -501,11 +531,15 @@
         };
         setTimeout(tick, 200);
       } else if (btn.dataset.act === "cancel") {
-        rec.status = "failed";
-        rec.finishedAt = nowText();
-        rec.stage = "已取消";
-        renderHistory();
-        showToast("已取消");
+        if (rec === currentRecord) {
+          cancelParse();
+        } else {
+          rec.status = "cancelled";
+          rec.finishedAt = nowText();
+          rec.stage = "已取消";
+          renderHistory();
+          showToast("已取消");
+        }
       }
     });
 
@@ -515,6 +549,7 @@
         id: "h" + Date.now(),
         videoName: "示例：除螨仪主视频.mp4",
         videoSource: "link",
+        videoPlatform: "douyin",
         duration: "02:13",
         startedAt: "2026/07/28 09:12",
         finishedAt: "2026/07/28 09:13",
@@ -523,8 +558,6 @@
         stage: "完成",
         shots: 8
       };
-      history.unshift(rec);
-      renderHistory();
       fillResultMeta({ ...rec, duration: "02:13" });
       (document.getElementById("resultTime") || {}).textContent = "2026/07/28 09:12";
       switchPage("pull");
@@ -535,4 +568,3 @@
     // 拉片结果页·历史解析记录入口(若该页存在按钮)
     const _lpHistBtn = document.getElementById("lpHistoryBtn");
     if (_lpHistBtn) _lpHistBtn.addEventListener("click", openHistory);
-

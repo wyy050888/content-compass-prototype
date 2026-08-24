@@ -29,7 +29,7 @@
       store: "抖店运营",
       creator: "达人建联",
       "role-management": "角色管理",
-      "member-management": "人员管理",
+      "member-management": "用户管理",
       admin: "AI管理后台"
     };
 
@@ -253,4 +253,3 @@
     document.getElementById("assetToggle").addEventListener("click", () => setAssetPanel(true));
     document.getElementById("assetClose").addEventListener("click", () => setAssetPanel(false));
     assetBackdrop.addEventListener("click", () => setAssetPanel(false));
-

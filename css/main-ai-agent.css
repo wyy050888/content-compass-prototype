@@ -532,6 +532,8 @@
     .cl-custom-age { display:none; align-items:center; gap:7px; }
     .cl-custom-age.show { display:flex; }
     .cl-custom-age input { width:82px; height:34px; }
+    .cl-custom-age .age-boundary-toggle { height:30px; padding:0 9px; border:1px solid #dcd9ed; border-radius:7px; background:#fff; color:#684de1; font:inherit; font-size:12px; white-space:nowrap; cursor:pointer; }
+    .cl-custom-age .age-boundary-toggle:hover { border-color:#9e8de8; background:#f7f4ff; color:#513ac9; }
     .cl-create-ai-action { float:right; padding:0; border:0; color:#795eed; background:transparent; font:inherit; font-size:11px; cursor:pointer; }
     .cl-create-ai-action:hover { color:#553ac8; text-decoration:underline; }
     .cl-create-modal .modal-foot { padding:14px 22px; background:#fbfbfd; }

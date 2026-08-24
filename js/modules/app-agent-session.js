@@ -522,23 +522,12 @@
       showToast(`${activeAgent} 已完成第 ${conversationTurnCount} 轮结果`);
     }
 
-    const audienceProfileDefaults = {
-      "Z世代": { gender:"不限", min:15, max:25 },
-      "新锐白领": { gender:"不限", min:25, max:35 },
-      "精致妈妈": { gender:"女性", min:25, max:40 },
-      "资深中产": { gender:"不限", min:36, max:50 },
-      "都市蓝领": { gender:"不限", min:20, max:40 },
-      "都市银发": { gender:"不限", min:50, max:80 },
-      "小镇青年": { gender:"不限", min:18, max:30 },
-      "小镇中老年": { gender:"不限", min:45, max:80 }
-    };
     function activateAudienceDefault(name, rewrite = false) {
-      const profile = audienceProfileDefaults[name];
+      const profile = window.ContentCompassPersonaRules?.profileFor(name);
       if (!profile) return;
       const genderRow = dynamicForm.querySelector(`[data-role="${rewrite ? "rewrite-gender" : "gender"}"]`);
       const ageRow = dynamicForm.querySelector(`[data-role="${rewrite ? "rewrite-age" : "age"}"]`);
       genderRow?.querySelectorAll(".choice-chip").forEach(item => item.classList.toggle("active", item.textContent.trim() === profile.gender));
-      if (genderRow) genderRow.dataset.audienceLockedGender = profile.gender === "女性" ? "女性" : "";
       const customTrigger = ageRow?.querySelector(rewrite ? "[data-rewrite-custom-age-trigger]" : "[data-custom-age-trigger]");
       ageRow?.querySelectorAll(".choice-chip").forEach(item => item.classList.toggle("active", item === customTrigger));
       const customRange = ageRow?.querySelector(rewrite ? "[data-rewrite-custom-age]" : "[data-custom-age]");
@@ -546,11 +535,36 @@
       const minInput = ageRow?.querySelector(rewrite ? "[data-rewrite-age-min]" : "[data-age-min]");
       const maxInput = ageRow?.querySelector(rewrite ? "[data-rewrite-age-max]" : "[data-age-max]");
       if (minInput) minInput.value = profile.min;
-      if (maxInput) maxInput.value = profile.max;
+      if (maxInput) { maxInput.value = profile.max ?? ""; maxInput.hidden = profile.plus; maxInput.disabled = profile.plus; }
+      const plusInput = ageRow?.querySelector(rewrite ? "[data-rewrite-age-plus]" : "[data-age-plus]");
+      if (plusInput) plusInput.checked = profile.plus;
+      const boundary = ageRow?.querySelector(rewrite ? "[data-rewrite-age-boundary-toggle]" : "[data-age-boundary-toggle]");
+      const separator = ageRow?.querySelector(rewrite ? "[data-rewrite-age-separator]" : "[data-age-separator]");
+      const suffix = ageRow?.querySelector(rewrite ? "[data-rewrite-age-open-suffix]" : "[data-age-open-suffix]");
+      if (separator) separator.hidden = profile.plus;
+      if (suffix) suffix.hidden = !profile.plus;
+      if (boundary) boundary.textContent = profile.plus ? "设为区间" : "设为以上";
       if (rewrite) syncRewriteAudienceTarget();
     }
 
     dynamicForm.addEventListener("click", event => {
+      const ageBoundary = event.target.closest("[data-age-boundary-toggle], [data-rewrite-age-boundary-toggle]");
+      if (ageBoundary) {
+        const rewrite = ageBoundary.matches("[data-rewrite-age-boundary-toggle]");
+        const row = ageBoundary.closest(`[data-role="${rewrite ? "rewrite-age" : "age"}"]`);
+        const plus = row?.querySelector(rewrite ? "[data-rewrite-age-plus]" : "[data-age-plus]");
+        const max = row?.querySelector(rewrite ? "[data-rewrite-age-max]" : "[data-age-max]");
+        if (!plus) return;
+        plus.checked = !plus.checked;
+        if (max) { max.hidden = plus.checked; max.disabled = plus.checked; }
+        const separator = row?.querySelector(rewrite ? "[data-rewrite-age-separator]" : "[data-age-separator]");
+        const suffix = row?.querySelector(rewrite ? "[data-rewrite-age-open-suffix]" : "[data-age-open-suffix]");
+        if (separator) separator.hidden = plus.checked;
+        if (suffix) suffix.hidden = !plus.checked;
+        ageBoundary.textContent = plus.checked ? "设为区间" : "设为以上";
+        if (rewrite) syncRewriteAudienceTarget();
+        return;
+      }
       if (event.target.closest("[data-open-creation-product-picker]")) {
         openCreationProductPicker();
         return;
@@ -784,10 +798,6 @@
       if (!chip) return;
       const row = chip.closest(".choice-row");
       if (row?.dataset.single) {
-        if ((row.dataset.role === "gender" || row.dataset.role === "rewrite-gender") && row.dataset.audienceLockedGender === "女性" && chip.textContent.trim() !== "女性") {
-          showToast("“精致妈妈”的核心性别为女性，不支持改为男性或不限");
-          return;
-        }
         row.querySelectorAll(".choice-chip").forEach(item => item.classList.remove("active"));
         chip.classList.add("active");
         if (row.dataset.single === "rewrite-method") refreshRewriteSetting();
@@ -940,4 +950,3 @@
     }));
     window.addEventListener("resize", positionNewCreatePopover);
     document.querySelector("#page-creation .conversation-panel")?.addEventListener("scroll", positionNewCreatePopover, { passive:true });
-

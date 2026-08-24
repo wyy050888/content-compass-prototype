@@ -30,7 +30,7 @@
   <div class="summary-col">
     <div class="summary-head">
       <span class="name">下载.mp4</span>
-      <span class="meta"><span>视频时长&nbsp;&nbsp;2分13秒</span><span>拆解时间&nbsp;&nbsp;2026/07/28 09:12</span></span>
+      <span class="meta"><span>视频时长&nbsp;&nbsp;2分13秒</span><span>来源&nbsp;&nbsp;<b id="resultSource">抖音链接</b></span><span>拆解时间&nbsp;&nbsp;2026/07/28 09:12</span></span>
     </div>
     <div class="summary-grid">
 
@@ -123,10 +123,14 @@
     <div class="tab active">分镜分析</div>
     <div class="tab">画面逐帧</div>
   </div>
-  <button class="btn-download">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 20h16"/></svg>
-    一键下载
-  </button>
+  <div class="pull-result-actions">
+    <button class="btn-secondary-download" id="downloadPullSource" type="button">下载原视频</button>
+    <button class="btn-download" id="downloadPullResult" type="button">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 20h16"/></svg>
+      下载拆解结果
+    </button>
+    <button class="btn-save-structure" id="savePullStructure" type="button">保存为爆款内容结构</button>
+  </div>
 </div>
 
 <!-- 分镜分析表 -->

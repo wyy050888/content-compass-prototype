@@ -22,8 +22,8 @@
             <!-- 链接添加(一次 1 个) -->
             <div class="source-panel" data-panel="link">
               <div class="pull-input-area" id="linkInputArea">
-                <textarea id="linkInput" placeholder="请粘贴 1 条抖音视频链接（一次解析 1 个）"></textarea>
-                <div class="link-error" id="linkError">请填写有效的抖音视频链接</div>
+                <textarea id="linkInput" placeholder="请粘贴1个抖音/天猫/京东/拼多多链接"></textarea>
+                <div class="link-error" id="linkError">请填写有效的视频链接</div>
                 <div class="pull-input-foot">
                   <button class="ghost-mini" id="clearLinks">清空</button>
                   <button class="primary-mini" id="addLinks">确定添加</button>

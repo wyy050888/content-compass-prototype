@@ -367,7 +367,7 @@
       const draft = new Set(clVideoTagFilters[kind]);
       const modal = document.createElement("div");
       modal.className = "cl-tag-filter-overlay";
-      modal.innerHTML = `<section class="cl-tag-filter-modal" role="dialog" aria-modal="true"><header><div><small>视频标签</small><h3>按标签筛选</h3><p>可多选标签，筛选同时满足全部标签的视频。</p></div><button type="button" data-cl-tag-close>×</button></header><div class="cl-tag-filter-body"><aside data-cl-tag-groups></aside><main><label class="cl-tag-filter-search">⌕<input type="search" placeholder="搜索标签" data-cl-tag-search></label><div class="cl-tag-filter-choices" data-cl-tag-choices></div><div class="cl-tag-filter-create"><button type="button" data-cl-tag-create-toggle>＋ 新建标签</button><div hidden data-cl-tag-create-row><input type="text" maxlength="20" placeholder="输入标签名称" data-cl-tag-new-input><button type="button" data-cl-tag-create>添加</button></div></div><small data-cl-tag-error></small></main></div><footer><span data-cl-tag-selected>已选 0 个标签</span><div><button type="button" data-cl-tag-clear>清空</button><button class="primary" type="button" data-cl-tag-apply>确认筛选</button></div></footer></section>`;
+      modal.innerHTML = `<section class="cl-tag-filter-modal" role="dialog" aria-modal="true"><header><div><small>视频标签</small><h3>按标签筛选</h3><p>可多选标签，筛选同时满足全部标签的视频。此处仅筛选，不会修改视频或标签库。</p></div><button type="button" data-cl-tag-close>×</button></header><div class="cl-tag-filter-body"><aside data-cl-tag-groups></aside><main><label class="cl-tag-filter-search">⌕<input type="search" placeholder="搜索标签" data-cl-tag-search></label><div class="cl-tag-filter-choices" data-cl-tag-choices></div></main></div><footer><span data-cl-tag-selected>已选 0 个标签</span><div><button type="button" data-cl-tag-clear>清空</button><button class="primary" type="button" data-cl-tag-apply>确认筛选</button></div></footer></section>`;
       document.body.appendChild(modal);
       const state = { group:"all", query:"" };
       const tags = () => [...new Set(catalog.flatMap(video => video.tags || []))];
@@ -386,13 +386,6 @@
         const choice = event.target.closest("[data-cl-tag-choice]");
         if (choice) { const tag = choice.dataset.clTagChoice; draft.has(tag) ? draft.delete(tag) : draft.add(tag); return render(); }
         if (event.target.closest("[data-cl-tag-clear]")) { draft.clear(); return render(); }
-        if (event.target.closest("[data-cl-tag-create-toggle]")) { const row = modal.querySelector("[data-cl-tag-create-row]"); row.hidden = !row.hidden; if (!row.hidden) row.querySelector("input").focus(); return; }
-        if (event.target.closest("[data-cl-tag-create]")) {
-          const input = modal.querySelector("[data-cl-tag-new-input]"); const tag = input.value.trim(); const error = modal.querySelector("[data-cl-tag-error]");
-          if (!tag) { error.textContent = "请输入标签名称"; return; }
-          if (tags().includes(tag)) { error.textContent = "已存在同名标签"; return; }
-          catalog[0]?.tags?.push(tag); clVideoTagGroupMap[kind][tag] = state.group === "all" ? "content" : state.group; draft.add(tag); input.value = ""; error.textContent = ""; return render();
-        }
         if (event.target.closest("[data-cl-tag-apply]")) { clVideoTagFilters[kind] = [...draft]; clRenderVideoSource(); close(); }
       });
       modal.querySelector("[data-cl-tag-search]").addEventListener("input", event => { state.query = event.target.value.trim(); render(); });

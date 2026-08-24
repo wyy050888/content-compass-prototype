@@ -223,4 +223,131 @@ tabs.forEach((t, idx) => {
     if (typeof switchPage === "function") switchPage("pull-entry");
   });
 
+// ===== 下载与保存爆款内容结构 =====
+document.getElementById("downloadPullResult")?.addEventListener("click", () => {
+  const payload = {
+    source: document.getElementById("resultSource")?.textContent || "—",
+    formula: document.querySelector("#page-pull .sum-row .val")?.textContent?.trim() || "",
+    shots: shots.map(item => ({ no:item.no, time:item.time, tags:item.tags, desc:item.desc, script:item.script }))
+  };
+  const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type:"application/json" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "爆款拆解结果.json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 800);
+  if (typeof showToast === "function") showToast("拆解结果已开始下载");
+});
+
+document.getElementById("downloadPullSource")?.addEventListener("click", () => {
+  if (typeof showToast === "function") showToast("原视频下载已开始（演示）");
+});
+
+const structureDraft = {
+  name:"除螨仪结果直给型内容结构",
+  formula:"结果冲击 → 痛点解释 → 产品演示 → 多场景证明 → 行动引导",
+  savedSignature:"",
+  stages:[
+    { name:"结果冲击", template:"先展示可视化结果，再提出反常识问题。", visual:"开场使用结果特写，主体居中，前 3 秒完成冲击。", edit:"快速切入，重点词与结果画面同步。" },
+    { name:"痛点解释", template:"说明问题为什么容易被忽略，以及会影响谁。", visual:"生活场景与脏污细节交替，保留证据画面。", edit:"中快节奏，按语义切分镜头。" },
+    { name:"产品演示", template:"用真实操作展示解决过程，不堆砌参数。", visual:"全景交代动作，特写展示关键功能与结果。", edit:"动作连续，功能点与口播逐项对齐。" },
+    { name:"行动引导", template:"总结适用人群和场景，引导查看完整信息。", visual:"产品定帧、品牌露出和清晰行动入口。", edit:"节奏收束，尾帧保留足够阅读时间。" }
+  ]
+};
+
+function structureEscape(value) {
+  return String(value || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
+
+function structureStageMarkup(stage, index, total) {
+  return `<article class="pull-structure-stage" data-structure-stage="${index}"><header><div><span>阶段 ${index + 1}</span><strong>${structureEscape(stage.name || "未命名阶段")}</strong></div><div><button type="button" data-stage-move="up" ${index === 0 ? "disabled" : ""}>上移</button><button type="button" data-stage-move="down" ${index === total - 1 ? "disabled" : ""}>下移</button><button class="danger" type="button" data-stage-delete ${total <= 2 ? "disabled" : ""}>删除</button></div></header><div class="pull-structure-stage-grid"><label>阶段名称 *<input value="${structureEscape(stage.name)}" maxlength="60" data-stage-field="name"></label><label class="wide">表达模板 *<textarea maxlength="300" data-stage-field="template">${structureEscape(stage.template)}</textarea></label><label>画面要求 *<textarea maxlength="300" data-stage-field="visual">${structureEscape(stage.visual)}</textarea></label><label>剪辑要求 *<textarea maxlength="300" data-stage-field="edit">${structureEscape(stage.edit)}</textarea></label></div><small>来源证据：分镜 ${Math.min(index + 1, shots.length)} · ${structureEscape(shots[Math.min(index, shots.length - 1)]?.time || "—")} · 只读证据摘要</small></article>`;
+}
+
+function structureSignature() {
+  return JSON.stringify({ name:structureDraft.name.trim(), formula:structureDraft.formula.trim(), stages:structureDraft.stages });
+}
+
+function syncStructureSaveState(modal) {
+  const saved = structureDraft.savedSignature && structureDraft.savedSignature === structureSignature();
+  const footerSave = modal.querySelector("[data-structure-save]");
+  const entry = document.getElementById("savePullStructure");
+  if (footerSave) {
+    footerSave.textContent = saved ? "已保存" : (structureDraft.savedSignature ? "保存更新" : "保存到模板库");
+    footerSave.disabled = Boolean(saved);
+  }
+  if (entry) entry.textContent = saved ? "已保存" : (structureDraft.savedSignature ? "保存更新" : "保存为爆款内容结构");
+}
+
+function renderStructureStages(modal) {
+  modal.querySelector("[data-structure-stage-list]").innerHTML = structureDraft.stages.map((stage, index) => structureStageMarkup(stage, index, structureDraft.stages.length)).join("");
+  syncStructureSaveState(modal);
+}
+
+function openStructureEditor() {
+  const overlay = document.createElement("div");
+  overlay.className = "pull-structure-overlay";
+  overlay.innerHTML = `<section class="pull-structure-modal" role="dialog" aria-modal="true" aria-label="保存为爆款内容结构"><header class="pull-structure-head"><div><span>爆款拆解沉淀</span><h3>保存为爆款内容结构</h3><p>只沉淀结构、节奏和镜头方法，不复制参考视频原句与画面。</p></div><button type="button" data-structure-close>×</button></header><div class="pull-structure-body"><div class="pull-structure-base"><label>结构名称 *<input data-structure-name maxlength="100" value="${structureEscape(structureDraft.name)}"></label><label>内容公式 *<textarea data-structure-formula maxlength="500">${structureEscape(structureDraft.formula)}</textarea></label><div><span>来源</span><strong>爆款拆解沉淀 · 当前解析结果</strong></div></div><div class="pull-structure-stage-title"><div><strong>结构阶段</strong><small>至少保留 2 个完整阶段；来源证据只读</small></div><button type="button" data-stage-add>＋ 新增阶段</button></div><div class="pull-structure-stage-list" data-structure-stage-list></div><div class="pull-structure-error" data-structure-error hidden></div></div><footer><span>首次保存创建资产，后续保存更新同一资产</span><div><button type="button" data-structure-close>取消</button><button class="primary" type="button" data-structure-save>保存到模板库</button></div></footer></section>`;
+  document.body.append(overlay);
+  renderStructureStages(overlay);
+  const close = () => overlay.remove();
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay || event.target.closest("[data-structure-close]")) return close();
+    if (event.target.closest("[data-stage-add]")) {
+      structureDraft.stages.push({ name:"新阶段", template:"", visual:"", edit:"" });
+      renderStructureStages(overlay);
+      overlay.querySelector(`[data-structure-stage="${structureDraft.stages.length - 1}"]`)?.scrollIntoView({ behavior:"smooth", block:"center" });
+      return;
+    }
+    const stageNode = event.target.closest("[data-structure-stage]");
+    if (!stageNode) return;
+    const index = Number(stageNode.dataset.structureStage);
+    if (event.target.closest("[data-stage-delete]")) {
+      if (structureDraft.stages.length <= 2) return;
+      structureDraft.stages.splice(index, 1);
+      renderStructureStages(overlay);
+      return;
+    }
+    const move = event.target.closest("[data-stage-move]")?.dataset.stageMove;
+    if (move) {
+      const target = move === "up" ? index - 1 : index + 1;
+      if (target < 0 || target >= structureDraft.stages.length) return;
+      [structureDraft.stages[index], structureDraft.stages[target]] = [structureDraft.stages[target], structureDraft.stages[index]];
+      renderStructureStages(overlay);
+    }
+  });
+  overlay.addEventListener("input", event => {
+    if (event.target.matches("[data-structure-name]")) structureDraft.name = event.target.value;
+    if (event.target.matches("[data-structure-formula]")) structureDraft.formula = event.target.value;
+    const field = event.target.dataset.stageField;
+    const stageNode = event.target.closest("[data-structure-stage]");
+    if (field && stageNode) {
+      const stage = structureDraft.stages[Number(stageNode.dataset.structureStage)];
+      if (stage) stage[field] = event.target.value;
+      if (field === "name") stageNode.querySelector("header strong").textContent = event.target.value.trim() || "未命名阶段";
+    }
+    syncStructureSaveState(overlay);
+  });
+  overlay.querySelector("[data-structure-save]").addEventListener("click", () => {
+    const error = overlay.querySelector("[data-structure-error]");
+    const invalidStage = structureDraft.stages.findIndex(stage => !stage.name.trim() || !stage.template.trim() || !stage.visual.trim() || !stage.edit.trim());
+    let message = "";
+    if (!structureDraft.name.trim() || structureDraft.name.trim().length > 100) message = "请输入 1～100 个字符的结构名称。";
+    else if (!structureDraft.formula.trim() || structureDraft.formula.trim().length > 500) message = "请输入 1～500 个字符的内容公式。";
+    else if (structureDraft.stages.length < 2) message = "至少保留 2 个结构阶段。";
+    else if (invalidStage >= 0) message = `请补全阶段 ${invalidStage + 1} 的名称、表达模板、画面要求和剪辑要求。`;
+    if (message) {
+      error.hidden = false;
+      error.textContent = message;
+      if (invalidStage >= 0) overlay.querySelector(`[data-structure-stage="${invalidStage}"]`)?.scrollIntoView({ behavior:"smooth", block:"center" });
+      return;
+    }
+    error.hidden = true;
+    structureDraft.savedSignature = structureSignature();
+    syncStructureSaveState(overlay);
+    if (typeof showToast === "function") showToast("已保存到模板库 · 爆款内容结构");
+  });
+}
+
+document.getElementById("savePullStructure")?.addEventListener("click", openStructureEditor);
+
 })();

@@ -1,4 +1,5 @@
     // ── 文案库 ──
+    const copyPersonaRules = window.ContentCompassPersonaRules;
     const clData = [
       { id:"cl1", text:"99块钱！苏泊尔这个除螨仪，能把床垫里的螨虫全吸出来！以前 Cleaning 靠晒，现在三分钟吸完，孩子过敏少了。", product:"除螨仪", crowd:"宝妈/家庭", structure:[{t:"hook",l:"钩子"},{t:"pain",l:"痛点"},{t:"sell",l:"卖点"},{t:"cta",l:"逼单"}], chars:186, duration:32, updated:"08-04 14:23:05", source:"AI" },
       { id:"cl2", text:"别再用烤箱预热了！苏泊尔空气炸锅，200度15分钟，鸡翅外酥里嫩，不用一滴油，少吃油不长胖。", product:"空气炸锅", crowd:"年轻白领", structure:[{t:"compare",l:"对比"},{t:"sell",l:"卖点"},{t:"cta",l:"逼单"}], chars:154, duration:28, updated:"08-04 11:07:42", source:"AI" },
@@ -211,18 +212,50 @@
     }
 
     function clSetEditAge(value) {
-      const age = value === "51+" ? "50+" : value;
-      const standard = [...clEditModal.querySelectorAll("[data-cl-age]")].some(button => button.dataset.clAge === age);
+      const parsed = copyPersonaRules.parseAge(value);
+      const age = parsed.value;
+      const standard = parsed.preset;
       clSetEditSingleChoice("age", standard ? age : (age ? "custom" : ""));
       const custom = clEditModal.querySelector("[data-cl-custom-age]");
       custom.hidden = standard || !age;
       if (!standard && age) {
-        const [min, max] = age.split(/[–-]/);
-        document.getElementById("clEditAgeMin").value = min || "";
-        document.getElementById("clEditAgeMax").value = max || "";
+        document.getElementById("clEditAgeMin").value = parsed.min;
+        document.getElementById("clEditAgeMax").value = parsed.max;
+        document.getElementById("clEditAgePlus").checked = parsed.plus;
       } else {
         document.getElementById("clEditAgeMin").value = "";
         document.getElementById("clEditAgeMax").value = "";
+        document.getElementById("clEditAgePlus").checked = false;
+      }
+      syncCopyAgePlus("edit");
+    }
+
+    function syncCopyAgePlus(mode) {
+      const edit = mode === "edit";
+      const plus = document.getElementById(edit ? "clEditAgePlus" : "clAgePlus")?.checked || false;
+      const max = document.getElementById(edit ? "clEditAgeMax" : "clAgeMax");
+      if (max) { max.hidden = plus; max.disabled = plus; }
+      const toggle = (edit ? clEditModal : clCreateModal)?.querySelector(edit ? "[data-cl-edit-age-boundary-toggle]" : "[data-cl-age-boundary-toggle]");
+      const host = edit ? clEditModal : clCreateModal;
+      const separator = host?.querySelector(edit ? "[data-cl-edit-age-separator]" : "[data-cl-age-separator]");
+      const suffix = host?.querySelector(edit ? "[data-cl-edit-age-open-suffix]" : "[data-cl-age-open-suffix]");
+      if (separator) separator.hidden = plus;
+      if (suffix) suffix.hidden = !plus;
+      if (toggle) toggle.textContent = plus ? "设为区间" : "设为以上";
+    }
+    function applyCopyPersonaDefault(audience, mode) {
+      const profile = copyPersonaRules.profileFor(audience);
+      if (!profile) return;
+      if (mode === "edit") {
+        clSetEditSingleChoice("gender", profile.gender);
+        clSetEditAge(copyPersonaRules.formatCustomAge(profile.min, profile.max, profile.plus));
+      } else {
+        setClAudienceChoice("gender", profile.gender);
+        setClAudienceChoice("age", "custom");
+        document.getElementById("clAgeMin").value = profile.min;
+        document.getElementById("clAgeMax").value = profile.max ?? "";
+        document.getElementById("clAgePlus").checked = profile.plus;
+        syncCopyAgePlus("create");
       }
     }
 
@@ -260,7 +293,7 @@
       const gender = clEditModal.querySelector("[data-cl-gender].active")?.dataset.clGender || "不限";
       const ageChoice = clEditModal.querySelector("[data-cl-age].active")?.dataset.clAge || "";
       const age = ageChoice === "custom"
-        ? [document.getElementById("clEditAgeMin").value.trim(), document.getElementById("clEditAgeMax").value.trim()].filter(Boolean).join("–")
+        ? copyPersonaRules.formatCustomAge(document.getElementById("clEditAgeMin").value.trim(), document.getElementById("clEditAgeMax").value.trim(), document.getElementById("clEditAgePlus").checked)
         : ageChoice;
       const splitLines = id => document.getElementById(id).value.split("\n").map(value => value.trim()).filter(Boolean);
       return {
@@ -345,13 +378,22 @@
         }
         if (e.target.closest("[data-cl-persona-trigger]")) clOpenEditPersonaTemplatePicker();
         const audienceButton = e.target.closest("[data-cl-audience]");
-        if (audienceButton) audienceButton.classList.toggle("active");
+        if (audienceButton) {
+          clEditModal.querySelectorAll("[data-cl-audience]").forEach(button => button.classList.toggle("active", button === audienceButton));
+          applyCopyPersonaDefault(audienceButton.dataset.clAudience, "edit");
+        }
         const genderButton = e.target.closest("[data-cl-gender]");
         if (genderButton) clSetEditSingleChoice("gender", genderButton.dataset.clGender);
         const ageButton = e.target.closest("[data-cl-age]");
         if (ageButton) {
           clSetEditSingleChoice("age", ageButton.dataset.clAge);
           clEditModal.querySelector("[data-cl-custom-age]").hidden = ageButton.dataset.clAge !== "custom";
+        }
+        const boundary = e.target.closest("[data-cl-edit-age-boundary-toggle]");
+        if (boundary) {
+          const plus = document.getElementById("clEditAgePlus");
+          plus.checked = !plus.checked;
+          syncCopyAgePlus("edit");
         }
         const aiSuggest = e.target.closest("[data-cl-ai-suggest]");
         if (aiSuggest) clApplyEditAiSuggestion(aiSuggest.dataset.clAiSuggest);
@@ -472,8 +514,8 @@
       "7553983811703197228":"下班回家不想守在厨房，就把食材放进轻享空气炸锅 A8。可视窗口能直接看到上色情况，不用反复开盖，家庭容量一次就能做够。炸篮用完可以拆洗，今晚直播间还有配套赠品，具体优惠以页面展示为准。"
     };
     const clVideoAudienceMap = {
-      "7553983811703193643":{ audience:"精致妈妈", gender:"女性", age:"24–30", pain:"床垫深处灰尘难以日常清理\n孩子接触织物后容易敏感", scenes:"宝宝家庭的床垫日常清洁\n布艺沙发与毛绒玩具清洁" },
-      "7553983811703197228":{ audience:"新锐白领", gender:"不限", age:"24–30", pain:"下班后做饭时间不足\n传统烹饪需要反复看守", scenes:"工作日晚餐快速制作\n周末家庭小食制作" }
+      "7553983811703193643":{ audience:"精致妈妈", gender:"女", age:"25–40", pain:"床垫深处灰尘难以日常清理\n孩子接触织物后容易敏感", scenes:"宝宝家庭的床垫日常清洁\n布艺沙发与毛绒玩具清洁" },
+      "7553983811703197228":{ audience:"都市白领", gender:"不限", age:"22–40", pain:"下班后做饭时间不足\n传统烹饪需要反复看守", scenes:"工作日晚餐快速制作\n周末家庭小食制作" }
     };
     const clCreateVideoFallback = [
       { id:"7553983811703193643", source:"finished", title:"除螨仪结果冲击型主视频", channel:"历史投放", product:"轻净 Pro 除螨仪", duration:"00:32", origin:"千川素材", status:"已分析", updated:"08-04 14:20", tags:["结果前置","清洁演示"], auxiliary:"素材 ID 7553983811703193643", transcript:clVideoCopyMap["7553983811703193643"] },
@@ -493,9 +535,9 @@
       return clCreateModal.querySelector(`[data-cl-choice-group="${group}"] .cl-audience-chip.active`)?.dataset.value || "";
     }
     function resetClAudienceFields() {
-      setClAudienceChoice("audience", "精致妈妈");
-      setClAudienceChoice("gender", "不限");
-      setClAudienceChoice("age", "24–30");
+      setClAudienceChoice("audience", "");
+      setClAudienceChoice("gender", "");
+      setClAudienceChoice("age", "");
       document.getElementById("clAgeMin").value = "";
       document.getElementById("clAgeMax").value = "";
       document.getElementById("clCreatePain").value = "";
@@ -528,13 +570,13 @@
       label.textContent = persona.name;
       setClAudienceChoice("audience", persona.audience || "");
       setClAudienceChoice("gender", persona.gender || "不限");
-      const age = persona.age === "50+" ? "51+" : persona.age;
-      const standard = [...clCreateModal.querySelectorAll('[data-cl-choice-group="age"] .cl-audience-chip')].some(button => button.dataset.value === age);
-      setClAudienceChoice("age", standard ? age : "custom");
-      if (!standard) {
-        const [min, max] = String(persona.age || "").split(/[–-]/);
-        document.getElementById("clAgeMin").value = min || "";
-        document.getElementById("clAgeMax").value = max || "";
+      const parsed = copyPersonaRules.parseAge(persona.age);
+      setClAudienceChoice("age", parsed.preset ? parsed.value : "custom");
+      if (!parsed.preset) {
+        document.getElementById("clAgeMin").value = parsed.min;
+        document.getElementById("clAgeMax").value = parsed.max;
+        document.getElementById("clAgePlus").checked = parsed.plus;
+        syncCopyAgePlus("create");
       }
       document.getElementById("clCreatePain").value = (persona.pain || []).join("\n");
       document.getElementById("clCreateScenes").value = (persona.scenes || []).join("\n");
@@ -723,9 +765,18 @@
       if (choice) {
         const group = choice.closest("[data-cl-choice-group]")?.dataset.clChoiceGroup;
         if (group) setClAudienceChoice(group, choice.dataset.value);
+        if (group === "audience") applyCopyPersonaDefault(choice.dataset.value, "create");
         return;
       }
+      const boundary = event.target.closest("[data-cl-age-boundary-toggle]");
+      if (boundary) {
+        const plus = document.getElementById("clAgePlus");
+        plus.checked = !plus.checked;
+        syncCopyAgePlus("create");
+      }
     });
+    document.getElementById("clAgePlus")?.addEventListener("change", () => syncCopyAgePlus("create"));
+    document.getElementById("clEditAgePlus")?.addEventListener("change", () => syncCopyAgePlus("edit"));
     document.getElementById("clVideoUploadTrigger")?.addEventListener("click", () => document.getElementById("clVideoUploadInput").click());
     document.getElementById("clVideoUploadInput")?.addEventListener("change", event => {
       const file = event.target.files?.[0];
@@ -761,8 +812,9 @@
       if (age === "custom") {
         const min = Number(document.getElementById("clAgeMin").value);
         const max = Number(document.getElementById("clAgeMax").value);
-        if (!min || !max || min > max) return showToast("请填写正确的自定义年龄区间");
-        age = `${min}–${max}`;
+        const plus = document.getElementById("clAgePlus").checked;
+        if (!min || (!plus && (!max || min > max))) return showToast("请填写正确的自定义年龄区间");
+        age = copyPersonaRules.formatCustomAge(min, max, plus);
       }
       const crowd = `${audience} / ${gender} / ${age}`;
       const pain = document.getElementById("clCreatePain").value.trim();
@@ -791,30 +843,32 @@
 
     /* ===== 组织权限与公共事实库增强（原型交互） ===== */
     (() => {
+      const permissionV2Ready = typeof window.initPermissionManagement === "function";
+      if (permissionV2Ready) window.initPermissionManagement();
+      if (!permissionV2Ready) {
       const permissionModules = [
-        { name:"AI创作", actions:["查看", "发起创作", "保存资产", "删除会话"] },
-        { name:"品牌库", actions:["查看", "新增", "编辑", "删除"] },
-        { name:"产品库", actions:["查看", "新增", "编辑", "删除"] },
-        { name:"文案库", actions:["查看", "新增", "编辑", "删除"] },
-        { name:"模板库", actions:["查看", "新增", "编辑", "删除"] },
-        { name:"系统管理", actions:["查看成员权限", "配置角色", "同步钉钉人员"] }
+        { name:"AI创作", actions:["查看", "发起创作", "保存资产", "删除本人会话"] },
+        ...["品牌库", "产品库", "文案库", "脚本库", "创作素材", "成片视频", "外部参考视频", "模板库"].map(name => ({
+          name, actions:["查看与调用", "新增", "编辑本人创建", "删除本人创建"]
+        })),
+        { name:"系统管理", actions:["查看用户", "配置角色", "分配角色", "同步钉钉用户"] }
       ];
       const roles = {
-        admin:{ name:"管理员", desc:"拥有当前团队全部菜单和按钮权限", permissions:{} },
-        creator:{ name:"运营／创作成员", desc:"可创作并维护业务资产，不可管理系统权限", permissions:{} },
-        viewer:{ name:"只读成员", desc:"仅可查看授权范围内的菜单与资产", permissions:{} }
+        admin:{ name:"管理员", desc:"内置最高权限角色，可管理全部功能、用户和资产数据", permissions:{} },
+        creator:{ name:"运营／创作成员", desc:"可创作、查看和调用全部资产，并维护本人创建的资产", permissions:{} },
+        viewer:{ name:"只读成员", desc:"仅可查看和调用已授权模块中的资产", permissions:{} }
       };
       permissionModules.forEach(module => module.actions.forEach(action => {
         const key = `${module.name}:${action}`;
         roles.admin.permissions[key] = true;
-        roles.creator.permissions[key] = module.name !== "系统管理" && !["删除"].includes(action);
-        roles.viewer.permissions[key] = action === "查看";
+        roles.creator.permissions[key] = module.name !== "系统管理";
+        roles.viewer.permissions[key] = action === "查看" || action === "查看与调用";
       }));
       const members = [
-        { name:"嗡大发", dept:"抖音三区", role:"admin", scope:"all", status:"在职" },
-        { name:"林运营", dept:"内容运营·小家电组", role:"creator", scope:"team", status:"在职" },
-        { name:"王剪辑", dept:"视频中心·混剪组", role:"creator", scope:"personal", status:"在职" },
-        { name:"陈观察", dept:"经营分析组", role:"viewer", scope:"team", status:"在职" }
+        { name:"嗡大发", dept:"抖音三区", role:"admin", status:"在职" },
+        { name:"林运营", dept:"内容运营·小家电组", role:"creator", status:"在职" },
+        { name:"王剪辑", dept:"视频中心·混剪组", role:"creator", status:"在职" },
+        { name:"陈观察", dept:"经营分析组", role:"viewer", status:"在职" }
       ];
       let activeRole = "admin";
       const roleList = document.getElementById("permissionRoleList");
@@ -825,7 +879,10 @@
 
       function renderPermissionTree() {
         if (!tree || !roles[activeRole]) return;
-        tree.innerHTML = permissionModules.map(module => `<section class="permission-tree-group"><div class="permission-tree-head"><strong>${module.name}</strong><label><input type="checkbox" data-module-all="${module.name}"> 全选</label></div><div class="permission-actions">${module.actions.map(action => { const key = `${module.name}:${action}`; return `<label><input type="checkbox" data-permission-key="${key}" ${roles[activeRole].permissions[key] ? "checked" : ""}> ${action}</label>`; }).join("")}</div></section>`).join("");
+        tree.innerHTML = permissionModules.map(module => {
+          const locked = activeRole === "admin" || module.name === "系统管理" ? "disabled" : "";
+          return `<section class="permission-tree-group"><div class="permission-tree-head"><strong>${module.name}</strong><label><input type="checkbox" data-module-all="${module.name}" ${locked}> 全选</label></div><div class="permission-actions">${module.actions.map(action => { const key = `${module.name}:${action}`; return `<label><input type="checkbox" data-permission-key="${key}" ${roles[activeRole].permissions[key] ? "checked" : ""} ${locked}> ${action}</label>`; }).join("")}</div></section>`;
+        }).join("");
         tree.querySelectorAll("[data-module-all]").forEach(box => {
           const children = [...tree.querySelectorAll(`[data-permission-key^="${box.dataset.moduleAll}:"]`)];
           box.checked = children.every(child => child.checked);
@@ -834,7 +891,7 @@
       }
       function renderMembers() {
         if (!memberRows) return;
-        memberRows.innerHTML = members.map((member, index) => `<tr><td><strong>${member.name}</strong></td><td>${member.dept}</td><td><select data-member-role="${index}">${Object.entries(roles).map(([key, role]) => `<option value="${key}" ${member.role === key ? "selected" : ""}>${role.name}</option>`).join("")}</select></td><td><select data-member-scope="${index}"><option value="personal" ${member.scope === "personal" ? "selected" : ""}>仅个人</option><option value="team" ${member.scope === "team" ? "selected" : ""}>个人及团队</option><option value="all" ${member.scope === "all" ? "selected" : ""}>当前公司全部</option></select></td><td><span class="badge green">${member.status}</span></td></tr>`).join("");
+        memberRows.innerHTML = members.map((member, index) => `<tr><td><strong>${member.name}</strong></td><td>${member.dept}</td><td><select data-member-role="${index}">${Object.entries(roles).map(([key, role]) => `<option value="${key}" ${member.role === key ? "selected" : ""}>${role.name}</option>`).join("")}</select></td><td><span class="badge green">${member.status}</span></td></tr>`).join("");
       }
       function selectRole(key) {
         if (!roles[key]) return;
@@ -849,6 +906,7 @@
         if (role) selectRole(role.dataset.permissionRole);
       });
       tree?.addEventListener("change", event => {
+        if (activeRole === "admin") return;
         const box = event.target;
         if (box.matches("[data-permission-key]")) roles[activeRole].permissions[box.dataset.permissionKey] = box.checked;
         if (box.matches("[data-module-all]")) {
@@ -859,15 +917,20 @@
       });
       memberRows?.addEventListener("change", event => {
         const roleSelect = event.target.closest("[data-member-role]");
-        const scopeSelect = event.target.closest("[data-member-scope]");
-        if (roleSelect) members[Number(roleSelect.dataset.memberRole)].role = roleSelect.value;
-        if (scopeSelect) members[Number(scopeSelect.dataset.memberScope)].scope = scopeSelect.value;
-        showToast("成员权限已更新");
+        if (roleSelect) {
+          const member = members[Number(roleSelect.dataset.memberRole)];
+          if (member.role === "admin" && roleSelect.value !== "admin" && members.filter(item => item.status === "在职" && item.role === "admin").length <= 1) {
+            roleSelect.value = "admin";
+            return showToast("系统至少需要保留一名管理员");
+          }
+          member.role = roleSelect.value;
+        }
+        showToast("用户角色已更新");
       });
       document.getElementById("syncDingMembers")?.addEventListener("click", event => {
         const button = event.currentTarget;
         button.disabled = true; button.textContent = "同步中…";
-        setTimeout(() => { button.disabled = false; button.textContent = "同步钉钉人员"; renderMembers(); showToast("已同步 4 名在职成员，未发现组织变更"); }, 900);
+        setTimeout(() => { button.disabled = false; button.textContent = "同步钉钉用户"; renderMembers(); showToast("已同步 4 名在职用户，未发现组织变更"); }, 900);
       });
 
       const roleModal = document.createElement("div");
@@ -888,6 +951,7 @@
         roleModal.classList.remove("show"); selectRole(key); renderMembers(); showToast(`角色“${name}”已创建`);
       });
       selectRole(activeRole); renderMembers();
+      }
 
       function renderBrandRelations() {
         const container = document.getElementById("brandRelatedProducts");

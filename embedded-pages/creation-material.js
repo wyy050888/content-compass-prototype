@@ -60,6 +60,7 @@ let selectedIds = new Set();
 let contextTargetId = null;
 let searchQuery = '';
 let materialTagEditorId = null;
+let materialTagEditorIds = null;
 let materialTagDraft = new Set();
 
 // 产品选项（与成片视频的 productOptions 同源）
@@ -516,7 +517,7 @@ $$('.batch-btn').forEach(btn => btn.addEventListener('click', () => {
   const act = btn.dataset.batch;
   const map = {
     download: () => toast(`已下载 ${selectedIds.size} 个素材`, 'success'),
-    tag: () => openModal('tagFilterModal'),
+    tag: () => openMaterialBatchTagEditor([...selectedIds]),
     product: () => openBatchEdit('product', [...selectedIds]),
     move: () => openBatchEdit('move', [...selectedIds]),
     reanalyze: () => {
@@ -788,6 +789,7 @@ document.addEventListener('keydown', (e) => {
 function renderTagGroups() {
   const wrap = $('#tagGroupList');
   if (!wrap) return;
+  const canManageTags = materialTagEditorId !== null;
   $$('.tag-modal-side .side-item[data-tag-group]').forEach(s => {
     s.classList.toggle('active', s.dataset.tagGroup === activeTagGroupId);
   });
@@ -796,10 +798,10 @@ function renderTagGroups() {
     return `<div class="side-item" data-tag-group="${g.id}">
       <span class="name">${escapeHtml(g.name)}</span>
       <span class="count">${count}</span>
-      <span class="grp-actions">
+      ${canManageTags ? `<span class="grp-actions">
         <button data-act="rename-grp" data-id="${g.id}" data-tip="重命名">✎</button>
         <button data-act="del-grp" data-id="${g.id}" data-tip="删除分组">×</button>
-      </span>
+      </span>` : ''}
     </div>`;
   }).join('');
   const total = tagLibrary.length;
@@ -813,7 +815,7 @@ function renderTagGroups() {
       renderTagGroups();
       renderTagList();
     });
-    row.addEventListener('contextmenu', (e) => {
+    if (canManageTags) row.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       showTagGroupMenu(row.dataset.tagGroup, e);
     });
@@ -894,7 +896,7 @@ function renderTagList() {
   else if (activeTagGroupId === 'uncategorized') list = tagLibrary.filter(t => t.group === null);
   else list = tagLibrary.filter(t => t.group === activeTagGroupId);
   const selectedTags = materialTagEditorId === null ? activeTagFilter : materialTagDraft;
-  $('#tagList').innerHTML = list.map(t => `<span class="tag-chip ${selectedTags.has(t.name) ? 'active' : ''}" data-tag="${escapeHtml(t.name)}" data-tag-id="${t.id}">${escapeHtml(t.name)}${selectedTags.has(t.name) ? '<span class="x">×</span>' : ''}</span>`).join('') || '<span style="color:#aab0c2; font-size:12px; padding:8px 4px;">该分组下还没有标签,点击下方「新建标签」添加</span>';
+  $('#tagList').innerHTML = list.map(t => `<span class="tag-chip ${selectedTags.has(t.name) ? 'active' : ''}" data-tag="${escapeHtml(t.name)}" data-tag-id="${t.id}">${escapeHtml(t.name)}${selectedTags.has(t.name) ? '<span class="x">×</span>' : ''}</span>`).join('') || `<span style="color:#aab0c2; font-size:12px; padding:8px 4px;">${materialTagEditorId === null ? '该分组下还没有可用标签' : '该分组下还没有标签，点击下方「新建标签」添加'}</span>`;
   $$('#tagList .tag-chip').forEach(c => c.addEventListener('click', () => {
     const t = c.dataset.tag;
     if (selectedTags.has(t)) selectedTags.delete(t); else selectedTags.add(t);
@@ -907,26 +909,50 @@ renderTagList();
 $('#addNewTagGroup').addEventListener('click', addTagGroup);
 function openMaterialTagEditor(m) {
   materialTagEditorId = m.id;
+  materialTagEditorIds = null;
   materialTagDraft = new Set(m.tags || []);
   $('#tagModalKicker').textContent = '素材操作';
   $('#tagModalTitle').textContent = '编辑素材标签';
   $('#applyTagFilter').textContent = '保存标签';
+  $('#addNewTagGroup').hidden = false;
+  $('#addNewTagBtn').hidden = false;
   $('#tagSelectedHint').textContent = `已选 ${materialTagDraft.size} 个标签`;
+  renderTagGroups(); renderTagList(); openModal('tagFilterModal');
+}
+function openMaterialBatchTagEditor(ids) {
+  materialTagEditorId = '__batch__';
+  materialTagEditorIds = ids;
+  materialTagDraft = new Set();
+  $('#tagModalKicker').textContent = '批量操作';
+  $('#tagModalTitle').textContent = '批量编辑素材标签';
+  $('#applyTagFilter').textContent = '保存标签';
+  $('#addNewTagGroup').hidden = false;
+  $('#addNewTagBtn').hidden = false;
+  $('#tagSelectedHint').textContent = `将作用于 ${ids.length} 个素材`;
   renderTagGroups(); renderTagList(); openModal('tagFilterModal');
 }
 function openTagFilterModal() {
   materialTagEditorId = null;
+  materialTagEditorIds = null;
   $('#tagModalKicker').textContent = '筛选';
   $('#tagModalTitle').textContent = '按标签筛选素材';
   $('#applyTagFilter').textContent = '应用筛选';
+  $('#addNewTagGroup').hidden = true;
+  $('#addNewTagBtn').hidden = true;
   $('#tagSelectedHint').textContent = `已选 ${activeTagFilter.size} 个标签`;
   renderTagGroups(); renderTagList(); openModal('tagFilterModal');
 }
 $('#applyTagFilter').addEventListener('click', () => {
   if (materialTagEditorId !== null) {
+    if (materialTagEditorId === '__batch__') {
+      const ids = new Set(materialTagEditorIds || []);
+      materials.filter(m => ids.has(m.id)).forEach(m => { m.tags = [...materialTagDraft]; });
+      closeModal('tagFilterModal'); materialTagEditorId = null; materialTagEditorIds = null;
+      renderGrid(); updateBatchBar(); toast(`已更新 ${ids.size} 个素材的标签`, 'success'); return;
+    }
     const material = materials.find(m => m.id === materialTagEditorId);
     if (material) material.tags = [...materialTagDraft];
-    closeModal('tagFilterModal'); materialTagEditorId = null; renderGrid(); returnToMaterialPreview('tagFilter'); toast('素材标签已保存', 'success'); return;
+    closeModal('tagFilterModal'); materialTagEditorId = null; materialTagEditorIds = null; renderGrid(); returnToMaterialPreview('tagFilter'); toast('素材标签已保存', 'success'); return;
   }
   closeModal('tagFilterModal');
   $('#tagFilterBtn').classList.toggle('has-value', activeTagFilter.size > 0);
@@ -935,6 +961,7 @@ $('#applyTagFilter').addEventListener('click', () => {
 });
 $('#clearTagFilter').addEventListener('click', () => { const tags = materialTagEditorId === null ? activeTagFilter : materialTagDraft; tags.clear(); renderTagList(); $('#tagSelectedHint').textContent = '已选 0 个标签'; if (materialTagEditorId === null) $('#tagFilterBtn').classList.remove('has-value'); });
 $('#addNewTagBtn').addEventListener('click', () => {
+  if (materialTagEditorId === null) return;
   if (previewChildReturn === 'tagFilter') $('#newTagModal').classList.add('preview-grandchild-layer');
   openModal('newTagModal');
 });

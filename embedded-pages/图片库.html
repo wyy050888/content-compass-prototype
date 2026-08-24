@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles-qianchuan.css?v=20260822x">
   <link rel="stylesheet" href="styles-pull-entry.css?v=20260822x">
   <link rel="stylesheet" href="styles-agent.css?v=20260822x">
-  <link rel="stylesheet" href="styles-copy.css?v=20260822x">
+  <link rel="stylesheet" href="styles-copy.css?v=20260824b">
   <link rel="stylesheet" href="styles-structure.css?v=20260822x">
   <link rel="stylesheet" href="styles-automation.css?v=20260822x">
   <link rel="stylesheet" href="host-embed.css?v=20260813a">
@@ -2558,9 +2558,9 @@
         <div class="persona-form-grid">
           <div class="field full"><label>画像名称<em class="required-mark">*</em></label><input id="personaFormName" placeholder="例如：精致妈妈—母婴清洁人群"></div>
           <div class="field full"><label>适用范围</label><div class="persona-product-mode" role="tablist" aria-label="适用范围"><button class="active" type="button" role="tab" aria-selected="true" data-persona-product-mode="linked">关联产品</button><button type="button" role="tab" aria-selected="false" data-persona-product-mode="universal">设为通用</button></div><div class="persona-product-panel" data-persona-product-panel="linked"><button class="persona-product-trigger" id="personaFormProductTrigger" type="button" aria-haspopup="dialog"><span data-persona-product-label>选择关联产品</span><b>⌄</b></button><small>选择后仅在该产品的创作流程中优先推荐。</small></div><div class="persona-product-panel" data-persona-product-panel="universal" hidden><small>通用画像不绑定产品，可在所有产品的创作流程中选择。</small></div><input id="personaFormProduct" type="hidden" value=""></div>
-          <div class="field full"><label>抖音八大人群<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="audience"><button class="active" type="button">精致妈妈</button><button type="button">新锐白领</button><button type="button">资深中产</button><button type="button">Z世代</button><button type="button">小镇青年</button><button type="button">小镇中老年</button><button type="button">都市蓝领</button><button type="button">都市银发</button></div></div>
-          <div class="field full"><label>性别<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="gender"><button class="active" type="button">不限</button><button type="button">女性</button><button type="button">男性</button></div></div>
-          <div class="field full"><label>年龄<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="age"><button type="button">18–23</button><button class="active" type="button">24–30</button><button type="button">31–40</button><button type="button">41–50</button><button type="button">51+</button><button type="button" data-persona-custom-age-trigger>自定义</button><span class="persona-custom-age" data-persona-custom-age hidden><input id="personaFormAgeMin" type="number" min="1" max="99" value="25"><i>至</i><input id="personaFormAgeMax" type="number" min="1" max="99" value="35"></span></div></div>
+          <div class="field full"><label>抖音八大人群<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="audience"><button type="button">Z世代</button><button type="button">精致妈妈</button><button type="button">都市白领</button><button type="button">都市银发</button><button type="button">小镇中老年</button><button type="button">小镇青年</button><button type="button">新锐蓝领</button><button type="button">资深中产</button></div></div>
+          <div class="field full"><label>性别<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="gender"><button type="button">不限</button><button type="button">男</button><button type="button">女</button></div></div>
+          <div class="field full"><label>年龄<em class="required-mark">*</em></label><div class="persona-choice-row" data-persona-form-single="age"><button type="button">18–23</button><button type="button">24–30</button><button type="button">31–40</button><button type="button">41–50</button><button type="button">51–60</button><button type="button">60+</button><button type="button" data-persona-custom-age-trigger>自定义</button><span class="persona-custom-age" data-persona-custom-age hidden><input id="personaFormAgeMin" type="number" min="1" max="99"><i data-persona-age-separator>至</i><input id="personaFormAgeMax" type="number" min="1" max="99"><span data-persona-age-open-suffix hidden>岁及以上</span><button type="button" class="age-boundary-toggle" data-persona-age-boundary-toggle>设为以上</button><input id="personaFormAgePlus" type="checkbox" hidden></span></div></div>
           <div class="field full"><div class="persona-field-head"><label>人群核心痛点</label><button class="persona-ai-refresh" type="button" data-persona-ai-suggest="pain">✦ AI 换一组</button></div><textarea id="personaFormPain" placeholder="一行一个人群核心痛点"></textarea></div>
           <div class="field full"><div class="persona-field-head"><label>使用场景</label><button class="persona-ai-refresh" type="button" data-persona-ai-suggest="scene">✦ AI 换一组</button></div><textarea id="personaFormScenes" placeholder="一行一个使用场景"></textarea></div>
         </div>
@@ -3402,12 +3402,13 @@
   <script src="js/core.js?v=20260816a"></script>
   <script src="js/pull-entry.js?v=20260822x"></script>
   <script src="js/pull-result-agent.js?v=20260822x"></script>
-  <script src="js/pull-result-form.js?v=20260822y"></script>
+  <script src="js/pull-result-form.js?v=20260822z"></script>
   <script src="js/pull-result-task.js?v=20260822x"></script>
   <script src="js/pull-result-output.js?v=20260822x"></script>
   <script src="js/pull-brands.js?v=20260822x"></script>
   <script src="js/business.js"></script>
-  <script src="js/misc-persona.js?v=20260822x"></script>
+  <script src="../js/persona-rules.js?v=20260824a"></script>
+  <script src="js/misc-persona.js?v=20260824d"></script>
   <script src="js/misc-prompt.js?v=20260822x"></script>
   <script src="js/misc-library.js?v=20260822x"></script>
   <script src="js/misc-structure.js?v=20260822x"></script>

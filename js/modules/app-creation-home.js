@@ -831,7 +831,7 @@
                       <button type="button" class="mix-persona-add-group" data-mix-add-persona-group><i>＋</i>添加人群</button>
                     </div>
                   </label>
-                  <label class="mix-field mix-duration-field" data-mix-duration-field><span data-mix-duration-label>视频生成时长 <small data-mix-duration-hint hidden>已继承脚本时长，可修改</small></span><span class="mix-duration-input"><input type="number" step="1" placeholder="请输入" data-mix-target-duration><i>秒</i></span></label>
+                  <label class="mix-field mix-duration-field" data-mix-duration-field><span data-mix-duration-label>视频生成时长 <small data-mix-duration-hint hidden>已继承脚本时长，可修改</small></span><span class="mix-duration-input"><input type="number" min="1" max="600" step="1" placeholder="1–600" data-mix-target-duration><i>秒</i></span><small class="mix-field-hint">请输入 1–600 的正整数秒</small></label>
                   <label class="mix-field mix-ratio-field" data-mix-ratio-field><span>画面比例 <em class="required-star">*</em></span><select data-mix-ratio><option value="9:16" selected>9:16</option><option value="16:9">16:9</option></select></label>
                 </div>
                 <div class="mix-duration-presets" data-mix-duration-presets hidden></div>
@@ -1009,4 +1009,3 @@
         `
       }
     };
-

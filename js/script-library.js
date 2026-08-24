@@ -18,17 +18,18 @@
   ].map(row => ({ ...row, material: mode === "depend" ? row.material : "" }));
 
   // 抖音八大人群(与智能脚本 agent 的 personaCatalog 保持一致,后续可改为从全局数据源拉取)
-  const SCRIPT_AUDIENCE_OPTIONS = ["精致妈妈", "新锐白领", "资深中产", "Z世代", "小镇青年", "小镇中老年", "都市蓝领", "都市银发"];
-  const SCRIPT_GENDER_OPTIONS = ["不限", "女性", "男性"];
-  const SCRIPT_AGE_OPTIONS = ["18-23", "24-30", "31-40", "41-50", "50+"];
+  const scriptPersonaRules = window.ContentCompassPersonaRules;
+  const SCRIPT_AUDIENCE_OPTIONS = [...scriptPersonaRules.audiences];
+  const SCRIPT_GENDER_OPTIONS = [...scriptPersonaRules.genders];
+  const SCRIPT_AGE_OPTIONS = scriptPersonaRules.ages.slice(0, -1);
   // 产品 → 默认人群三件套(参照 personaCatalog,缺省时使用,新脚本在编辑表单中可手动改)
   const PRODUCT_PERSONA_DEFAULTS = {
-    "轻净 Pro 除螨仪": { audience: "精致妈妈", gender: "女性", age: "24-30" },
-    "轻享空气炸锅 A8": { audience: "新锐白领", gender: "不限", age: "24-30" },
+    "轻净 Pro 除螨仪": { audience: "精致妈妈", gender: "女", age: "25–40" },
+    "轻享空气炸锅 A8": { audience: "都市白领", gender: "不限", age: "22–40" },
     "净界洗地机 S5": { audience: "资深中产", gender: "不限", age: "31-40" }
   };
   const productPersonaDefault = product => PRODUCT_PERSONA_DEFAULTS[product] || { audience: SCRIPT_AUDIENCE_OPTIONS[0], gender: SCRIPT_GENDER_OPTIONS[0], age: SCRIPT_AGE_OPTIONS[1] };
-  const isStandardAge = value => SCRIPT_AGE_OPTIONS.includes(value) || /^(\d+)-(\d+)$/.test(String(value || ""));
+  const isStandardAge = value => SCRIPT_AGE_OPTIONS.includes(value);
   const sanitizePersona = (raw, fallback) => {
     const f = fallback || productPersonaDefault("");
     return {
@@ -66,10 +67,10 @@
   }).join("");
 
   let scripts = [
-    { id:"sl-001", sessionId:"session-mite-summer", name:"轻净 Pro 除螨仪_脚本_20260807", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"女性", age:"24-30", personas:[{audience:"精致妈妈",gender:"女性",age:"24-30",sourcePersonaId:"persona-mom"}], source:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。", sourceFull:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。轻净 Pro 边拍边吸，脏东西直接进尘杯，用完还能拆下水洗。", duration:60, ratio:"9:16", materialMode:"depend", materialStatus:"4/4 已匹配", createdBy:"嗡大发", createdAt:"08/04 14:20", updatedBy:"嗡大发", updated:"08/11 14:32", rows:baseRows("depend") },
-    { id:"sl-002", sessionId:"session-mite-summer", name:"轻净 Pro 除螨仪_脚本_20260806", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"女性", age:"31-40", personas:[{audience:"精致妈妈",gender:"女性",age:"31-40",sourcePersonaId:"persona-pet"}], source:"床单刚换一周，第一遍照样能吸出碎屑和毛发。", sourceFull:"床单刚换一周，第一遍照样能吸出碎屑和毛发。床垫深处的脏东西，普通清理根本触达不到。轻净 Pro 拍打吸尘同步完成，尘杯可水洗。", duration:30, ratio:"9:16", materialMode:"free", materialStatus:"已生成提示词", createdBy:"李四", createdAt:"08/03 11:07", updatedBy:"李四", updated:"08/10 18:16", rows:baseRows("free") },
-    { id:"sl-003", sessionId:"session-air-fryer-copy", name:"轻享空气炸锅 A8_快手晚餐脚本", product:"轻享空气炸锅 A8", audience:"新锐白领", gender:"不限", age:"24-30", personas:[{audience:"新锐白领",gender:"不限",age:"24-30",sourcePersonaId:"persona-whitecollar"}], source:"下班回家不想洗一堆锅，晚饭就用这一台解决。", sourceFull:"下班回家不想洗一堆锅，晚饭就用这一台解决。食材放进去，定好时间，外酥里嫩的一餐就能直接上桌。", duration:45, ratio:"9:16", materialMode:"depend", materialStatus:"4/4 已匹配", createdBy:"嗡大发", createdAt:"08/04 14:20", updatedBy:"嗡大发", updated:"08/05 10:20", rows:baseRows("depend") },
-    { id:"sl-004", sessionId:"session-washer-script", name:"净界洗地机 S5_夏季清爽脚本", product:"净界洗地机 S5", audience:"资深中产", gender:"不限", age:"31-40", personas:[{audience:"资深中产",gender:"不限",age:"31-40",sourcePersonaId:"persona-family"},{audience:"精致妈妈",gender:"女性",age:"31-40",sourcePersonaId:null}], source:"地上看着干净，拖一遍才知道脏东西有多少。", sourceFull:"地上看着干净，拖一遍才知道脏东西，净界洗地机 S5 洗拖同步，把日常地面清洁变成一件更省心的事。", duration:30, ratio:"16:9", materialMode:"free", materialStatus:"已生成提示词", createdBy:"李四", createdAt:"08/03 11:07", updatedBy:"李四", updated:"08/03 16:08", rows:baseRows("free") }
+    { id:"sl-001", sessionId:"session-mite-summer", name:"轻净 Pro 除螨仪_脚本_20260807", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"女", age:"25–40", personas:[{audience:"精致妈妈",gender:"女",age:"25–40",sourcePersonaId:"persona-mom"}], source:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。", sourceFull:"刚换的床单，也能吸出一杯脏东西。看得见的是表面，看不见的都藏在床垫深处。轻净 Pro 边拍边吸，脏东西直接进尘杯，用完还能拆下水洗。", duration:60, ratio:"9:16", materialMode:"depend", materialStatus:"4/4 已匹配", createdBy:"嗡大发", createdAt:"08/04 14:20", updatedBy:"嗡大发", updated:"08/11 14:32", rows:baseRows("depend") },
+    { id:"sl-002", sessionId:"session-mite-summer", name:"轻净 Pro 除螨仪_脚本_20260806", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"女", age:"31–40", personas:[{audience:"精致妈妈",gender:"女",age:"31–40",sourcePersonaId:"persona-pet"}], source:"床单刚换一周，第一遍照样能吸出碎屑和毛发。", sourceFull:"床单刚换一周，第一遍照样能吸出碎屑和毛发。床垫深处的脏东西，普通清理根本触达不到。轻净 Pro 拍打吸尘同步完成，尘杯可水洗。", duration:30, ratio:"9:16", materialMode:"free", materialStatus:"已生成提示词", createdBy:"李四", createdAt:"08/03 11:07", updatedBy:"李四", updated:"08/10 18:16", rows:baseRows("free") },
+    { id:"sl-003", sessionId:"session-air-fryer-copy", name:"轻享空气炸锅 A8_快手晚餐脚本", product:"轻享空气炸锅 A8", audience:"都市白领", gender:"不限", age:"22–40", personas:[{audience:"都市白领",gender:"不限",age:"22–40",sourcePersonaId:"persona-whitecollar"}], source:"下班回家不想洗一堆锅，晚饭就用这一台解决。", sourceFull:"下班回家不想洗一堆锅，晚饭就用这一台解决。食材放进去，定好时间，外酥里嫩的一餐就能直接上桌。", duration:45, ratio:"9:16", materialMode:"depend", materialStatus:"4/4 已匹配", createdBy:"嗡大发", createdAt:"08/04 14:20", updatedBy:"嗡大发", updated:"08/05 10:20", rows:baseRows("depend") },
+    { id:"sl-004", sessionId:"session-washer-script", name:"净界洗地机 S5_夏季清爽脚本", product:"净界洗地机 S5", audience:"资深中产", gender:"不限", age:"35–55", personas:[{audience:"资深中产",gender:"不限",age:"35–55",sourcePersonaId:"persona-family"},{audience:"精致妈妈",gender:"女",age:"31–40",sourcePersonaId:null}], source:"地上看着干净，拖一遍才知道脏东西有多少。", sourceFull:"地上看着干净，拖一遍才知道脏东西，净界洗地机 S5 洗拖同步，把日常地面清洁变成一件更省心的事。", duration:30, ratio:"16:9", materialMode:"free", materialStatus:"已生成提示词", createdBy:"李四", createdAt:"08/03 11:07", updatedBy:"李四", updated:"08/03 16:08", rows:baseRows("free") }
   ];
 
   const modal = (title, subtitle, body, footer = "", small = false) => {
@@ -385,19 +386,14 @@
   }
   // 模板库数据(与 app.js personaCatalog 一致,后续可改为从全局数据源拉取)
   const SCRIPT_PERSONA_CATALOG = [
-    { id:"persona-mom", name:"精致妈妈—母婴清洁人群", brand:"轻净", category:"清洁电器", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"女性", age:"24-30" },
+    { id:"persona-mom", name:"精致妈妈—母婴清洁人群", brand:"轻净", category:"清洁电器", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"女", age:"25–40" },
     { id:"persona-pet", name:"精致妈妈—养宠清洁人群", brand:"轻净", category:"清洁电器", product:"轻净 Pro 除螨仪", audience:"精致妈妈", gender:"不限", age:"31-40" },
-    { id:"persona-whitecollar", name:"新锐白领—一人食效率人群", brand:"轻享", category:"厨房小电", product:"轻享空气炸锅 A8", audience:"新锐白领", gender:"不限", age:"24-30" },
-    { id:"persona-family", name:"资深中产—品质清洁人群", brand:"净界", category:"清洁电器", product:"净界洗地机 S5", audience:"资深中产", gender:"不限", age:"31-40" },
+    { id:"persona-whitecollar", name:"都市白领—一人食效率人群", brand:"轻享", category:"厨房小电", product:"轻享空气炸锅 A8", audience:"都市白领", gender:"不限", age:"22–40" },
+    { id:"persona-family", name:"资深中产—品质清洁人群", brand:"净界", category:"清洁电器", product:"净界洗地机 S5", audience:"资深中产", gender:"不限", age:"35–55" },
     { id:"persona-general", name:"家庭日常清洁—通用人群", brand:"", category:"", product:"", audience:"精致妈妈", gender:"不限", age:"24-40" }
   ];
   // 把 age 字符串转成 {min,max,isCustom,label}
-  const parseAge = value => {
-    if (SCRIPT_AGE_OPTIONS.includes(value)) return { isCustom:false, min:null, max:null, label:value };
-    const m = String(value || "").match(/^(\d+)-(\d+)$/);
-    if (m) return { isCustom:true, min:m[1], max:m[2], label:`${m[1]}-${m[2]}` };
-    return { isCustom:false, min:null, max:null, label:"" };
-  };
+  const parseAge = value => { const p = scriptPersonaRules.parseAge(value); return { isCustom:!!p.value && !p.preset, min:p.min, max:p.max, plus:p.plus, label:p.value }; };
 
   // 单个手动人群组(供编辑/查看使用;查看态加 is-readonly 屏蔽交互)
   const slEditPersonaGroupHtml = (index, persona, readonly) => {
@@ -424,8 +420,11 @@
           <div class="sl-pp-chips-row" data-sl-age-chips>${ageChips}</div>
           <div class="sl-pp-custom-age" data-sl-custom-age ${parsed.isCustom ? "" : "hidden"}>
             <input type="number" data-sl-age-min min="1" max="99" placeholder="最小" value="${escapeHtml(parsed.min || "")}">
-            <i>至</i>
+            <i data-sl-age-separator ${parsed.plus ? "hidden" : ""}>至</i>
             <input type="number" data-sl-age-max min="1" max="99" placeholder="最大" value="${escapeHtml(parsed.max || "")}">
+            <span data-sl-age-open-suffix ${parsed.plus ? "" : "hidden"}>岁及以上</span>
+            <button type="button" class="age-boundary-toggle" data-sl-age-boundary-toggle>${parsed.plus ? "设为区间" : "设为以上"}</button>
+            <input type="checkbox" data-sl-age-plus ${parsed.plus ? "checked" : ""} hidden>
           </div>
         </div>
       </div>
@@ -482,7 +481,8 @@
       if (agePill === "__custom__") {
         const min = group.querySelector("[data-sl-age-min]")?.value.trim();
         const max = group.querySelector("[data-sl-age-max]")?.value.trim();
-        if (min && max) age = `${min}-${max}`;
+        const plus = group.querySelector("[data-sl-age-plus]")?.checked;
+        if (min && (plus || max)) age = scriptPersonaRules.formatCustomAge(min, max, plus);
       } else {
         age = agePill;
       }
@@ -637,12 +637,43 @@
           refreshTemplateAddedState(host);
           return;
         }
+        const boundary = event.target.closest("[data-sl-age-boundary-toggle]");
+        if (boundary) {
+          const group = boundary.closest("[data-sl-persona-group]");
+          const plus = group?.querySelector("[data-sl-age-plus]");
+          const max = group?.querySelector("[data-sl-age-max]");
+          if (plus && max) {
+            plus.checked = !plus.checked;
+            max.hidden = plus.checked;
+            max.disabled = plus.checked;
+            group.querySelector("[data-sl-age-separator]").hidden = plus.checked;
+            group.querySelector("[data-sl-age-open-suffix]").hidden = !plus.checked;
+            boundary.textContent = plus.checked ? "设为区间" : "设为以上";
+            refreshTemplateAddedState(host);
+          }
+          return;
+        }
         const pill = event.target.closest(".sl-pp-pill");
         if (pill && block.contains(pill)) {
           const row = pill.parentElement;
           row.querySelectorAll(".sl-pp-pill").forEach(p => p.classList.toggle("active", p === pill));
           // 年龄切到自定义时显示输入框
           const group = pill.closest("[data-sl-persona-group]");
+          if (group && pill.closest("[data-sl-audience-chips]")) {
+            const profile = scriptPersonaRules.profileFor(pill.dataset.slAudiencePill);
+            group.querySelectorAll("[data-sl-gender-pill]").forEach(button => button.classList.toggle("active", button.dataset.slGenderPill === profile.gender));
+            group.querySelectorAll("[data-sl-age-pill]").forEach(button => button.classList.toggle("active", button.dataset.slAgePill === "__custom__"));
+            const customBox = group.querySelector("[data-sl-custom-age]");
+            if (customBox) customBox.hidden = false;
+            group.querySelector("[data-sl-age-min]").value = profile.min;
+            group.querySelector("[data-sl-age-max]").value = profile.max ?? "";
+            group.querySelector("[data-sl-age-plus]").checked = profile.plus;
+            group.querySelector("[data-sl-age-max]").hidden = profile.plus;
+            group.querySelector("[data-sl-age-max]").disabled = profile.plus;
+            group.querySelector("[data-sl-age-separator]").hidden = profile.plus;
+            group.querySelector("[data-sl-age-open-suffix]").hidden = !profile.plus;
+            group.querySelector("[data-sl-age-boundary-toggle]").textContent = profile.plus ? "设为区间" : "设为以上";
+          }
           if (group && pill.closest("[data-sl-age-chips]")) {
             const customBox = group.querySelector("[data-sl-custom-age]");
             if (customBox) customBox.hidden = pill.dataset.slAgePill !== "__custom__";

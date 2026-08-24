@@ -304,6 +304,9 @@
     state.tagModal = { mode, targetIds, draft: new Set(draft) };
     state.tagGroup = 'all';
     byId('fvTagSearch').value = ''; byId('fvNewTagName').value = ''; byId('fvTagError').textContent = ''; byId('fvTagCreateRow').hidden = true;
+    const readOnlyFilter = mode === 'filter';
+    byId('fvNewTagGroup').hidden = readOnlyFilter;
+    byId('fvShowNewTag').hidden = readOnlyFilter;
     byId('fvTagModalTitle').textContent = mode === 'filter' ? '按标签筛选' : mode === 'import' ? '添加视频标签' : mode === 'edit' ? '编辑视频标签' : `为 ${targetIds.length} 个成片打标签`;
     byId('fvTagModalSubtitle').textContent = mode === 'filter' ? '可多选标签，筛选同时满足全部标签的成片。' : mode === 'import' ? '选择或新建标签，导入后将随视频保存。' : mode === 'edit' ? '选择需要保留的视频标签。' : '标签会追加到已选成片，不会覆盖原有标签。';
     byId('fvConfirmTag').textContent = mode === 'filter' ? '应用筛选' : mode === 'import' ? '确认标签' : mode === 'edit' ? '保存标签' : '确认添加';
@@ -311,6 +314,7 @@
   }
 
   function createTag() {
+    if (state.tagModal?.mode === 'filter') return;
     const tag = byId('fvNewTagName').value.trim();
     if (!tag) { byId('fvTagError').textContent = '请输入标签名称'; return; }
     if (tag.length > 20) { byId('fvTagError').textContent = '标签名称最多 20 个字符'; return; }
@@ -320,6 +324,7 @@
   }
 
   function createTagGroup() {
+    if (state.tagModal?.mode === 'filter') return;
     const name = prompt('请输入标签分组名称（1–20 个字符）');
     if (!name) return;
     const value = name.trim();

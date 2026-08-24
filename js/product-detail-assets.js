@@ -108,7 +108,7 @@
         {id:'prompt-detail-function', name:'功能拆解型详情页提示词', category:'商品详情图', description:'适合按功能模块生成电商详情页图片', agent:'商品详情图 Agent', text:'首屏海报图、核心卖点图与细节特写图三个模块。', tags:['首屏海报图','核心卖点图','细节特写图'], createdAt:'2026-08-04', isDefault:true}
       ],
       persona:[
-        {id:'persona-mom', name:'精致妈妈—母婴清洁人群', audience:'精致妈妈 · 女性', age:'24–30岁', scene:'宝宝家庭的床垫日常清洁；毛绒玩具和布艺沙发清洁', pain:'孩子接触床褥后容易敏感不适；床单刚换仍担心深层毛发碎屑', scope:'轻净 Pro 除螨仪', created:'嗡大发 · 08/01 10:20', updated:'嗡大发 · 08/04 15:30', usage:36},
+        {id:'persona-mom', name:'精致妈妈—母婴清洁人群', audience:'精致妈妈 · 女', age:'25–40', scene:'宝宝家庭的床垫日常清洁；毛绒玩具和布艺沙发清洁', pain:'孩子接触床褥后容易敏感不适；床单刚换仍担心深层毛发碎屑', scope:'轻净 Pro 除螨仪', created:'嗡大发 · 08/01 10:20', updated:'嗡大发 · 08/04 15:30', usage:36},
         {id:'persona-pet', name:'精致妈妈—养宠清洁人群', audience:'精致妈妈 · 不限', age:'31–40岁', scene:'宠物活动区日常清洁；换季掉毛期的床褥与沙发清洁', pain:'宠物掉毛进入沙发和床褥缝隙；表面清理后仍有毛发碎屑', scope:'轻净 Pro 除螨仪', created:'嗡大发 · 08/01 10:20', updated:'嗡大发 · 08/04 11:18', usage:24}
       ],
       canvas:[

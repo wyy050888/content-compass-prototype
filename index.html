@@ -13,10 +13,10 @@
   <link rel="stylesheet" href="css/main-pull.css?v=20260822x">
   <link rel="stylesheet" href="css/main-qianchuan.css?v=20260822x">
   <link rel="stylesheet" href="css/main-pull-result.css?v=20260822x">
-  <link rel="stylesheet" href="css/main-ai-agent.css?v=20260822x">
-  <link rel="stylesheet" href="css/main-library.css?v=20260822x">
-  <link rel="stylesheet" href="css/main-automation.css?v=20260822x">
-  <link rel="stylesheet" href="css/main-mix.css?v=20260822x">
+  <link rel="stylesheet" href="css/main-ai-agent.css?v=20260824b">
+  <link rel="stylesheet" href="css/main-library.css?v=20260824b">
+  <link rel="stylesheet" href="css/main-automation.css?v=20260824m">
+  <link rel="stylesheet" href="css/main-mix.css?v=20260824b">
   <link rel="stylesheet" href="css/competitor.css">
   <link rel="stylesheet" href="css/lapan-detail.css">
   <link rel="stylesheet" href="css/script-agent.css?v=20260811a">
@@ -123,7 +123,7 @@
           <summary><span class="nav-group-title"><span class="nav-icon">管</span>系统管理</span><span class="nav-group-caret">⌄</span></summary>
           <div class="nav-sublist">
             <button class="nav-item nav-sub" data-page="role-management">角色管理</button>
-            <button class="nav-item nav-sub" data-page="member-management">人员管理</button>
+            <button class="nav-item nav-sub" data-page="member-management">用户管理</button>
             <button class="nav-item nav-sub" data-page="admin">AI管理后台</button>
           </div>
         </details>
@@ -133,7 +133,7 @@
         <div class="avatar">嗡</div>
         <div>
           <strong>嗡大发</strong>
-          <small>运营 · 抖音三区</small>
+          <small>管理员 · 抖音三区</small>
         </div>
       </div>
     </aside>
@@ -239,6 +239,8 @@
         </div>
       </header>
 
+      <script src="js/persona-rules.js?v=20260824a"></script>
+
       <!-- AI 创作 -->
         <script src="fragments/page-creation.js?v=20260817b"></script>
   <script src="fragments/page-pull-entry.js?v=20260816a"></script>
@@ -253,7 +255,7 @@
   <script src="fragments/page-creation-videos.js?v=20260811a"></script>
   <script src="fragments/page-finished-videos.js?v=20260812a"></script>
   <script src="fragments/page-reference-videos.js?v=20260812a"></script>
-  <script src="fragments/page-external-views.js?v=20260808"></script>
+  <script src="fragments/page-external-views.js?v=20260824c"></script>
   <script src="fragments/page-material-monitor.js"></script>
   <script src="fragments/page-review-distribute.js"></script>
   <script src="fragments/page-product-card.js"></script>
@@ -266,12 +268,12 @@
   <script src="fragments/page-promotion-sync.js"></script>
   <script src="fragments/page-store.js"></script>
   <script src="fragments/page-creator.js?v=20260813a"></script>
-  <script src="fragments/page-role-management.js"></script>
-  <script src="fragments/page-member-management.js"></script>
+  <script src="fragments/page-role-management.js?v=20260824e"></script>
+  <script src="fragments/page-member-management.js?v=20260824f"></script>
   <script src="fragments/page-admin.js"></script>
-  <script src="fragments/_modals-core.js?v=20260816a"></script>
+  <script src="fragments/_modals-core.js?v=20260824c"></script>
   <script src="fragments/_modals-promotion.js?v=20260811a"></script>
-  <script src="fragments/_modals-content.js?v=20260817b"></script>
+  <script src="fragments/_modals-content.js?v=20260824c"></script>
 </div>
 
 
@@ -282,14 +284,14 @@
   <script src="js/modules/app-shell.js?v=20260822r"></script>
   <script src="js/modules/app-pull-entry.js?v=20260822r"></script>
   <script src="js/modules/app-pull-result.js?v=20260822r"></script>
-  <script src="js/modules/app-creation-home.js?v=20260822r"></script>
+  <script src="js/modules/app-creation-home.js?v=20260824a"></script>
   <script src="js/modules/app-creation-copy.js?v=20260822s"></script>
-  <script src="js/modules/app-creation-script.js?v=20260822r"></script>
-  <script src="js/modules/app-creation-reference.js?v=20260822s"></script>
+  <script src="js/modules/app-creation-script.js?v=20260824a"></script>
+  <script src="js/modules/app-creation-reference.js?v=20260824c"></script>
   <script src="js/modules/app-creation-mix-form.js?v=20260822w"></script>
   <script src="js/modules/app-creation-mix-render.js?v=20260822w"></script>
   <script src="js/modules/app-creation-mix-catalog.js?v=20260822w"></script>
-  <script src="js/modules/app-creation-mix-audience.js?v=20260822w"></script>
+  <script src="js/modules/app-creation-mix-audience.js?v=20260824c"></script>
   <script src="js/modules/app-creation-mix-script.js?v=20260822w"></script>
   <script src="js/modules/app-creation-mix-row.js?v=20260822x"></script>
   <script src="js/modules/app-creation-mix-trim.js?v=20260822w"></script>
@@ -299,15 +301,17 @@
   <script src="js/modules/app-creation-task-result.js?v=20260822x"></script>
   <script src="js/modules/app-creation-task-script.js?v=20260822z"></script>
   <script src="js/modules/app-script-shot.js?v=20260822v"></script>
-  <script src="js/modules/app-agent-session.js?v=20260822v"></script>
+  <script src="js/modules/app-agent-session.js?v=20260824c"></script>
   <script src="js/modules/app-agent-assets.js?v=20260822v"></script>
   <script src="js/modules/app-asset-brand.js?v=20260822v"></script>
   <script src="js/modules/app-asset-product.js?v=20260822v"></script>
   <script src="js/modules/app-promotion-org.js?v=20260822r"></script>
   <script src="js/modules/app-copy-structure.js?v=20260822r"></script>
-  <script src="js/modules/app-persona-library.js?v=20260822r"></script>
-  <script src="js/modules/app-copy-edit.js?v=20260822r"></script>
-  <script src="js/script-library.js?v=20260820c"></script>
+  <script src="js/modules/app-persona-library.js?v=20260824c"></script>
+  <script src="js/permission-model.js?v=20260824h"></script>
+  <script src="js/modules/app-permissions.js?v=20260824k"></script>
+  <script src="js/modules/app-copy-edit.js?v=20260824d"></script>
+  <script src="js/script-library.js?v=20260824c"></script>
   <script src="js/asset-audit.js?v=20260820d"></script>
   <script src="js/competitor.js?v=20260812a"></script>
   <script src="js/lapan-detail.js"></script>
