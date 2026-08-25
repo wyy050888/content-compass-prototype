@@ -153,7 +153,8 @@
     .footer-advanced-toggle:hover { border-color:#a897df; color:#5f47bf; background:#faf8ff; }
     .footer-advanced-toggle.active { border-color:#b6a5ed; color:#5d45bd; background:#f4f0ff; }
     .footer-advanced-toggle small { padding:2px 6px; border-radius:999px; background:#eee9fb; color:#725dbe; font-size:10px; }
-    .permission-page-pad { max-width:1540px; margin:0 auto; }
+    /* 权限页随主内容区伸缩；侧栏收起后不保留固定最大宽度造成的两侧留白。 */
+    .permission-page-pad { width:100%; max-width:none; margin:0; }
     .permission-page-head { align-items:flex-end; }
     .permission-page-actions { display:flex; align-items:center; gap:8px; }
     .permission-layout { display:grid; grid-template-columns:272px minmax(0,1fr); gap:18px; align-items:start; }
@@ -366,5 +367,10 @@
     .permission-fallback-toast { position:fixed; left:50%; bottom:28px; z-index:9999; transform:translate(-50%,16px); padding:10px 14px; border-radius:10px; background:#3f3749; color:#fff; font-size:12px; opacity:0; pointer-events:none; transition:.2s ease; }
     .permission-fallback-toast.show { opacity:1; transform:translate(-50%,0); }
     @media (max-width:1200px) { .permission-layout{grid-template-columns:1fr}.permission-side{position:static}.member-summary{grid-template-columns:repeat(2,1fr)}.brand-product-grid{grid-template-columns:1fr 1fr}.reference-video-cover{width:64px} }
+    /* 该断点按视口判断；收起侧栏后主内容区已足以容纳角色列表与详情并排展示。 */
+    @media (min-width:1080px) and (max-width:1200px) {
+      .app.sidebar-collapsed #page-role-management .permission-layout { grid-template-columns:272px minmax(0,1fr); }
+      .app.sidebar-collapsed #page-role-management .permission-side { position:sticky; top:18px; }
+    }
     @media (max-width:760px) { .permission-page-head,.permission-panel-toolbar,.permission-member-toolbar{align-items:stretch;flex-direction:column}.permission-role-detail-actions{order:3;width:100%;margin-left:0}.permission-tabs{width:100%}.permission-tab{flex:1}.permission-member-search{max-width:none}.permission-member-filters{display:grid;grid-template-columns:1fr 1fr}.permission-department-search{max-width:none}.member-summary{grid-template-columns:1fr 1fr}.permission-note{display:grid}.permission-node-row{padding-left:calc(8px + var(--permission-depth) * 14px)} }
 
