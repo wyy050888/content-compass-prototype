@@ -103,7 +103,7 @@
           "情绪冲击": `每天都在用的地方，最怕看着干净、实际问题还藏在里面。`,
           "理性对比": `选这类产品，不比功能数量，只比核心问题能不能真正处理。`
         };
-        const methodTitles = { hook:"只换前3秒钩子", shorten:"缩短文案", audience:"更换目标人群", selling:"卖点前置", style:"调整表达风格", rephrase:"保留结构重新表达" };
+        const methodTitles = { hook:"只换前3秒钩子", shorten:"缩短/扩写文案", audience:"更换目标人群", selling:"卖点前置", style:"调整表达风格", rephrase:"保留结构重新表达" };
         const count = Math.max(1, Math.min(10, Number(countOverride ?? fields.generationCount ?? 3)));
         return Array.from({ length: count }, (_, index) => {
           const absoluteIndex = offset + index;
@@ -175,7 +175,7 @@
 
     function defaultAgentRequest(type) {
       const product = currentProduct();
-      const rewriteMethodLabel = ({ hook:"只换前3秒钩子", shorten:"缩短文案", audience:"更换目标人群", selling:"卖点前置", style:"调整表达风格", rephrase:"保留结构重新表达" })[creationContext.originalFields.rewriteMethod] || "只换前3秒钩子";
+      const rewriteMethodLabel = ({ hook:"只换前3秒钩子", shorten:"缩短/扩写文案", audience:"更换目标人群", selling:"卖点前置", style:"调整表达风格", rephrase:"保留结构重新表达" })[creationContext.originalFields.rewriteMethod] || "只换前3秒钩子";
       const requests = {
         original: `为“${product.name}”生成${creationContext.originalFields.generationCount || 3}条千川口播文案；营销场景：${creationContext.originalFields.marketingScene || "直播间引流"}；目标人群：${creationContext.originalFields.audiences?.join("、") || "产品默认人群"}；开场钩子：${creationContext.originalFields.hook || "不限"}；文案结构：${creationContext.originalFields.copyStructure || "不限"}；脚本类型：${creationContext.originalFields.scriptType || "不限"}；每条约${creationContext.originalFields.wordCount || 180}字。仅使用已确认的产品卖点与信任背书。`,
         copy: `参考当前已解析爆款内容的钩子、结构与节奏，为“${product.name}”生成${creationContext.originalFields.generationCount || 3}条原创仿写文案，每条约${creationContext.originalFields.wordCount || 120}字；仅使用当前产品事实，不复制原文，不迁移参考商品的品牌、参数、价格或优惠。`,
