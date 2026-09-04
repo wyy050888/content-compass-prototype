@@ -1,84 +1,75 @@
-(function(){var s=document.currentScript;if(!s)return;s.insertAdjacentHTML('beforebegin',`
-
-      <!-- 账户配置 -->
-      <section class="page" id="page-account-config">
-        <div class="promo-page">
-          <div class="page-head">
-            <div>
-              <h1>账户映射配置</h1>
-              <p>维护产品 ↔ 过审账户 ↔ 直播投放账户 ↔ 图文投放账户 ↔ 默认端口的映射关系。</p>
-            </div>
-            <button class="primary-btn" id="acAddBtn">＋ 新增产品</button>
+(function () {
+  const script = document.currentScript;
+  if (!script) return;
+  script.insertAdjacentHTML("beforebegin", `
+    <section class="page" id="page-account-config">
+      <div class="ac-page">
+        <header class="ac-page-head">
+          <div><h1>授权配置</h1><p>管理店铺平台授权、广告账户及其授权抖音号</p></div>
+        </header>
+        <nav class="ac-view-tabs" id="acViewTabs" aria-label="授权配置视图">
+          <button class="active" data-ac-view="shop">店铺授权</button>
+          <button data-ac-view="account">广告账户</button>
+          <button data-ac-view="douyin">广告账户授权抖音号</button>
+        </nav>
+        <section class="ac-panel" data-ac-panel="shop">
+          <div class="ac-toolbar ac-toolbar-wrap">
+            <label class="ac-search"><span>⌕</span><input id="acShopSearch" placeholder="搜索店铺名称或ID"></label>
+            <label class="ac-filter"><span>千川授权状态</span><select id="acQianchuanFilter"><option value="all">全部</option><option value="authorized">已授权</option><option value="unauthorized">未授权</option></select></label>
+            <label class="ac-filter"><span>随心推授权状态</span><select id="acSuixintuiFilter"><option value="all">全部</option><option value="authorized">已授权</option><option value="unauthorized">未授权</option></select></label>
+            <label class="ac-filter"><span>巨量广告授权状态</span><select id="acJuliangFilter"><option value="all">全部</option><option value="authorized">已授权</option><option value="unauthorized">未授权</option></select></label>
+            <span class="ac-result-count" id="acShopCount"></span>
+            <button class="ac-primary ac-add-auth" id="acAddShopAuth" type="button">添加店铺授权</button>
           </div>
-          <div class="info-banner info" style="margin-bottom:14px;">
-            <span>ℹ</span><span>每个产品至少配置4类账户：过审账户、直播投放账户、图文投放账户、默认端口账户。过审与图文投放可共用，直播投放必须独立。</span>
+          <div class="ac-table-wrap"><table class="ac-table ac-shop-table"><thead><tr><th>店铺</th><th>广告账户数</th><th>剩余授权有效期（天）</th><th>千川授权</th><th>随心推授权</th><th>巨量广告授权</th><th>操作</th></tr></thead><tbody id="acShopBody"></tbody></table></div>
+        </section>
+        <section class="ac-panel" data-ac-panel="account" hidden>
+          <div class="ac-toolbar ac-toolbar-wrap">
+            <label class="ac-search"><span>⌕</span><input id="acAccountSearch" placeholder="搜索广告账户名称或ID"></label>
+            <label class="ac-search ac-search-secondary"><span>⌕</span><input id="acAccountShopSearch" placeholder="搜索店铺名称或ID"></label>
+            <label class="ac-checkbox"><input type="checkbox" id="acDefaultOnly"><span>仅看店铺默认账户</span></label>
+            <span class="ac-result-count" id="acAccountCount"></span>
           </div>
-          <div class="promo-table">
-            <table>
-              <thead><tr>
-                <th>产品</th><th>过审账户</th><th>直播投放账户</th><th>图文投放账户</th><th>默认端口</th><th>状态</th><th>操作</th>
-              </tr></thead>
-              <tbody id="acTbody"></tbody>
-            </table>
+          <div class="ac-table-wrap"><table class="ac-table ac-account-table"><thead><tr><th>广告账户</th><th>店铺</th><th>授权抖音号数</th><th>操作</th></tr></thead><tbody id="acAccountBody"></tbody></table></div>
+        </section>
+        <section class="ac-panel" data-ac-panel="douyin" hidden>
+          <div class="ac-toolbar">
+            <label class="ac-search ac-search-wide"><span>⌕</span><input id="acDouyinSearch" placeholder="搜索抖音号、广告账户或店铺名称/ID"></label>
+            <span class="ac-result-count" id="acDouyinCount"></span>
           </div>
-
-          <!-- 子Tab：账户映射 / 任务调度 -->
-          <div class="seg" style="margin-top:18px; margin-bottom:14px;">
-            <button class="seg-item active" data-ac-tab="mapping">账户映射</button>
-            <button class="seg-item" data-ac-tab="scheduler">任务调度</button>
+          <div class="ac-table-wrap"><table class="ac-table ac-douyin-table"><thead><tr><th>抖音号</th><th>广告账户</th><th>店铺/主体</th><th>授权状态</th><th>更新时间</th></tr></thead><tbody id="acDouyinBody"></tbody></table></div>
+        </section>
+      </div>
+      <div class="ac-guide-mask" id="acGuideMask" hidden>
+        <section class="ac-guide" role="dialog" aria-modal="true" aria-labelledby="acGuideTitle">
+          <header class="ac-guide-head">
+            <div><h3 id="acGuideTitle">授权引导</h3><p>完成以下步骤，将店铺授权给内容罗盘</p></div>
+            <button class="ac-guide-close" id="acGuideClose" type="button" aria-label="关闭授权引导">×</button>
+          </header>
+          <div class="ac-guide-steps">
+            <article class="ac-guide-step">
+              <span class="ac-guide-index">1</span>
+              <div class="ac-guide-icon ac-guide-icon-browser" aria-hidden="true"><i></i></div>
+              <h4>登录抖店账户</h4>
+              <p>请在当前浏览器中，提前登录需要授权的抖店账户</p>
+            </article>
+            <article class="ac-guide-step">
+              <span class="ac-guide-index">2</span>
+              <div class="ac-guide-icon ac-guide-icon-click" aria-hidden="true"><i></i></div>
+              <h4>发起授权</h4>
+              <p>点击下方“去授权”，进入千川官方授权流程</p>
+            </article>
+            <article class="ac-guide-step">
+              <span class="ac-guide-index">3</span>
+              <div class="ac-guide-icon ac-guide-icon-check" aria-hidden="true"><i></i></div>
+              <h4>选择授权账户</h4>
+              <p>在千川授权页面选择账户，确认后即可完成授权</p>
+            </article>
           </div>
-
-          <!-- 账户映射子Tab内容（默认显示） -->
-          <div data-ac-panel="mapping">
-            <div class="info-banner info">
-              <span>ℹ</span><span>账户映射配置位于上方主表格，此处可继续维护产品 ↔ 账户的默认端口、负责人等扩展信息。</span>
-            </div>
-            <div class="promo-table">
-              <table>
-                <thead><tr><th>产品</th><th>默认端口</th><th>端口负责人</th><th>合作类型</th><th>更新时间</th><th>操作</th></tr></thead>
-                <tbody id="acExtraTbody"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- 任务调度子Tab内容 -->
-          <div data-ac-panel="scheduler" hidden>
-            <section class="card" style="margin-bottom:16px;">
-              <div class="card-title"><div><h3>每日执行时间线</h3><small>6个核心自动化任务的时序编排</small></div></div>
-              <div style="padding:16px;">
-                <div class="flow-card" id="tsFlowCard2">
-                  <div class="flow-step"><b>1</b><strong>02:00 素材清理</strong><small>投放+过审双轨扫描</small></div>
-                  <div class="flow-step"><b>2</b><strong>08:00 商品卡巡检</strong><small>补建/异常上报</small></div>
-                  <div class="flow-step"><b>3</b><strong>09:00 图文推广巡检</strong><small>补建/更新/填充素材</small></div>
-                  <div class="flow-step"><b>4</b><strong>全天 过审分发</strong><small>NAS扫描→上传→监听→分发</small></div>
-                  <div class="flow-step"><b>5</b><strong>实时 审核监听</strong><small>通过→分发 / 不通过→申诉</small></div>
-                  <div class="flow-step"><b>6</b><strong>全天 素材库同步</strong><small>过审状态标记更新</small></div>
-                </div>
-              </div>
-            </section>
-            <div class="two-col">
-              <section class="card">
-                <div class="card-title"><div><h3>任务执行状态</h3><small>今日运行情况</small></div></div>
-                <div class="table-wrap">
-                  <table>
-                    <thead><tr><th>任务</th><th>触发时间</th><th>状态</th><th>上次执行</th><th>结果</th></tr></thead>
-                    <tbody id="tsTaskTbody2"></tbody>
-                  </table>
-                </div>
-              </section>
-              <section class="card">
-                <div class="card-title"><div><h3>异常处理策略</h3><small>自动重试与告警规则</small></div></div>
-                <div class="table-wrap">
-                  <table>
-                    <thead><tr><th>异常场景</th><th>处理策略</th></tr></thead>
-                    <tbody id="tsStrategyTbody2"></tbody>
-                  </table>
-                </div>
-              </section>
-            </div>
-            <div style="margin-top:14px; text-align:right;">
-              <button class="ghost-btn" id="tsTriggerBtn2">▶ 立即执行全部任务</button>
-            </div>
-          </div>
-        </div>
-      </section>`);})();
+          <footer class="ac-guide-foot"><button class="ac-primary" id="acGuideAuthorize" type="button">去授权</button></footer>
+        </section>
+      </div>
+      <div class="ac-confirm-mask" id="acConfirmMask" hidden><section class="ac-confirm" role="dialog" aria-modal="true" aria-labelledby="acConfirmTitle"><h3 id="acConfirmTitle"></h3><p id="acConfirmText"></p><div><button id="acConfirmCancel">取消</button><button class="ac-primary" id="acConfirmOk">确认</button></div></section></div>
+      <div class="ac-toast" id="acToast" hidden></div>
+    </section>`);
+})();

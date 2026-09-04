@@ -20,7 +20,7 @@
       "review-distribute": "视频过审与分发",
       "product-card": "商品卡推广",
       "content-promo": "图文推广",
-      "account-config": "推广配置",
+      "account-config": "授权配置",
       promotion: "推广自动化",
       "promotion-batch": "推广自动化",
       "promotion-rules": "推广配置",
@@ -132,7 +132,7 @@
       activeItem?.closest(".nav-child-group")?.setAttribute("open", "");
       sidebar.classList.remove("open");
       setAssetPanel(false);
-      const accountScopedPages = ["material-monitor", "review-distribute", "product-card", "content-promo"];
+      const accountScopedPages = ["material-monitor", "review-distribute", "content-promo"];
       const showAccountSidebar = accountScopedPages.includes(name);
       document.getElementById("subSidebar")?.classList.toggle("show", showAccountSidebar);
       appShell.classList.toggle("has-subsidebar", showAccountSidebar);

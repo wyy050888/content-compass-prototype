@@ -16,6 +16,20 @@
   <link rel="stylesheet" href="css/main-ai-agent.css?v=20260824b">
   <link rel="stylesheet" href="css/main-library.css?v=20260824b">
   <link rel="stylesheet" href="css/main-automation.css?v=20260824m">
+  <link rel="stylesheet" href="css/main-product-card.css?v=20260904b">
+  <link rel="stylesheet" href="css/main-product-card-filters.css?v=20260902f">
+  <link rel="stylesheet" href="css/main-product-card-generation.css?v=20260904a">
+  <link rel="stylesheet" href="css/main-product-card-product-view.css?v=20260904c">
+  <link rel="stylesheet" href="css/main-product-card-strategy.css?v=20260902f">
+  <link rel="stylesheet" href="css/main-product-card-screening.css?v=20260902c">
+  <link rel="stylesheet" href="css/main-product-card-distribution.css?v=20260904e">
+  <link rel="stylesheet" href="css/main-product-card-gallery.css?v=20260903c">
+  <link rel="stylesheet" href="css/main-product-card-distribution-viewer.css?v=20260903a">
+  <link rel="stylesheet" href="css/main-product-card-distribution-cards.css?v=20260904g">
+  <link rel="stylesheet" href="css/main-product-card-sticky-columns.css?v=20260903a">
+  <link rel="stylesheet" href="css/main-product-card-metrics.css?v=20260903b">
+  <link rel="stylesheet" href="css/main-product-card-screen-progress.css?v=20260903c">
+  <link rel="stylesheet" href="css/main-account-config.css?v=20260904a">
   <link rel="stylesheet" href="css/main-mix.css?v=20260824b">
   <link rel="stylesheet" href="css/competitor.css">
   <link rel="stylesheet" href="css/lapan-detail.css">
@@ -76,9 +90,15 @@
           <div class="nav-sublist">
             <button class="nav-item nav-sub" data-page="material-monitor">素材监控</button>
             <button class="nav-item nav-sub" data-page="review-distribute">视频过审与分发</button>
-            <button class="nav-item nav-sub" data-page="product-card">商品卡推广</button>
             <button class="nav-item nav-sub" data-page="content-promo">图文推广</button>
-            <button class="nav-item nav-sub" data-page="account-config">推广配置</button>
+            <details class="nav-child-group" open>
+              <summary><span>商品卡推广</span><span>⌄</span></summary>
+              <div class="nav-child-list">
+                <button class="nav-item nav-sub nested" data-page="product-card" data-pc-nav="generation">图片生成</button>
+                <button class="nav-item nav-sub nested" data-page="product-card" data-pc-nav="distribution">图片分发</button>
+              </div>
+            </details>
+            <button class="nav-item nav-sub" data-page="account-config">授权配置</button>
           </div>
         </details>
 
@@ -242,7 +262,7 @@
       <script src="js/persona-rules.js?v=20260824a"></script>
 
       <!-- AI 创作 -->
-        <script src="fragments/page-creation.js?v=20260817b"></script>
+        <script src="fragments/page-creation.js?v=20260904a"></script>
   <script src="fragments/page-pull-entry.js?v=20260816a"></script>
   <script src="fragments/page-pull.js?v=20260816a"></script>
   <script src="fragments/page-brands.js?v=20260813a"></script>
@@ -258,9 +278,9 @@
   <script src="fragments/page-external-views.js?v=20260824c"></script>
   <script src="fragments/page-material-monitor.js"></script>
   <script src="fragments/page-review-distribute.js"></script>
-  <script src="fragments/page-product-card.js"></script>
+  <script src="fragments/page-product-card.js?v=20260904d"></script>
   <script src="fragments/page-content-promo.js"></script>
-  <script src="fragments/page-account-config.js"></script>
+  <script src="fragments/page-account-config.js?v=20260904a"></script>
   <script src="fragments/page-promotion.js?v=20260813a"></script>
   <script src="fragments/page-promotion-batch.js"></script>
   <script src="fragments/page-promotion-rules.js"></script>
@@ -306,6 +326,21 @@
   <script src="js/modules/app-asset-brand.js?v=20260822v"></script>
   <script src="js/modules/app-asset-product.js?v=20260822v"></script>
   <script src="js/modules/app-promotion-org.js?v=20260822r"></script>
+  <script src="js/product-card-data.js?v=20260904b"></script>
+  <script src="js/modules/app-product-card.js?v=20260904g"></script>
+  <script src="js/modules/app-product-card-date-range.js?v=20260902f"></script>
+  <script src="js/modules/app-product-card-image-picker.js?v=20260902c"></script>
+  <script src="js/modules/app-product-card-generation.js?v=20260904c"></script>
+  <script src="js/modules/app-product-card-screening.js?v=20260904a"></script>
+  <script src="js/modules/app-product-card-strategy.js?v=20260904a"></script>
+  <script src="js/modules/app-product-card-product-view.js?v=20260904b"></script>
+  <script src="js/modules/app-product-card-distribution.js?v=20260904e"></script>
+  <script src="js/modules/app-product-card-distribution-results.js?v=20260904j"></script>
+  <script src="js/modules/app-product-card-distribution-gallery.js?v=20260904a"></script>
+  <script src="js/modules/app-product-card-distribution-image-viewer.js?v=20260904e"></script>
+  <script src="js/modules/app-product-card-distribution-wizard.js?v=20260904h"></script>
+  <script src="js/modules/app-account-config-data.js?v=20260902a"></script>
+  <script src="js/modules/app-account-config.js?v=20260904a"></script>
   <script src="js/modules/app-copy-structure.js?v=20260822r"></script>
   <script src="js/modules/app-persona-library.js?v=20260824c"></script>
   <script src="js/permission-model.js?v=20260824h"></script>

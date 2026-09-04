@@ -1,0 +1,4 @@
+.pc-table-scroll:has(.pc-distribution-plan-table){position:relative;isolation:isolate}
+.pc-distribution-plan-table th:last-child,.pc-distribution-plan-table td:last-child{position:sticky;right:0;min-width:150px;white-space:nowrap;box-shadow:-10px 0 14px -12px rgba(35,46,67,.42)}
+.pc-distribution-plan-table th:last-child{z-index:4;background:#f7f8fa}.pc-distribution-plan-table td:last-child{z-index:2;background:#fff}
+.pc-distribution-plan-table tbody tr:hover td:last-child{background:#fbfaff}
