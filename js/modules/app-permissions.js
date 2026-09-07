@@ -111,7 +111,11 @@
   let activePanel = "function";
   let isEditingRole = false;
   let editSnapshot = null;
-  const expanded = new Set(["ai", "asset", "asset.brand", "asset.product", "system"]);
+  const expanded = new Set([
+    "ai", "asset", "asset.brand", "asset.product",
+    "promotion", "promotion.productCard", "promotion.productCard.generate", "promotion.productCard.distribute", "promotion.authorization",
+    "system"
+  ]);
 
   const elements = {
     roleList: document.getElementById("permissionRoleList"),
@@ -165,7 +169,7 @@
     const hasChildren = Boolean(node.children?.length);
     const locked = activeRole === "admin" || !isEditingRole || (activeRole !== "admin" && (node.id === "system" || node.id.startsWith("system.")));
     const isExpanded = expanded.has(node.id);
-    const typeLabel = node.type === "menu" ? "菜单" : node.type === "page" ? "页面" : "按钮";
+    const typeLabel = node.type === "menu" ? "菜单" : node.type === "page" ? (node.id.startsWith("promotion.") ? "Tab" : "页面") : "按钮";
     const stats = branchStats(role, node);
     return `<div class="permission-node permission-node-${node.type}" data-node-id="${node.id}" style="--permission-depth:${depth}">
       <div class="permission-node-row">
@@ -300,7 +304,7 @@
       elements.roleActions.hidden = role.type !== "configured";
       elements.roleActions.innerHTML = isEditingRole
         ? `<button class="text-btn" type="button" data-role-command="cancel">取消</button><button class="primary-btn permission-save-role" type="button" data-role-command="save">保存</button>`
-        : `<button class="text-btn" type="button" data-role-command="edit">编辑角色</button><button class="text-btn" type="button" data-role-command="move">移动分组</button><button class="text-btn danger" type="button" data-role-command="delete">删除角色</button>`;
+        : `<button class="text-btn" type="button" data-preview-promotion-role>预览推广权限</button><button class="text-btn" type="button" data-role-command="edit">编辑角色</button><button class="text-btn" type="button" data-role-command="move">移动分组</button><button class="text-btn danger" type="button" data-role-command="delete">删除角色</button>`;
     }
     [document.getElementById("newPermissionRoleGroup"), document.getElementById("newPermissionRole")].forEach(button => {
       if (button) button.disabled = isEditingRole;
@@ -782,5 +786,24 @@
     setPanel(activePanel);
   }
 
+  // Preview affects only promotion menus/tabs; role assignments are not changed.
+  let previewRole = "";
+  window.ContentCompassPermissions = {
+    ids() {
+      const ids = previewRole ? [previewRole] : (members[0].enabled ? members[0].roleIds : []);
+      return new Set(ids.flatMap(id => [...(roles[id]?.permissions || [])]));
+    },
+    preview(roleId = "") {
+      if (roleId && !roles[roleId]) return;
+      previewRole = roleId;
+      window.dispatchEvent(new CustomEvent("promotion-permissions-change", { detail: { name: roles[roleId]?.name || "" } }));
+    }
+  };
+  document.addEventListener("click", event => {
+    if (!event.target.closest("[data-preview-promotion-role]")) return;
+    if (isEditingRole) return notify("请先保存角色");
+    window.ContentCompassPermissions.preview(activeRole);
+    notify("已切换商品卡推广权限预览，退出预览不影响角色配置");
+  });
   window.initPermissionManagement = initPermissionManagement;
 })();

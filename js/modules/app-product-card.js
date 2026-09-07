@@ -15,7 +15,10 @@
       distributionView: "task",
       drawerDirty: false,
       drawerMode: "",
-      confirmResolve: null
+      drawerSaveDraft: null,
+      drawerCanSaveDraft: null,
+      confirmResolve: null,
+      confirmMode: "boolean"
     },
     els: {
       title: root.querySelector("#pcPageTitle"),
@@ -103,6 +106,8 @@
     app.closeDistributionImageViewer?.();
     app.state.drawerDirty = false;
     app.state.drawerMode = options.mode || "view";
+    app.state.drawerSaveDraft = typeof options.saveDraft === "function" ? options.saveDraft : null;
+    app.state.drawerCanSaveDraft = typeof options.canSaveDraft === "function" ? options.canSaveDraft : null;
     app.els.drawer.classList.toggle("pc-distribution-drawer", options.className === "pc-distribution-drawer");
     app.els.drawerBody.className = `pc-drawer-body ${options.bodyClass || ""}`.trim();
     app.els.drawerEyebrow.textContent = options.eyebrow || "";
@@ -127,22 +132,54 @@
     app.els.drawer.classList.remove("pc-distribution-drawer");
     app.state.drawerDirty = false;
     app.state.drawerMode = "";
+    app.state.drawerSaveDraft = null;
+    app.state.drawerCanSaveDraft = null;
     document.body.style.overflow = "";
   };
   app.requestCloseDrawer = async () => {
     if (app.state.drawerDirty) {
-      const discard = await app.confirm("放弃未保存修改？", "当前抽屉中的修改尚未保存，关闭后将丢失。", "放弃修改");
-      if (!discard) return;
+      const canSave = app.state.drawerSaveDraft && (!app.state.drawerCanSaveDraft || app.state.drawerCanSaveDraft());
+      const choice = await app.confirmUnsaved(Boolean(canSave));
+      if (choice === "continue") return false;
+      if (choice === "save") {
+        const saved = await app.state.drawerSaveDraft?.();
+        if (!saved) return false;
+      }
     }
     app.forceCloseDrawer();
+    return true;
   };
 
   app.confirm = (title, message, okText = "确认") => new Promise(resolve => {
     if (app.state.confirmResolve) app.state.confirmResolve(false);
     app.state.confirmResolve = resolve;
+    app.state.confirmMode = "boolean";
     app.els.confirmTitle.textContent = title;
     app.els.confirmMessage.textContent = message;
-    app.els.confirmLayer.querySelector('[data-pc-confirm="ok"]').textContent = okText;
+    const ok = app.els.confirmLayer.querySelector('[data-pc-confirm="ok"]');
+    const cancel = app.els.confirmLayer.querySelector('[data-pc-confirm="cancel"]:not(.pc-confirm-mask)');
+    const secondary = app.els.confirmLayer.querySelector('[data-pc-confirm="secondary"]');
+    ok.textContent = okText;
+    ok.disabled = false;
+    cancel.textContent = "取消";
+    secondary.hidden = true;
+    app.els.confirmLayer.classList.add("show");
+    app.els.confirmLayer.setAttribute("aria-hidden", "false");
+  });
+  app.confirmUnsaved = canSave => new Promise(resolve => {
+    if (app.state.confirmResolve) app.state.confirmResolve("continue");
+    app.state.confirmResolve = resolve;
+    app.state.confirmMode = "unsaved";
+    app.els.confirmTitle.textContent = "保存当前修改？";
+    app.els.confirmMessage.textContent = canSave ? "当前内容尚未保存。你可以先保存草稿，也可以放弃修改后关闭。" : "当前内容尚未达到草稿保存条件。可以放弃修改，或返回继续编辑。";
+    const ok = app.els.confirmLayer.querySelector('[data-pc-confirm="ok"]');
+    const cancel = app.els.confirmLayer.querySelector('[data-pc-confirm="cancel"]:not(.pc-confirm-mask)');
+    const secondary = app.els.confirmLayer.querySelector('[data-pc-confirm="secondary"]');
+    ok.textContent = "保存草稿";
+    ok.disabled = !canSave;
+    cancel.textContent = "继续编辑";
+    secondary.textContent = "放弃修改";
+    secondary.hidden = false;
     app.els.confirmLayer.classList.add("show");
     app.els.confirmLayer.setAttribute("aria-hidden", "false");
   });
@@ -150,6 +187,7 @@
     if (!app.state.confirmResolve) return;
     const resolve = app.state.confirmResolve;
     app.state.confirmResolve = null;
+    app.state.confirmMode = "boolean";
     app.els.confirmLayer.classList.remove("show");
     app.els.confirmLayer.setAttribute("aria-hidden", "true");
     resolve(value);
@@ -196,7 +234,11 @@
   root.addEventListener("focusout", event => { if (event.target.closest("[data-pc-tip]")) scheduleHideTip(); });
   tipPopover.addEventListener("pointerenter", () => window.clearTimeout(tipHideTimer));
   tipPopover.addEventListener("pointerleave", scheduleHideTip);
-  root.querySelectorAll("[data-pc-confirm]").forEach(button => button.addEventListener("click", () => app.resolveConfirm(button.dataset.pcConfirm === "ok")));
+  root.querySelectorAll("[data-pc-confirm]").forEach(button => button.addEventListener("click", () => {
+    const action = button.dataset.pcConfirm;
+    if (app.state.confirmMode === "unsaved") app.resolveConfirm(action === "ok" ? "save" : action === "secondary" ? "discard" : "continue");
+    else app.resolveConfirm(action === "ok");
+  }));
   root.addEventListener("input", event => {
     if (event.target.closest("#pcDrawerBody")) app.markDrawerDirty();
   });
@@ -208,7 +250,7 @@
     if (app.isImagePickerOpen?.()) app.closeImagePicker();
     else if (app.isScreenViewerOpen?.()) app.closeGenerationScreenViewer();
     else if (app.isDistributionImageViewerOpen?.()) app.closeDistributionImageViewer();
-    else if (app.els.confirmLayer.classList.contains("show")) app.resolveConfirm(false);
+    else if (app.els.confirmLayer.classList.contains("show")) app.resolveConfirm(app.state.confirmMode === "unsaved" ? "continue" : false);
     else if (app.els.drawerLayer.classList.contains("show")) app.requestCloseDrawer();
   });
 

@@ -14,7 +14,7 @@
   const allImages = () => app.data.images.filter(image => image.taskId === state.taskId);
   const visibleImages = () => state.filter === "all" ? allImages() : allImages().filter(image => image.screenStatus === state.filter);
   const statusText = status => ({ pending: "待筛选", selected: "已选用", rejected: "不选用" })[status] || status;
-  const imageVisual = image => `<div class="pc-generated-placeholder tone-${image.order % 6 + 1}"><b>${image.order}</b><span>规则 ${image.ruleIndex}</span></div>`;
+  const imageVisual = image => app.imageVisual(image);
 
   function filterButton(status, label, count) {
     return `<button data-screen-filter="${status}" class="${state.filter === status ? "active" : ""}">${label} ${count}</button>`;
@@ -29,19 +29,27 @@
     const count = status => images.filter(image => image.screenStatus === status).length;
     const checkedCount = [...state.checked].filter(id => visible.some(image => image.id === id)).length;
     const allChecked = visible.length > 0 && visible.every(image => state.checked.has(image.id));
-    box.innerHTML = `<div class="pc-image-toolbar pc-screen-toolbar"><div class="pc-segmented">${filterButton("all", "全部", images.length)}${filterButton("pending", "待筛选", count("pending"))}${filterButton("selected", "选用", count("selected"))}${filterButton("rejected", "不选用", count("rejected"))}</div><div class="pc-screen-batch"><label><input type="checkbox" data-screen-check-all ${allChecked ? "checked" : ""} ${visible.length ? "" : "disabled"}> 全选当前</label><span>已选 ${checkedCount} 张</span><button class="pc-btn" data-screen-batch="selected" ${checkedCount ? "" : "disabled"}>批量选用</button><button class="pc-btn" data-screen-batch="rejected" ${checkedCount ? "" : "disabled"}>批量不选用</button><button class="pc-btn pc-btn-quiet" data-screen-batch="clear" ${checkedCount ? "" : "disabled"}>取消选择</button></div></div><div class="pc-image-grid pc-screen-grid">${visible.length ? visible.map(image => `<article class="pc-image-card pc-screen-card ${image.screenStatus}"><label class="pc-screen-check" title="加入批量操作"><input type="checkbox" data-screen-check="${image.id}" ${state.checked.has(image.id) ? "checked" : ""}></label><span class="pc-screen-status ${image.screenStatus}">${statusText(image.screenStatus)}</span><button class="pc-screen-open" type="button" data-screen-open="${image.id}" aria-label="查看并筛选 ${app.escape(image.fileName)}">${imageVisual(image)}</button>${image.distributionCount ? `<span class="pc-uploaded-mark">已分发 ${image.distributionCount} 次</span>` : ""}<div class="pc-image-meta"><strong title="${app.escape(image.fileName)}">${app.escape(image.fileName)}</strong><span>规则 ${image.ruleIndex}</span></div></article>`).join("") : `<div class="pc-empty pc-screen-empty">当前状态下没有图片</div>`}</div>`;
+    box.innerHTML = `<div class="pc-image-toolbar pc-screen-toolbar"><div class="pc-segmented">${filterButton("all", "全部", images.length)}${filterButton("pending", "待筛选", count("pending"))}${filterButton("selected", "选用", count("selected"))}${filterButton("rejected", "不选用", count("rejected"))}</div><div class="pc-screen-batch"><label><input type="checkbox" data-screen-check-all ${allChecked ? "checked" : ""} ${visible.length ? "" : "disabled"}> 全选当前</label><span>已选 ${checkedCount} 张</span><button class="pc-btn" data-screen-batch="selected" ${checkedCount ? "" : "disabled"}>批量选用</button><button class="pc-btn" data-screen-batch="rejected" ${checkedCount ? "" : "disabled"}>批量不选用</button><button class="pc-btn pc-btn-quiet" data-screen-batch="clear" ${checkedCount ? "" : "disabled"}>取消选择</button></div></div><div class="pc-image-grid pc-screen-grid">${visible.length ? visible.map(image => `<article class="pc-image-card pc-screen-card ${image.screenStatus}"><label class="pc-screen-check" title="加入批量操作"><input type="checkbox" data-screen-check="${image.id}" ${state.checked.has(image.id) ? "checked" : ""}></label><span class="pc-screen-status ${image.screenStatus}">${statusText(image.screenStatus)}</span><button class="pc-screen-open" type="button" data-screen-open="${image.id}" aria-label="查看并筛选 ${app.escape(image.fileName)}">${imageVisual(image)}</button>${image.distributionCount ? `<span class="pc-uploaded-mark">已分发 ${image.distributionCount} 次</span>` : ""}<div class="pc-image-meta"><strong title="${app.escape(image.fileName)}">${app.escape(image.fileName)}</strong>${app.imageTime(image)}</div></article>`).join("") : `<div class="pc-empty pc-screen-empty">当前状态下没有图片</div>`}</div>`;
     if (options.preserveScroll) requestAnimationFrame(() => { app.els.drawerBody.scrollTop = scrollTop; });
   }
 
   function saveDecision(image, status) {
-    image.screenStatus = status;
+    app.recordScreenDecision(image, status);
     app.renderGeneration?.();
   }
 
-  function setBatchStatus(status) {
+  async function confirmRejectDistributed(images) {
+    const distributed = images.filter(image => image.screenStatus !== "rejected" && Number(image.distributionCount || 0) > 0);
+    if (!distributed.length) return true;
+    return app.confirm("确认设为不选用？", `其中 ${distributed.length} 张图片已有分发记录。本次修改仅影响后续新建分发任务，不撤回历史分发。`, "继续不选用");
+  }
+
+  async function setBatchStatus(status) {
     const ids = [...state.checked];
     if (status === "clear") { state.checked.clear(); renderScreen({ preserveScroll: true }); return; }
-    ids.forEach(id => { const image = app.data.images.find(item => item.id === id); if (image) saveDecision(image, status); });
+    const images = ids.map(id => app.data.images.find(item => item.id === id)).filter(Boolean);
+    if (status === "rejected" && !(await confirmRejectDistributed(images))) return;
+    images.forEach(image => saveDecision(image, status));
     state.checked.clear();
     renderScreen({ preserveScroll: true });
     app.toast(`已将 ${ids.length} 张图片设为${status === "selected" ? "选用" : "不选用"}`);
@@ -55,10 +63,10 @@
     const image = currentViewerImage();
     if (!image) { closeViewer(); return; }
     const generationTask = task();
-    const prompt = generationTask?.rules?.[Math.max(0, image.ruleIndex - 1)]?.prompt || "—";
-    viewer.querySelector("#pcScreenViewerIndex").textContent = `${state.viewerIndex + 1} / ${state.viewerIds.length} · 规则 ${image.ruleIndex}`;
+    const prompt = image.promptSnapshot || generationTask?.rules?.[Math.max(0, image.ruleIndex - 1)]?.prompt || "—";
+    viewer.querySelector("#pcScreenViewerIndex").textContent = `${state.viewerIndex + 1} / ${state.viewerIds.length}`;
     viewer.querySelector("#pcScreenViewerTitle").textContent = image.fileName;
-    viewer.querySelector("#pcScreenViewerBody").innerHTML = `<div class="pc-screen-large-image">${imageVisual(image)}</div><div class="pc-screen-viewer-info"><div><span>当前状态</span><b class="pc-screen-status ${image.screenStatus}">${statusText(image.screenStatus)}</b></div><div><span>所属任务</span><b>${app.escape(generationTask?.name || "—")}</b></div><div><span>提示词</span><b class="pc-screen-viewer-prompt" title="${app.escape(prompt)}">${app.escape(prompt)}</b></div></div><div class="pc-screen-viewer-actions"><button class="pc-btn" data-screen-viewer-nav="prev" ${state.viewerIndex === 0 ? "disabled" : ""}>上一张</button><div><button class="pc-screen-decision selected" data-screen-viewer-status="selected">✓ 选用</button><button class="pc-screen-decision rejected" data-screen-viewer-status="rejected">× 不选用</button></div><button class="pc-btn" data-screen-viewer-nav="next" ${state.viewerIndex === state.viewerIds.length - 1 ? "disabled" : ""}>下一张</button></div><p class="pc-screen-shortcuts">方向键切换 · Enter 选用 · Delete 不选用</p>`;
+    viewer.querySelector("#pcScreenViewerBody").innerHTML = `<div class="pc-screen-large-image">${imageVisual(image)}</div><div class="pc-screen-viewer-info"><div><span>当前状态</span><b class="pc-screen-status ${image.screenStatus}">${statusText(image.screenStatus)}</b></div><div><span>所属任务</span><b>${app.escape(generationTask?.name || "—")}</b></div><div><span>图片生成时间</span><b>${app.escape(image.generatedAt || "未记录")}</b></div><div><span>提示词</span><b class="pc-screen-viewer-prompt" title="${app.escape(prompt)}">${app.escape(prompt)}</b></div></div><div class="pc-screen-viewer-actions"><button class="pc-btn" data-screen-viewer-nav="prev" ${state.viewerIndex === 0 ? "disabled" : ""}>上一张</button><div><button class="pc-screen-decision selected" data-screen-viewer-status="selected">✓ 选用</button><button class="pc-screen-decision rejected" data-screen-viewer-status="rejected">× 不选用</button></div><button class="pc-btn" data-screen-viewer-nav="next" ${state.viewerIndex === state.viewerIds.length - 1 ? "disabled" : ""}>下一张</button></div><p class="pc-screen-shortcuts">方向键切换 · Enter 选用 · Delete 不选用</p>`;
   }
 
   function openViewer(imageId) {
@@ -80,9 +88,10 @@
     renderViewer();
   }
 
-  function decideInViewer(status) {
+  async function decideInViewer(status) {
     const image = currentViewerImage();
     if (!image) return;
+    if (status === "rejected" && !(await confirmRejectDistributed([image]))) return;
     saveDecision(image, status);
     renderScreen({ preserveScroll: true });
     if (state.viewerIndex < state.viewerIds.length - 1) moveViewer(1);

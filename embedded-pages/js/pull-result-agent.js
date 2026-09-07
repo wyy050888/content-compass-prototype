@@ -493,6 +493,15 @@
       ].join("");
     }
 
+    function escapePromptHtml(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function imagePromptStepMarkup(detail = false) {
       const values = detail
         ? ['轻净 Pro 除螨仪，白色机身，透明预调灰尘杯，品牌与产品外观保持一致。','仅展示已审核权益：运费险、7天无理由退换、赠送替换滤网。','精致妈妈，关注床褥深层清洁、使用便利和清洁结果。','统一柔和自然光与品牌配色，模块之间视觉连续。','按深层清洁、拍打吸尘、透明尘杯、适用场景依次拆解。','一个模块只讲一个重点，先给结果证据，再解释功能原理。','禁止商品变形、品牌错字、乱码、虚构参数、夸大功效、未审核价格。']
@@ -500,7 +509,7 @@
       const labels = detail ? ['产品基本信息','权益信息','目标人群','场景','核心卖点','差异化卖点','反向提示词'] : ['基础描述','构图方式','色调描述','标题文字','促销文案','卖点文案','文字设置','场景描述','LOGO规则','权益规则','反向提示词','其他限制'];
       const templateToolbar = '<div class="prompt-confirm-toolbar"><div><strong>提示词内容</strong><small>可选择模板后继续新增、修改参数</small></div><button class="soft-btn" type="button" data-get-prompt-library>选择模板</button></div>';
       const detailCreator = detail ? '<div class="detail-prompt-create"><div><strong>新增详情页模块</strong><small>填写模块名称、模板文案和模块提示词</small></div><div class="detail-prompt-create-fields"><input data-new-detail-prompt-name placeholder="模块名称"><textarea data-new-detail-prompt-copy placeholder="模板文案"></textarea><textarea data-new-detail-prompt-visual placeholder="模块提示词"></textarea><button class="soft-btn" type="button" data-add-detail-prompt-module>＋ 新增模块</button></div></div>' : '';
-      const mainItems = labels.map(function(label,index){ const lines=String(values[index] || '').split(/\n+/).filter(Boolean); const params=lines.length ? lines.map(function(line){ const parts=line.split(/[：:]/); return {name:parts.length > 1 ? parts.shift().trim() : '提示词参数',value:parts.length ? parts.join('：').trim() : line}; }) : [{name:'提示词参数',value:''}]; return '<div class="prompt-confirm-item prompt-structured-field" data-prompt-step-module="'+label+'"><label><span>'+(index+1)+'</span>'+label+' <button type="button" data-prompt-optimize>AI优化</button></label><div class="prompt-param-list">'+params.map(function(param,paramIndex){ return '<div class="prompt-param-row" data-prompt-step-param-row><input data-prompt-step-param-name value="'+escapeHtml(param.name)+'" placeholder="参数名称"><textarea '+(paramIndex===0?'data-required ':'')+'data-prompt-step-param-value placeholder="提示词描述">'+escapeHtml(param.value)+'</textarea><button class="prompt-param-remove" type="button" data-remove-prompt-step-param>×</button></div>'; }).join('')+'</div><button class="prompt-param-add" type="button" data-add-prompt-step-param>＋ 新增提示词参数</button></div>'; }).join('');
+      const mainItems = labels.map(function(label,index){ const lines=String(values[index] || '').split(/\n+/).filter(Boolean); const params=lines.length ? lines.map(function(line){ const parts=line.split(/[：:]/); return {name:parts.length > 1 ? parts.shift().trim() : '提示词参数',value:parts.length ? parts.join('：').trim() : line}; }) : [{name:'提示词参数',value:''}]; return '<div class="prompt-confirm-item prompt-structured-field" data-prompt-step-module="'+label+'"><label><span>'+(index+1)+'</span>'+label+' <button type="button" data-prompt-optimize>AI优化</button></label><div class="prompt-param-list">'+params.map(function(param,paramIndex){ return '<div class="prompt-param-row" data-prompt-step-param-row><input data-prompt-step-param-name value="'+escapePromptHtml(param.name)+'" placeholder="参数名称"><textarea '+(paramIndex===0?'data-required ':'')+'data-prompt-step-param-value placeholder="提示词描述">'+escapePromptHtml(param.value)+'</textarea><button class="prompt-param-remove" type="button" data-remove-prompt-step-param>×</button></div>'; }).join('')+'</div><button class="prompt-param-add" type="button" data-add-prompt-step-param>＋ 新增提示词参数</button></div>'; }).join('');
       const totalPrompt = detail ? '' : '<div class="prompt-confirm-item prompt-total-item"><label>总版提示词 <small>自动整合以上所有结构化模块，不允许删除</small><button type="button" data-total-prompt-optimize>AI优化</button></label><textarea data-total-prompt readonly></textarea></div>';
       return '<section class="form-section image-flow-step" data-task-step="3"><div class="form-section-head"><div><strong>提示词确认</strong><small>确认图片生成提示词；每项均可编辑或单独 AI 优化</small></div><span class="badge">步骤 3 / 5</span></div>'+templateToolbar+'<div class="prompt-confirm-list">'+mainItems+'</div>'+detailCreator+totalPrompt+'</section>';
     }

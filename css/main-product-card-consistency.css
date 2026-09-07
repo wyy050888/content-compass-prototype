@@ -1,0 +1,12 @@
+.pc-image-time { display:block; margin-top:5px; font-size:10px; line-height:1.5; color:#929bad; font-weight:400; white-space:nowrap; }
+.pc-image-load-error { display:flex; min-height:140px; height:100%; flex-direction:column; align-items:center; justify-content:center; gap:10px; font-size:12px; color:#929bad; background:#f5f6fa; }
+.pc-image-load-error button { background:none; border:0; color:#6651ed; cursor:pointer; }
+.pc-wizard-image-stage button.pc-image-preview { border:0; padding:0; width:100%; height:100%; position:relative; cursor:zoom-in; }
+.pc-wizard-image-stage button.pc-image-preview:hover .pc-image-zoom-hint { opacity:1; }
+.pc-screen-open .pc-distribution-placeholder,.pc-screen-large-image .pc-distribution-placeholder { display:block; width:100%; height:100%; min-height:148px; }
+.pc-screen-open img,.pc-screen-large-image img { width:100%; height:100%; object-fit:contain; }
+.pc-access-preview { display:flex; align-items:center; gap:12px; padding:10px 16px; border:1px solid #ddd8ff; background:#f4f2ff; color:#6251c6; border-radius:8px; margin:10px 0; font-size:12px; }
+.pc-access-preview button { border:0; background:none; color:#6651ed; cursor:pointer; }
+.pc-draft-warning { margin-bottom:12px; padding:12px; border:1px solid #f5d6a9; background:#fff8eb; color:#9b6319; border-radius:8px; font-size:12px; }
+.pc-draft-warning button { margin-left:12px; border:0; background:none; color:#6651ed; cursor:pointer; }
+[data-permission-hidden="true"] { display:none !important; }

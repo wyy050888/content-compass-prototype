@@ -30,20 +30,24 @@
     const totalDistributionCount = dist.distributionCount?.(source) ?? Number(source?.distributionCount || 0);
     const contextualDistributionCount = dist.distributionCount?.(source, state.countContext) ?? totalDistributionCount;
     const contextualLabel = state.countContext.label === "累计" ? "累计成功分发" : `${state.countContext.label}成功分发`;
+    const showDistributionCounts = state.countContext.type !== "task";
     layer.querySelector("#pcDistributionViewerIndex").textContent = `${state.index + 1} / ${state.ids.length} · 规则 ${record.ruleIndex}`;
     layer.querySelector("#pcDistributionViewerTitle").textContent = record.fileName;
     layer.querySelector("#pcDistributionViewerBody").innerHTML = `<div class="pc-distribution-viewer-content">
       <div class="pc-distribution-viewer-image">${visual(record, source)}</div>
       <aside class="pc-distribution-viewer-info">
-        <div class="pc-distribution-viewer-status"><span>本次结果</span><b class="pc-dist-result-tag ${record.status}">${statusText(record)}</b></div>
+        ${distributionTask ? `<div class="pc-distribution-viewer-status"><span>本次结果</span><b class="pc-dist-result-tag ${record.status}">${statusText(record)}</b></div>` : ""}
         <dl>
           <div><dt>图片命名</dt><dd>${app.escape(record.fileName)}</dd></div>
           <div><dt>来源生成任务</dt><dd>${app.escape(sourceTask?.name || source?.taskId || "生成任务")}</dd></div>
           <div><dt>分发任务</dt><dd>${app.escape(distributionTask?.name || distributionTask?.id || "—")}</dd></div>
-          <div><dt>分发时间</dt><dd>${distributionTask?.createdAt || "—"}</dd></div>
+          <div><dt>图片生成时间</dt><dd>${app.escape(source?.generatedAt || "未记录")}</dd></div>
+          <div><dt>提交分发时间</dt><dd>${app.escape(record.submittedAt || distributionTask?.createdAt || "尚未提交")}</dd></div>
+          <div><dt>分发处理完成时间</dt><dd>${app.escape(record.completedAt || "尚未完成")}</dd></div>
+          <div><dt>实际生图提示词</dt><dd>${app.escape(source?.promptSnapshot || "未记录")}</dd></div>
           <div><dt>目标计划</dt><dd>${app.escape(plan?.name || "—")}<small>${plan?.id || "—"}</small></dd></div>
-          <div><dt>${app.escape(contextualLabel)}</dt><dd>${contextualDistributionCount} 次</dd></div>
-          ${state.countContext.type === "all" ? "" : `<div><dt>全部计划累计</dt><dd>${totalDistributionCount} 次</dd></div>`}
+          ${showDistributionCounts ? `<div><dt>${app.escape(contextualLabel)}</dt><dd>${contextualDistributionCount} 次</dd></div>` : ""}
+          ${showDistributionCounts && state.countContext.type !== "all" ? `<div><dt>全部计划累计</dt><dd>${totalDistributionCount} 次</dd></div>` : ""}
           ${record.reason ? `<div class="${record.status === "failed" ? "failed" : ""}"><dt>${record.status === "failed" ? "失败原因" : "处理说明"}</dt><dd>${app.escape(record.reason)}</dd></div>` : ""}
         </dl>
         ${record.status === "failed" ? `<button class="pc-viewer-retry" data-distribution-viewer-retry>重试分发</button>` : ""}
@@ -74,6 +78,7 @@
 
   app.isDistributionImageViewerOpen = () => layer.classList.contains("show");
   app.closeDistributionImageViewer = close;
+  app.openDistributionImageViewer = open;
 
   app.root.addEventListener("click", event => {
     const trigger = event.target.closest("[data-open-distribution-image]");

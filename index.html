@@ -16,20 +16,21 @@
   <link rel="stylesheet" href="css/main-ai-agent.css?v=20260824b">
   <link rel="stylesheet" href="css/main-library.css?v=20260824b">
   <link rel="stylesheet" href="css/main-automation.css?v=20260824m">
-  <link rel="stylesheet" href="css/main-product-card.css?v=20260904b">
+  <link rel="stylesheet" href="css/main-product-card.css?v=20260907a">
   <link rel="stylesheet" href="css/main-product-card-filters.css?v=20260902f">
   <link rel="stylesheet" href="css/main-product-card-generation.css?v=20260904a">
   <link rel="stylesheet" href="css/main-product-card-product-view.css?v=20260904c">
   <link rel="stylesheet" href="css/main-product-card-strategy.css?v=20260902f">
   <link rel="stylesheet" href="css/main-product-card-screening.css?v=20260902c">
-  <link rel="stylesheet" href="css/main-product-card-distribution.css?v=20260904e">
+  <link rel="stylesheet" href="css/main-product-card-distribution.css?v=20260907f">
   <link rel="stylesheet" href="css/main-product-card-gallery.css?v=20260903c">
   <link rel="stylesheet" href="css/main-product-card-distribution-viewer.css?v=20260903a">
   <link rel="stylesheet" href="css/main-product-card-distribution-cards.css?v=20260904g">
   <link rel="stylesheet" href="css/main-product-card-sticky-columns.css?v=20260903a">
   <link rel="stylesheet" href="css/main-product-card-metrics.css?v=20260903b">
   <link rel="stylesheet" href="css/main-product-card-screen-progress.css?v=20260903c">
-  <link rel="stylesheet" href="css/main-account-config.css?v=20260904a">
+  <link rel="stylesheet" href="css/main-product-card-consistency.css?v=20260905a">
+  <link rel="stylesheet" href="css/main-account-config.css?v=20260907g">
   <link rel="stylesheet" href="css/main-mix.css?v=20260824b">
   <link rel="stylesheet" href="css/competitor.css">
   <link rel="stylesheet" href="css/lapan-detail.css">
@@ -278,9 +279,9 @@
   <script src="fragments/page-external-views.js?v=20260824c"></script>
   <script src="fragments/page-material-monitor.js"></script>
   <script src="fragments/page-review-distribute.js"></script>
-  <script src="fragments/page-product-card.js?v=20260904d"></script>
+  <script src="fragments/page-product-card.js?v=20260907a"></script>
   <script src="fragments/page-content-promo.js"></script>
-  <script src="fragments/page-account-config.js?v=20260904a"></script>
+  <script src="fragments/page-account-config.js?v=20260907g"></script>
   <script src="fragments/page-promotion.js?v=20260813a"></script>
   <script src="fragments/page-promotion-batch.js"></script>
   <script src="fragments/page-promotion-rules.js"></script>
@@ -326,25 +327,28 @@
   <script src="js/modules/app-asset-brand.js?v=20260822v"></script>
   <script src="js/modules/app-asset-product.js?v=20260822v"></script>
   <script src="js/modules/app-promotion-org.js?v=20260822r"></script>
-  <script src="js/product-card-data.js?v=20260904b"></script>
-  <script src="js/modules/app-product-card.js?v=20260904g"></script>
-  <script src="js/modules/app-product-card-date-range.js?v=20260902f"></script>
-  <script src="js/modules/app-product-card-image-picker.js?v=20260902c"></script>
-  <script src="js/modules/app-product-card-generation.js?v=20260904c"></script>
-  <script src="js/modules/app-product-card-screening.js?v=20260904a"></script>
-  <script src="js/modules/app-product-card-strategy.js?v=20260904a"></script>
-  <script src="js/modules/app-product-card-product-view.js?v=20260904b"></script>
-  <script src="js/modules/app-product-card-distribution.js?v=20260904e"></script>
-  <script src="js/modules/app-product-card-distribution-results.js?v=20260904j"></script>
-  <script src="js/modules/app-product-card-distribution-gallery.js?v=20260904a"></script>
-  <script src="js/modules/app-product-card-distribution-image-viewer.js?v=20260904e"></script>
-  <script src="js/modules/app-product-card-distribution-wizard.js?v=20260904h"></script>
-  <script src="js/modules/app-account-config-data.js?v=20260902a"></script>
-  <script src="js/modules/app-account-config.js?v=20260904a"></script>
+  <script src="js/product-card-data.js?v=20260907f"></script>
+  <script src="js/modules/app-product-card.js?v=20260907f"></script>
+  <script src="js/modules/app-product-card-date-range.js?v=20260905a"></script>
+  <script src="js/modules/app-product-card-image-picker.js?v=20260905a"></script>
+  <script src="js/modules/app-product-card-model.js?v=20260905a"></script>
+  <script src="js/modules/app-product-card-generation.js?v=20260905a"></script>
+  <script src="js/modules/app-product-card-screening.js?v=20260907h"></script>
+  <script src="js/modules/app-product-card-strategy.js?v=20260907h"></script>
+  <script src="js/modules/app-product-card-product-view.js?v=20260907a"></script>
+  <script src="js/modules/app-product-card-distribution.js?v=20260907a"></script>
+  <script src="js/modules/app-product-card-distribution-results.js?v=20260905a"></script>
+  <script src="js/modules/app-product-card-distribution-gallery.js?v=20260905a"></script>
+  <script src="js/modules/app-product-card-distribution-image-viewer.js?v=20260905a"></script>
+  <script src="js/modules/app-product-card-distribution-execution.js?v=20260905a"></script>
+  <script src="js/modules/app-product-card-distribution-wizard.js?v=20260907h"></script>
+  <script src="js/modules/app-account-config-data.js?v=20260907f"></script>
+  <script src="js/modules/app-account-config.js?v=20260907g"></script>
   <script src="js/modules/app-copy-structure.js?v=20260822r"></script>
   <script src="js/modules/app-persona-library.js?v=20260824c"></script>
-  <script src="js/permission-model.js?v=20260824h"></script>
-  <script src="js/modules/app-permissions.js?v=20260824k"></script>
+  <script src="js/permission-model.js?v=20260905a"></script>
+  <script src="js/modules/app-permissions.js?v=20260905a"></script>
+  <script src="js/modules/app-product-card-access.js?v=20260905a"></script>
   <script src="js/modules/app-copy-edit.js?v=20260824d"></script>
   <script src="js/script-library.js?v=20260824c"></script>
   <script src="js/asset-audit.js?v=20260820d"></script>

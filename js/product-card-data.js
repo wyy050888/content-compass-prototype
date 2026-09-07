@@ -80,13 +80,15 @@
   const shops = [
     { id: "SHOP-31021", name: "生活电器旗舰店", accountId: "AD-8821" },
     { id: "SHOP-31045", name: "居家好物专营店", accountId: "AD-5567" },
-    { id: "SHOP-31108", name: "轻享生活旗舰店", accountId: "AD-9016" }
+    { id: "SHOP-31108", name: "轻享生活旗舰店", accountId: "AD-9016" },
+    { id: "SHOP-31132", name: "吹风机专营店", accountId: "" }
   ];
 
   const accounts = [
     { id: "AD-8821", name: "生活电器图文投放", shopId: "SHOP-31021", today: 38, failed: 2, total: 1280, updatedAt: "09-01 15:18" },
     { id: "AD-5567", name: "居家图文投放", shopId: "SHOP-31045", today: 20, failed: 0, total: 846, updatedAt: "09-01 14:52" },
-    { id: "AD-9016", name: "轻享商品卡投放", shopId: "SHOP-31108", today: 0, failed: 10, total: 532, updatedAt: "09-01 11:30" }
+    { id: "AD-9016", name: "轻享商品卡投放", shopId: "SHOP-31108", today: 0, failed: 10, total: 532, updatedAt: "09-01 11:30" },
+    { id: "AD-9219", name: "吹风机千川投放", shopId: "SHOP-31132", today: 0, failed: 0, total: 0, updatedAt: "09-01 10:08" }
   ];
 
   const plans = [

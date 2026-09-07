@@ -41,7 +41,7 @@
 
   function validDraft(task) {
     if (!task.rules?.length || task.rules.length > 50 || task.target < 1 || task.target > 200) return false;
-    return task.rules.every(rule => rule.images?.length && rule.prompt?.trim() && rule.quantity >= 1 && rule.quantity <= 20);
+    return task.name?.trim() && app.product(task.productId) && task.rules.every(rule => rule.images?.length && rule.promptState === "ready" && rule.prompt?.trim() && Number.isInteger(rule.quantity) && rule.quantity >= 1 && rule.quantity <= 20);
   }
 
   function screeningProgress(task) {
@@ -69,7 +69,7 @@
     const creatorKeyword = els.creator.value.trim().toLowerCase();
     const scope = app.state.generationScope;
     const showCreator = scope !== "personal";
-    const scoped = app.data.generationTasks.filter(task => scope === "all" || (scope === "team" ? task.team === "抖音三区" : task.creator === "周宁"));
+    const scoped = app.data.generationTasks.filter(task => app.canViewTask ? app.canViewTask(task, "generate", scope) : scope === "all" || (scope === "team" ? task.team === "抖音三区" : task.creator === "周宁"));
     const all = scoped.filter(task => app.dateRange.contains(task.createdAt, createdRange));
     const tasks = all.filter(task => {
       const product = app.product(task.productId);
@@ -83,23 +83,23 @@
     els.creatorWrap.hidden = !showCreator;
     els.dateRange.innerHTML = app.dateRange.render("generation-created", createdRange, { label: "创建时间", compact: true });
     const todayRange = app.dateRange.preset(1);
-    const todayTasks = scoped.filter(task => app.dateRange.contains(task.createdAt, todayRange));
-    const todaySuccess = todayTasks.reduce((sum, task) => sum + task.success, 0), todayFailed = todayTasks.reduce((sum, task) => sum + task.failed, 0);
+    const todayResults = scoped.flatMap(task => task.processingResults || []).filter(result => app.dateRange.contains(result.completedAt, todayRange));
+    const todaySuccess = todayResults.filter(item => item.status === "success").length, todayFailed = todayResults.filter(item => item.status === "failed").length;
     const cumulativeSuccess = scoped.reduce((sum, task) => sum + task.success, 0), cumulativeFailed = scoped.reduce((sum, task) => sum + task.failed, 0);
-    const scopedIds = new Set(scoped.map(task => task.id)), todayIds = new Set(todayTasks.map(task => task.id));
-    const todaySelected = app.data.images.filter(image => todayIds.has(image.taskId) && image.screenStatus === "selected").length;
+    const scopedIds = new Set(scoped.map(task => task.id));
+    const todaySelected = app.data.images.filter(image => scopedIds.has(image.taskId) && image.screenStatus === "selected" && image.selectedAt && app.dateRange.contains(image.selectedAt, todayRange)).length;
     const cumulativeSelected = app.data.images.filter(image => scopedIds.has(image.taskId) && image.screenStatus === "selected").length;
     els.metrics.innerHTML = [
       app.metric("任务数", all.length, metricDetail([["生成成功", all.filter(task => task.status === "success").length, "success"], ["部分成功", all.filter(task => task.status === "partial").length, "warning"], ["生成失败", all.filter(task => task.status === "failed").length, "danger"]])),
-      app.metric("今日生成图片数", todaySuccess + todayFailed, metricDetail([["成功", todaySuccess, "success"], ["失败", todayFailed, "danger"]])),
-      app.metric("累计生成图片数", cumulativeSuccess + cumulativeFailed, metricDetail([["成功", cumulativeSuccess, "success"], ["失败", cumulativeFailed, "danger"]])),
+      app.metric("今日生图处理数", todaySuccess + todayFailed, metricDetail([["成功", todaySuccess, "success"], ["失败", todayFailed, "danger"]])),
+      app.metric("累计生图处理数", cumulativeSuccess + cumulativeFailed, metricDetail([["成功", cumulativeSuccess, "success"], ["失败", cumulativeFailed, "danger"]])),
       app.metric("今日选用图片数", todaySelected, metricDetail([["累计选用", cumulativeSelected, "primary"]]))
     ].join("");
     els.cols.innerHTML = (showCreator ? [14, 10, 7, 8, 14, 13, 10, 10, 14] : [15, 11, 9, 14, 14, 11, 11, 15]).map(width => `<col style="width:${width}%">`).join("");
     els.head.innerHTML = `<tr><th>任务名称</th><th>产品名称</th>${showCreator ? "<th>创建人</th>" : ""}<th>任务状态</th><th>生成进度${app.tip("已完成数量 ÷ 目标数量；已完成数量包含生成成功与生成失败。")}</th><th>筛选进度${app.tip("已筛选数量为选用与不选用之和；仅生成成功的图片需要筛选。")}</th><th>规则/目标图片</th><th>创建时间</th><th>操作</th></tr>`;
     els.body.innerHTML = pageTasks.length ? pageTasks.map(task => {
       const product = app.product(task.productId);
-      return `<tr><td><span class="pc-cell-main">${app.escape(task.name)}</span><span class="pc-cell-sub">${task.id}</span></td><td><span class="pc-cell-main">${app.escape(product?.name)}</span></td>${showCreator ? `<td>${app.escape(task.creator)}</td>` : ""}<td>${taskStatus(task)}</td><td>${app.formatProgress(task)}</td><td>${screeningProgress(task)}</td><td>${task.rules.length} 条 / ${task.target} 张</td><td>${task.createdAt}</td><td><div class="pc-actions">${taskActions(task)}</div></td></tr>`;
+      return `<tr><td><span class="pc-cell-main">${app.escape(task.name)}</span><span class="pc-cell-sub">${task.id}</span></td><td><span class="pc-cell-main">${app.escape(product?.name)}</span></td>${showCreator ? `<td>${app.escape(task.creator)}</td>` : ""}<td>${taskStatus(task)}</td><td>${app.formatProgress(task)}</td><td>${screeningProgress(task)}</td><td>${task.rules.length} 条 / ${task.target} 张</td><td>${app.shortTime(task.createdAt)}</td><td><div class="pc-actions">${taskActions(task)}</div></td></tr>`;
     }).join("") : `<tr><td class="pc-empty" colspan="${showCreator ? 9 : 8}">没有符合条件的任务</td></tr>`;
     els.pagination.innerHTML = `<span>每页 ${pageSize} 条</span><div><button data-page="prev" ${currentPage === 1 ? "disabled" : ""}>上一页</button>${Array.from({ length: totalPages }, (_, index) => `<button data-page="${index + 1}" class="${currentPage === index + 1 ? "active" : ""}>${index + 1}</button>`).join("")}<button data-page="next" ${currentPage === totalPages ? "disabled" : ""}>下一页</button></div>`;
   };
@@ -170,18 +170,12 @@
     root.querySelector(".pc-generation-table")?.scrollIntoView({ block: "nearest" });
   });
 
-  function completeRunningTask(task) {
-    task.status = task.failed ? "partial" : "success";
-    const product = app.product(task.productId);
-    const existing = app.data.images.filter(image => image.taskId === task.id).length;
-    for (let index = existing; index < task.success; index += 1) app.data.images.push({ id: `${task.id}-IMG-${String(index + 1).padStart(3, "0")}`, taskId: task.id, productId: task.productId, productName: product?.name, fileName: `09.02-${product?.name}-${task.creator}-商品卡-${String(102000 + index).padStart(6, "0")}.png`, ruleIndex: Math.floor(index / 2) + 1, order: index + 1, screenStatus: "pending", distributionCount: 0, distributionHistory: [] });
-  }
   window.setInterval(() => {
     let task = app.data.generationTasks.find(item => item.status === "running" && !item.demoSeed);
     if (!task) { task = app.data.generationTasks.find(item => item.status === "pending" && !item.demoSeed); if (task) task.status = "running"; }
     if (!task) return;
-    task.success += Math.min(2, task.target - task.failed - task.success);
-    if (task.success + task.failed >= task.target) completeRunningTask(task);
+    for (let index = 0; index < 2; index += 1) app.completeGenerationSample(task);
+    if (task.success + task.failed >= task.target) { task.status = task.failed ? (task.success ? "partial" : "failed") : "success"; task.completedAt = app.now(); }
     if (app.state.section === "generation") app.renderGeneration();
   }, 3000);
 

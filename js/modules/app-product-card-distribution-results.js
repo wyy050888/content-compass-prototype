@@ -29,7 +29,7 @@
       accountId: plan.accountId,
       account: `${plan.accountId} ${app.account(plan.accountId)?.name || ""}`.trim(),
       plan: `${plan.id} ${plan.name}`,
-      time: task?.createdAt || "09-04 现在"
+      time: record.completedAt || app.fullTime(task?.createdAt)
     });
     image.distributionCount = image.distributionHistory.length;
     return true;
@@ -79,7 +79,7 @@
         fileName: image?.fileName || `${app.product(task.productId)?.name || "商品"}-待分发-${index + 1}.png`,
         order: image?.order || index + 1,
         ruleIndex: image?.ruleIndex || Math.floor(index / 2) + 1,
-        planId, status, retries: 0,
+        planId, status, retries: 0, submittedAt: app.fullTime(task.createdAt), completedAt: ["success", "failed"].includes(status) ? app.fullTime(task.createdAt) : null,
         reason: status === "failed" ? (planResult?.reason || task.failureReason || "分发失败") : status === "pending" ? (task.status === "cancelled" ? "任务已取消，未执行分发" : "等待处理") : "分发成功"
       };
     });
@@ -92,7 +92,9 @@
     const results = ensureImageResults(task);
     task.success = results.filter(item => item.status === "success").length;
     task.failed = results.filter(item => item.status === "failed").length;
-    const pending = results.filter(item => item.status === "pending").length;
+    const pending = results.filter(item => ["pending", "processing"].includes(item.status)).length;
+    if (["cancelled", "cancelling", "interrupted"].includes(task.status)) return;
+    if (results.some(item => item.status === "confirming")) { task.status = "confirming"; return; }
     task.status = pending ? (task.status === "draft" ? "draft" : task.status === "pending" ? "pending" : "uploading") : task.failed ? (task.success ? "partial" : "failed") : "success";
   }
   dist.recalcTask = recalcTask;
@@ -107,6 +109,7 @@
     const totalDistributionCount = distributionCount(source);
     const contextualDistributionCount = countContext ? distributionCount(source, countContext) : totalDistributionCount;
     const countLabel = countContext?.label || "累计";
+    const showCountBadge = countContext?.type !== "task";
     const statusLabel = record.status === "success" ? "成功" : record.status === "failed" ? "失败" : record.reason?.includes("取消") ? "未处理" : "待处理";
     const visual = source?.url
       ? `<img src="${app.escape(source.url)}" alt="${app.escape(record.fileName)}">`
@@ -116,12 +119,12 @@
       <div class="pc-distribution-image-stage">
         <button type="button" class="pc-distribution-image-preview" data-open-distribution-image="${record.id}" data-count-context-type="${app.escape(countContext?.type || "all")}" data-count-context-id="${app.escape(countContext?.id || "")}" data-count-context-label="${app.escape(countLabel)}" aria-label="查看大图：${app.escape(record.fileName)}">${visual}<span class="pc-image-zoom-hint">查看大图</span></button>
         ${showStatus ? `<span class="pc-dist-result-tag pc-distribution-status-badge ${record.status}">${statusLabel}</span>` : ""}
-        <span class="pc-distribution-count-badge ${contextualDistributionCount ? "distributed" : ""}">${app.escape(countLabel)} ${contextualDistributionCount} 次</span>
+        ${showCountBadge ? `<span class="pc-distribution-count-badge ${contextualDistributionCount ? "distributed" : ""}">${app.escape(countLabel)} ${contextualDistributionCount} 次</span>` : ""}
       </div>
       <div class="pc-distribution-image-meta">
         <strong title="${app.escape(record.fileName)}">${app.escape(record.fileName)}</strong>
         ${showStatus && record.status === "failed" ? `<div class="pc-image-result-line failed"><span title="${failureReason}">${failureReason}</span><button class="pc-card-retry" data-result-retry="${record.id}" ${distributionTask ? `data-result-task="${distributionTask.id}"` : ""}>重试</button></div>` : ""}
-        <div class="pc-distribution-source-row"><span title="${app.escape(sourceTask?.name || source?.taskId || "生成任务")}">${app.escape(sourceTask?.name || source?.taskId || "生成任务")}</span><span class="pc-source-detail-trigger" tabindex="0" data-pc-tip="来源详情" data-pc-tip-kind="source-detail" data-source-task="${app.escape(`${sourceTask?.name || "生成任务"} · ${sourceTask?.id || source?.taskId || "—"}`)}" data-source-prompt="${app.escape(sourceRule?.prompt || "未记录提示词")}" data-source-distribution-count="${totalDistributionCount}" aria-label="悬浮查看来源任务、提示词和历史分发次数">来源详情</span></div>
+        <div class="pc-distribution-source-row">${app.imageTime(source)}<span class="pc-source-detail-trigger" tabindex="0" data-pc-tip="来源详情" data-pc-tip-kind="source-detail" data-source-task="${app.escape(`${sourceTask?.name || "生成任务"} · ${sourceTask?.id || source?.taskId || "—"}`)}" data-source-prompt="${app.escape(source?.promptSnapshot || sourceRule?.prompt || "未记录提示词")}" data-source-distribution-count="${totalDistributionCount}" aria-label="悬浮查看来源任务、提示词和历史分发次数">来源详情</span></div>
       </div>
     </article>`;
   }
@@ -137,9 +140,10 @@
     if (!allocations.length) return `<div class="pc-empty">当前没有符合条件的分发图片</div>`;
     const context = options.context || "detail";
     return `<div class="pc-distribution-table-wrap"><table class="pc-distribution-table"><thead><tr><th>序号</th><th>店铺</th><th>默认广告账户</th><th>计划</th><th>计划状态</th><th>分发图片</th><th>分发数量</th><th>${options.preview ? "当前/预计素材数" : "当前素材数"}</th></tr></thead><tbody>${allocations.map((item, index) => {
-      const plan = item.plan;
-      const shop = app.shop(plan?.shopId);
-      const account = app.account(plan?.accountId);
+      const snapshot = item.images[0] || {};
+      const plan = item.plan ? { ...item.plan, name: snapshot.planName || item.plan.name } : { id: snapshot.planId, name: snapshot.planName || "已失效计划", current: 0 };
+      const shop = { ...app.shop(snapshot.shopId || plan?.shopId), name: snapshot.shopName || app.shop(plan?.shopId)?.name };
+      const account = { ...app.account(snapshot.accountId || plan?.accountId), name: snapshot.accountName || app.account(plan?.accountId)?.name };
       const key = `${context}-${index}`;
       const imageNames = item.images.slice(0, 2).map(record => `<span title="${app.escape(record.fileName)}">${app.escape(record.fileName)}</span>`).join("");
       return `<tr><td>${index + 1}</td><td><span class="pc-two-line"><b>${app.escape(shop?.name || "—")}</b><small>${shop?.id || "—"}</small></span></td><td><span class="pc-two-line"><b>${app.escape(account?.name || "—")}</b><small>${account?.id || "—"}</small></span></td><td><span class="pc-two-line"><b>${app.escape(plan?.name || "—")}</b><small>${plan?.id || "—"}</small></span></td><td>${plan ? dist.planStatusTag(plan.status) : "—"}</td><td><div class="pc-distribution-image-summary"><div>${imageNames || "—"}</div><button type="button" data-toggle-plan-images="${key}">查看全部 ${item.images.length} 张</button></div></td><td><b>${item.images.length} 张</b></td><td>${options.preview ? `${plan?.current || 0} / ${(plan?.current || 0) + item.images.length}` : `${plan?.current || 0} 张`}</td></tr><tr class="pc-distribution-image-row" data-plan-images-row="${key}" hidden><td colspan="8"><div class="pc-distribution-image-grid">${item.images.map(record => detailImageCard(record, options.showStatus, options.countContext)).join("")}</div></td></tr>`;
@@ -168,8 +172,8 @@
       <button class="${resultFilter === "success" ? "active" : ""}" data-result-filter="success">成功 <b>${counts.success}</b></button>
       <button class="${resultFilter === "failed" ? "active" : ""}" data-result-filter="failed">失败 <b>${counts.failed}</b></button>
     </div>${dist.renderDistributionTable(allocations, { context: `${activeTask.id}-${resultFilter}`, showStatus: true, countContext: { type: "task", id: activeTask.id, label: "本任务" } })}</div>`;
-    const runningActions = ["pending", "uploading"].includes(activeTask.status) ? `<button class="pc-btn pc-btn-danger" data-dist-action="cancel-task" data-id="${activeTask.id}">取消任务</button>` : "";
-    app.els.drawerFoot.innerHTML = `${counts.failed && ["partial", "failed"].includes(activeTask.status) ? `<button class="pc-btn pc-btn-warning" data-result-retry-all>重试全部失败项</button>` : ""}${runningActions}<button class="pc-btn" data-pc-close-drawer>关闭</button>`;
+    const runningActions = ["pending", "uploading", "interrupted"].includes(activeTask.status) ? `<button class="pc-btn pc-btn-danger" data-dist-action="cancel-task" data-id="${activeTask.id}">取消任务</button>` : "";
+    app.els.drawerFoot.innerHTML = `${activeTask.status === "confirming" ? `<button class="pc-btn" data-query-original>查询原请求结果</button>` : activeTask.status === "interrupted" ? `<button class="pc-btn" data-resume-distribution>继续分发</button>` : ""}${counts.failed && ["partial", "failed"].includes(activeTask.status) ? `<button class="pc-btn pc-btn-warning" data-result-retry-all>重试全部失败项</button>` : ""}${runningActions}<button class="pc-btn" data-pc-close-drawer>关闭</button>`;
   }
   dist.refreshTaskDetail = () => {
     if (activeTask && app.els.drawerBody.querySelector(".pc-task-detail-content")) renderTaskDetail();
@@ -183,13 +187,20 @@
   };
 
   function retryRecord(record) {
+    if (record?.status !== "failed") return false;
+    const task = record.distributionTask || app.data.distributionTasks.find(item => item.imageResults?.some(result => result.id === record.id));
+    if (!task || ["cancelled", "cancelling"].includes(task.status)) { record.reason = "任务已取消，请新建分发任务"; return false; }
+    const error = dist.validateExecution?.(record, task);
+    if (error) { record.reason = error; return false; }
     const plan = app.plan(record.planId);
-    if (!plan?.canUpload) { record.reason = `计划${dist.planStatusText(plan?.status)}，暂不可分发`; return false; }
-    if (plan.current + 1 > 500) { record.reason = `计划当前素材数 ${plan.current}，已达到500张上限`; return false; }
-    record.status = "success"; record.reason = "重试分发成功"; record.retries += 1;
-    registerSuccessfulDistribution(record, record.distributionTask);
-    plan.current += 1; plan.distributed += 1; plan.today += 1;
-    const account = app.account(plan.accountId); account.today += 1; account.total += 1;
+    if (!plan?.canUpload || plan.current >= 500) { record.reason = "计划当前不可分发或容量已满"; return false; }
+    record.status = "success"; record.reason = "重试分发成功（原型模拟）";
+    record.retries += 1; record.completedAt = app.now();
+    if (registerSuccessfulDistribution(record, task)) {
+      plan.current += 1; plan.distributed += 1; plan.today += 1;
+      const account = app.account(plan.accountId);
+      if (account) { account.today += 1; account.total += 1; }
+    }
     return true;
   }
   dist.retryRecord = retryRecord;
@@ -228,6 +239,8 @@
   };
 
   app.root.addEventListener("click", event => {
+    if (event.target.closest("[data-query-original]") && activeTask) { dist.confirmUnknown(activeTask); return; }
+    if (event.target.closest("[data-resume-distribution]") && activeTask) { dist.resumeExecution(activeTask); return; }
     const toggle = event.target.closest("[data-toggle-plan-images]");
     if (toggle) {
       const row = app.els.drawerBody.querySelector(`[data-plan-images-row="${toggle.dataset.togglePlanImages}"]`);

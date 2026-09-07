@@ -18,6 +18,8 @@
 
   let statusFilter = "all";
   let expandedProductId = "";
+  let productPage = 1;
+  const productPageSize = 20;
   let galleryProductId = "";
   let galleryFilter = "all";
 
@@ -35,12 +37,12 @@
     };
   };
   const productSummary = product => {
-    const tasks = app.data.generationTasks.filter(task => task.productId === product.id);
+    const tasks = app.data.generationTasks.filter(task => task.productId === product.id && (!app.canViewTask || app.canViewTask(task, "generate")));
     const success = tasks.reduce((sum, task) => sum + task.success, 0);
     const failed = tasks.reduce((sum, task) => sum + task.failed, 0);
     const target = tasks.reduce((sum, task) => sum + task.target, 0);
     const screening = screeningCounts(tasks);
-    const active = tasks.some(task => ["pending", "running"].includes(task.status));
+    const active = tasks.some(task => ["pending", "running", "paused"].includes(task.status));
     const completed = Boolean(tasks.length) && tasks.every(task => terminalStatuses.has(task.status)) && screening.pending === 0;
     const recent = tasks.slice().sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0];
     const displayStatus = tasks.some(task => task.status === "running") ? "running" : tasks.some(task => task.status === "pending") ? "pending" : tasks.some(task => task.status === "paused") ? "paused" : tasks.some(task => task.status === "partial") ? "partial" : tasks.some(task => task.status === "failed") ? "failed" : "success";
@@ -62,7 +64,7 @@
       const pending = images.filter(image => image.screenStatus === "pending").length;
       const canScreen = ["success", "partial", "cancelled"].includes(task.status) && task.success > 0;
       return `<div class="pc-product-task-item">
-        <div><span class="pc-cell-main">${app.escape(task.name)}</span><span class="pc-cell-sub">${task.id} · ${task.createdAt}</span></div>
+        <div><span class="pc-cell-main">${app.escape(task.name)}</span><span class="pc-cell-sub">${task.id} · ${app.shortTime(task.createdAt)}</span></div>
         <div>${task.status === "failed" ? `<span class="pc-status failed" tabindex="0" data-pc-tip="${app.escape(task.failureReason || "生成失败")}">生成失败</span>` : app.statusTag(task.status)}</div>
         <div class="pc-product-count"><b>${task.success + task.failed}/${task.target} 张</b><small>成功 ${task.success} · 失败 ${task.failed} · 待筛 ${pending}</small></div>
         <div class="pc-actions"><button data-product-task-action="strategy" data-task-id="${task.id}">查看策略</button>${canScreen ? `<button data-product-task-action="screen" data-task-id="${task.id}">筛选图片</button>` : ""}</div>
@@ -78,10 +80,10 @@
       return `<tr class="pc-product-main-row ${expanded ? "expanded" : ""}">
         <td><div class="pc-product-name"><span class="pc-product-avatar tone-${index % 4 + 1}">${app.escape(item.product.name.slice(0, 1))}</span><span><b class="pc-cell-main">${app.escape(item.product.name)}</b><small class="pc-cell-sub">${item.product.id}</small></span></div></td>
         <td>${app.statusTag(item.displayStatus)}</td>
-        <td><div class="pc-product-count"><b>${item.tasks.length} 个</b><small>进行中 ${item.tasks.filter(task => ["pending", "running"].includes(task.status)).length}</small></div></td>
+        <td><div class="pc-product-count"><b>${item.tasks.length} 个</b><small>进行中 ${item.tasks.filter(task => ["pending", "running", "paused"].includes(task.status)).length}</small></div></td>
         <td><div class="pc-product-progress"><div><i style="width:${percent}%"></i></div><span><b>成功 ${item.success}</b> · 失败 ${item.failed} · 目标 ${item.target}</span></div></td>
         <td><div class="pc-product-screening"><strong>已筛 ${item.screening.selected + item.screening.rejected}/${item.screening.all}</strong><span>选用 ${item.screening.selected} · 不选用 ${item.screening.rejected}${item.screening.pending ? ` · <i class="pending">待筛 ${item.screening.pending}</i>` : ""}</span></div></td>
-        <td><span class="pc-cell-main">${app.escape(item.recent?.name || "暂无任务")}</span><span class="pc-cell-sub">${item.recent?.createdAt || "—"}</span></td>
+        <td><span class="pc-cell-main">${app.escape(item.recent?.name || "暂无任务")}</span><span class="pc-cell-sub">${app.shortTime(item.recent?.createdAt)}</span></td>
         <td><div class="pc-actions"><button data-product-toggle="${item.product.id}" aria-expanded="${expanded}">${expanded ? "收起任务" : "查看任务"}</button><button data-product-gallery="${item.product.id}">查看图片</button><button data-product-create="${item.product.id}">新建任务</button></div></td>
       </tr>${expanded ? productTaskRows(item) : ""}`;
     }).join("") : `<tr><td class="pc-empty" colspan="7">没有符合条件的产品</td></tr>`;
@@ -94,13 +96,16 @@
     const pending = all.reduce((sum, item) => sum + item.screening.pending, 0);
     els.metrics.innerHTML = [
       app.metric("产品数", all.length, `${all.filter(item => item.tasks.length).length} 个已有任务`),
-      app.metric("进行中产品", all.filter(item => item.active).length, `${all.reduce((sum, item) => sum + item.tasks.filter(task => ["pending", "running"].includes(task.status)).length, 0)} 个进行中任务`),
-      app.metric("累计生成图片", totalImages, `已选用 ${selected} 张`),
+      app.metric("进行中产品", all.filter(item => item.active).length, `${all.reduce((sum, item) => sum + item.tasks.filter(task => ["pending", "running", "paused"].includes(task.status)).length, 0)} 个进行中任务`),
+      app.metric("累计生图处理数", totalImages, `已选用 ${selected} 张`),
       app.metric("待筛选图片", pending, pending ? "需要继续处理" : "已全部处理")
     ].join("");
     const items = filteredProducts();
-    renderRows(items);
-    els.footer.innerHTML = `<span>共 ${items.length} 个产品</span><div>点击“查看任务”展开该产品的历史任务</div>`;
+    const pageCount = Math.max(1, Math.ceil(items.length / productPageSize));
+    productPage = Math.min(productPage, pageCount);
+    const pageItems = items.slice((productPage - 1) * productPageSize, productPage * productPageSize);
+    renderRows(pageItems);
+    els.footer.innerHTML = `<span>每页 ${productPageSize} 条，共 ${items.length} 个产品</span><div><button data-product-page="prev" ${productPage === 1 ? "disabled" : ""}>上一页</button><b>${productPage} / ${pageCount}</b><button data-product-page="next" ${productPage === pageCount ? "disabled" : ""}>下一页</button></div>`;
   };
 
   app.setGenerationView = view => {
@@ -109,14 +114,14 @@
     els.mode.querySelectorAll("[data-generation-view]").forEach(button => button.classList.toggle("active", button.dataset.generationView === next));
     els.taskView.classList.toggle("active", next === "task");
     els.productView.classList.toggle("active", next === "product");
-    if (next === "product") app.renderGenerationProducts();
+    if (next === "product") { productPage = 1; expandedProductId = ""; app.renderGenerationProducts(); }
     else app.renderGeneration();
   };
 
   function renderProductGallery() {
     const product = app.product(galleryProductId);
     if (!product) return;
-    const tasks = app.data.generationTasks.filter(task => task.productId === product.id);
+    const tasks = app.data.generationTasks.filter(task => task.productId === product.id && (!app.canViewTask || app.canViewTask(task, "generate")));
     const taskIds = new Set(tasks.map(task => task.id));
     const images = app.data.images.filter(image => taskIds.has(image.taskId));
     const visible = galleryFilter === "all" ? images : images.filter(image => image.screenStatus === galleryFilter);
@@ -127,7 +132,7 @@
     <div class="pc-product-gallery-grid">${visible.length ? visible.map(image => {
       const task = app.data.generationTasks.find(item => item.id === image.taskId);
       const visual = image.url ? `<img src="${app.escape(image.url)}" alt="${app.escape(image.fileName)}">` : `<span class="pc-product-gallery-placeholder tone-${(image.order || 0) % 6 + 1}" aria-hidden="true"></span>`;
-      return `<article class="pc-product-gallery-card"><div class="pc-product-gallery-stage">${visual}${imageStatusTag(image.screenStatus)}</div><div class="pc-product-gallery-meta"><strong title="${app.escape(image.fileName)}">${app.escape(image.fileName)}</strong><span title="${app.escape(task?.name || image.taskId)}">${app.escape(task?.name || image.taskId)}</span></div></article>`;
+      return `<article class="pc-product-gallery-card"><div class="pc-product-gallery-stage">${visual}${imageStatusTag(image.screenStatus)}</div><div class="pc-product-gallery-meta"><strong title="${app.escape(image.fileName)}">${app.escape(image.fileName)}</strong>${app.imageTime(image)}<span title="${app.escape(task?.name || image.taskId)}">${app.escape(task?.name || image.taskId)}</span></div></article>`;
     }).join("") : `<div class="pc-empty">当前筛选下没有图片</div>`}</div>`;
   }
 
@@ -144,11 +149,13 @@
     const button = event.target.closest("[data-generation-view]");
     if (button) app.setGenerationView(button.dataset.generationView);
   });
-  els.search.addEventListener("input", app.renderGenerationProducts);
+  els.search.addEventListener("input", () => { productPage = 1; expandedProductId = ""; app.renderGenerationProducts(); });
   els.statuses.addEventListener("click", event => {
     const button = event.target.closest("[data-product-status]");
     if (!button) return;
     statusFilter = button.dataset.productStatus;
+    productPage = 1;
+    expandedProductId = "";
     els.statuses.querySelectorAll("[data-product-status]").forEach(item => item.classList.toggle("active", item === button));
     app.renderGenerationProducts();
   });
@@ -165,6 +172,13 @@
     if (!task) return;
     if (taskAction.dataset.productTaskAction === "screen") app.openGenerationScreening?.(task);
     else app.openGenerationStrategy?.(task);
+  });
+  els.footer.addEventListener("click", event => {
+    const button = event.target.closest("[data-product-page]");
+    if (!button || button.disabled) return;
+    productPage += button.dataset.productPage === "next" ? 1 : -1;
+    expandedProductId = "";
+    app.renderGenerationProducts();
   });
   root.addEventListener("click", event => {
     const filter = event.target.closest("[data-product-image-filter]");

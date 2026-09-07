@@ -2,32 +2,38 @@
   "use strict";
   const seed = window.ProductCardSeed || { shops: [], accounts: [] };
 
+  const authorizationSamples = [
+    { qianchuan: "authorized", suixintui: "authorized", juliang: "unauthorized" },
+    { qianchuan: "authorized", suixintui: "unauthorized", juliang: "expired" },
+    { qianchuan: "unauthorized", suixintui: "authorized", juliang: "failed" },
+    { qianchuan: "authorized", suixintui: "cancelled", juliang: "authorized" }
+  ];
+  const expirySamples = [
+    { qianchuan: 24, suixintui: 16, juliang: null },
+    { qianchuan: 8, suixintui: null, juliang: null },
+    { qianchuan: null, suixintui: 36, juliang: null },
+    { qianchuan: 5, suixintui: null, juliang: 18 }
+  ];
   const shops = seed.shops.map((item, index) => ({
     id: item.id,
     name: item.name,
     avatarTone: index + 1,
     defaultAccountId: item.accountId || "",
-    subject: ["杭州轻风生活电器有限公司", "杭州居家好物科技有限公司", "上海轻享电器有限公司"][index] || "杭州内容罗盘科技有限公司",
-    expiresIn: [24, 8, 36][index] || 30,
-    authorization: {
-      qianchuan: index !== 2 ? "authorized" : "unauthorized",
-      suixintui: index !== 1 ? "authorized" : "unauthorized",
-      juliang: index === 0 ? "authorized" : "unauthorized"
-    }
+    subject: ["杭州轻风生活电器有限公司", "杭州居家好物科技有限公司", "上海轻享电器有限公司", "宁波风尚个人护理有限公司"][index] || "杭州内容罗盘科技有限公司",
+    expiresIn: expirySamples[index]?.qianchuan ?? 0,
+    authorization: authorizationSamples[index] || { qianchuan: "unauthorized", suixintui: "unauthorized", juliang: "unauthorized" },
+    authorizationExpiry: expirySamples[index] || { qianchuan: null, suixintui: null, juliang: null }
   }));
-  shops.push({
-    id: "SHOP-31132", name: "吹风机专营店", avatarTone: 4, defaultAccountId: "",
-    subject: "宁波风尚个人护理有限公司", expiresIn: 5,
-    authorization: { qianchuan: "authorized", suixintui: "unauthorized", juliang: "authorized" }
-  });
-
   const baseAccounts = seed.accounts.map((item, index) => ({
-    id: item.id, name: item.name, shopId: item.shopId || shops[index]?.id || "", douyinCount: [3, 1, 2][index] || 0
+    id: item.id, name: item.name, shopId: item.shopId || shops[index]?.id || "", platform: "qianchuan", douyinCount: [3, 1, 2][index] || 0
   }));
   const accounts = baseAccounts.concat([
-    { id: "AD-7740", name: "生活电器新品投放", shopId: "SHOP-31021", douyinCount: 2 },
-    { id: "AD-6632", name: "居家商品卡测试", shopId: "SHOP-31045", douyinCount: 1 },
-    { id: "AD-9218", name: "吹风机商品卡投放", shopId: "SHOP-31132", douyinCount: 2 }
+    { id: "AD-7740", name: "生活电器新品投放", shopId: "SHOP-31021", platform: "qianchuan", douyinCount: 2 },
+    { id: "AD-7741", name: "生活电器随心推", shopId: "SHOP-31021", platform: "suixintui", douyinCount: 1 },
+    { id: "AD-7742", name: "生活电器巨量广告", shopId: "SHOP-31021", platform: "juliang", douyinCount: 1 },
+    { id: "AD-6632", name: "居家商品卡测试", shopId: "SHOP-31045", platform: "juliang", douyinCount: 1 },
+    { id: "AD-9017", name: "轻享随心推账户", shopId: "SHOP-31108", platform: "suixintui", douyinCount: 1 },
+    { id: "AD-9218", name: "吹风机商品卡投放", shopId: "SHOP-31132", platform: "juliang", douyinCount: 2 }
   ]);
 
   const douyinTemplates = [

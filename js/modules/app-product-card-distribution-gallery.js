@@ -16,7 +16,7 @@
 
   function latestPlanId(records) {
     return [...records]
-      .sort((left, right) => String(right.distributionTask?.createdAt || "").localeCompare(String(left.distributionTask?.createdAt || "")))[0]?.planId || "";
+      .sort((left, right) => String(right.completedAt || right.submittedAt || right.distributionTask?.createdAt || "").localeCompare(String(left.completedAt || left.submittedAt || left.distributionTask?.createdAt || "")))[0]?.planId || "";
   }
 
   function refreshRecords() {
@@ -32,7 +32,7 @@
   }
 
   function planRecords(planId, applyRange = true) {
-    return gallery.records.filter(record => record.planId === planId && (!applyRange || app.dateRange.contains(record.distributionTask?.createdAt, activeRange())));
+    return gallery.records.filter(record => record.planId === planId && (!applyRange || app.dateRange.contains(record.completedAt || record.submittedAt || record.distributionTask?.createdAt, activeRange())));
   }
 
   function counts(records) {
@@ -46,7 +46,7 @@
 
   function availablePlans() {
     const ids = [...new Set(gallery.records.map(record => record.planId))];
-    const lastTime = planId => gallery.records.filter(record => record.planId === planId).map(record => record.distributionTask?.createdAt || "").sort().at(-1) || "";
+    const lastTime = planId => gallery.records.filter(record => record.planId === planId).map(record => record.completedAt || record.submittedAt || record.distributionTask?.createdAt || "").sort().at(-1) || "";
     return ids.map(id => app.plan(id)).filter(Boolean).sort((left, right) => {
       const leftTime = lastTime(left.id);
       const rightTime = lastTime(right.id);

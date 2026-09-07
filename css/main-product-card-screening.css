@@ -3,3 +3,7 @@
 .pc-screen-viewer-info{grid-template-columns:120px 180px minmax(0,1fr);width:min(620px,100%)}.pc-screen-viewer-info .pc-screen-status{display:inline-flex}.pc-screen-viewer-info .pc-screen-viewer-prompt{display:-webkit-box;line-height:1.45;white-space:normal;-webkit-box-orient:vertical;-webkit-line-clamp:2}
 @media(max-width:980px){.pc-screen-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.pc-screen-toolbar{align-items:flex-start;flex-direction:column}.pc-screen-batch{justify-content:flex-start}}
 @media(max-width:640px){.pc-screen-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pc-screen-viewer{width:calc(100vw - 24px)}.pc-screen-viewer-layer{padding:12px}.pc-screen-viewer-actions{grid-template-columns:1fr 1fr}.pc-screen-viewer-actions>div{grid-column:1/-1;grid-row:1}.pc-screen-viewer-info{grid-template-columns:1fr}}
+
+/* Generated product images use a square canvas; metadata remains outside the canvas. */
+.pc-screen-open,.pc-screen-large-image{aspect-ratio:1/1;overflow:hidden}
+.pc-screen-viewer-info>div:last-child{grid-column:1/-1}

@@ -120,23 +120,27 @@
     menu("promotion", "推广自动化", [
       menu("promotion.productCard", "商品卡推广", [
         menu("promotion.productCard.generate", "图片生成", [
-          page("promotion.productCard.generate.personal", "个人任务", [
-            button("promotion.productCard.generate.personal.create", "新建生图任务", "create"),
-            button("promotion.productCard.generate.personal.operate", "操作个人任务", "execute")
+          page("promotion.productCard.generate.task", "任务视图", [
+            page("promotion.productCard.generate.task.all", "全部任务"),
+            page("promotion.productCard.generate.task.personal", "个人任务"),
+            page("promotion.productCard.generate.task.team", "团队任务")
           ]),
-          page("promotion.productCard.generate.team", "团队任务", [
-            button("promotion.productCard.generate.team.create", "新建生图任务", "create"),
-            button("promotion.productCard.generate.team.operate", "操作团队任务", "execute")
-          ])
+          page("promotion.productCard.generate.product", "产品视图")
         ]),
         menu("promotion.productCard.distribute", "图片分发", [
           page("promotion.productCard.distribute.task", "任务视图", [
-            button("promotion.productCard.distribute.create", "新建分发任务", "create"),
-            button("promotion.productCard.distribute.retry", "重新分发", "execute")
+            page("promotion.productCard.distribute.task.all", "全部任务"),
+            page("promotion.productCard.distribute.task.personal", "个人任务"),
+            page("promotion.productCard.distribute.task.team", "团队任务")
           ]),
           page("promotion.productCard.distribute.account", "广告账户视图"),
           page("promotion.productCard.distribute.plan", "计划视图")
         ])
+      ]),
+      menu("promotion.authorization", "授权配置", [
+        page("promotion.authorization.shop", "店铺授权"),
+        page("promotion.authorization.account", "广告账户"),
+        page("promotion.authorization.douyin", "广告账户授权抖音号")
       ])
     ]),
     menu("system", "系统管理", [

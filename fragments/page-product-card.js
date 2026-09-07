@@ -129,7 +129,7 @@
         <section class="pc-confirm" role="alertdialog" aria-modal="true" aria-labelledby="pcConfirmTitle">
           <h3 id="pcConfirmTitle"></h3>
           <p id="pcConfirmMessage"></p>
-          <div><button class="pc-btn" data-pc-confirm="cancel">取消</button><button class="pc-btn pc-btn-primary" data-pc-confirm="ok">确认</button></div>
+          <div><button class="pc-btn pc-confirm-secondary" data-pc-confirm="secondary" hidden>放弃修改</button><button class="pc-btn" data-pc-confirm="cancel">取消</button><button class="pc-btn pc-btn-primary" data-pc-confirm="ok">确认</button></div>
         </section>
       </div>
     </section>`);

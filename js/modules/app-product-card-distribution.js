@@ -29,9 +29,10 @@
     ["rejected", "审核不通过"], ["paused", "已暂停"], ["deleted", "已删除"],
     ["completed", "已完成"], ["terminated", "已终止"], ["all", "全部（含已删除）"]
   ];
-  dist.taskStatusText = status => ({ ...Object.fromEntries(taskStatuses), cancelling: "取消处理中" })[status] || status;
+  dist.taskDisplayStatus = status => status === "confirming" ? "uploading" : status === "interrupted" ? "failed" : status;
+  dist.taskStatusText = status => ({ ...Object.fromEntries(taskStatuses), cancelling: "取消处理中" })[dist.taskDisplayStatus(status)] || status;
   dist.planStatusText = status => Object.fromEntries(planStatuses)[status] || status;
-  dist.taskStatusTag = status => `<span class="pc-status pc-dist-status-${status}">${dist.taskStatusText(status)}</span>`;
+  dist.taskStatusTag = status => `<span class="pc-status pc-dist-status-${dist.taskDisplayStatus(status)}">${dist.taskStatusText(status)}</span>`;
   dist.planStatusTag = status => `<span class="pc-status pc-plan-status-${status}">${dist.planStatusText(status)}</span>`;
   dist.formatNumber = value => Number(value || 0).toLocaleString("zh-CN", { maximumFractionDigits: 2 });
   dist.distributedImages = predicate => app.data.images.filter(image => (image.distributionHistory || []).some(predicate));
@@ -50,7 +51,7 @@
     return `<button class="pc-sort-head ${current === field ? "active" : ""}" data-dist-sort="${field}">${label}<span>${current === field ? (direction === "asc" ? "↑" : "↓") : "↕"}</span></button>`;
   }
   function taskAllocations(task) {
-    if (task.imageResults?.length) return task.imageResults.map(record => ({ planId: record.planId, status: record.status }));
+    if (task.imageResults?.length) return task.imageResults;
     const records = [];
     (task.results || []).forEach(result => {
       for (let index = 0; index < result.success; index += 1) records.push({ planId: result.planId, status: "success" });
@@ -61,7 +62,7 @@
     return records;
   }
   function distributionStats(planPredicate, range) {
-    const records = app.data.distributionTasks.filter(task => task.status !== "draft" && (!range || app.dateRange.contains(task.createdAt, range))).flatMap(task => taskAllocations(task).filter(record => planPredicate(app.plan(record.planId), task)));
+    const records = app.data.distributionTasks.filter(task => task.status !== "draft").flatMap(task => taskAllocations(task).filter(record => planPredicate(app.plan(record.planId), task) && (!range || app.dateRange.contains(record.completedAt || record.submittedAt || app.fullTime(task.createdAt), range))));
     const success = records.filter(record => record.status === "success").length;
     const failed = records.filter(record => record.status === "failed").length;
     return {
@@ -73,7 +74,11 @@
     };
   }
   function latestProcessedDistributionTime(planPredicate) {
-    return app.data.distributionTasks.filter(task => task.status !== "draft" && taskAllocations(task).some(record => ["success", "failed"].includes(record.status) && planPredicate(app.plan(record.planId), task))).map(task => task.createdAt).sort().at(-1) || "--";
+    return app.data.distributionTasks.filter(task => task.status !== "draft")
+      .flatMap(task => taskAllocations(task)
+        .filter(record => ["success", "failed"].includes(record.status) && planPredicate(app.plan(record.planId), task))
+        .map(record => record.completedAt || app.fullTime(task.createdAt)))
+      .filter(Boolean).sort().at(-1) || "--";
   }
   dist.distributionStats = distributionStats;
   dist.performanceForRange = (plan, range) => {
@@ -87,16 +92,25 @@
   const metricDetail = items => `<span class="pc-metric-breakdown">${items.map(([label, value, tone]) => `<i class="${tone || ""}">${label} <b>${value}</b></i>`).join("")}</span>`;
   function setPageTitle(title) { if (app.els.title) app.els.title.textContent = title; }
   function periodLabel(range) { return app.dateRange.isToday(range) ? "今日" : "期间"; }
+  function pageItems(items) {
+    const pageCount = Math.max(1, Math.ceil(items.length / dist.pageSize));
+    dist.page = Math.max(1, Math.min(dist.page, pageCount));
+    return { rows: items.slice((dist.page - 1) * dist.pageSize, dist.page * dist.pageSize), pageCount };
+  }
+  function renderPagination(total, pageCount) {
+    els.pagination.hidden = false;
+    els.pagination.innerHTML = `<span>每页 ${dist.pageSize} 条，共 ${total} 条</span><div><button data-dist-page="prev" ${dist.page === 1 ? "disabled" : ""}>上一页</button><b>${dist.page} / ${pageCount}</b><button data-dist-page="next" ${dist.page === pageCount ? "disabled" : ""}>下一页</button></div>`;
+  }
   function visibleTasks(includeStatus = true, range = dist.filters.taskRange) {
     const { taskScope, taskSearch, creator, taskStatus } = dist.filters;
     const keyword = taskSearch.trim().toLowerCase();
     const creatorKeyword = creator.trim().toLowerCase();
     return app.data.distributionTasks.filter(task => {
-      const inScope = taskScope === "all" || (taskScope === "team" ? task.team === dist.currentTeam : task.creator === dist.currentUser);
+      const inScope = app.canViewTask ? app.canViewTask(task, "distribute", taskScope) : taskScope === "all" || (taskScope === "team" ? task.team === dist.currentTeam : task.creator === dist.currentUser);
       const product = app.product(task.productId);
       const matchesKeyword = !keyword || [task.id, task.name, product?.name].some(value => String(value || "").toLowerCase().includes(keyword));
       const matchesCreator = taskScope === "personal" || !creatorKeyword || String(task.creator || "").toLowerCase().includes(creatorKeyword);
-      return inScope && matchesKeyword && matchesCreator && (!range || app.dateRange.contains(task.createdAt, range)) && (!includeStatus || taskStatus === "all" || task.status === taskStatus);
+      return inScope && matchesKeyword && matchesCreator && (!range || app.dateRange.contains(task.createdAt, range)) && (!includeStatus || taskStatus === "all" || dist.taskDisplayStatus(task.status) === taskStatus);
     });
   }
   function renderTaskView() {
@@ -107,12 +121,12 @@
     const pageCount = Math.max(1, Math.ceil(tasks.length / dist.pageSize));
     dist.page = Math.min(dist.page, pageCount);
     const rows = tasks.slice((dist.page - 1) * dist.pageSize, dist.page * dist.pageSize);
-    const todayTasks = visibleTasks(false, app.dateRange.preset(1)).filter(task => task.status !== "draft");
     const cumulativeTasks = visibleTasks(false, null).filter(task => task.status !== "draft");
-    const imageStats = list => ({ success: list.reduce((sum, task) => sum + task.success, 0), failed: list.reduce((sum, task) => sum + task.failed, 0) });
-    const today = imageStats(todayTasks), cumulative = imageStats(cumulativeTasks);
+    const records = cumulativeTasks.flatMap(task => taskAllocations(task).map(record => ({ ...record, completedAt: record.completedAt || app.fullTime(task.createdAt) })));
+    const stats = list => ({ success: list.filter(record => record.status === "success").length, failed: list.filter(record => record.status === "failed").length });
+    const today = stats(records.filter(record => app.dateRange.contains(record.completedAt, app.dateRange.preset(1)))), cumulative = stats(records);
     setMetricCards([
-      app.metric("任务数", metricTasks.length, metricDetail([["分发成功", metricTasks.filter(task => task.status === "success").length, "success"], ["部分成功", metricTasks.filter(task => task.status === "partial").length, "warning"], ["分发失败", metricTasks.filter(task => task.status === "failed").length, "danger"]])),
+      app.metric("任务数", metricTasks.length, metricDetail([["分发成功", metricTasks.filter(task => task.status === "success").length, "success"], ["部分成功", metricTasks.filter(task => task.status === "partial").length, "warning"], ["分发失败", metricTasks.filter(task => dist.taskDisplayStatus(task.status) === "failed").length, "danger"]])),
       app.metric("今日分发图片数", today.success + today.failed, metricDetail([["成功", today.success, "success"], ["失败", today.failed, "danger"]])),
       app.metric("累计分发图片数", cumulative.success + cumulative.failed, metricDetail([["成功", cumulative.success, "success"], ["失败", cumulative.failed, "danger"]]))
     ]);
@@ -129,7 +143,7 @@
       if (task.status === "pending") actions.push(taskAction(task, "cancel-task", "取消", "danger"));
       if (task.status === "uploading") actions.push(taskAction(task, "cancel-task", "取消", "danger"));
       if (["partial", "failed"].includes(task.status) && task.failed) actions.push(taskAction(task, "retry-failed", "重试失败", "warning"));
-      return `<tr><td><span class="pc-cell-main">${app.escape(task.name || task.id)}</span><span class="pc-cell-sub">${task.id}</span></td><td><span class="pc-cell-main">${app.escape(app.product(task.productId)?.name)}</span></td>${showCreator ? `<td>${app.escape(task.creator)}</td>` : ""}<td>${dist.taskStatusTag(task.status)}</td><td><div class="pc-progress"><div><i style="width:${percent}%"></i></div><span>${done}/${task.requested}（成功 ${task.success}，失败 ${task.failed}）</span></div></td><td>${task.plans.length} 个</td><td>${task.createdAt}</td><td><div class="pc-actions">${actions.join("")}</div></td></tr>`;
+      return `<tr><td><span class="pc-cell-main">${app.escape(task.name || task.id)}</span><span class="pc-cell-sub">${task.id}</span></td><td><span class="pc-cell-main">${app.escape(app.product(task.productId)?.name)}</span></td>${showCreator ? `<td>${app.escape(task.creator)}</td>` : ""}<td>${dist.taskStatusTag(task.status)}</td><td><div class="pc-progress"><div><i style="width:${percent}%"></i></div><span>${done}/${task.requested}（成功 ${task.success}，失败 ${task.failed}）</span></div></td><td>${task.plans.length} 个</td><td>${app.shortTime(task.createdAt)}</td><td><div class="pc-actions">${actions.join("")}</div></td></tr>`;
     }).join("") : `<tr><td class="pc-empty" colspan="${showCreator ? 8 : 7}">没有符合条件的分发任务</td></tr>`;
     els.pagination.hidden = false;
     els.pagination.innerHTML = `<span>每页 ${dist.pageSize} 条，共 ${tasks.length} 条</span><div><button data-dist-page="prev" ${dist.page === 1 ? "disabled" : ""}>上一页</button>${Array.from({ length: pageCount }, (_, index) => `<button data-dist-page="${index + 1}" class="${dist.page === index + 1 ? "active" : ""}">${index + 1}</button>`).join("")}<button data-dist-page="next" ${dist.page === pageCount ? "disabled" : ""}>下一页</button></div>`;
@@ -143,6 +157,7 @@
       const hasPeriodRecords = distributionStats(plan => plan?.accountId === account.id, dist.filters.accountRange).total > 0;
       return matches && (!dist.filters.accountOnlyActive || hasPeriodRecords);
     });
+    const accountPage = pageItems(accounts);
     const accountIds = new Set(accounts.map(account => account.id));
     const todayRange = app.dateRange.preset(1);
     const todayStats = distributionStats(plan => plan && accountIds.has(plan.accountId), todayRange);
@@ -159,7 +174,7 @@
     els.toolbar.innerHTML = `<div class="pc-query-row"><label class="pc-search"><span>⌕</span><input data-dist-filter="accountSearch" value="${app.escape(dist.filters.accountSearch)}" placeholder="搜索店铺或广告账户名称/ID"></label>${app.dateRange.render("distribution-account", dist.filters.accountRange, { label: "分发时间" })}<label class="pc-period-only" title="隐藏所选分发时间内分发数量为0的广告账户"><input type="checkbox" data-dist-toggle="accountOnlyActive" ${dist.filters.accountOnlyActive ? "checked" : ""}>仅看期间分发数 &gt; 0</label></div><span class="pc-result-count">共 ${accounts.length} 个广告账户</span>`;
     els.cols.innerHTML = "";
     els.head.innerHTML = `<tr><th>广告账户</th><th>店铺</th><th>计划概况${app.tip("点击计划数量可跳转计划视图，并自动筛选账户及投放状态。")}</th><th>容量预警${app.tip("单计划当前素材数达到450张时预警，500张为分发上限。")}</th><th>${label}分发</th><th>累计系统分发</th><th>最近分发时间</th><th>操作</th></tr>`;
-    els.body.innerHTML = accounts.map(account => {
+    els.body.innerHTML = accountPage.rows.length ? accountPage.rows.map(account => {
       const plans = app.data.plans.filter(plan => plan.accountId === account.id);
       const activeCount = plans.filter(plan => plan.status === "active").length;
       const riskPlans = plans.filter(plan => plan.current >= 450);
@@ -169,8 +184,8 @@
       const cumulative = distributionStats(plan => plan?.accountId === account.id);
       const riskCell = riskPlans.length ? `<span class="pc-capacity-warning ${fullCount ? "danger" : ""}">${fullCount ? `${fullCount} 个已满` : `${riskPlans.length} 个预警`}</span><small>${riskPlans.length} 个计划 ≥450张</small>` : `<span class="pc-capacity-safe">无预警</span>`;
       return `<tr><td><span class="pc-cell-main">${app.escape(account.name)}</span><span class="pc-cell-sub">${account.id}</span></td><td><span class="pc-cell-main">${app.escape(app.shop(account.shopId)?.name)}</span><span class="pc-cell-sub">${account.shopId}</span></td><td><span class="pc-plan-overview"><button data-account-plans="${account.id}" data-plan-status="active"><b>${activeCount}</b> 投放中</button><i>/</i><button data-account-plans="${account.id}" data-plan-status="all">${plans.length} 全部</button></span></td><td><span class="pc-capacity-cell">${riskCell}</span></td><td>${todayDistribution(stats.success, stats.failed)}</td><td><b>${cumulative.total}</b> 张</td><td>${latestTime}</td><td><div class="pc-actions"><button class="pc-action-info" data-dist-action="account-images" data-id="${account.id}">查看系统分发图片</button></div></td></tr>`;
-    }).join("");
-    els.pagination.hidden = true;
+    }).join("") : `<tr><td class="pc-empty" colspan="8">没有符合条件的广告账户</td></tr>`;
+    renderPagination(accounts.length, accountPage.pageCount);
   }
   function renderPlanView() {
     setPageTitle("计划视图");
@@ -187,6 +202,7 @@
       const comparison = typeof leftValue === "number" ? leftValue - rightValue : String(leftValue || "").localeCompare(String(rightValue || ""));
       return direction === "asc" ? comparison : -comparison;
     });
+    const planPage = pageItems(plans);
     const visibleIds = new Set(plans.map(plan => plan.id));
     const todayStats = distributionStats(plan => plan && visibleIds.has(plan.id), app.dateRange.preset(1));
     const activePlans = plans.filter(plan => plan.status === "active");
@@ -202,7 +218,7 @@
     els.toolbar.innerHTML = `<div class="pc-dist-plan-toolbar-main"><div class="pc-plan-query-primary"><label class="pc-search"><span>⌕</span><input data-dist-filter="planSearch" value="${app.escape(dist.filters.planSearch)}" placeholder="搜索计划、店铺或广告账户名称/ID"></label>${app.dateRange.render("distribution-plan-data", dist.filters.planDataRange, { label: "千川数据时间" })}${app.dateRange.render("distribution-plan", dist.filters.planRange, { label: "分发时间" })}</div><div class="pc-plan-query-secondary">${dist.filters.planSearch ? `<button class="pc-clear-filter" data-clear-plan-search>清除账户筛选</button>` : ""}<label class="pc-period-only" title="隐藏所选分发时间内分发数量为0的计划"><input type="checkbox" data-dist-toggle="planOnlyActive" ${dist.filters.planOnlyActive ? "checked" : ""}>仅看期间分发数 &gt; 0</label><span class="pc-sync-time">千川同步：09-02 11:20:06</span></div></div>${statusFilters(planStatuses, dist.filters.planStatus, "data-dist-plan-status")}`;
     els.cols.innerHTML = "";
     els.head.innerHTML = `<tr><th>计划</th><th>计划状态</th><th>店铺</th><th>默认广告账户</th><th>${sortHead("spend", "整体消耗(元)")}</th><th>${sortHead("orders", "成交订单数")}</th><th>${sortHead("gmv", "成交金额(元)")}</th><th>${sortHead("roi", "支付ROI")}</th><th>${sortHead("current", "素材容量")}${app.tip("千川单计划最多500张图片素材。")}</th><th>${sortHead("today", `${label}分发`)}</th><th>${sortHead("distributed", "累计系统分发")}</th><th>${sortHead("updatedAt", "最近分发时间")}</th><th>操作</th></tr>`;
-    els.body.innerHTML = plans.length ? plans.map(plan => {
+    els.body.innerHTML = planPage.rows.length ? planPage.rows.map(plan => {
       const capacityPercent = Math.min(100, Math.round(plan.current / 500 * 100));
       const capacityTone = plan.current >= 500 ? "danger" : plan.current >= 450 ? "warning" : "";
       const metric = dist.performanceForRange(plan, dist.filters.planDataRange);
@@ -210,7 +226,7 @@
       const cumulative = distributionStats(item => item?.id === plan.id);
       return `<tr><td><span class="pc-cell-main">${app.escape(plan.name)}</span><span class="pc-cell-sub">${plan.id}</span></td><td>${dist.planStatusTag(plan.status)}</td><td><span class="pc-cell-main">${app.escape(app.shop(plan.shopId)?.name)}</span><span class="pc-cell-sub">${plan.shopId}</span></td><td><span class="pc-cell-main">${app.escape(app.account(plan.accountId)?.name)}</span><span class="pc-cell-sub">${plan.accountId}</span></td><td>${dist.formatNumber(metric.spend)}</td><td>${dist.formatNumber(metric.orders)}</td><td>${dist.formatNumber(metric.gmv)}</td><td><b>${metric.roi.toFixed(2)}</b></td><td><div class="pc-capacity-progress ${capacityTone}"><span><b>${plan.current}</b>/500</span><i><em style="width:${capacityPercent}%"></em></i></div></td><td>${todayDistribution(stats.success, stats.failed)}</td><td>${dist.formatNumber(cumulative.total)} 张</td><td>${latestProcessedDistributionTime(item => item?.id === plan.id)}</td><td><div class="pc-actions"><button class="pc-action-info" data-dist-action="plan-detail" data-id="${plan.id}">查看系统分发图片</button></div></td></tr>`;
     }).join("") : `<tr><td class="pc-empty" colspan="13">没有符合条件的计划</td></tr>`;
-    els.pagination.hidden = true;
+    renderPagination(plans.length, planPage.pageCount);
   }
   app.renderDistribution = () => {
     els.scopeRow.hidden = app.state.distributionView !== "task";
@@ -222,6 +238,7 @@
   els.view.addEventListener("click", event => {
     const button = event.target.closest("[data-view]"); if (!button) return;
     app.state.distributionView = button.dataset.view;
+    dist.page = 1;
     els.view.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button));
     app.renderDistribution();
   });
@@ -243,26 +260,28 @@
     const taskStatus = event.target.closest("[data-dist-task-status]");
     const planStatus = event.target.closest("[data-dist-plan-status]");
     if (taskStatus) { dist.filters.taskStatus = taskStatus.dataset.distTaskStatus; dist.page = 1; app.renderDistribution(); }
-    if (planStatus) { dist.filters.planStatus = planStatus.dataset.distPlanStatus; app.renderDistribution(); }
+    if (planStatus) { dist.filters.planStatus = planStatus.dataset.distPlanStatus; dist.page = 1; app.renderDistribution(); }
     const clearPlan = event.target.closest("[data-clear-plan-search]");
-    if (clearPlan) { dist.filters.planSearch = ""; app.renderDistribution(); return; }
+    if (clearPlan) { dist.filters.planSearch = ""; dist.page = 1; app.renderDistribution(); return; }
     const sort = event.target.closest("[data-dist-sort]");
     if (sort) {
       const [current, direction] = dist.filters.planSort.split("-");
       dist.filters.planSort = `${sort.dataset.distSort}-${current === sort.dataset.distSort && direction === "desc" ? "asc" : "desc"}`;
+      dist.page = 1;
       app.renderDistribution();
     }
   });
   els.toolbar.addEventListener("change", event => {
     if (app.dateRange.handle(event, "distribution-task", dist.filters.taskRange) || app.dateRange.handle(event, "distribution-account", dist.filters.accountRange) || app.dateRange.handle(event, "distribution-plan-data", dist.filters.planDataRange) || app.dateRange.handle(event, "distribution-plan", dist.filters.planRange)) { dist.page = 1; app.renderDistribution(); return; }
     const toggle = event.target.closest("[data-dist-toggle]");
-    if (toggle) { dist.filters[toggle.dataset.distToggle] = toggle.checked; app.renderDistribution(); }
+    if (toggle) { dist.filters[toggle.dataset.distToggle] = toggle.checked; dist.page = 1; app.renderDistribution(); }
   });
   els.head.addEventListener("click", event => {
     const sort = event.target.closest("[data-dist-sort]");
     if (!sort) return;
     const [current, direction] = dist.filters.planSort.split("-");
     dist.filters.planSort = `${sort.dataset.distSort}-${current === sort.dataset.distSort && direction === "desc" ? "asc" : "desc"}`;
+    dist.page = 1;
     app.renderDistribution();
   });
   els.pagination.addEventListener("click", event => {
@@ -279,6 +298,7 @@
       app.state.distributionView = "plan";
       dist.filters.planSearch = account?.name || planLink.dataset.accountPlans;
       dist.filters.planStatus = planLink.dataset.planStatus;
+      dist.page = 1;
       els.view.querySelectorAll("button").forEach(item => item.classList.toggle("active", item.dataset.view === "plan"));
       app.renderDistribution(); return;
     }

@@ -16,10 +16,11 @@
   const state = {
     view: "shop",
     shopSearch: "", qianchuan: "all", suixintui: "all", juliang: "all",
-    accountSearch: "", accountShopSearch: "", defaultOnly: false,
+    accountSearch: "", accountShopSearch: "", accountPlatform: "all", defaultOnly: false,
     douyinSearch: ""
   };
   const platformNames = { qianchuan: "千川", suixintui: "随心推", juliang: "巨量广告" };
+  const authorizationNames = { unauthorized: "未授权", authorized: "已授权", failed: "授权失败", exception: "授权异常", expired: "已过期", cancelled: "已取消" };
   const el = id => page.querySelector(`#${id}`);
   const escape = value => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
   const shopById = id => shops.find(item => item.id === id);
@@ -33,7 +34,7 @@
     return `<button class="ac-entity ac-entity-link" ${attribute}>${content}</button>`;
   }
   function authorizationTag(status) {
-    return `<span class="ac-state ${status}">${status === "authorized" ? "已授权" : "未授权"}</span>`;
+    return `<span class="ac-state ${escape(status)}">${authorizationNames[status] || "未授权"}</span>`;
   }
   function emptyRow(columns, text) { return `<tr><td colspan="${columns}" class="ac-empty">${text}</td></tr>`; }
 
@@ -58,9 +59,15 @@
     confirmResolve = null;
   }
 
-  let guideTrigger = null;
-  function openAuthorizationGuide() {
+  let guideTrigger = null, authorizationOpening = false;
+  function selectedGuideShop() { return shopById(el("acGuideShop").value); }
+  function openAuthorizationGuide(shopId = "") {
     guideTrigger = document.activeElement;
+    if (!el("acGuideShop").options.length) el("acGuideShop").innerHTML = shops.map(shop => `<option value="${escape(shop.id)}">${escape(shop.name)}</option>`).join("");
+    el("acGuideShop").value = shopId && shopById(shopId) ? shopId : shops[0]?.id || "";
+    el("acGuideShop").disabled = false;
+    el("acGuideAuthorize").disabled = false;
+    el("acGuideAuthorize").textContent = "去授权";
     el("acGuideMask").hidden = false;
     document.body.classList.add("ac-modal-open");
     window.requestAnimationFrame(() => el("acGuideClose").focus());
@@ -72,8 +79,22 @@
     guideTrigger = null;
   }
   function startAuthorization() {
-    closeAuthorizationGuide();
-    toast("授权申请已发起，请在千川授权页面完成账户选择");
+    if (authorizationOpening) return;
+    const shop = selectedGuideShop();
+    if (!shop) return;
+    authorizationOpening = true;
+    el("acGuideShop").disabled = true;
+    el("acGuideAuthorize").disabled = true;
+    el("acGuideAuthorize").textContent = "正在打开";
+    page.dispatchEvent(new CustomEvent("account-config-authorize-request", { detail: { shopId: shop.id } }));
+    window.setTimeout(() => {
+      authorizationOpening = false;
+      closeAuthorizationGuide();
+      el("acGuideShop").disabled = false;
+      el("acGuideAuthorize").disabled = false;
+      el("acGuideAuthorize").textContent = "去授权";
+      toast("请在官方授权页面选择平台和账户");
+    }, 350);
   }
 
   function shopRows() {
@@ -86,12 +107,19 @@
     const rows = shopRows();
     el("acShopCount").textContent = `共 ${rows.length} 个店铺`;
     el("acShopBody").innerHTML = rows.length ? rows.map(shop => {
-      const accountCount = accounts.filter(account => account.shopId === shop.id).length;
-      const authorizedPlatforms = Object.values(shop.authorization).filter(status => status === "authorized").length;
-      const expiry = authorizedPlatforms ? `<span class="ac-expiry ${shop.expiresIn <= 7 ? "warning" : ""}">${shop.expiresIn}</span>` : `<span class="ac-empty-value">--</span>`;
-      const actions = Object.entries(shop.authorization).filter(([, status]) => status === "authorized").map(([platform]) => `<button class="ac-action-cancel" data-cancel-auth="${platform}" data-shop-id="${shop.id}">取消${platformNames[platform]}授权</button>`).join("");
-      return `<tr><td>${entity(shop)}</td><td><button class="ac-count-link" data-jump-accounts="${shop.id}">${accountCount} 个</button></td><td>${expiry}</td><td>${authorizationTag(shop.authorization.qianchuan)}</td><td>${authorizationTag(shop.authorization.suixintui)}</td><td>${authorizationTag(shop.authorization.juliang)}</td><td><div class="ac-actions">${actions || '<span class="ac-empty-value">--</span>'}</div></td></tr>`;
-    }).join("") : emptyRow(7, "没有符合条件的店铺");
+      const platformCell = platform => {
+        const status = shop.authorization[platform];
+        const expiry = shop.authorizationExpiry?.[platform];
+        const accountCount = accounts.filter(account => account.shopId === shop.id && account.platform === platform).length;
+        const expiryText = status === "authorized" && Number.isFinite(expiry) ? `剩余 ${expiry} 天` : "有效期 --";
+        return `<div class="ac-platform-cell"><div><button class="ac-count-link" data-jump-accounts="${shop.id}" data-account-platform="${platform}">${accountCount} 个账户</button>${authorizationTag(status)}</div><small class="${status === "authorized" && expiry <= 7 ? "warning" : ""}">${expiryText}</small></div>`;
+      };
+      const cancelActions = Object.entries(shop.authorization).filter(([, status]) => status === "authorized").map(([platform]) => `<button class="ac-action-cancel" data-cancel-auth="${platform}" data-shop-id="${shop.id}">取消${platformNames[platform]}授权</button>`).join("");
+      const needsAuthorization = Object.values(shop.authorization).some(status => status !== "authorized");
+      const continueAction = needsAuthorization ? `<button class="ac-action-primary" data-open-auth="${shop.id}">去授权</button>` : "";
+      const actions = cancelActions + continueAction;
+      return `<tr><td>${entity(shop)}</td><td>${platformCell("qianchuan")}</td><td>${platformCell("suixintui")}</td><td>${platformCell("juliang")}</td><td><div class="ac-actions">${actions}</div></td></tr>`;
+    }).join("") : emptyRow(5, "没有符合条件的店铺");
   }
 
   function accountRows() {
@@ -99,18 +127,22 @@
     const shopKeyword = state.accountShopSearch.trim().toLowerCase();
     return accounts.filter(account => {
       const shop = shopById(account.shopId);
-      return matches(keyword, [account.name, account.id]) && matches(shopKeyword, [shop?.name, shop?.id]) && (!state.defaultOnly || shop?.defaultAccountId === account.id);
+      return matches(keyword, [account.name, account.id]) && matches(shopKeyword, [shop?.name, shop?.id]) && (state.accountPlatform === "all" || account.platform === state.accountPlatform) && (!state.defaultOnly || shop?.defaultAccountId === account.id);
     });
   }
   function renderAccounts() {
     const rows = accountRows();
+    const shopFilter = state.accountShopSearch.trim();
+    el("acAccountAppliedFilter").hidden = !shopFilter;
+    el("acAccountAppliedShop").textContent = shopFilter;
     el("acAccountCount").textContent = `共 ${rows.length} 个广告账户`;
     el("acAccountBody").innerHTML = rows.length ? rows.map(account => {
       const shop = shopById(account.shopId);
       const isDefault = shop?.defaultAccountId === account.id;
-      const operation = isDefault ? `<button class="ac-action-cancel-default" data-cancel-default="${account.id}">取消店铺默认账户</button>` : `<button class="ac-action-primary" data-set-default="${account.id}">设为店铺默认账户</button>`;
-      return `<tr><td>${entity(account, "account")}</td><td>${shop ? entity(shop, "shop", true) : '<span class="ac-empty-value">--</span>'}</td><td><button class="ac-count-link" data-jump-douyin="${account.id}">${account.douyinCount} 个</button></td><td>${operation}</td></tr>`;
-    }).join("") : emptyRow(4, "没有符合条件的广告账户");
+      const qianchuanAvailable = shop?.authorization.qianchuan === "authorized" && shop?.expiresIn > 0;
+      const operation = account.platform !== "qianchuan" ? '<span class="ac-empty-value">--</span>' : !qianchuanAvailable ? `<button class="ac-action-primary" data-open-auth="${shop?.id || ""}">去授权</button>` : isDefault ? `<button class="ac-action-cancel-default" data-cancel-default="${account.id}">取消店铺默认账户</button>` : `<button class="ac-action-primary" data-set-default="${account.id}">设为店铺默认账户</button>`;
+      return `<tr><td>${entity(account, "account")}</td><td><span class="ac-platform-badge ${escape(account.platform)}">${platformNames[account.platform] || "--"}</span></td><td>${shop ? entity(shop, "shop", true) : '<span class="ac-empty-value">--</span>'}</td><td><button class="ac-count-link" data-jump-douyin="${account.id}">${account.douyinCount} 个</button></td><td>${operation}</td></tr>`;
+    }).join("") : emptyRow(5, "没有符合条件的广告账户");
   }
 
   function douyinRows() {
@@ -132,6 +164,7 @@
 
   function render() { renderShops(); renderAccounts(); renderDouyin(); }
   function switchView(view) {
+    if (window.ProductCardApp?.hasPromotionPermission && !window.ProductCardApp.hasPromotionPermission("promotion.authorization." + view)) { toast("没有该Tab权限"); return; }
     state.view = view;
     el("acViewTabs").querySelectorAll("button").forEach(button => button.classList.toggle("active", button.dataset.acView === view));
     page.querySelectorAll("[data-ac-panel]").forEach(panel => { panel.hidden = panel.dataset.acPanel !== view; });
@@ -144,16 +177,18 @@
     ["acQianchuanFilter", "acSuixintuiFilter", "acJuliangFilter"].forEach(id => { el(id).value = "all"; });
     switchView("shop"); renderShops();
   }
-  function jumpToAccounts(shopId) {
+  page.addEventListener("account-config-open-shop", event => jumpToShop(event.detail?.shopId));
+  function jumpToAccounts(shopId, platform = "all") {
     const shop = shopById(shopId); if (!shop) return;
-    state.accountSearch = ""; state.accountShopSearch = shop.name; state.defaultOnly = false;
-    setInput("acAccountSearch", ""); setInput("acAccountShopSearch", shop.name); el("acDefaultOnly").checked = false;
+    state.accountSearch = ""; state.accountShopSearch = shop.name; state.accountPlatform = platform; state.defaultOnly = false;
+    setInput("acAccountSearch", ""); setInput("acAccountShopSearch", shop.name); el("acAccountPlatformFilter").value = platform; el("acDefaultOnly").checked = false;
     switchView("account"); renderAccounts();
   }
+  page.addEventListener("account-config-open-accounts", event => jumpToAccounts(event.detail?.shopId, event.detail?.platform || "all"));
   function jumpToAccount(accountId) {
     const account = accountById(accountId); if (!account) return;
-    state.accountSearch = account.name; state.accountShopSearch = ""; state.defaultOnly = false;
-    setInput("acAccountSearch", account.name); setInput("acAccountShopSearch", ""); el("acDefaultOnly").checked = false;
+    state.accountSearch = account.name; state.accountShopSearch = ""; state.accountPlatform = account.platform || "all"; state.defaultOnly = false;
+    setInput("acAccountSearch", account.name); setInput("acAccountShopSearch", ""); el("acAccountPlatformFilter").value = state.accountPlatform; el("acDefaultOnly").checked = false;
     switchView("account"); renderAccounts();
   }
   function jumpToDouyin(accountId) {
@@ -166,12 +201,14 @@
     if (!shop || !platformName || shop.authorization[platform] !== "authorized") return;
     const ok = await confirmAction(`确认取消${platformName}授权？`, `取消后，店铺“${shop.name}”将不能通过本系统使用${platformName}相关能力，已有数据不会删除。`, "确认取消");
     if (!ok) return;
-    shop.authorization[platform] = "unauthorized";
+    shop.authorization[platform] = "cancelled";
+    shop.authorizationExpiry[platform] = null;
+    if (platform === "qianchuan") shop.expiresIn = 0;
     renderShops(); toast(`${platformName}授权已取消`);
   }
   async function setDefaultAccount(accountId) {
     const account = accountById(accountId), shop = account && shopById(account.shopId);
-    if (!account || !shop || shop.defaultAccountId === account.id) return;
+    if (!account || !shop || account.platform !== "qianchuan" || shop.authorization.qianchuan !== "authorized" || shop.expiresIn <= 0 || shop.defaultAccountId === account.id) return;
     const previous = accountById(shop.defaultAccountId);
     const ok = await confirmAction("确认修改店铺默认账户？", `店铺“${shop.name}”的默认广告账户将由“${previous?.name || "未设置"}”切换为“${account.name}”。已创建的分发任务不受影响。`, "确认修改");
     if (!ok) return;
@@ -201,12 +238,20 @@
   [["acQianchuanFilter", "qianchuan"], ["acSuixintuiFilter", "suixintui"], ["acJuliangFilter", "juliang"]].forEach(([id, field]) => {
     el(id).addEventListener("change", event => { state[field] = event.target.value; renderShops(); });
   });
+  el("acAccountPlatformFilter").addEventListener("change", event => { state.accountPlatform = event.target.value; renderAccounts(); });
   el("acDefaultOnly").addEventListener("change", event => { state.defaultOnly = event.target.checked; renderAccounts(); });
+  el("acAccountClearShop").addEventListener("click", () => {
+    state.accountShopSearch = "";
+    setInput("acAccountShopSearch", "");
+    renderAccounts();
+    el("acAccountShopSearch").focus();
+  });
   page.addEventListener("click", event => {
-    const accountsJump = event.target.closest("[data-jump-accounts]"); if (accountsJump) return jumpToAccounts(accountsJump.dataset.jumpAccounts);
+    const accountsJump = event.target.closest("[data-jump-accounts]"); if (accountsJump) return jumpToAccounts(accountsJump.dataset.jumpAccounts, accountsJump.dataset.accountPlatform || "all");
     const shopJump = event.target.closest("[data-jump-shop]"); if (shopJump) return jumpToShop(shopJump.dataset.jumpShop);
     const accountJump = event.target.closest("[data-jump-account]"); if (accountJump) return jumpToAccount(accountJump.dataset.jumpAccount);
     const douyinJump = event.target.closest("[data-jump-douyin]"); if (douyinJump) return jumpToDouyin(douyinJump.dataset.jumpDouyin);
+    const startAuth = event.target.closest("[data-open-auth]"); if (startAuth) return openAuthorizationGuide(startAuth.dataset.openAuth);
     const cancel = event.target.closest("[data-cancel-auth]"); if (cancel) return cancelAuthorization(cancel.dataset.shopId, cancel.dataset.cancelAuth);
     const cancelDefault = event.target.closest("[data-cancel-default]"); if (cancelDefault) return cancelDefaultAccount(cancelDefault.dataset.cancelDefault);
     const setDefault = event.target.closest("[data-set-default]"); if (setDefault) return setDefaultAccount(setDefault.dataset.setDefault);
@@ -220,6 +265,10 @@
   el("acGuideMask").addEventListener("click", event => { if (event.target === el("acGuideMask")) closeAuthorizationGuide(); });
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && !el("acGuideMask").hidden) closeAuthorizationGuide();
+  });
+  window.addEventListener("promotion-permissions-change", () => {
+    const first = ["shop", "account", "douyin"].find(view => window.ProductCardApp?.hasPromotionPermission("promotion.authorization." + view));
+    if (first) switchView(first);
   });
   render();
 })();

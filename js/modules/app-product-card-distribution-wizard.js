@@ -13,9 +13,21 @@
     step: 1, productId: "", selectedTaskIds: [], selectedImageIds: [], taskOrder: [], taskSearch: "", taskPage: 1,
     hideUploaded: true, taskRange: app.dateRange.preset(30), planRange: app.dateRange.preset(30),
     shopIds: [], shopSearch: "", planIds: [], planOrder: [], quantities: {}, planSearch: "", planStatus: "active",
-    sourceTaskId: "", editingTaskId: ""
+    sourceTaskId: "", editingTaskId: "", taskName: "", taskNameEdited: false
   };
   const taskPageSize = 8;
+  function dateParts() {
+    const date = new Date();
+    const pad = value => String(value).padStart(2, "0");
+    return { day: `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`, time: `${pad(date.getHours())}${pad(date.getMinutes())}` };
+  }
+  function initialTaskName() { const stamp = dateParts(); return `图片分发_${stamp.day}${stamp.time}`; }
+  function productTaskName(productId) {
+    const stamp = dateParts();
+    const suffix = `-图片分发_${stamp.day}${stamp.time}`;
+    const productName = app.product(productId)?.name || "商品";
+    return `${productName.slice(0, Math.max(1, 50 - suffix.length))}${suffix}`;
+  }
 
   function selectedImages() {
     return app.data.images.filter(image => wizard.selectedImageIds.includes(image.id)).sort((left, right) => {
@@ -34,7 +46,7 @@
     return app.data.generationTasks.filter(task => {
       const images = taskImages(task.id);
       const product = app.product(task.productId);
-      return images.length && app.dateRange.contains(task.createdAt, wizard.taskRange) && (!keyword || [task.id, task.name, product?.name].some(value => String(value || "").toLowerCase().includes(keyword)));
+      return (!app.canViewTask || app.canViewTask(task, "generate")) && images.length && app.dateRange.contains(task.createdAt, wizard.taskRange) && (!keyword || [task.id, task.name, product?.name].some(value => String(value || "").toLowerCase().includes(keyword)));
     });
   }
   function selectedPlans() {
@@ -50,20 +62,24 @@
     const base = Math.floor(total / count);
     const remainder = total % count;
     wizard.planOrder.forEach((id, index) => { wizard.quantities[id] = base + (index < remainder ? 1 : 0); });
+    app.toast("已按计划选择顺序重新平分；容量不足时请手动调整数量");
   }
   function resetWizard(productId, sourceTaskId) {
     const source = app.data.distributionTasks.find(item => item.id === sourceTaskId);
     Object.assign(wizard, {
       step: 1, productId: productId || source?.productId || "", selectedTaskIds: [], selectedImageIds: [], taskOrder: [],
       taskSearch: "", taskPage: 1, hideUploaded: true, taskRange: app.dateRange.preset(30), shopIds: [], shopSearch: "", planIds: [], planOrder: [], quantities: {},
-      planSearch: "", planStatus: "active", planRange: app.dateRange.preset(30), sourceTaskId: sourceTaskId || "", editingTaskId: source?.status === "draft" ? source.id : ""
+      planSearch: "", planStatus: "active", planRange: app.dateRange.preset(30), sourceTaskId: sourceTaskId || "", editingTaskId: source?.status === "draft" ? source.id : "",
+      taskName: source?.name || (productId ? productTaskName(productId) : initialTaskName()), taskNameEdited: Boolean(source?.name)
     });
     if (!source) return;
     if (source.draftState) {
       Object.assign(wizard, JSON.parse(JSON.stringify(source.draftState)), { sourceTaskId: source.id, editingTaskId: source.id });
+      wizard.taskName ||= source.name || initialTaskName();
+      wizard.taskNameEdited = true;
       wizard.step = Math.min(3, Math.max(1, Number(wizard.step || 1)));
       wizard.hideUploaded = wizard.hideUploaded !== false;
-      if (wizard.hideUploaded) wizard.selectedImageIds = wizard.selectedImageIds.filter(id => Number(app.data.images.find(image => image.id === id)?.distributionCount || 0) === 0);
+      wizard.step = 1; // Restore all saved selections; never silently substitute or discard.
       return;
     }
     const records = dist.ensureImageResults?.(source) || [];
@@ -79,7 +95,11 @@
     return `<div class="pc-wizard-steps">${["选择任务与图片", "选择店铺与计划", "分发明细"].map((label, index) => `<div class="pc-wizard-step ${wizard.step > index + 1 ? "done" : ""} ${wizard.step === index + 1 ? "active" : ""}" data-step="${index + 1}">${label}</div>`).join("")}</div>`;
   }
   function footer() {
-    return `${wizard.step > 1 ? `<button class="pc-btn" data-wizard-action="prev">上一步</button>` : ""}<button class="pc-btn pc-btn-quiet" data-wizard-action="save-draft">保存草稿</button><button class="pc-btn" data-pc-close-drawer>取消</button>${wizard.step < 3 ? `<button class="pc-btn pc-btn-primary" data-wizard-action="next">下一步</button>` : `<button class="pc-btn pc-btn-primary" data-wizard-action="submit">提交分发</button>`}`;
+    return `${wizard.step > 1 ? `<button class="pc-btn pc-wizard-prev" data-wizard-action="prev">上一步</button>` : ""}<button class="pc-btn pc-btn-quiet" data-wizard-action="save-draft">保存草稿</button><button class="pc-btn" data-pc-close-drawer>取消</button>${wizard.step < 3 ? `<button class="pc-btn pc-btn-primary" data-wizard-action="next">下一步</button>` : `<button class="pc-btn pc-btn-primary" data-wizard-action="submit">提交分发</button>`}`;
+  }
+  function taskNameField() {
+    const length = wizard.taskName.length;
+    return `<label class="pc-wizard-name-field ${length > 50 ? "invalid" : ""}"><span><b>分发任务名称</b><em><i data-wizard-name-count>${length}</i>/50</em></span><input id="pcDistributionTaskName" maxlength="50" value="${app.escape(wizard.taskName)}" placeholder="请输入分发任务名称"></label>`;
   }
   function imageCard(image) {
     const checked = wizard.selectedImageIds.includes(image.id);
@@ -89,10 +109,10 @@
     const visual = image.url ? `<img src="${app.escape(image.url)}" alt="${app.escape(image.fileName)}">` : `<span class="pc-distribution-placeholder tone-${(image.order || 0) % 6 + 1}" aria-hidden="true"></span>`;
     return `<label class="pc-wizard-image ${checked ? "selected" : ""}">
       <input type="checkbox" data-wizard-image="${image.id}" ${checked ? "checked" : ""}>
-      <div class="pc-wizard-image-stage"><div class="pc-image-preview">${visual}</div><span class="pc-distribution-count-badge ${distributionCount ? "distributed" : ""}">累计 ${distributionCount} 次</span></div>
+      <div class="pc-wizard-image-stage"><button type="button" class="pc-image-preview" data-wizard-preview="${image.id}" aria-label="查看大图">${visual}<span class="pc-image-zoom-hint">查看大图</span></button><span class="pc-distribution-count-badge ${distributionCount ? "distributed" : ""}">累计 ${distributionCount} 次</span></div>
       <div class="pc-wizard-image-meta">
         <strong title="${app.escape(image.fileName)}">${app.escape(image.fileName)}</strong>
-        <span class="pc-wizard-image-source"><i title="${app.escape(sourceTask?.name || image.taskId || "生成任务")}">${app.escape(sourceTask?.name || image.taskId || "生成任务")}</i><span class="pc-source-detail-trigger" tabindex="0" data-pc-tip="来源详情" data-pc-tip-kind="source-detail" data-source-task="${app.escape(`${sourceTask?.name || "生成任务"} · ${sourceTask?.id || image.taskId || "—"}`)}" data-source-prompt="${app.escape(sourceRule?.prompt || "未记录提示词")}" data-source-distribution-count="${distributionCount}">来源详情</span></span>
+        <span class="pc-wizard-image-source">${app.imageTime(image)}<span class="pc-source-detail-trigger" tabindex="0" data-pc-tip="来源详情" data-pc-tip-kind="source-detail" data-source-task="${app.escape(`${sourceTask?.name || "生成任务"} · ${sourceTask?.id || image.taskId || "—"}`)}" data-source-prompt="${app.escape(image.promptSnapshot || sourceRule?.prompt || "未记录提示词")}" data-source-distribution-count="${distributionCount}">来源详情</span></span>
       </div>
     </label>`;
   }
@@ -128,12 +148,28 @@
   function accountCell(account) {
     return `<span class="pc-two-line"><b>${app.escape(account?.name || "—")}</b><small>${account?.id || "—"}</small></span>`;
   }
+  function shopAvailability(shop) {
+    const account = app.account(shop.accountId);
+    const auth = window.AccountConfigSeed?.shops.find(item => item.id === shop.id);
+    if (!auth || auth.authorization.qianchuan !== "authorized" || auth.expiresIn <= 0) {
+      return { available: false, account, reason: "千川未授权或已失效" };
+    }
+    if (!account || account.authorizationStatus === "disabled") {
+      return { available: false, account, reason: "缺少有效默认千川广告账户" };
+    }
+    return { available: true, account, reason: "" };
+  }
+  async function goToAccountConfig(shopId) {
+    const closed = await app.requestCloseDrawer();
+    if (!closed) return;
+    document.querySelector('.nav-item[data-page="account-config"]')?.click();
+    document.getElementById("page-account-config")?.dispatchEvent(new CustomEvent("account-config-open-accounts", { detail: { shopId, platform: "qianchuan" } }));
+  }
   function stepTwo() {
     const keyword = wizard.shopSearch.trim().toLowerCase();
     const shops = app.data.shops.filter(shop => {
       const account = app.account(shop.accountId);
-      const available = account && account.authorizationStatus !== "disabled";
-      return available && (!keyword || [shop.name, shop.id, account?.name, account?.id].some(value => String(value || "").toLowerCase().includes(keyword)));
+      return !keyword || [shop.name, shop.id, account?.name, account?.id].some(value => String(value || "").toLowerCase().includes(keyword));
     });
     const plans = candidatePlans();
     const assigned = allocatedTotal();
@@ -141,11 +177,12 @@
       <section class="pc-target-shops"><header><div><h3>店铺与默认广告账户</h3><p>选择后，右侧联动展示该商品的计划</p></div><b>已选 ${wizard.shopIds.length}</b></header>
         <label class="pc-search pc-search-full"><span>⌕</span><input id="pcWizardShopSearch" value="${app.escape(wizard.shopSearch)}" placeholder="搜索店铺或账户名称/ID"></label>
         <div class="pc-target-shop-list">${shops.length ? shops.map(shop => {
-        const account = app.account(shop.accountId), selected = wizard.shopIds.includes(shop.id);
-        return `<label class="pc-target-shop ${selected ? "selected" : ""}"><input type="checkbox" data-wizard-shop="${shop.id}" ${selected ? "checked" : ""}><div>${shopCell(shop)}<span class="pc-target-account"><small>默认广告账户</small>${accountCell(account)}</span></div></label>`;
+        const availability = shopAvailability(shop), selected = wizard.shopIds.includes(shop.id);
+        if (!availability.available) return `<div class="pc-target-shop disabled"><input type="checkbox" disabled aria-label="${app.escape(shop.name)}不可选择"><div>${shopCell(shop)}<span class="pc-target-account pc-target-account-missing"><small>${app.escape(availability.reason)}</small><button type="button" class="pc-link-btn" data-wizard-account-config="${shop.id}">去授权配置</button></span></div></div>`;
+        return `<label class="pc-target-shop ${selected ? "selected" : ""}"><input type="checkbox" data-wizard-shop="${shop.id}" ${selected ? "checked" : ""}><div>${shopCell(shop)}<span class="pc-target-account"><small>默认广告账户</small>${accountCell(availability.account)}</span></div></label>`;
       }).join("") : `<div class="pc-empty pc-empty-compact">没有符合条件的店铺</div>`}</div>
       </section>
-      <section class="pc-target-plans"><header><div><h3>计划集合</h3><p>勾选计划后自动平分图片，也可直接填写分发素材数</p></div><strong class="${assigned === wizard.selectedImageIds.length ? "is-valid" : "is-invalid"}">已选 ${wizard.planIds.length} 个 · 图片 ${wizard.selectedImageIds.length} 张 · 已分配 ${assigned} 张</strong></header>
+      <section class="pc-target-plans"><header><div><h3>计划集合</h3><p>勾选计划后自动平分图片，也可直接填写分发素材数</p></div><strong class="${assigned === wizard.selectedImageIds.length ? "is-valid" : "is-invalid"}">已选 ${wizard.planIds.length} 个 · 图片 ${wizard.selectedImageIds.length} 张 · 已分配 ${assigned} 张${assigned !== wizard.selectedImageIds.length ? ` · ${assigned > wizard.selectedImageIds.length ? "超配" : "未分配"} ${Math.abs(assigned - wizard.selectedImageIds.length)} 张` : ""}</strong></header>
         <div class="pc-step-toolbar pc-plan-step-toolbar"><div><label class="pc-search"><span>⌕</span><input id="pcWizardPlanSearch" value="${app.escape(wizard.planSearch)}" placeholder="搜索计划名称或计划ID"></label>${app.dateRange.render("wizard-plan-data", wizard.planRange, { label: "千川数据时间", compact: true })}<span class="pc-sync-time">千川同步：09-02 11:20:06</span></div></div>
         ${planStatusFilters()}
         <div class="pc-plan-table-wrap"><table class="pc-wizard-table pc-plan-table"><thead><tr><th></th><th>计划</th><th>计划状态</th><th>整体消耗(元)</th><th>整体成交订单数</th><th>整体成交金额(元)</th><th>整体支付ROI</th><th>店铺</th><th>默认广告账户</th><th>当前素材数</th><th>分发素材数</th></tr></thead><tbody>${plans.length ? plans.map(plan => {
@@ -168,7 +205,7 @@
     </div>`;
   }
   function candidatePlans() {
-    const accountIds = wizard.shopIds.map(id => app.shop(id)?.accountId).filter(id => app.account(id)?.authorizationStatus !== "disabled");
+    const accountIds = wizard.shopIds.filter(id => !invalidSelections().some(item => item.kind === "shop" && item.id === id)).map(id => app.shop(id)?.accountId).filter(id => app.account(id)?.authorizationStatus !== "disabled");
     const keyword = wizard.planSearch.trim().toLowerCase();
     return app.data.plans.filter(plan => accountIds.includes(plan.accountId) && plan.productId === wizard.productId && (wizard.planStatus === "all" || plan.status === wizard.planStatus) && (!keyword || [plan.id, plan.name].some(value => value.toLowerCase().includes(keyword))));
   }
@@ -191,18 +228,44 @@
       <section class="pc-review-section"><header><div class="pc-review-title"><h3>分发明细</h3><span>提交时校验500张上限，单计划失败不影响其他计划</span></div><span>按计划勾选顺序依次分配；点击“查看全部”核对图片</span></header>${dist.renderDistributionTable(details, { context: "wizard-preview", preview: true, showStatus: false })}</section>`;
   }
   function renderWizard() {
-    app.els.drawerBody.innerHTML = `${steps()}${wizard.step === 1 ? stepOne() : wizard.step === 2 ? stepTwo() : stepThree()}`;
+    const invalid = invalidSelections();
+    app.els.drawerBody.innerHTML = `${invalid.length ? `<div class="pc-draft-warning" role="alert">保存的配置有 ${invalid.length} 项已失效：${invalid.map(item => app.escape(item.label)).join("、")}。不会自动替换。<button type="button" data-clear-invalid>移除失效选择</button></div>` : ""}${steps()}${taskNameField()}${wizard.step === 1 ? stepOne() : wizard.step === 2 ? stepTwo() : stepThree()}`;
     app.els.drawerFoot.innerHTML = footer();
   }
   app.openDistributionWizard = (productId, sourceTaskId) => {
     resetWizard(productId, sourceTaskId);
     const source = app.data.distributionTasks.find(item => item.id === sourceTaskId);
     const title = source?.status === "draft" ? "继续编辑分发任务" : "新建分发任务";
-    app.openDrawer({ mode: "edit", className: "pc-distribution-drawer", eyebrow: "图片分发", title, subtitle: "按任务选择、规则和生成顺序分配图片", body: "", footer: "" });
+    app.openDrawer({ mode: "edit", className: "pc-distribution-drawer", eyebrow: "图片分发", title, subtitle: "按任务选择、规则和生成顺序分配图片", body: "", footer: "", saveDraft: () => saveDraft(false), canSaveDraft: () => Boolean(wizard.selectedTaskIds.length && wizard.productId) });
     renderWizard();
   };
 
+  function invalidSelections() {
+    const invalid = [];
+    wizard.selectedImageIds.forEach(id => {
+      const image = app.data.images.find(item => item.id === id);
+      const task = app.data.generationTasks.find(item => item.id === image?.taskId);
+      if (!image || image.unavailable || image.screenStatus !== "selected" || image.productId !== wizard.productId || !wizard.selectedTaskIds.includes(image.taskId) || (app.canViewTask && !app.canViewTask(task || {}, "generate")) || (wizard.hideUploaded && image.distributionCount > 0))
+        invalid.push({ kind: "image", id, label: image?.fileName || id });
+    });
+    wizard.planIds.forEach(id => {
+      const plan = app.plan(id), shop = app.shop(plan?.shopId), account = app.account(plan?.accountId);
+      if (!plan || plan.productId !== wizard.productId || !plan.canUpload || !wizard.shopIds.includes(plan.shopId) || shop?.accountId !== plan.accountId || !account || account.authorizationStatus === "disabled")
+        invalid.push({ kind: "plan", id, label: plan?.name || id });
+    });
+    wizard.shopIds.forEach(id => {
+      const shop = app.shop(id), auth = window.AccountConfigSeed?.shops.find(item => item.id === id);
+      if (!shop || !shop.accountId || (auth && (auth.authorization.qianchuan !== "authorized" || auth.expiresIn <= 0)))
+        invalid.push({ kind: "shop", id, label: shop?.name || id });
+    });
+    return invalid;
+  }
   function validateTargets() {
+    if (!wizard.taskName.trim()) return "请填写分发任务名称";
+    if (wizard.taskName.trim().length > 50) return "分发任务名称最多 50 个字符";
+    if (invalidSelections().length) return "请先移除失效选择并重新确认配置";
+    if (!wizard.selectedImageIds.length) return "请先选择图片";
+    if (wizard.planIds.some(id => !Number.isInteger(wizard.quantities[id]))) return "分发素材数必须为整数";
     if (!wizard.shopIds.length) return "请至少选择1个店铺";
     const disabledShop = wizard.shopIds.map(id => app.shop(id)).find(shop => !app.account(shop?.accountId) || app.account(shop.accountId)?.authorizationStatus === "disabled");
     if (disabledShop) return `${disabledShop.name}的默认广告账户已停用，请重新选择店铺`;
@@ -219,72 +282,78 @@
   }
   function validateStep() {
     if (wizard.step === 1) {
+      if (!wizard.taskName.trim()) return "请填写分发任务名称";
+      if (invalidSelections().some(item => item.kind === "image")) return "请先移除失效图片";
       if (!wizard.selectedTaskIds.length) return "请至少选择1个生成任务";
       if (!wizard.selectedImageIds.length) return "请至少选择1张选用图片";
     }
     if (wizard.step === 2) return validateTargets();
     return "";
   }
-  function formatNow() {
-    const date = new Date();
-    const pad = value => String(value).padStart(2, "0");
-    return `${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-  }
-  function saveDraft() {
-    if (!wizard.selectedTaskIds.length || !wizard.productId) { app.toast("至少选择1个生成任务后才能保存草稿"); return; }
+  function saveDraft(closeAfterSave = true) {
+    if (!wizard.selectedTaskIds.length || !wizard.productId) { app.toast("至少选择1个生成任务后才能保存草稿"); return false; }
+    if (!wizard.taskName.trim()) { app.toast("请填写分发任务名称"); return false; }
     const existing = app.data.distributionTasks.find(item => item.id === wizard.editingTaskId);
-    const task = existing || { id: `DT-0902-${String(app.data.distributionTasks.length + 19).padStart(3, "0")}`, createdAt: formatNow() };
+    const task = existing || { id: `DT-${Date.now()}`, createdAt: app.now() };
     const draftState = JSON.parse(JSON.stringify({
       step: wizard.step, productId: wizard.productId, selectedTaskIds: wizard.selectedTaskIds, selectedImageIds: wizard.selectedImageIds,
       taskOrder: wizard.taskOrder, taskSearch: wizard.taskSearch, taskPage: wizard.taskPage, hideUploaded: wizard.hideUploaded, shopIds: wizard.shopIds,
       shopSearch: wizard.shopSearch, planIds: wizard.planIds, planOrder: wizard.planOrder, quantities: wizard.quantities,
-      planSearch: wizard.planSearch, planStatus: wizard.planStatus, taskRange: wizard.taskRange, planRange: wizard.planRange
+      planSearch: wizard.planSearch, planStatus: wizard.planStatus, taskRange: wizard.taskRange, planRange: wizard.planRange,
+      taskName: wizard.taskName.trim(), taskNameEdited: wizard.taskNameEdited
     }));
-    Object.assign(task, { name: `${app.product(wizard.productId)?.name}分发草稿`, productId: wizard.productId, creator: dist.currentUser, team: dist.currentTeam, sourceTaskIds: wizard.taskOrder.slice(), plans: wizard.planOrder.slice(), requested: wizard.selectedImageIds.length, success: 0, failed: 0, status: "draft", results: [], draftState });
+    Object.assign(task, { name: wizard.taskName.trim(), productId: wizard.productId, creator: dist.currentUser, team: dist.currentTeam, sourceTaskIds: wizard.taskOrder.slice(), plans: wizard.planOrder.slice(), requested: wizard.selectedImageIds.length, success: 0, failed: 0, status: "draft", results: [], draftState });
     delete task.imageResults;
     if (!existing) app.data.distributionTasks.unshift(task);
-    app.state.drawerDirty = false; app.forceCloseDrawer(); app.renderDistribution(); app.toast("分发草稿已保存");
+    app.state.drawerDirty = false; if (closeAfterSave) app.forceCloseDrawer(); app.renderDistribution(); app.toast("分发草稿已保存");
+    return true;
   }
   async function submit() {
     const error = validateTargets(); if (error) { app.toast(error); return; }
     const ok = await app.confirm("确认提交分发？", `将向 ${wizard.planIds.length} 个计划分发 ${wizard.selectedImageIds.length} 张图片。`, "开始分发");
     if (!ok) return;
-    const imageResults = [], results = [];
-    allocationPreview().forEach(({ plan, quantity, images }) => {
-      const canUpload = plan.canUpload && plan.current + quantity <= 500;
-      images.forEach(image => {
-        const status = canUpload ? "success" : "failed";
-        const reason = canUpload ? "分发成功" : !plan.canUpload ? `计划${dist.planStatusText(plan.status)}，不可分发` : `当前 ${plan.current} 张，新增 ${quantity} 张后超过500`;
-        const record = { id: `RESULT-${Date.now()}-${imageResults.length}`, imageId: image.id, fileName: image.fileName, order: image.order, ruleIndex: image.ruleIndex, planId: plan.id, status, retries: 0, reason };
-        imageResults.push(record);
-        if (canUpload) dist.registerSuccessfulDistribution?.(record);
-      });
-      const success = canUpload ? images.length : 0;
-      const failed = images.length - success;
-      if (success) {
-        plan.current += success; plan.distributed += success; plan.today += success; plan.updatedAt = formatNow();
-        const account = app.account(plan.accountId); account.today += success; account.total += success; account.updatedAt = formatNow();
-      } else {
-        plan.failed += failed;
-        const account = app.account(plan.accountId); account.failed += failed;
-      }
-      results.push({ planId: plan.id, success, failed, reason: canUpload ? "分发完成" : imageResults.at(-1)?.reason });
-    });
-    const success = imageResults.filter(item => item.status === "success").length;
-    const failed = imageResults.length - success;
+    const changed = validateTargets(); if (changed) { app.toast(changed); renderWizard(); return; }
     const existing = app.data.distributionTasks.find(item => item.id === wizard.editingTaskId);
-    const task = existing || { id: `DT-0902-${String(app.data.distributionTasks.length + 19).padStart(3, "0")}` };
-    Object.assign(task, { name: `${app.product(wizard.productId)?.name}图片分发`, productId: wizard.productId, creator: dist.currentUser, team: dist.currentTeam, sourceTaskIds: wizard.taskOrder.slice(), plans: wizard.planOrder.slice(), requested: imageResults.length, success, failed, status: failed ? (success ? "partial" : "failed") : "success", createdAt: formatNow(), results, imageResults });
+    const task = existing || { id: `DT-${Date.now()}`, createdAt: app.now() };
+    const submittedAt = app.now();
+    const imageResults = allocationPreview().flatMap(({ plan, images }) => images.map(image => ({
+      id: `${task.id}-${plan.id}-${image.id}`, imageId: image.id, fileName: image.fileName,
+      order: image.order, ruleIndex: image.ruleIndex, planId: plan.id, accountId: plan.accountId, shopId: plan.shopId,
+      planName: plan.name, accountName: app.account(plan.accountId)?.name, shopName: app.shop(plan.shopId)?.name,
+      submittedAt, completedAt: null, status: "pending", retries: 0, reason: "等待处理"
+    })));
+    Object.assign(task, { name: wizard.taskName.trim(), productId: wizard.productId,
+      creator: dist.currentUser, team: dist.currentTeam, sourceTaskIds: wizard.taskOrder.slice(), plans: wizard.planOrder.slice(),
+      requested: imageResults.length, success: 0, failed: 0, submittedAt, results: [], imageResults,
+      allocationSnapshot: JSON.parse(JSON.stringify(imageResults)) });
     delete task.draftState;
     if (!existing) app.data.distributionTasks.unshift(task);
-    app.state.drawerDirty = false;
-    app.renderDistribution();
-    dist.openTaskDetail?.(task);
-    app.toast(`分发完成：成功 ${success} 张，失败 ${failed} 张`);
+    dist.startExecution(task);
+    app.state.drawerDirty = false; app.renderDistribution(); dist.openTaskDetail(task);
+    app.toast("分发任务已提交，正在本地模拟执行");
   }
 
   app.els.drawerBody.addEventListener("click", event => {
     if (app.dateRange.handle(event, "wizard-generation-task", wizard.taskRange) || app.dateRange.handle(event, "wizard-plan-data", wizard.planRange)) { wizard.taskPage = 1; renderWizard(); return; }
+    const preview = event.target.closest("[data-wizard-preview]");
+    if (preview) {
+      event.preventDefault(); event.stopPropagation();
+      const images = wizard.taskOrder.flatMap(visibleTaskImages);
+      dist.transientImageRecords ||= new Map();
+      images.forEach(image => dist.transientImageRecords.set(image.id, { ...image, imageId: image.id, status: "pending", reason: "" }));
+      app.openDistributionImageViewer(preview.dataset.wizardPreview, images.map(image => image.id));
+      return;
+    }
+    if (event.target.closest("[data-clear-invalid]")) {
+      invalidSelections().forEach(item => {
+        if (item.kind === "image") wizard.selectedImageIds = wizard.selectedImageIds.filter(id => id !== item.id);
+        if (item.kind === "shop") wizard.shopIds = wizard.shopIds.filter(id => id !== item.id);
+        if (item.kind === "plan") { wizard.planIds = wizard.planIds.filter(id => id !== item.id); wizard.planOrder = wizard.planOrder.filter(id => id !== item.id); delete wizard.quantities[item.id]; }
+      });
+      app.markDrawerDirty(); renderWizard(); return;
+    }
+    const accountConfig = event.target.closest("[data-wizard-account-config]");
+    if (accountConfig) { goToAccountConfig(accountConfig.dataset.wizardAccountConfig); return; }
     const page = event.target.closest("[data-task-page]");
     if (page && !page.disabled) { wizard.taskPage += page.dataset.taskPage === "next" ? 1 : -1; renderWizard(); return; }
     const bulk = event.target.closest("[data-image-bulk]");
@@ -321,6 +390,7 @@
     if (action === "save-draft") { saveDraft(); return; }
     if (action === "next") {
       const error = validateStep(); if (error) { app.toast(error); return; }
+      if (wizard.step === 1 && allocatedTotal() !== wizard.selectedImageIds.length) rebalance();
       wizard.step += 1; renderWizard(); return;
     }
     if (action === "submit") submit();
@@ -331,14 +401,14 @@
       const task = app.data.generationTasks.find(item => item.id === event.target.dataset.wizardTask);
       if (!task) return;
       if (event.target.checked) {
-        if (!wizard.productId) { wizard.productId = task.productId; wizard.planIds = []; wizard.planOrder = []; wizard.quantities = {}; }
+        if (!wizard.productId) { wizard.productId = task.productId; wizard.planIds = []; wizard.planOrder = []; wizard.quantities = {}; if (!wizard.taskNameEdited) wizard.taskName = productTaskName(task.productId); }
         wizard.selectedTaskIds = [...new Set([...wizard.selectedTaskIds, task.id])]; wizard.taskOrder = [...new Set([...wizard.taskOrder, task.id])];
       } else {
         wizard.selectedTaskIds = wizard.selectedTaskIds.filter(id => id !== task.id);
         wizard.taskOrder = wizard.taskOrder.filter(id => id !== task.id);
         const ids = taskImages(task.id).map(image => image.id);
         wizard.selectedImageIds = wizard.selectedImageIds.filter(id => !ids.includes(id));
-        if (!wizard.selectedTaskIds.length) wizard.productId = "";
+        if (!wizard.selectedTaskIds.length) { wizard.productId = ""; wizard.shopIds = []; wizard.planIds = []; wizard.planOrder = []; wizard.quantities = {}; if (!wizard.taskNameEdited) wizard.taskName = initialTaskName(); }
       }
       app.markDrawerDirty(); renderWizard(); return;
     }
@@ -374,7 +444,8 @@
     }
     if (event.target.matches("[data-wizard-qty]")) {
       const id = event.target.dataset.wizardQty;
-      const quantity = Math.max(0, Math.min(200, Number(event.target.value || 0)));
+      const quantity = Number(event.target.value || 0);
+      if (!Number.isInteger(quantity) || quantity < 0 || quantity > 200) { app.toast("分发素材数必须为0–200的整数"); renderWizard(); return; }
       if (quantity > 0) {
         if (!wizard.planIds.includes(id)) {
           wizard.planIds.push(id);
@@ -390,6 +461,14 @@
     }
   });
   app.els.drawerBody.addEventListener("input", event => {
+    if (event.target.id === "pcDistributionTaskName") {
+      wizard.taskName = event.target.value;
+      wizard.taskNameEdited = true;
+      const count = app.els.drawerBody.querySelector("[data-wizard-name-count]");
+      if (count) count.textContent = wizard.taskName.length;
+      event.target.closest(".pc-wizard-name-field")?.classList.toggle("invalid", wizard.taskName.length > 50);
+      return;
+    }
     const fields = { pcWizardTaskSearch: "taskSearch", pcWizardShopSearch: "shopSearch", pcWizardPlanSearch: "planSearch" };
     const field = fields[event.target.id]; if (!field) return;
     wizard[field] = event.target.value; if (field === "taskSearch") wizard.taskPage = 1;
