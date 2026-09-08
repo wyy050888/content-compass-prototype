@@ -859,7 +859,7 @@
 
             <section class="mix-step-panel" data-task-step="2" hidden>
               <article class="mix-block mix-copy-editor">
-                <div class="mix-block-head"><div><strong>口播文案</strong></div><div class="mix-copy-head-actions"><span class="mix-structure-stages" data-mix-structure-stages hidden></span><button class="mix-regenerate-copy" type="button" data-mix-regenerate-copy>重新生成</button></div></div>
+                <div class="mix-block-head"><div><strong>口播文案</strong></div><div class="mix-copy-head-actions"><button class="mix-regenerate-copy" type="button" data-mix-regenerate-copy>重新生成</button></div></div>
                 <div class="mix-copy-textarea-wrap"><textarea data-mix-copy>刚换的床单，看起来干净，床垫深处却可能还藏着毛发和碎屑。先别听我讲参数，直接看轻净 Pro 除螨仪走完一遍后的透明尘杯。它在床垫表面推进时，拍打和吸尘同步进行，把织物深处的细小脏污带出来，清洁结果当场就能看见。卧室床垫、客厅沙发和其他布艺都能使用，用完后尘杯还可以拆下来水洗，日常整理更省事。家里有孩子或宠物，别只停留在换床单和粘表面毛发，定期把床褥深处也清理一遍。想看完整实测过程，点击商品了解更多。</textarea><span class="mix-copy-count" aria-live="polite"><b data-mix-copy-count>196</b> 字</span></div>
               </article>
               <article class="mix-block">

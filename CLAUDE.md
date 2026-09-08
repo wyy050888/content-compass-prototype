@@ -25,7 +25,7 @@
 | 智能混剪：分镜渲染、模式字段、产品选择 | `js/modules/app-creation-mix-render.js` |
 | 智能混剪：模板结构选择、素材卡片 | `js/modules/app-creation-mix-catalog.js` 的 `mix*Structure*` |
 | 智能混剪：人群配置 | `js/modules/app-creation-mix-audience.js` |
-| 智能混剪：结构决策、计划同步、校验、弹窗工具 | `js/modules/app-creation-mix-script.js` 的 `syncMixStructureDecision` |
+| 智能混剪：计划同步、文案重写、校验、弹窗工具 | `js/modules/app-creation-mix-script.js` |
 | 智能混剪：分镜行级预览/重匹配/增删 | `js/modules/app-creation-mix-row.js` |
 | 智能混剪：素材选择、裁剪弹窗、行编辑 | `js/modules/app-creation-mix-trim.js` |
 | 混剪任务：Agent 事件、任务步骤条 | `js/modules/app-creation-task-mix.js` |

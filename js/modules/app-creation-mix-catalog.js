@@ -113,7 +113,6 @@
       root._mixSelectedStructureFormula = item?.formula || "";
       root._mixSelectedStructureMode = item?.id || "";
       renderMixPlanContext("ai");
-      syncMixStructureDecision();
     }
 
     function openContentStructurePicker(options = {}) {

@@ -1273,7 +1273,6 @@
     .mix-copy-editor textarea { min-height:250px; padding:16px 16px 32px; color:#353844; background:#fcfcfe; font-size:13px; }
     .mix-copy-editor textarea:focus,.mix-requirement textarea:focus { border-color:#8e73e5; box-shadow:0 0 0 3px rgba(118,86,220,.09); }
     .mix-copy-head-actions { display:flex; align-items:center; justify-content:flex-end; gap:10px; min-width:0; }
-    .mix-structure-stages { overflow:hidden; color:#7666ae; font-size:11px; line-height:1.4; white-space:nowrap; text-overflow:ellipsis; }
     .mix-regenerate-copy { min-height:32px; padding:0 12px; border:1px solid #cfc4f8; border-radius:8px; color:#6348cc; background:#fff; font-size:12px; font-weight:650; cursor:pointer; transition:.18s ease; }
     .mix-regenerate-copy:hover { border-color:#7959e7; background:#f7f4ff; box-shadow:0 3px 8px rgba(92,67,193,.12); }
     .mix-regenerate-copy:active { transform:translateY(1px); box-shadow:none; }

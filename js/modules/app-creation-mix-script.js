@@ -1,16 +1,3 @@
-    function syncMixStructureDecision() {
-      const root = dynamicForm.querySelector(".mix-flow-form");
-      const plan = root?.dataset.mixPlanMode || "ai";
-      const selectedId = dynamicForm.querySelector("[data-mix-content-structure]")?.value || "";
-      const structure = mixCurrentStructure();
-      const stageHint = dynamicForm.querySelector("[data-mix-structure-stages]");
-      const shouldShowStages = plan === "ai" && Boolean(selectedId) && Boolean(structure?.stageNames?.length);
-      if (stageHint) {
-        stageHint.hidden = !shouldShowStages;
-        stageHint.textContent = shouldShowStages ? structure.stageNames.join(" → ") : "";
-      }
-    }
-
     function generateMixCopyRewrite(sourceText) {
       const root = dynamicForm.querySelector(".mix-flow-form");
       const product = productCatalog[root?.querySelector("[data-mix-product]")?.value || ""];
@@ -84,7 +71,6 @@
         if (copy) copy.value = mixGeneratedCopyByProfile[profile] || mixGeneratedCopyByProfile.result;
         fitMixCopyToTarget(false);
       }
-      syncMixStructureDecision();
       syncMixDuration();
     }
 
