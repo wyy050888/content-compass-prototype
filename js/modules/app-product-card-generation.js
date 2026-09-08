@@ -14,6 +14,8 @@
   };
   let statusFilter = "all";
   let currentPage = 1;
+  let highlightedTaskId = "";
+  let highlightTimer = 0;
   const createdRange = app.dateRange.preset(30);
   const pageSize = 20;
   const metricDetail = items => `<span class="pc-metric-breakdown">${items.map(([label, value, tone]) => `<i class="${tone || ""}">${label} <b>${value}</b></i>`).join("")}</span>`;
@@ -41,7 +43,7 @@
 
   function validDraft(task) {
     if (!task.rules?.length || task.rules.length > 50 || task.target < 1 || task.target > 200) return false;
-    return task.name?.trim() && app.product(task.productId) && task.rules.every(rule => rule.images?.length && rule.promptState === "ready" && rule.prompt?.trim() && Number.isInteger(rule.quantity) && rule.quantity >= 1 && rule.quantity <= 20);
+    return task.name?.trim() && app.product(task.productId) && task.rules.every(rule => rule.images?.length && rule.images.length <= 3 && rule.promptState === "ready" && rule.prompt?.trim() && Number.isInteger(rule.quantity) && rule.quantity >= 1 && rule.quantity <= 20);
   }
 
   function screeningProgress(task) {
@@ -99,9 +101,39 @@
     els.head.innerHTML = `<tr><th>任务名称</th><th>产品名称</th>${showCreator ? "<th>创建人</th>" : ""}<th>任务状态</th><th>生成进度${app.tip("已完成数量 ÷ 目标数量；已完成数量包含生成成功与生成失败。")}</th><th>筛选进度${app.tip("已筛选数量为选用与不选用之和；仅生成成功的图片需要筛选。")}</th><th>规则/目标图片</th><th>创建时间</th><th>操作</th></tr>`;
     els.body.innerHTML = pageTasks.length ? pageTasks.map(task => {
       const product = app.product(task.productId);
-      return `<tr><td><span class="pc-cell-main">${app.escape(task.name)}</span><span class="pc-cell-sub">${task.id}</span></td><td><span class="pc-cell-main">${app.escape(product?.name)}</span></td>${showCreator ? `<td>${app.escape(task.creator)}</td>` : ""}<td>${taskStatus(task)}</td><td>${app.formatProgress(task)}</td><td>${screeningProgress(task)}</td><td>${task.rules.length} 条 / ${task.target} 张</td><td>${app.shortTime(task.createdAt)}</td><td><div class="pc-actions">${taskActions(task)}</div></td></tr>`;
+      return `<tr data-generation-task-id="${app.escape(task.id)}" class="${task.id === highlightedTaskId ? "pc-saved-task-highlight" : ""}"><td><span class="pc-cell-main">${app.escape(task.name)}</span><span class="pc-cell-sub">${task.id}</span></td><td><span class="pc-cell-main">${app.escape(product?.name)}</span></td>${showCreator ? `<td>${app.escape(task.creator)}</td>` : ""}<td>${taskStatus(task)}</td><td>${app.formatProgress(task)}</td><td>${screeningProgress(task)}</td><td>${task.rules.length} 条 / ${task.target} 张</td><td>${app.shortTime(task.createdAt)}</td><td><div class="pc-actions">${taskActions(task)}</div></td></tr>`;
     }).join("") : `<tr><td class="pc-empty" colspan="${showCreator ? 9 : 8}">没有符合条件的任务</td></tr>`;
     els.pagination.innerHTML = `<span>每页 ${pageSize} 条</span><div><button data-page="prev" ${currentPage === 1 ? "disabled" : ""}>上一页</button>${Array.from({ length: totalPages }, (_, index) => `<button data-page="${index + 1}" class="${currentPage === index + 1 ? "active" : ""}>${index + 1}</button>`).join("")}<button data-page="next" ${currentPage === totalPages ? "disabled" : ""}>下一页</button></div>`;
+  };
+
+  app.focusGenerationDraft = taskId => {
+    const task = app.data.generationTasks.find(item => item.id === taskId);
+    if (!task) return;
+    highlightedTaskId = taskId;
+    statusFilter = "draft";
+    currentPage = 1;
+    els.search.value = "";
+    els.creator.value = "";
+    Object.assign(createdRange, app.dateRange.preset(30));
+    const availableScope = [...els.scope.querySelectorAll("[data-scope]")].find(button => button.getAttribute("data-permission-hidden") !== "true" && (!app.canViewTask || app.canViewTask(task, "generate", button.dataset.scope)));
+    if (availableScope) {
+      app.state.generationScope = availableScope.dataset.scope;
+      els.scope.querySelectorAll("[data-scope]").forEach(button => button.classList.toggle("active", button === availableScope));
+    }
+    els.statuses.querySelectorAll("[data-status]").forEach(button => button.classList.toggle("active", button.dataset.status === "draft"));
+    app.setGenerationView?.("task");
+    app.renderGeneration();
+    if (!els.body.querySelector(`[data-generation-task-id="${taskId}"]`)) {
+      Object.assign(createdRange, { start: "", end: "" });
+      app.renderGeneration();
+    }
+    window.clearTimeout(highlightTimer);
+    window.requestAnimationFrame(() => els.body.querySelector(`[data-generation-task-id="${taskId}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" }));
+    highlightTimer = window.setTimeout(() => {
+      if (highlightedTaskId !== taskId) return;
+      highlightedTaskId = "";
+      els.body.querySelector(`[data-generation-task-id="${taskId}"]`)?.classList.remove("pc-saved-task-highlight");
+    }, 2600);
   };
 
   async function handleTaskAction(task, action) {

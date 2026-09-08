@@ -3,7 +3,7 @@
   const app = window.ProductCardApp;
   if (!app) return;
 
-  const state = { open: false, multiple: false, folder: "all", query: "", selected: new Set(), onConfirm: null };
+  const state = { open: false, multiple: false, maxSelected: Infinity, folder: "all", query: "", selected: new Set(), onConfirm: null };
   const layer = document.createElement("div");
   layer.className = "pc-library-layer";
   layer.setAttribute("aria-hidden", "true");
@@ -33,6 +33,7 @@
   app.openImagePicker = options => {
     state.open = true;
     state.multiple = Boolean(options?.multiple);
+    state.maxSelected = Number.isInteger(options?.maxSelected) ? options.maxSelected : Infinity;
     state.folder = "all";
     state.query = "";
     state.selected = new Set((options?.selectedIds || []).filter(id => app.data.imageLibrary.some(image => image.id === id)));
@@ -59,7 +60,11 @@
     const card = event.target.closest("[data-library-image]");
     if (card) {
       const id = card.dataset.libraryImage;
-      if (state.multiple) state.selected.has(id) ? state.selected.delete(id) : state.selected.add(id);
+      if (state.multiple) {
+        if (state.selected.has(id)) state.selected.delete(id);
+        else if (state.selected.size >= state.maxSelected) { app.toast("每条规则最多上传3张图片"); return; }
+        else state.selected.add(id);
+      }
       else { state.selected.clear(); state.selected.add(id); }
       renderGrid();
       return;
