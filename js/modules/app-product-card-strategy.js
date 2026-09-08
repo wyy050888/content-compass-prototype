@@ -38,7 +38,7 @@
   }
   function strategyBody(task) {
     const taskName = task?.name || "";
-    return `<div class="pc-form"><div class="pc-form-grid"><label class="pc-field"><span>任务名称</span><span class="pc-input-with-count"><input id="pcTaskName" maxlength="50" value="${app.escape(taskName)}" ${editor.editable ? "" : "disabled"}><small id="pcTaskNameCount" aria-live="polite">${taskName.length}/50</small></span></label><label class="pc-field"><span>产品名称</span><select id="pcTaskProduct" ${editor.editable && editor.isNew ? "" : "disabled"}>${app.data.products.map(product => `<option value="${product.id}" ${product.id === editor.productId ? "selected" : ""}>${app.escape(product.name)}</option>`).join("")}</select></label>${editor.isNew ? `<div class="pc-field pc-field-wide"><span>商品主图</span>${sourcePicker()}</div>` : ""}</div>${task?.failureReason ? `<div class="pc-note-error">${app.escape(task.failureReason)}</div>` : ""}<div id="pcUploadFeedback" aria-live="polite"></div><input type="file" id="pcSourceLocalInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg" hidden><input type="file" id="pcRuleLocalInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg" hidden><div id="pcRuleEditor"></div></div>`;
+    return `<div class="pc-form"><div class="pc-form-grid"><label class="pc-field"><span>任务名称</span><span class="pc-input-with-count"><input id="pcTaskName" maxlength="50" value="${app.escape(taskName)}" ${editor.editable ? "" : "disabled"}><small id="pcTaskNameCount" aria-live="polite">${taskName.length}/50</small></span></label><label class="pc-field"><span>产品名称</span><select id="pcTaskProduct" ${editor.editable && editor.isNew ? "" : "disabled"}><option value="" ${editor.productId ? "" : "selected"} disabled>请选择产品</option>${app.data.products.map(product => `<option value="${product.id}" ${product.id === editor.productId ? "selected" : ""}>${app.escape(product.name)}</option>`).join("")}</select></label>${editor.isNew ? `<div class="pc-field pc-field-wide"><span>商品主图</span>${sourcePicker()}</div>` : ""}</div>${task?.failureReason ? `<div class="pc-note-error">${app.escape(task.failureReason)}</div>` : ""}<div id="pcUploadFeedback" aria-live="polite"></div><input type="file" id="pcSourceLocalInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg" hidden><input type="file" id="pcRuleLocalInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg" hidden><div id="pcRuleEditor"></div></div>`;
   }
   function strategyFooter() {
     if (!editor.editable) return `<button class="pc-btn" data-pc-close-drawer>关闭</button>`;
@@ -168,7 +168,7 @@
     editor.taskId = isNew ? null : task?.id || null;
     editor.sourceTaskId = isNew ? task?.repeatSourceId || "" : task?.sourceTaskId || "";
     editor.rules = (task?.rules || []).map(normalizeRule);
-    editor.productId = preferredProductId || task?.productId || app.data.products[0]?.id || "";
+    editor.productId = preferredProductId || task?.productId || "";
     editor.sourceImage = editor.rules[0]?.images[0] ? copyImage(editor.rules[0].images[0]) : null;
     editor.isNew = Boolean(isNew);
     editor.editable = Boolean(isNew || task?.status === "draft");

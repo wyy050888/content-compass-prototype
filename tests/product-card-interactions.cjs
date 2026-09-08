@@ -13,6 +13,8 @@ const path = require('node:path');
 
     await page.locator('[data-pc-nav="generation"]').click();
     await page.locator('#pcPrimaryAction').click();
+    assert.equal(await page.locator('#pcTaskProduct').inputValue(), '');
+    assert.equal(await page.locator('#pcTaskProduct option:checked').innerText(), '请选择产品');
     assert.equal(await page.locator('#pcTaskName').getAttribute('maxlength'), '50');
     assert.equal(await page.locator('#pcTaskNameCount').textContent(), '0/50');
     await page.locator('#pcTaskName').fill('测试任务');
@@ -20,6 +22,7 @@ const path = require('node:path');
     assert.equal(await page.locator('#pcSourceLocalInput').getAttribute('accept'), '.png,.jpg,.jpeg,image/png,image/jpeg');
     assert.equal(await page.locator('#pcSourceLocalInput').getAttribute('multiple'), null);
     assert.equal(await page.locator('#pcRuleLocalInput').getAttribute('multiple'), null);
+    await page.locator('#pcTaskProduct').selectOption({ index: 1 });
 
     await page.locator('#pcSourceLocalInput').setInputFiles({ name: '错误格式.webp', mimeType: 'image/webp', buffer: Buffer.from('not-an-image') });
     assert.match(await page.locator('#pcUploadFeedback').innerText(), /仅支持 PNG、JPG、JPEG/);
