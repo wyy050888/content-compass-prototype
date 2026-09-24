@@ -25,15 +25,15 @@
     const query = state.query.trim().toLowerCase();
     const images = eligible().filter(image => (state.folder === "all" || image.folder === state.folder) && (!query || image.name.toLowerCase().includes(query)));
     layer.querySelector("#pcLibraryGrid").innerHTML = images.length ? images.map(image => `<button class="pc-library-card ${state.selected.has(image.id) ? "selected" : ""}" type="button" data-library-image="${image.id}"><span class="pc-library-cover pc-tone-${image.tone}"><i>${state.selected.has(image.id) ? "✓" : ""}</i></span><strong title="${app.escape(image.name)}">${app.escape(image.name)}</strong><small>${image.width} × ${image.height} · ${app.escape(image.folder)}</small></button>`).join("") : `<div class="pc-library-empty">没有符合条件的图片</div>`;
-    layer.querySelector("#pcLibrarySelected").textContent = `已选 ${state.selected.size} 张`;
-    layer.querySelector("#pcLibraryConfirm").disabled = !state.selected.size;
+    layer.querySelector("#pcLibrarySelected").textContent = `已选 ${state.selected.size} 张 · 本次最多 ${state.maxSelected} 张`;
+    layer.querySelector("#pcLibraryConfirm").disabled = !state.selected.size || state.selected.size > state.maxSelected;
   }
   function render() { renderFolders(); renderGrid(); }
 
   app.openImagePicker = options => {
     state.open = true;
     state.multiple = Boolean(options?.multiple);
-    state.maxSelected = Number.isInteger(options?.maxSelected) ? options.maxSelected : Infinity;
+    state.maxSelected = state.multiple ? Math.max(0, Math.min(options?.maxSelected ?? app.generationLimits.maxRuleImages, app.generationLimits.maxRuleImages)) : 1;
     state.folder = "all";
     state.query = "";
     state.selected = new Set((options?.selectedIds || []).filter(id => app.data.imageLibrary.some(image => image.id === id)));
@@ -62,7 +62,7 @@
       const id = card.dataset.libraryImage;
       if (state.multiple) {
         if (state.selected.has(id)) state.selected.delete(id);
-        else if (state.selected.size >= state.maxSelected) { app.toast("每条规则最多上传3张图片"); return; }
+        else if (state.selected.size >= state.maxSelected) { app.toast(`本次最多选择 ${state.maxSelected} 张图片`); return; }
         else state.selected.add(id);
       }
       else { state.selected.clear(); state.selected.add(id); }
@@ -70,6 +70,7 @@
       return;
     }
     if (event.target.closest("#pcLibraryConfirm")) {
+      if (!state.selected.size || state.selected.size > state.maxSelected) return;
       const images = [...state.selected].map(id => app.data.imageLibrary.find(image => image.id === id)).filter(Boolean).map(image => ({ ...image, source: "library", url: "" }));
       const callback = state.onConfirm;
       app.closeImagePicker();

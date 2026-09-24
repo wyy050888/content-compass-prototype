@@ -2,6 +2,8 @@
   "use strict";
   const app = window.ProductCardApp;
   if (!app) return;
+  // Shared limits for rule creation, image selection and submission.
+  app.generationLimits = Object.freeze({ defaultQuantity: 1, maxRuleImages: 2 });
   const pad = value => String(value).padStart(2, "0");
   app.now = (date = new Date()) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   app.fullTime = value => /^\d{2}-\d{2}/.test(value || "") ? `2026-${value}` : value || "";

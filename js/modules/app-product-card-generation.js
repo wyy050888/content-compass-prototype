@@ -43,7 +43,7 @@
 
   function validDraft(task) {
     if (!task.rules?.length || task.rules.length > 50 || task.target < 1 || task.target > 200) return false;
-    return task.name?.trim() && app.product(task.productId) && task.rules.every(rule => rule.images?.length && rule.images.length <= 3 && rule.promptState === "ready" && rule.prompt?.trim() && Number.isInteger(rule.quantity) && rule.quantity >= 1 && rule.quantity <= 20);
+    return task.name?.trim() && app.product(task.productId) && task.rules.every(rule => rule.images?.length && rule.images.length <= app.generationLimits.maxRuleImages && rule.promptState === "ready" && rule.prompt?.trim() && Number.isInteger(rule.quantity) && rule.quantity >= 1 && rule.quantity <= 20);
   }
 
   function screeningProgress(task) {
