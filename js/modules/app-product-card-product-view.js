@@ -22,6 +22,7 @@
   const productPageSize = 20;
   let galleryProductId = "";
   let galleryFilter = "all";
+  let galleryImages = [];
 
   const terminalStatuses = new Set(["success", "partial", "failed", "cancelled"]);
   const imageStatusTag = status => `<span class="pc-status ${status}">${status === "selected" ? "选用" : status === "rejected" ? "不选用" : "待筛选"}</span>`;
@@ -126,6 +127,7 @@
     const taskIds = new Set(tasks.map(task => task.id));
     const images = app.data.images.filter(image => taskIds.has(image.taskId));
     const visible = galleryFilter === "all" ? images : images.filter(image => image.screenStatus === galleryFilter);
+    galleryImages = visible;
     const count = status => images.filter(image => image.screenStatus === status).length;
     app.els.drawerBody.innerHTML = `<div class="pc-product-gallery-summary">
       <div><span>全部图片</span><b>${images.length} 张</b></div><div><span>待筛选</span><b>${count("pending")} 张</b></div><div><span>选用</span><b>${count("selected")} 张</b></div><div><span>不选用</span><b>${count("rejected")} 张</b></div>
@@ -133,7 +135,7 @@
     <div class="pc-product-gallery-grid">${visible.length ? visible.map(image => {
       const task = app.data.generationTasks.find(item => item.id === image.taskId);
       const visual = image.url ? `<img src="${app.escape(image.url)}" alt="${app.escape(image.fileName)}">` : `<span class="pc-product-gallery-placeholder tone-${(image.order || 0) % 6 + 1}" aria-hidden="true"></span>`;
-      return `<article class="pc-product-gallery-card"><div class="pc-product-gallery-stage">${visual}${imageStatusTag(image.screenStatus)}</div><div class="pc-product-gallery-meta"><strong title="${app.escape(image.fileName)}">${app.escape(image.fileName)}</strong>${app.imageTime(image)}<span title="${app.escape(task?.name || image.taskId)}">${app.escape(task?.name || image.taskId)}</span></div></article>`;
+      return `<article class="pc-product-gallery-card"><button type="button" class="pc-product-gallery-stage" data-product-image-open="${image.id}" aria-label="查看 ${app.escape(image.fileName)}">${visual}${imageStatusTag(image.screenStatus)}</button><div class="pc-product-gallery-meta"><strong title="${app.escape(image.fileName)}">${app.escape(image.fileName)}</strong>${app.imageTime(image)}<span title="${app.escape(task?.name || image.taskId)}">${app.escape(task?.name || image.taskId)}</span></div></article>`;
     }).join("") : `<div class="pc-empty">当前筛选下没有图片</div>`}</div>`;
   }
 
@@ -182,6 +184,11 @@
     app.renderGenerationProducts();
   });
   root.addEventListener("click", event => {
+    const image = event.target.closest("[data-product-image-open]");
+    if (image && app.els.drawerBody.contains(image)) {
+      app.openProductImageViewer?.(image.dataset.productImageOpen, galleryImages);
+      return;
+    }
     const filter = event.target.closest("[data-product-image-filter]");
     if (!filter || !galleryProductId || !app.els.drawerBody.contains(filter)) return;
     galleryFilter = filter.dataset.productImageFilter;

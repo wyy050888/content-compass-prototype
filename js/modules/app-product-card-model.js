@@ -26,8 +26,12 @@
   });
   app.data.images.forEach(image => {
     const task = app.data.generationTasks.find(item => item.id === image.taskId);
+    const rule = image.ruleId ? task?.rules?.find(item => item.id === image.ruleId) : task?.rules?.[image.ruleIndex - 1];
     image.generatedAt ||= task?.processingResults?.[image.order - 1]?.completedAt || task?.createdAt || "";
-    image.promptSnapshot ||= task?.rules?.[image.ruleIndex - 1]?.prompt || "";
+    image.promptSnapshot ||= rule?.prompt || "";
+    // Seed data mirrors the inputs used for each sample; later rule edits must not change them.
+    image.ruleId ||= rule?.id;
+    if (rule?.images && image.referenceImagesSnapshot == null) image.referenceImagesSnapshot = rule.images.map(item => ({ ...item }));
     if (image.screenStatus === "selected") image.selectedAt ||= image.generatedAt;
   });
   // A sample has a stable slot, irrespective of completion order or rule quantity.
@@ -48,7 +52,8 @@
     task.success += 1;
     app.data.images.push({ id: `${task.id}-IMG-${slot + 1}`, taskId: task.id, productId: task.productId,
       fileName: `${app.product(task.productId)?.name}-${task.id}-${String(slot + 1).padStart(3, "0")}.png`,
-      ruleIndex: ruleIndex + 1, order: slot + 1, generatedAt: completedAt, promptSnapshot: samplePrompt,
+      ruleId: rule.id, ruleIndex: ruleIndex + 1, order: slot + 1, generatedAt: completedAt, promptSnapshot: samplePrompt,
+      referenceImagesSnapshot: (rule.images || []).map(item => ({ ...item })),
       screenStatus: "pending", distributionCount: 0, distributionHistory: [] });
     return true;
   };

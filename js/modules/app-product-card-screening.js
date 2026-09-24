@@ -3,14 +3,19 @@
   const app = window.ProductCardApp;
   if (!app) return;
 
-  const state = { taskId: "", filter: "all", checked: new Set(), viewerIds: [], viewerIndex: 0 };
+  const state = { taskId: "", filter: "all", checked: new Set(), viewerIds: [], viewerIndex: 0, readOnly: false };
   const viewer = document.createElement("div");
   viewer.className = "pc-screen-viewer-layer";
   viewer.setAttribute("aria-hidden", "true");
-  viewer.innerHTML = `<button class="pc-screen-viewer-mask" type="button" aria-label="关闭大图" data-screen-viewer-close></button><section class="pc-screen-viewer" role="dialog" aria-modal="true" aria-labelledby="pcScreenViewerTitle"><header><div><small id="pcScreenViewerIndex"></small><h3 id="pcScreenViewerTitle">逐张筛选</h3></div><button class="pc-icon-btn" type="button" aria-label="关闭" data-screen-viewer-close>×</button></header><div class="pc-screen-viewer-body" id="pcScreenViewerBody"></div></section>`;
+  viewer.innerHTML = `<button class="pc-screen-viewer-mask" type="button" aria-label="关闭大图" data-screen-viewer-close></button><section class="pc-screen-viewer" role="dialog" aria-modal="true" aria-labelledby="pcScreenViewerTitle"><header><div><small id="pcScreenViewerIndex"></small><div class="pc-screen-title-row"><h3 id="pcScreenViewerTitle">逐张筛选</h3><span id="pcScreenViewerStatus" class="pc-screen-status"></span></div></div><button class="pc-icon-btn" type="button" aria-label="关闭" data-screen-viewer-close>×</button></header><div class="pc-screen-viewer-body" id="pcScreenViewerBody"></div></section>`;
   app.root.appendChild(viewer);
+  // Keep the preview outside the scrolling dialog so it can extend to either side.
+  const referencePreview = document.createElement("div");
+  referencePreview.className = "pc-screen-reference-preview";
+  referencePreview.setAttribute("aria-hidden", "true");
+  viewer.appendChild(referencePreview);
+  let viewerReferences = [];
 
-  const task = () => app.data.generationTasks.find(item => item.id === state.taskId);
   const allImages = () => app.data.images.filter(image => image.taskId === state.taskId);
   const visibleImages = () => state.filter === "all" ? allImages() : allImages().filter(image => image.screenStatus === state.filter);
   const statusText = status => ({ pending: "待筛选", selected: "已选用", rejected: "不选用" })[status] || status;
@@ -59,19 +64,68 @@
     return app.data.images.find(image => image.id === state.viewerIds[state.viewerIndex]);
   }
 
-  function renderViewer() {
-    const image = currentViewerImage();
-    if (!image) { closeViewer(); return; }
-    const generationTask = task();
-    const prompt = image.promptSnapshot || generationTask?.rules?.[Math.max(0, image.ruleIndex - 1)]?.prompt || "—";
-    viewer.querySelector("#pcScreenViewerIndex").textContent = `${state.viewerIndex + 1} / ${state.viewerIds.length}`;
-    viewer.querySelector("#pcScreenViewerTitle").textContent = image.fileName;
-    viewer.querySelector("#pcScreenViewerBody").innerHTML = `<div class="pc-screen-large-image">${imageVisual(image)}</div><div class="pc-screen-viewer-info"><div><span>当前状态</span><b class="pc-screen-status ${image.screenStatus}">${statusText(image.screenStatus)}</b></div><div><span>所属任务</span><b>${app.escape(generationTask?.name || "—")}</b></div><div><span>图片生成时间</span><b>${app.escape(image.generatedAt || "未记录")}</b></div><div><span>提示词</span><b class="pc-screen-viewer-prompt" title="${app.escape(prompt)}">${app.escape(prompt)}</b></div></div><div class="pc-screen-viewer-actions"><button class="pc-btn" data-screen-viewer-nav="prev" ${state.viewerIndex === 0 ? "disabled" : ""}>上一张</button><div><button class="pc-screen-decision selected" data-screen-viewer-status="selected">✓ 选用</button><button class="pc-screen-decision rejected" data-screen-viewer-status="rejected">× 不选用</button></div><button class="pc-btn" data-screen-viewer-nav="next" ${state.viewerIndex === state.viewerIds.length - 1 ? "disabled" : ""}>下一张</button></div><p class="pc-screen-shortcuts">方向键切换 · Enter 选用 · Delete 不选用</p>`;
+  function referenceImagesMarkup(images) {
+    if (!images.length) return `<p class="pc-screen-reference-empty">未记录垫图</p>`;
+    return `<div class="pc-screen-reference-list">${images.map((image, index) => `<figure>
+      <button type="button" class="pc-screen-reference-image" data-screen-reference="${index}" aria-label="查看垫图 ${index + 1} 大图">${imageVisual({ ...image, fileName: `垫图 ${index + 1}`, order: index })}</button>
+    </figure>`).join("")}</div>`;
   }
 
-  function openViewer(imageId) {
-    state.viewerIds = visibleImages().map(image => image.id);
-    state.viewerIndex = Math.max(0, state.viewerIds.indexOf(imageId));
+  function hideReferencePreview() {
+    referencePreview.classList.remove("show");
+    referencePreview.setAttribute("aria-hidden", "true");
+    referencePreview.replaceChildren();
+  }
+
+  function showReferencePreview(thumb) {
+    const index = Number(thumb.dataset.screenReference);
+    const reference = viewerReferences[index];
+    if (!reference || !viewer.classList.contains("show")) return;
+    const size = Math.max(0, Math.min(360, window.innerWidth - 24, window.innerHeight - 24));
+    referencePreview.style.width = `${size}px`;
+    referencePreview.innerHTML = `<div class="pc-screen-reference-preview-image">${imageVisual({ ...reference, fileName: `垫图 ${index + 1}`, order: index })}</div>`;
+    referencePreview.classList.add("show");
+    referencePreview.setAttribute("aria-hidden", "false");
+    const rect = thumb.getBoundingClientRect();
+    const preview = referencePreview.getBoundingClientRect();
+    let left = rect.right + 12;
+    if (left + preview.width > window.innerWidth - 12) left = rect.left - preview.width - 12;
+    referencePreview.style.left = `${Math.max(12, Math.min(left, window.innerWidth - preview.width - 12))}px`;
+    referencePreview.style.top = `${Math.max(12, Math.min(rect.top, window.innerHeight - preview.height - 12))}px`;
+  }
+
+  function renderViewer() {
+    hideReferencePreview();
+    const image = currentViewerImage();
+    if (!image) { closeViewer(); return; }
+    const generationTask = app.data.generationTasks.find(item => item.id === image.taskId);
+    const rule = image.ruleId
+      ? generationTask?.rules?.find(item => item.id === image.ruleId)
+      : generationTask?.rules?.[Math.max(0, image.ruleIndex - 1)];
+    const prompt = image.promptSnapshot || rule?.prompt || "未记录提示词";
+    const references = image.referenceImagesSnapshot ?? rule?.images ?? [];
+    viewerReferences = references;
+    viewer.querySelector("#pcScreenViewerIndex").textContent = `${state.viewerIndex + 1} / ${state.viewerIds.length}`;
+    viewer.querySelector("#pcScreenViewerTitle").textContent = image.fileName;
+    const status = viewer.querySelector("#pcScreenViewerStatus");
+    status.className = `pc-screen-status ${image.screenStatus}`;
+    status.textContent = statusText(image.screenStatus);
+    viewer.querySelector("#pcScreenViewerBody").innerHTML = `<div class="pc-screen-viewer-content">
+      <div class="pc-screen-image-stage"><div class="pc-screen-large-image">${imageVisual(image)}</div></div>
+      <aside class="pc-screen-viewer-info" aria-label="任务信息">
+        <div class="pc-screen-info-field"><span class="pc-screen-field-label">任务名</span><strong class="pc-screen-task-name">${app.escape(generationTask?.name || "未记录任务名")}</strong><time class="pc-screen-generated-time">生成于 ${app.escape(image.generatedAt || "未记录")}</time></div>
+        <div class="pc-screen-info-field"><span class="pc-screen-field-label">${image.referenceImagesSnapshot == null ? "垫图（当前规则）" : "垫图"}</span>${referenceImagesMarkup(references)}</div>
+        <section class="pc-screen-prompt-field"><div class="pc-screen-prompt-heading"><span class="pc-screen-field-label">提示词</span></div><div class="pc-screen-prompt-scroll" tabindex="0" role="region" aria-label="完整提示词"><p class="pc-screen-viewer-prompt">${app.escape(prompt)}</p></div></section>
+      </aside>
+    </div><footer class="pc-screen-viewer-footer"><div class="pc-screen-viewer-actions ${state.readOnly ? "is-readonly" : ""}"><button class="pc-btn" data-screen-viewer-nav="prev" ${state.viewerIndex === 0 ? "disabled" : ""}>上一张</button>${state.readOnly ? "" : `<div><button class="pc-screen-decision selected" data-screen-viewer-status="selected">✓ 选用</button><button class="pc-screen-decision rejected" data-screen-viewer-status="rejected">× 不选用</button></div>`}<button class="pc-btn" data-screen-viewer-nav="next" ${state.viewerIndex === state.viewerIds.length - 1 ? "disabled" : ""}>下一张</button></div><p class="pc-screen-shortcuts">${state.readOnly ? "方向键切换" : "方向键切换 · Enter 选用 · Delete 不选用"}</p></footer>`;
+  }
+
+  function openViewer(imageId, images = visibleImages(), readOnly = false) {
+    const index = images.findIndex(image => image.id === imageId);
+    if (index < 0) return;
+    state.readOnly = readOnly;
+    state.viewerIds = images.map(image => image.id);
+    state.viewerIndex = index;
     renderViewer();
     viewer.classList.add("show");
     viewer.setAttribute("aria-hidden", "false");
@@ -79,6 +133,7 @@
   }
 
   function closeViewer() {
+    hideReferencePreview();
     viewer.classList.remove("show");
     viewer.setAttribute("aria-hidden", "true");
   }
@@ -89,6 +144,7 @@
   }
 
   async function decideInViewer(status) {
+    if (state.readOnly) return;
     const image = currentViewerImage();
     if (!image) return;
     if (status === "rejected" && !(await confirmRejectDistributed([image]))) return;
@@ -107,6 +163,8 @@
   };
   app.isScreenViewerOpen = () => viewer.classList.contains("show");
   app.closeGenerationScreenViewer = closeViewer;
+  // Product galleries share the layout but never expose screening mutations.
+  app.openProductImageViewer = (imageId, images) => openViewer(imageId, images, true);
 
   app.els.drawerBody.addEventListener("click", event => {
     const filter = event.target.closest("[data-screen-filter]");
@@ -127,7 +185,28 @@
     if (checkbox.checked) state.checked.add(checkbox.dataset.screenCheck); else state.checked.delete(checkbox.dataset.screenCheck);
     renderScreen({ preserveScroll: true });
   });
+  viewer.addEventListener("pointerover", event => {
+    if (event.pointerType === "touch") return;
+    const thumb = event.target.closest("[data-screen-reference]");
+    if (thumb && !thumb.contains(event.relatedTarget)) showReferencePreview(thumb);
+  });
+  viewer.addEventListener("pointerout", event => {
+    const thumb = event.target.closest("[data-screen-reference]");
+    if (thumb && !thumb.contains(event.relatedTarget)) hideReferencePreview();
+  });
+  viewer.addEventListener("focusin", event => {
+    const thumb = event.target.closest("[data-screen-reference]");
+    if (thumb) showReferencePreview(thumb);
+  });
+  viewer.addEventListener("focusout", event => {
+    if (event.target.closest("[data-screen-reference]")) hideReferencePreview();
+  });
+  viewer.addEventListener("scroll", hideReferencePreview, true);
+  window.addEventListener("resize", hideReferencePreview);
   viewer.addEventListener("click", event => {
+    const reference = event.target.closest("[data-screen-reference]");
+    if (reference) { showReferencePreview(reference); return; }
+    hideReferencePreview();
     if (event.target.closest("[data-screen-viewer-close]")) { closeViewer(); return; }
     const nav = event.target.closest("[data-screen-viewer-nav]");
     if (nav) { moveViewer(nav.dataset.screenViewerNav === "next" ? 1 : -1); return; }
@@ -136,9 +215,13 @@
   });
   document.addEventListener("keydown", event => {
     if (!app.isScreenViewerOpen()) return;
+    const reference = event.target.closest("[data-screen-reference]");
+    if (reference && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault(); showReferencePreview(reference); return;
+    }
     if (event.key === "ArrowLeft") { event.preventDefault(); moveViewer(-1); }
     if (event.key === "ArrowRight") { event.preventDefault(); moveViewer(1); }
-    if (event.key === "Enter") { event.preventDefault(); decideInViewer("selected"); }
-    if (event.key === "Delete") { event.preventDefault(); decideInViewer("rejected"); }
+    if (!state.readOnly && event.key === "Enter") { event.preventDefault(); decideInViewer("selected"); }
+    if (!state.readOnly && event.key === "Delete") { event.preventDefault(); decideInViewer("rejected"); }
   });
 })();
