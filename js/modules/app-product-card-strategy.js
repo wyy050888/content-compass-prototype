@@ -34,7 +34,7 @@
   }
   function sourcePicker() {
     const image = editor.sourceImage;
-    return `<div class="pc-source-picker"><div class="pc-source-preview">${image ? imageVisual(image) : "1:1<br>商品主图"}</div><div class="pc-source-actions"><strong>${image ? app.escape(image.name) : "选择一张商品主图"}</strong><small>PNG、JPG、JPEG · 仅 1 张 · 不超过 10 MB · 1:1${app.tip("重新上传会替换当前商品主图；格式、大小或比例不符合要求时不会进入识别。")}</small><button type="button" data-source-local>${image ? "重新上传" : "本地上传"}</button><button type="button" data-source-library>从图片库选择</button></div></div>`;
+    return `<div class="pc-source-picker"><div class="pc-source-preview">${image ? imageVisual(image) : "1:1<br>商品主图"}</div><div class="pc-source-actions"><strong>${image ? app.escape(image.name) : "选择一张商品主图"}</strong><small>PNG、JPG、JPEG · 仅 1 张 · 不超过 10 MB · 1:1${app.tip("商品主图将作为各条规则的默认垫图，用于生成提示词。更换主图后，将替换全部规则的垫图，并重新生成提示词。")}</small><button type="button" data-source-local>${image ? "重新上传" : "本地上传"}</button><button type="button" data-source-library>从图片库选择</button></div></div>`;
   }
   function strategyBody(task) {
     const taskName = task?.name || "";
