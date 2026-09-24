@@ -91,11 +91,12 @@
 
   app.renderGenerationProducts = () => {
     const all = app.data.products.map(productSummary);
+    const totalTasks = all.reduce((sum, item) => sum + item.tasks.length, 0);
     const totalImages = all.reduce((sum, item) => sum + item.success + item.failed, 0);
     const selected = all.reduce((sum, item) => sum + item.screening.selected, 0);
     const pending = all.reduce((sum, item) => sum + item.screening.pending, 0);
     els.metrics.innerHTML = [
-      app.metric("产品数", all.length, `${all.filter(item => item.tasks.length).length} 个已有任务`),
+      app.metric("产品数", all.length, `共 ${totalTasks} 个生成任务`),
       app.metric("进行中产品", all.filter(item => item.active).length, `${all.reduce((sum, item) => sum + item.tasks.filter(task => ["pending", "running", "paused"].includes(task.status)).length, 0)} 个进行中任务`),
       app.metric("累计生图处理数", totalImages, `已选用 ${selected} 张`),
       app.metric("待筛选图片", pending, pending ? "需要继续处理" : "已全部处理")

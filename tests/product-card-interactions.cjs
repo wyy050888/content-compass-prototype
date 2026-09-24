@@ -115,6 +115,8 @@ const path = require('node:path');
     });
     await page.locator('[data-pc-nav="generation"]').click();
     await page.locator('[data-generation-view="product"]').click();
+    const visibleGenerationTaskCount = await page.evaluate(() => ProductCardApp.data.generationTasks.filter(task => !ProductCardApp.canViewTask || ProductCardApp.canViewTask(task, 'generate')).length);
+    assert.match(await page.locator('#pcProductMetrics').innerText(), new RegExp(`共 ${visibleGenerationTaskCount} 个生成任务`));
     assert.match(await page.locator('#pcProductFooter').innerText(), /1 \/ 2/);
     await page.locator('#pcProductFooter [data-product-page="next"]').click();
     assert.match(await page.locator('#pcProductFooter').innerText(), /2 \/ 2/);
