@@ -4,20 +4,13 @@
   script.insertAdjacentHTML("beforebegin", `
     <section class="page" id="page-product-card">
       <div class="pc-page">
-        <header class="pc-page-head">
-          <div>
-            <h1 id="pcPageTitle">图片生成</h1>
-            <p id="pcPageSubtitle">生成并管理商品卡图片</p>
-          </div>
-          <button class="pc-btn pc-btn-primary" id="pcPrimaryAction">新建生图任务</button>
-        </header>
-
         <section class="pc-section active" data-pc-panel="generation">
           <div class="pc-generation-mode-row pc-primary-view-row">
             <div class="pc-segmented pc-generation-mode pc-primary-view-tabs" id="pcGenerationViewMode" aria-label="图片生成视图">
               <button class="active" data-generation-view="task">任务视图</button>
               <button data-generation-view="product">产品视图</button>
             </div>
+            <button class="pc-btn pc-btn-primary" id="pcPrimaryAction">新建生图任务</button>
           </div>
           <div class="pc-generation-subview active" id="pcGenerationTaskView" data-generation-subview="task">
             <div class="pc-view-row">

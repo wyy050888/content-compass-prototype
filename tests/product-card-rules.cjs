@@ -9,7 +9,7 @@ const path = require('node:path');
     await page.goto('file:///'+path.resolve(__dirname,'../index.html').replaceAll('\\','/'));
     await page.waitForTimeout(500);
     await page.locator('[data-pc-nav="generation"]').click();
-    assert.equal(await page.locator('#pcPageTitle').innerText(),'图片生成');
+    assert.equal(await page.locator('#pcPageTitle').count(),0);
     const core = await page.evaluate(()=>{
       const app=ProductCardApp, d=app.distribution, task=app.data.generationTasks.find(t=>t.status==='draft');
       const fixture={...structuredClone(task),id:'TEST-GEN',createdAt:'2026-09-01 09:00:00',rules:[{...structuredClone(task.rules[0]),quantity:1},{...structuredClone(task.rules[1]),quantity:3}],target:4,success:0,failed:0,processingResults:[]};

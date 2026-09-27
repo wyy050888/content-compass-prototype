@@ -90,7 +90,6 @@
     els.metrics.innerHTML = cards.join("");
   }
   const metricDetail = items => `<span class="pc-metric-breakdown">${items.map(([label, value, tone]) => `<i class="${tone || ""}">${label} <b>${value}</b></i>`).join("")}</span>`;
-  function setPageTitle(title) { if (app.els.title) app.els.title.textContent = title; }
   function periodLabel(range) { return app.dateRange.isToday(range) ? "今日" : "期间"; }
   function pageItems(items) {
     const pageCount = Math.max(1, Math.ceil(items.length / dist.pageSize));
@@ -114,7 +113,6 @@
     });
   }
   function renderTaskView() {
-    setPageTitle("任务视图");
     const tasks = visibleTasks();
     const metricTasks = visibleTasks(false);
     const showCreator = dist.filters.taskScope !== "personal";
@@ -149,7 +147,6 @@
     els.pagination.innerHTML = `<span>每页 ${dist.pageSize} 条，共 ${tasks.length} 条</span><div><button data-dist-page="prev" ${dist.page === 1 ? "disabled" : ""}>上一页</button>${Array.from({ length: pageCount }, (_, index) => `<button data-dist-page="${index + 1}" class="${dist.page === index + 1 ? "active" : ""}">${index + 1}</button>`).join("")}<button data-dist-page="next" ${dist.page === pageCount ? "disabled" : ""}>下一页</button></div>`;
   }
   function renderAccountView() {
-    setPageTitle("广告账户视图");
     const keyword = dist.filters.accountSearch.trim().toLowerCase();
     const accounts = app.data.accounts.filter(account => {
       const shop = app.shop(account.shopId);
@@ -188,7 +185,6 @@
     renderPagination(accounts.length, accountPage.pageCount);
   }
   function renderPlanView() {
-    setPageTitle("计划视图");
     const keyword = dist.filters.planSearch.trim().toLowerCase();
     const plans = app.data.plans.filter(plan => {
       const account = app.account(plan.accountId), shop = app.shop(plan.shopId);

@@ -21,8 +21,6 @@
       confirmMode: "boolean"
     },
     els: {
-      title: root.querySelector("#pcPageTitle"),
-      subtitle: root.querySelector("#pcPageSubtitle"),
       primary: root.querySelector("#pcPrimaryAction"),
       drawerLayer: root.querySelector("#pcDrawerLayer"),
       drawer: root.querySelector(".pc-drawer"),
@@ -197,6 +195,7 @@
     if (!['generation', 'distribution'].includes(section)) return;
     app.state.section = section;
     root.querySelectorAll("[data-pc-panel]").forEach(panel => panel.classList.toggle("active", panel.dataset.pcPanel === section));
+    root.querySelector(`[data-pc-panel="${section}"] .pc-primary-view-row`).appendChild(app.els.primary);
     document.querySelectorAll(".nav-item[data-page]").forEach(button => {
       button.classList.toggle("active", button.dataset.page === "product-card" && button.dataset.pcNav === section);
     });
@@ -204,8 +203,6 @@
       app.state.generationView = "task";
       app.state.generationScope = "all";
       root.querySelectorAll("#pcGenerationScope [data-scope]").forEach(button => button.classList.toggle("active", button.dataset.scope === "all"));
-      app.els.title.textContent = "图片生成";
-      app.els.subtitle.textContent = "生成并管理商品卡图片";
       app.els.primary.textContent = "新建生图任务";
       app.setGenerationView?.("task");
       app.renderGeneration?.();
@@ -216,8 +213,6 @@
         app.distribution.page = 1;
       }
       root.querySelectorAll("#pcDistributionView [data-view]").forEach(button => button.classList.toggle("active", button.dataset.view === "task"));
-      app.els.title.textContent = "任务视图";
-      app.els.subtitle.textContent = "将已选用图片分发至商品卡计划";
       app.els.primary.textContent = "新建分发任务";
       app.renderDistribution?.();
     }
