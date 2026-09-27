@@ -4,6 +4,7 @@
   const dist = app?.distribution;
   if (!app || !dist) return;
 
+  const planSorting = dist.wizardPlanSorting;
   const planStatuses = [
     ["active", "投放中"], ["new_review", "新建审核中"], ["edit_review", "修改审核中"],
     ["rejected", "审核不通过"], ["paused", "已暂停"], ["deleted", "已删除"],
@@ -12,7 +13,7 @@
   const wizard = {
     step: 1, productId: "", selectedTaskIds: [], selectedImageIds: [], taskOrder: [], taskSearch: "", taskPage: 1,
     hideUploaded: true, taskRange: app.dateRange.preset(30), planRange: app.dateRange.preset(30),
-    shopIds: [], shopSearch: "", planIds: [], planOrder: [], quantities: {}, planSearch: "", planStatus: "active",
+    shopIds: [], shopSearch: "", planIds: [], planOrder: [], quantities: {}, planSearch: "", planStatus: "active", planSort: "",
     sourceTaskId: "", editingTaskId: "", taskName: "", taskNameEdited: false
   };
   const taskPageSize = 8;
@@ -69,7 +70,7 @@
     Object.assign(wizard, {
       step: 1, productId: productId || source?.productId || "", selectedTaskIds: [], selectedImageIds: [], taskOrder: [],
       taskSearch: "", taskPage: 1, hideUploaded: true, taskRange: app.dateRange.preset(30), shopIds: [], shopSearch: "", planIds: [], planOrder: [], quantities: {},
-      planSearch: "", planStatus: "active", planRange: app.dateRange.preset(30), sourceTaskId: sourceTaskId || "", editingTaskId: source?.status === "draft" ? source.id : "",
+      planSearch: "", planStatus: "active", planSort: "", planRange: app.dateRange.preset(30), sourceTaskId: sourceTaskId || "", editingTaskId: source?.status === "draft" ? source.id : "",
       taskName: source?.name || (productId ? productTaskName(productId) : initialTaskName()), taskNameEdited: Boolean(source?.name)
     });
     if (!source) return;
@@ -183,7 +184,7 @@
       <section class="pc-target-plans"><header><div><h3>计划集合</h3><p>勾选计划后自动平分图片，也可直接填写分发素材数</p></div><strong class="${assigned === wizard.selectedImageIds.length ? "is-valid" : "is-invalid"}">已选 ${wizard.planIds.length} 个 · 图片 ${wizard.selectedImageIds.length} 张 · 已分配 ${assigned} 张${assigned !== wizard.selectedImageIds.length ? ` · ${assigned > wizard.selectedImageIds.length ? "超配" : "未分配"} ${Math.abs(assigned - wizard.selectedImageIds.length)} 张` : ""}</strong></header>
         <div class="pc-step-toolbar pc-plan-step-toolbar"><div><label class="pc-search"><span>⌕</span><input id="pcWizardPlanSearch" value="${app.escape(wizard.planSearch)}" placeholder="搜索计划名称或计划ID"></label>${app.dateRange.render("wizard-plan-data", wizard.planRange, { label: "千川数据时间", compact: true })}<span class="pc-sync-time">千川同步：09-02 11:20:06</span></div></div>
         ${planStatusFilters()}
-        <div class="pc-plan-table-wrap"><table class="pc-wizard-table pc-plan-table"><thead><tr><th></th><th>计划</th><th>计划状态</th><th>整体消耗(元)</th><th>整体成交订单数</th><th>整体成交金额(元)</th><th>整体支付ROI</th><th>店铺</th><th>默认广告账户</th><th>当前素材数</th><th>分发素材数</th></tr></thead><tbody>${plans.length ? plans.map(plan => {
+        <div class="pc-plan-table-wrap"><table class="pc-wizard-table pc-plan-table"><thead><tr><th></th><th>计划</th><th>计划状态</th>${["spend", "orders", "gmv", "roi"].map(field => planSorting.header(field, wizard.planSort)).join("")}<th>店铺</th><th>默认广告账户</th>${planSorting.header("current", wizard.planSort)}<th>分发素材数</th></tr></thead><tbody>${plans.length ? plans.map(plan => {
           const selected = wizard.planIds.includes(plan.id);
           const quantity = Number(wizard.quantities[plan.id] || 0);
           const capacityError = selected && plan.current + quantity > 500;
@@ -205,7 +206,8 @@
   function candidatePlans() {
     const accountIds = wizard.shopIds.filter(id => !invalidSelections().some(item => item.kind === "shop" && item.id === id)).map(id => app.shop(id)?.accountId).filter(id => app.account(id)?.authorizationStatus !== "disabled");
     const keyword = wizard.planSearch.trim().toLowerCase();
-    return app.data.plans.filter(plan => accountIds.includes(plan.accountId) && plan.productId === wizard.productId && (wizard.planStatus === "all" || plan.status === wizard.planStatus) && (!keyword || [plan.id, plan.name].some(value => value.toLowerCase().includes(keyword))));
+    const plans = app.data.plans.filter(plan => accountIds.includes(plan.accountId) && plan.productId === wizard.productId && (wizard.planStatus === "all" || plan.status === wizard.planStatus) && (!keyword || [plan.id, plan.name].some(value => value.toLowerCase().includes(keyword))));
+    return planSorting.apply(plans, wizard.planSort, wizard.planRange);
   }
   function allocationPreview() {
     const images = selectedImages();
@@ -297,7 +299,7 @@
       step: wizard.step, productId: wizard.productId, selectedTaskIds: wizard.selectedTaskIds, selectedImageIds: wizard.selectedImageIds,
       taskOrder: wizard.taskOrder, taskSearch: wizard.taskSearch, taskPage: wizard.taskPage, hideUploaded: wizard.hideUploaded, shopIds: wizard.shopIds,
       shopSearch: wizard.shopSearch, planIds: wizard.planIds, planOrder: wizard.planOrder, quantities: wizard.quantities,
-      planSearch: wizard.planSearch, planStatus: wizard.planStatus, taskRange: wizard.taskRange, planRange: wizard.planRange,
+      planSearch: wizard.planSearch, planStatus: wizard.planStatus, planSort: wizard.planSort, taskRange: wizard.taskRange, planRange: wizard.planRange,
       taskName: wizard.taskName.trim(), taskNameEdited: wizard.taskNameEdited
     }));
     Object.assign(task, { name: wizard.taskName.trim(), productId: wizard.productId, creator: dist.currentUser, team: dist.currentTeam, sourceTaskIds: wizard.taskOrder.slice(), plans: wizard.planOrder.slice(), requested: wizard.selectedImageIds.length, success: 0, failed: 0, status: "draft", results: [], draftState });
@@ -359,6 +361,15 @@
       const ids = wizard.taskOrder.flatMap(visibleTaskImages).map(image => image.id);
       wizard.selectedImageIds = bulk.dataset.imageBulk === "all" ? [...new Set(ids)] : [];
       app.markDrawerDirty(); renderWizard(); return;
+    }
+    const sort = event.target.closest("[data-wizard-plan-sort]");
+    if (sort) {
+      const scrollLeft = app.els.drawerBody.querySelector(".pc-plan-table-wrap").scrollLeft;
+      wizard.planSort = planSorting.next(sort.dataset.wizardPlanSort, wizard.planSort);
+      renderWizard();
+      app.els.drawerBody.querySelector(".pc-plan-table-wrap").scrollLeft = scrollLeft;
+      app.els.drawerBody.querySelector(`[data-wizard-plan-sort="${sort.dataset.wizardPlanSort}"]`).focus({ preventScroll: true });
+      return;
     }
     const planBulk = event.target.closest("[data-plan-bulk]");
     if (planBulk) {
