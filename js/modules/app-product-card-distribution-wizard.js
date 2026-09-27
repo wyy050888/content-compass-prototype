@@ -103,8 +103,6 @@
   }
   function imageCard(image) {
     const checked = wizard.selectedImageIds.includes(image.id);
-    const sourceTask = app.data.generationTasks.find(task => task.id === image.taskId);
-    const sourceRule = sourceTask?.rules?.[Math.max(0, Number(image.ruleIndex || 1) - 1)];
     const distributionCount = Number(image.distributionCount || 0);
     const visual = image.url ? `<img src="${app.escape(image.url)}" alt="${app.escape(image.fileName)}">` : `<span class="pc-distribution-placeholder tone-${(image.order || 0) % 6 + 1}" aria-hidden="true"></span>`;
     return `<label class="pc-wizard-image ${checked ? "selected" : ""}">
@@ -112,7 +110,7 @@
       <div class="pc-wizard-image-stage"><button type="button" class="pc-image-preview" data-wizard-preview="${image.id}" aria-label="查看大图">${visual}<span class="pc-image-zoom-hint">查看大图</span></button><span class="pc-distribution-count-badge ${distributionCount ? "distributed" : ""}">累计 ${distributionCount} 次</span></div>
       <div class="pc-wizard-image-meta">
         <strong title="${app.escape(image.fileName)}">${app.escape(image.fileName)}</strong>
-        <span class="pc-wizard-image-source">${app.imageTime(image)}<span class="pc-source-detail-trigger" tabindex="0" data-pc-tip="来源详情" data-pc-tip-kind="source-detail" data-source-task="${app.escape(`${sourceTask?.name || "生成任务"} · ${sourceTask?.id || image.taskId || "—"}`)}" data-source-prompt="${app.escape(image.promptSnapshot || sourceRule?.prompt || "未记录提示词")}" data-source-distribution-count="${distributionCount}">来源详情</span></span>
+        <span class="pc-wizard-image-source">${app.imageTime(image)}</span>
       </div>
     </label>`;
   }

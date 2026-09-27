@@ -3,7 +3,7 @@
   const app = window.ProductCardApp;
   if (!app) return;
 
-  const state = { taskId: "", filter: "all", checked: new Set(), viewerIds: [], viewerIndex: 0, readOnly: false };
+  const state = { taskId: "", filter: "all", checked: new Set(), viewerIds: [], viewerIndex: 0, readOnly: false, showDistributionCount: false };
   const viewer = document.createElement("div");
   viewer.className = "pc-screen-viewer-layer";
   viewer.setAttribute("aria-hidden", "true");
@@ -108,22 +108,28 @@
     viewer.querySelector("#pcScreenViewerIndex").textContent = `${state.viewerIndex + 1} / ${state.viewerIds.length}`;
     viewer.querySelector("#pcScreenViewerTitle").textContent = image.fileName;
     const status = viewer.querySelector("#pcScreenViewerStatus");
+    status.hidden = state.showDistributionCount;
     status.className = `pc-screen-status ${image.screenStatus}`;
     status.textContent = statusText(image.screenStatus);
     viewer.querySelector("#pcScreenViewerBody").innerHTML = `<div class="pc-screen-viewer-content">
       <div class="pc-screen-image-stage"><div class="pc-screen-large-image">${imageVisual(image)}</div></div>
       <aside class="pc-screen-viewer-info" aria-label="任务信息">
-        <div class="pc-screen-info-field"><span class="pc-screen-field-label">任务名</span><strong class="pc-screen-task-name">${app.escape(generationTask?.name || "未记录任务名")}</strong><time class="pc-screen-generated-time">生成于 ${app.escape(image.generatedAt || "未记录")}</time></div>
+        <dl class="pc-screen-info-field pc-screen-task-meta">
+          <div><dt>任务名</dt><dd>${app.escape(generationTask?.name || "未记录任务名")}</dd></div>
+          <div><dt>生成时间</dt><dd><time>${app.escape(image.generatedAt || "未记录")}</time></dd></div>
+          <div class="pc-screen-distribution-count"><dt>累计成功分发</dt><dd><span>${app.distribution.distributionCount(image)}</span> 次</dd></div>
+        </dl>
         <div class="pc-screen-info-field"><span class="pc-screen-field-label">${image.referenceImagesSnapshot == null ? "垫图（当前规则）" : "垫图"}</span>${referenceImagesMarkup(references)}</div>
         <section class="pc-screen-prompt-field"><div class="pc-screen-prompt-heading"><span class="pc-screen-field-label">提示词</span></div><div class="pc-screen-prompt-scroll" tabindex="0" role="region" aria-label="完整提示词"><p class="pc-screen-viewer-prompt">${app.escape(prompt)}</p></div></section>
       </aside>
     </div><footer class="pc-screen-viewer-footer"><div class="pc-screen-viewer-actions ${state.readOnly ? "is-readonly" : ""}"><button class="pc-btn" data-screen-viewer-nav="prev" ${state.viewerIndex === 0 ? "disabled" : ""}>上一张</button>${state.readOnly ? "" : `<div><button class="pc-screen-decision selected" data-screen-viewer-status="selected">✓ 选用</button><button class="pc-screen-decision rejected" data-screen-viewer-status="rejected">× 不选用</button></div>`}<button class="pc-btn" data-screen-viewer-nav="next" ${state.viewerIndex === state.viewerIds.length - 1 ? "disabled" : ""}>下一张</button></div><p class="pc-screen-shortcuts">${state.readOnly ? "方向键切换" : "方向键切换 · Enter 选用 · Delete 不选用"}</p></footer>`;
   }
 
-  function openViewer(imageId, images = visibleImages(), readOnly = false) {
+  function openViewer(imageId, images = visibleImages(), readOnly = false, options = {}) {
     const index = images.findIndex(image => image.id === imageId);
     if (index < 0) return;
     state.readOnly = readOnly;
+    state.showDistributionCount = Boolean(options.showDistributionCount);
     state.viewerIds = images.map(image => image.id);
     state.viewerIndex = index;
     renderViewer();
@@ -164,7 +170,9 @@
   app.isScreenViewerOpen = () => viewer.classList.contains("show");
   app.closeGenerationScreenViewer = closeViewer;
   // Product galleries share the layout but never expose screening mutations.
-  app.openProductImageViewer = (imageId, images) => openViewer(imageId, images, true);
+  app.openProductImageViewer = (imageId, images, options) => openViewer(imageId, images, true, options);
+  app.isDistributionImageViewerOpen = () => state.showDistributionCount && app.isScreenViewerOpen();
+  app.closeDistributionImageViewer = () => { if (state.showDistributionCount) closeViewer(); };
 
   app.els.drawerBody.addEventListener("click", event => {
     const filter = event.target.closest("[data-screen-filter]");

@@ -74,13 +74,7 @@
 
   function showTip(button) {
     window.clearTimeout(tipHideTimer);
-    const sourceDetail = button.dataset.pcTipKind === "source-detail";
-    tipPopover.classList.toggle("source-detail", sourceDetail);
-    if (sourceDetail) {
-      tipPopover.innerHTML = `<dl><div><dt>来源任务</dt><dd>${app.escape(button.dataset.sourceTask || "—")}</dd></div><div><dt>提示词</dt><dd>${app.escape(button.dataset.sourcePrompt || "未记录提示词")}</dd></div><div><dt>历史分发次数</dt><dd>${app.escape(button.dataset.sourceDistributionCount || "0")} 次</dd></div></dl>`;
-    } else {
-      tipPopover.textContent = button.dataset.pcTip || "";
-    }
+    tipPopover.textContent = button.dataset.pcTip || "";
     tipPopover.classList.add("show");
     const anchor = button.getBoundingClientRect();
     const box = tipPopover.getBoundingClientRect();
@@ -92,7 +86,7 @@
   }
   function hideTip() {
     window.clearTimeout(tipHideTimer);
-    tipPopover.classList.remove("show", "source-detail");
+    tipPopover.classList.remove("show");
   }
   function scheduleHideTip() {
     window.clearTimeout(tipHideTimer);

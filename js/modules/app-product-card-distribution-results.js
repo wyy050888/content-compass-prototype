@@ -103,8 +103,6 @@
     dist.transientImageRecords ||= new Map();
     dist.transientImageRecords.set(record.id, record);
     const source = app.data.images.find(image => image.id === record.imageId);
-    const sourceTask = app.data.generationTasks.find(task => task.id === source?.taskId);
-    const sourceRule = sourceTask?.rules?.[Math.max(0, Number(record.ruleIndex || 1) - 1)];
     const distributionTask = record.distributionTask;
     const totalDistributionCount = distributionCount(source);
     const contextualDistributionCount = countContext ? distributionCount(source, countContext) : totalDistributionCount;
@@ -124,7 +122,7 @@
       <div class="pc-distribution-image-meta">
         <strong title="${app.escape(record.fileName)}">${app.escape(record.fileName)}</strong>
         ${showStatus && record.status === "failed" ? `<div class="pc-image-result-line failed"><span title="${failureReason}">${failureReason}</span><button class="pc-card-retry" data-result-retry="${record.id}" ${distributionTask ? `data-result-task="${distributionTask.id}"` : ""}>重试</button></div>` : ""}
-        <div class="pc-distribution-source-row">${app.imageTime(source)}<span class="pc-source-detail-trigger" tabindex="0" data-pc-tip="来源详情" data-pc-tip-kind="source-detail" data-source-task="${app.escape(`${sourceTask?.name || "生成任务"} · ${sourceTask?.id || source?.taskId || "—"}`)}" data-source-prompt="${app.escape(source?.promptSnapshot || sourceRule?.prompt || "未记录提示词")}" data-source-distribution-count="${totalDistributionCount}" aria-label="悬浮查看来源任务、提示词和历史分发次数">来源详情</span></div>
+        <div class="pc-distribution-source-row">${app.imageTime(source)}</div>
       </div>
     </article>`;
   }

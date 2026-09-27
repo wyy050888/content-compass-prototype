@@ -133,9 +133,8 @@
       <div><span>全部图片</span><b>${images.length} 张</b></div><div><span>待筛选</span><b>${count("pending")} 张</b></div><div><span>选用</span><b>${count("selected")} 张</b></div><div><span>不选用</span><b>${count("rejected")} 张</b></div>
     </div><div class="pc-product-gallery-toolbar"><div class="pc-status-filters">${[["all","全部"],["pending","待筛选"],["selected","选用"],["rejected","不选用"]].map(([value,label]) => `<button class="${galleryFilter === value ? "active" : ""}" data-product-image-filter="${value}">${label} ${value === "all" ? images.length : count(value)}</button>`).join("")}</div><span class="pc-note-inline">按生成任务汇总</span></div>
     <div class="pc-product-gallery-grid">${visible.length ? visible.map(image => {
-      const task = app.data.generationTasks.find(item => item.id === image.taskId);
       const visual = image.url ? `<img src="${app.escape(image.url)}" alt="${app.escape(image.fileName)}">` : `<span class="pc-product-gallery-placeholder tone-${(image.order || 0) % 6 + 1}" aria-hidden="true"></span>`;
-      return `<article class="pc-product-gallery-card"><button type="button" class="pc-product-gallery-stage" data-product-image-open="${image.id}" aria-label="查看 ${app.escape(image.fileName)}">${visual}${imageStatusTag(image.screenStatus)}</button><div class="pc-product-gallery-meta"><strong title="${app.escape(image.fileName)}">${app.escape(image.fileName)}</strong>${app.imageTime(image)}<span title="${app.escape(task?.name || image.taskId)}">${app.escape(task?.name || image.taskId)}</span></div></article>`;
+      return `<article class="pc-product-gallery-card"><button type="button" class="pc-product-gallery-stage" data-product-image-open="${image.id}" aria-label="查看 ${app.escape(image.fileName)}">${visual}${imageStatusTag(image.screenStatus)}</button><div class="pc-product-gallery-meta"><strong title="${app.escape(image.fileName)}">${app.escape(image.fileName)}</strong>${app.imageTime(image)}</div></article>`;
     }).join("") : `<div class="pc-empty">当前筛选下没有图片</div>`}</div>`;
   }
 
