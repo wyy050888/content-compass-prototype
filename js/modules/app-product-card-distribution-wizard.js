@@ -134,7 +134,7 @@
         <div class="pc-mini-pagination"><button data-task-page="prev" ${wizard.taskPage === 1 ? "disabled" : ""}>上一页</button><span>${wizard.taskPage}/${pageCount}</span><button data-task-page="next" ${wizard.taskPage === pageCount ? "disabled" : ""}>下一页</button></div>
       </section>
       <section class="pc-selected-images"><header><div><h3>图片集合</h3><p>仅显示生成任务中标记为“选用”的图片</p></div><div><span class="pc-product-lock">${app.escape(productName)}</span><b>已选 ${wizard.selectedImageIds.length}/${images.length}</b></div></header>
-        <div class="pc-image-bulk"><label class="pc-history-filter" title="勾选后仅显示从未分发过的图片"><input id="pcHideUploaded" type="checkbox" ${wizard.hideUploaded ? "checked" : ""}><span>隐藏已分发图片</span><small>仅保留分发次数为0</small></label><div><button data-image-bulk="all" ${images.length ? "" : "disabled"}>全选当前图片</button><button data-image-bulk="clear" ${wizard.selectedImageIds.length ? "" : "disabled"}>取消选择</button></div></div>
+        <div class="pc-image-bulk"><div><label class="pc-history-filter"><input id="pcHideUploaded" type="checkbox" ${wizard.hideUploaded ? "checked" : ""}><span>隐藏已分发图片</span></label>${app.tip("勾选后仅保留累计成功分发次数为 0 的图片。", "隐藏已分发图片说明")}</div><div><button data-image-bulk="all" ${images.length ? "" : "disabled"}>全选当前图片</button><button data-image-bulk="clear" ${wizard.selectedImageIds.length ? "" : "disabled"}>取消选择</button></div></div>
         <div class="pc-wizard-image-grid">${images.length ? images.map(imageCard).join("") : `<div class="pc-empty">请先在左侧勾选生成任务</div>`}</div>
       </section>
     </div>`;

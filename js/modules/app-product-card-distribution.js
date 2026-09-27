@@ -16,7 +16,8 @@
     filters: {
       taskScope: "all", taskSearch: "", creator: "", taskStatus: "all", taskRange: app.dateRange.preset(30),
       accountSearch: "", accountRange: app.dateRange.preset(30), accountOnlyActive: false,
-      planSearch: "", planStatus: "active", planSort: "updatedAt-desc", planRange: app.dateRange.preset(30), planDataRange: app.dateRange.preset(30), planOnlyActive: false
+      planSearch: "", planCapacityWarning: false,
+      planStatus: "active", planSort: "updatedAt-desc", planRange: app.dateRange.preset(30), planDataRange: app.dateRange.preset(30), planOnlyActive: false
     }
   };
   const taskStatuses = [
@@ -179,18 +180,20 @@
       const latestTime = latestProcessedDistributionTime(plan => plan?.accountId === account.id);
       const stats = distributionStats(plan => plan?.accountId === account.id, dist.filters.accountRange);
       const cumulative = distributionStats(plan => plan?.accountId === account.id);
-      const riskCell = riskPlans.length ? `<span class="pc-capacity-warning ${fullCount ? "danger" : ""}">${fullCount ? `${fullCount} 个已满` : `${riskPlans.length} 个预警`}</span><small>${riskPlans.length} 个计划 ≥450张</small>` : `<span class="pc-capacity-safe">无预警</span>`;
+      const riskCell = riskPlans.length ? `<button type="button" class="pc-capacity-warning ${fullCount ? "danger" : ""}" data-account-plans="${account.id}" data-plan-status="all" data-plan-capacity-warning title="查看该账户的全部容量预警计划（含已满）">${fullCount ? `${fullCount} 个已满` : `${riskPlans.length} 个预警`}</button>` : `<span class="pc-capacity-safe">无预警</span>`;
       return `<tr><td><span class="pc-cell-main">${app.escape(account.name)}</span><span class="pc-cell-sub">${account.id}</span></td><td><span class="pc-cell-main">${app.escape(app.shop(account.shopId)?.name)}</span><span class="pc-cell-sub">${account.shopId}</span></td><td><span class="pc-plan-overview"><button data-account-plans="${account.id}" data-plan-status="active"><b>${activeCount}</b> 投放中</button><i>/</i><button data-account-plans="${account.id}" data-plan-status="all">${plans.length} 全部</button></span></td><td><span class="pc-capacity-cell">${riskCell}</span></td><td>${todayDistribution(stats.success, stats.failed)}</td><td><b>${cumulative.total}</b> 张</td><td>${latestTime}</td><td><div class="pc-actions"><button class="pc-action-info" data-dist-action="account-images" data-id="${account.id}">查看系统分发图片</button></div></td></tr>`;
     }).join("") : `<tr><td class="pc-empty" colspan="8">没有符合条件的广告账户</td></tr>`;
     renderPagination(accounts.length, accountPage.pageCount);
   }
   function renderPlanView() {
     const keyword = dist.filters.planSearch.trim().toLowerCase();
+    const searchedAccount = app.data.accounts.find(account => account.id.toLowerCase() === keyword);
     const plans = app.data.plans.filter(plan => {
       const account = app.account(plan.accountId), shop = app.shop(plan.shopId);
-      const matches = !keyword || [plan.id, plan.name, account?.id, account?.name, shop?.id, shop?.name].some(value => String(value || "").toLowerCase().includes(keyword));
+      const matches = searchedAccount ? plan.accountId === searchedAccount.id : !keyword || [plan.id, plan.name, account?.id, account?.name, shop?.id, shop?.name].some(value => String(value || "").toLowerCase().includes(keyword));
       const hasPeriodRecords = distributionStats(item => item?.id === plan.id, dist.filters.planRange).total > 0;
-      return matches && (dist.filters.planStatus === "all" || plan.status === dist.filters.planStatus) && (!dist.filters.planOnlyActive || hasPeriodRecords);
+      return matches && (!dist.filters.planCapacityWarning || plan.current >= 450)
+        && (dist.filters.planStatus === "all" || plan.status === dist.filters.planStatus) && (!dist.filters.planOnlyActive || hasPeriodRecords);
     }).sort((left, right) => {
       const [field, direction] = dist.filters.planSort.split("-");
       const leftValue = field === "today" ? distributionStats(item => item?.id === left.id, dist.filters.planRange).total : field === "updatedAt" ? latestProcessedDistributionTime(item => item?.id === left.id) : left[field];
@@ -211,7 +214,7 @@
     ]);
     els.head.closest("table").className = "pc-table pc-distribution-plan-table";
     els.toolbar.className = "pc-toolbar pc-dist-plan-toolbar";
-    els.toolbar.innerHTML = `<div class="pc-dist-plan-toolbar-main"><div class="pc-plan-query-primary"><label class="pc-search"><span>⌕</span><input data-dist-filter="planSearch" value="${app.escape(dist.filters.planSearch)}" placeholder="搜索计划、店铺或广告账户名称/ID"></label>${app.dateRange.render("distribution-plan-data", dist.filters.planDataRange, { label: "千川数据时间" })}${app.dateRange.render("distribution-plan", dist.filters.planRange, { label: "分发时间" })}</div><div class="pc-plan-query-secondary">${dist.filters.planSearch ? `<button class="pc-clear-filter" data-clear-plan-search>清除账户筛选</button>` : ""}<label class="pc-period-only" title="隐藏所选分发时间内分发数量为0的计划"><input type="checkbox" data-dist-toggle="planOnlyActive" ${dist.filters.planOnlyActive ? "checked" : ""}>仅看期间分发数 &gt; 0</label><span class="pc-sync-time">千川同步：09-02 11:20:06</span></div></div>${statusFilters(planStatuses, dist.filters.planStatus, "data-dist-plan-status")}`;
+    els.toolbar.innerHTML = `<div class="pc-dist-plan-toolbar-main"><div class="pc-plan-query-primary"><label class="pc-search"><span>⌕</span><input data-dist-filter="planSearch" value="${app.escape(dist.filters.planSearch)}" placeholder="搜索计划、店铺或广告账户名称/ID"></label>${app.dateRange.render("distribution-plan-data", dist.filters.planDataRange, { label: "千川数据时间" })}${app.dateRange.render("distribution-plan", dist.filters.planRange, { label: "分发时间" })}</div><div class="pc-plan-query-secondary"><label class="pc-period-only" title="仅显示当前素材数达到450张的计划（含已满）"><input type="checkbox" data-dist-toggle="planCapacityWarning" ${dist.filters.planCapacityWarning ? "checked" : ""}>仅看容量预警</label><label class="pc-period-only" title="隐藏所选分发时间内分发数量为0的计划"><input type="checkbox" data-dist-toggle="planOnlyActive" ${dist.filters.planOnlyActive ? "checked" : ""}>仅看期间分发数 &gt; 0</label><span class="pc-sync-time">千川同步：09-02 11:20:06</span></div></div>${statusFilters(planStatuses, dist.filters.planStatus, "data-dist-plan-status")}`;
     els.cols.innerHTML = "";
     els.head.innerHTML = `<tr><th>计划</th><th>计划状态</th><th>店铺</th><th>默认广告账户</th><th>${sortHead("spend", "整体消耗(元)")}</th><th>${sortHead("orders", "成交订单数")}</th><th>${sortHead("gmv", "成交金额(元)")}</th><th>${sortHead("roi", "支付ROI")}</th><th>${sortHead("current", "素材容量")}${app.tip("千川单计划最多500张图片素材。")}</th><th>${sortHead("today", `${label}分发`)}</th><th>${sortHead("distributed", "累计系统分发")}</th><th>${sortHead("updatedAt", "最近分发时间")}</th><th>操作</th></tr>`;
     els.body.innerHTML = planPage.rows.length ? planPage.rows.map(plan => {
@@ -257,8 +260,6 @@
     const planStatus = event.target.closest("[data-dist-plan-status]");
     if (taskStatus) { dist.filters.taskStatus = taskStatus.dataset.distTaskStatus; dist.page = 1; app.renderDistribution(); }
     if (planStatus) { dist.filters.planStatus = planStatus.dataset.distPlanStatus; dist.page = 1; app.renderDistribution(); }
-    const clearPlan = event.target.closest("[data-clear-plan-search]");
-    if (clearPlan) { dist.filters.planSearch = ""; dist.page = 1; app.renderDistribution(); return; }
     const sort = event.target.closest("[data-dist-sort]");
     if (sort) {
       const [current, direction] = dist.filters.planSort.split("-");
@@ -290,9 +291,11 @@
   root.addEventListener("click", event => {
     const planLink = event.target.closest("[data-account-plans]");
     if (planLink) {
-      const account = app.account(planLink.dataset.accountPlans);
+      if (app.hasPromotionPermission && !app.hasPromotionPermission("promotion.productCard.distribute.plan")) return;
       app.state.distributionView = "plan";
-      dist.filters.planSearch = account?.name || planLink.dataset.accountPlans;
+      dist.filters.planSearch = app.account(planLink.dataset.accountPlans)?.name || planLink.dataset.accountPlans;
+      dist.filters.planCapacityWarning = planLink.hasAttribute("data-plan-capacity-warning");
+      dist.filters.planOnlyActive = false;
       dist.filters.planStatus = planLink.dataset.planStatus;
       dist.page = 1;
       els.view.querySelectorAll("button").forEach(item => item.classList.toggle("active", item.dataset.view === "plan"));
