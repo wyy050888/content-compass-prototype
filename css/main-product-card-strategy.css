@@ -1,6 +1,18 @@
 #page-product-card{--pc-action:#2563eb;--pc-action-soft:#eff6ff}
 #page-product-card .pc-actions button,#page-product-card .pc-link-btn{color:var(--pc-action)}#page-product-card .pc-actions button.danger{color:#dc3545}
 .pc-drawer{width:min(1180px,82vw)}
+.pc-generation-form-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 180px}
+.pc-generation-form-grid>.pc-field{min-width:0}
+.pc-generation-form-grid>.pc-field>span:first-child{min-height:16px}
+.pc-field.pc-initial-rule-count{display:grid;align-content:start;gap:6px}
+.pc-rule-toolbar>.pc-rule-toolbar-meta{margin-left:auto;gap:16px;flex-wrap:wrap;justify-content:flex-end}
+.pc-rule-toolbar{flex-wrap:wrap}
+#pcRuleSummary{white-space:nowrap}
+.pc-initial-rule-label{display:inline-flex;align-items:center;white-space:nowrap}
+.pc-initial-rule-control{position:relative;display:inline-flex;align-items:center}
+.pc-initial-rule-control input{width:100%;padding-right:36px;font-weight:400}
+.pc-initial-rule-control em{position:absolute;right:26px;color:#969baa;font-size:11px;font-style:normal;font-weight:400;pointer-events:none}
+.pc-initial-rule-control input:disabled{background:#f5f6f9;color:#969baa;cursor:not-allowed}
 .pc-library-layer{position:fixed;z-index:4100;inset:0;visibility:hidden;pointer-events:none}.pc-library-layer.show{visibility:visible;pointer-events:auto}
 .pc-library-mask{position:absolute;inset:0;width:100%;height:100%;border:0;background:rgba(24,28,40,.48)}
 .pc-library-modal{position:absolute;top:50%;left:50%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;width:min(1040px,calc(100vw - 48px));height:min(720px,calc(100vh - 48px));overflow:hidden;border-radius:14px;background:#fff;box-shadow:0 28px 78px rgba(24,28,40,.26);transform:translate(-50%,-50%)}
@@ -22,3 +34,18 @@
 @media(max-width:1100px){.pc-library-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.pc-rule-table .pc-rule-head,.pc-rule-table .pc-rule-row{grid-template-columns:30px 40px 190px minmax(260px,1fr) 72px 118px}}
 @media(max-width:760px){.pc-library-main{grid-template-columns:1fr}.pc-library-main>aside{display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--pc-line)}.pc-library-main>aside button{min-width:110px}.pc-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pc-source-picker{grid-template-columns:74px 1fr}.pc-source-preview{width:68px}}
 @media(max-width:800px){.pc-drawer{width:100vw}}
+
+/* Full-width source card below the three generation settings. */
+#pcSourceField{min-width:0;align-content:start}
+#pcSourceField .pc-source-picker{grid-template-columns:80px minmax(0,1fr);gap:10px 20px;min-height:104px;padding:16px 12px;border-style:dashed;border-color:#dfe3eb;background:#fbfcfe}
+#pcSourceField .pc-source-preview{width:80px;grid-row:1/3}
+.pc-source-copy{display:grid;gap:8px;min-width:0}
+.pc-source-copy strong{overflow:hidden;color:#4b5262;font-size:12px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+.pc-source-copy small{color:#9298a6;font-size:10px;line-height:1.5}
+#pcSourceField .pc-source-actions{grid-column:2;flex-wrap:wrap;gap:8px}
+#pcSourceField .pc-source-actions button{white-space:nowrap}
+@media(max-width:760px){
+  #pcSourceField .pc-source-picker{grid-template-columns:56px minmax(0,1fr);gap:10px;padding:12px}
+  #pcSourceField .pc-source-preview{width:56px;grid-row:1/3}
+  #pcSourceField .pc-source-actions{grid-column:2;flex-wrap:wrap}
+}

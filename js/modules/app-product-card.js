@@ -42,9 +42,11 @@
   };
   const tipPopover = document.createElement("div");
   tipPopover.className = "pc-tip-popover";
+  tipPopover.id = "pcTipPopover";
   tipPopover.setAttribute("role", "tooltip");
   root.appendChild(tipPopover);
   let tipHideTimer = 0;
+  let tipAnchor = null;
   const productToast = document.createElement("div");
   productToast.className = "pc-toast";
   productToast.setAttribute("role", "status");
@@ -74,7 +76,12 @@
 
   function showTip(button) {
     window.clearTimeout(tipHideTimer);
+    tipAnchor?.removeAttribute("aria-describedby");
+    tipAnchor = button;
+    button.setAttribute("aria-describedby", tipPopover.id);
+    tipPopover.classList.toggle("pc-failure-tip", button.classList.contains("pc-failure-reason"));
     tipPopover.textContent = button.dataset.pcTip || "";
+    tipPopover.scrollTop = 0;
     tipPopover.classList.add("show");
     const anchor = button.getBoundingClientRect();
     const box = tipPopover.getBoundingClientRect();
@@ -87,10 +94,12 @@
   function hideTip() {
     window.clearTimeout(tipHideTimer);
     tipPopover.classList.remove("show");
+    tipAnchor?.removeAttribute("aria-describedby");
+    tipAnchor = null;
   }
   function scheduleHideTip() {
     window.clearTimeout(tipHideTimer);
-    tipHideTimer = window.setTimeout(hideTip, 140);
+    tipHideTimer = window.setTimeout(() => { if (!tipPopover.matches(":hover")) hideTip(); }, 140);
   }
 
   app.openDrawer = options => {
@@ -221,6 +230,11 @@
   root.addEventListener("pointerout", event => { const button = event.target.closest("[data-pc-tip]"); if (button && !button.contains(event.relatedTarget)) scheduleHideTip(); });
   root.addEventListener("focusin", event => { const button = event.target.closest("[data-pc-tip]"); if (button) showTip(button); });
   root.addEventListener("focusout", event => { if (event.target.closest("[data-pc-tip]")) scheduleHideTip(); });
+  root.addEventListener("click", event => {
+    const reason = event.target.closest(".pc-failure-reason");
+    if (reason) showTip(reason);
+    else if (tipPopover.classList.contains("pc-failure-tip") && !tipPopover.contains(event.target)) hideTip();
+  });
   tipPopover.addEventListener("pointerenter", () => window.clearTimeout(tipHideTimer));
   tipPopover.addEventListener("pointerleave", scheduleHideTip);
   root.querySelectorAll("[data-pc-confirm]").forEach(button => button.addEventListener("click", () => {
@@ -236,6 +250,7 @@
   });
   document.addEventListener("keydown", event => {
     if (event.key !== "Escape") return;
+    if (tipPopover.classList.contains("show")) { hideTip(); event.preventDefault(); return; }
     if (app.isImagePickerOpen?.()) app.closeImagePicker();
     else if (app.isScreenViewerOpen?.()) app.closeGenerationScreenViewer();
     else if (app.isDistributionImageViewerOpen?.()) app.closeDistributionImageViewer();

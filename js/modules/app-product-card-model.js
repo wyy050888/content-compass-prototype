@@ -3,7 +3,8 @@
   const app = window.ProductCardApp;
   if (!app) return;
   // Shared limits for rule creation, image selection and submission.
-  app.generationLimits = Object.freeze({ defaultQuantity: 1, maxRuleImages: 2 });
+  app.generationLimits = Object.freeze({ defaultQuantity: 1, maxRuleImages: 2, maxRules: 100 });
+  app.imageModels = Object.freeze([{ id: "gpt-image-2", name: "GPT-Image-2" }]);
   const pad = value => String(value).padStart(2, "0");
   app.now = (date = new Date()) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   app.fullTime = value => /^\d{2}-\d{2}/.test(value || "") ? `2026-${value}` : value || "";
@@ -47,14 +48,12 @@
     }
     if (ruleIndex < 0 || slot >= task.target) return false;
     const rule = task.rules[ruleIndex], completedAt = app.now();
-    const sampleIndex = slot - (offset - rule.quantity);
-    const samplePrompt = rule.prompt + (rule.quantity > 1 ? `；本规则子变体：主体占画面${[55,65,75,60,70][sampleIndex % 5]}%，背景层次${["简洁", "前景虚化", "后景虚化", "浅景深"][Math.floor(sampleIndex / 5) % 4]}。不改变商品结构与原规则场景。` : "");
     const result = { id: `${task.id}-SAMPLE-${slot + 1}`, ruleId: rule.id, status: "success", completedAt };
     task.processingResults.push(result);
     task.success += 1;
     app.data.images.push({ id: `${task.id}-IMG-${slot + 1}`, taskId: task.id, productId: task.productId,
       fileName: `${app.product(task.productId)?.name}-${task.id}-${String(slot + 1).padStart(3, "0")}.png`,
-      ruleId: rule.id, ruleIndex: ruleIndex + 1, order: slot + 1, generatedAt: completedAt, promptSnapshot: samplePrompt,
+      ruleId: rule.id, ruleIndex: ruleIndex + 1, order: slot + 1, generatedAt: completedAt, promptSnapshot: rule.prompt,
       referenceImagesSnapshot: (rule.images || []).map(item => ({ ...item })),
       screenStatus: "pending", distributionCount: 0, distributionHistory: [] });
     return true;

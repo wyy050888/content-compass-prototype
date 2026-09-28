@@ -121,7 +121,7 @@
       </div>
       <div class="pc-distribution-image-meta">
         <strong title="${app.escape(record.fileName)}">${app.escape(record.fileName)}</strong>
-        ${showStatus && record.status === "failed" ? `<div class="pc-image-result-line failed"><span title="${failureReason}">${failureReason}</span><button class="pc-card-retry" data-result-retry="${record.id}" ${distributionTask ? `data-result-task="${distributionTask.id}"` : ""}>重试</button></div>` : ""}
+        ${showStatus && record.status === "failed" ? `<div class="pc-image-result-line failed"><button type="button" class="pc-failure-reason" data-pc-tip="${failureReason}" aria-label="查看完整失败原因：${failureReason}">${failureReason}</button><button class="pc-card-retry" data-result-retry="${record.id}" ${distributionTask ? `data-result-task="${distributionTask.id}"` : ""}>重试</button></div>` : ""}
         <div class="pc-distribution-source-row">${app.imageTime(source)}</div>
       </div>
     </article>`;

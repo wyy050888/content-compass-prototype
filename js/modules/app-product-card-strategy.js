@@ -6,6 +6,8 @@
   const editor = { taskId: null, sourceTaskId: "", rules: [], productId: "", sourceImage: null, isNew: false, editable: false, token: 0, fileTarget: null, submitting: false };
   const MAX_RULE_IMAGES = app.generationLimits.maxRuleImages;
   const DEFAULT_QUANTITY = app.generationLimits.defaultQuantity;
+  const DEFAULT_INITIAL_RULE_COUNT = 10;
+  const MAX_RULES = app.generationLimits.maxRules;
   let uid = 0;
   const nextId = prefix => `${prefix}-${Date.now()}-${uid += 1}`;
   const copyImage = image => ({ ...image });
@@ -23,7 +25,7 @@
     return { id: rule.id || nextId("RULE"), images, prompt: rule.prompt || "", promptState: rule.promptState || (rule.prompt ? "ready" : "idle"), promptVersion: rule.promptVersion || 0, promptSource: rule.promptSource || "manual", quantity: Number(rule.quantity ?? DEFAULT_QUANTITY), isNew: false };
   }
   function totalQuantity() { return editor.rules.reduce((sum, rule) => sum + Number(rule.quantity || 0), 0); }
-  function remainingRuleCount() { return Math.max(0, 50 - editor.rules.length); }
+  function remainingRuleCount() { return Math.max(0, MAX_RULES - editor.rules.length); }
   function remainingImageCount() { return Math.max(0, 200 - totalQuantity()); }
   function insertLimit() { return Math.min(remainingRuleCount(), Math.floor(remainingImageCount() / DEFAULT_QUANTITY)); }
   function generatingCount() { return editor.rules.filter(rule => rule.promptState === "generating").length; }
@@ -35,11 +37,56 @@
   }
   function sourcePicker() {
     const image = editor.sourceImage;
-    return `<div class="pc-source-picker"><div class="pc-source-preview">${image ? imageVisual(image) : "1:1<br>商品主图"}</div><div class="pc-source-actions"><strong>${image ? app.escape(image.name) : "选择一张商品主图"}</strong><small>PNG、JPG、JPEG · 仅 1 张 · 不超过 10 MB · 1:1${app.tip("商品主图将作为各条规则的默认垫图，用于生成提示词。更换主图后，将替换全部规则的垫图，并重新生成提示词。")}</small><button type="button" data-source-local>${image ? "重新上传" : "本地上传"}</button><button type="button" data-source-library>从图片库选择</button></div></div>`;
+    return `<div class="pc-source-picker"><div class="pc-source-preview">${image ? imageVisual(image) : "1:1<br>商品主图"}</div><div class="pc-source-copy"><strong>${image ? app.escape(image.name) : "选择商品主图"}</strong><small>PNG / JPG / JPEG · 1:1 · ≤10 MB${app.tip("仅限1张，作为默认垫图；更换后将重新生成全部规则提示词。", "商品主图说明")}</small></div><div class="pc-source-actions"><button type="button" data-source-local>${image ? "重新上传" : "本地上传"}</button><button type="button" data-source-library>从图片库选择</button></div></div>`;
+  }
+  function initialRuleCountField() {
+    return `<div class="pc-field pc-initial-rule-count"><span class="pc-initial-rule-label"><label for="pcInitialRuleCount">首次生成规则数</label>${app.tip("", "首次生成规则数说明")}</span><span class="pc-initial-rule-control"><input id="pcInitialRuleCount" type="number" min="1" max="${MAX_RULES}" step="1" value="${editor.initialRuleCount}"><em>条</em></span></div>`;
+  }
+  function updateInitialRuleCount() {
+    // Once rules exist, this setting must never resize or repopulate the list.
+    if (editor.rules.length) editor.rulesInitialized = true;
+    const input = app.els.drawerBody.querySelector("#pcInitialRuleCount");
+    if (!input) return;
+    input.disabled = !editor.editable || editor.rulesInitialized;
+    const help = editor.rulesInitialized
+      ? "已生成，可通过新增、删除调整规则。"
+      : `上传主图后生成的规则数量，支持1～${MAX_RULES}条，生成后可增删。`;
+    app.els.drawerBody.querySelector(".pc-initial-rule-label [data-pc-tip]").dataset.pcTip = help;
+    input.setAttribute("aria-description", help);
+  }
+  function validateInitialRuleCount() {
+    if (editor.rulesInitialized || (Number.isInteger(editor.initialRuleCount) && editor.initialRuleCount >= 1 && editor.initialRuleCount <= MAX_RULES)) return true;
+    app.toast(`首次生成规则数请输入 1～${MAX_RULES} 的整数`);
+    app.els.drawerBody.querySelector("#pcInitialRuleCount")?.focus();
+    return false;
   }
   function strategyBody(task) {
     const taskName = task?.name || "";
-    return `<div class="pc-form"><div class="pc-form-grid"><label class="pc-field"><span>任务名称</span><span class="pc-input-with-count"><input id="pcTaskName" maxlength="50" value="${app.escape(taskName)}" ${editor.editable ? "" : "disabled"}><small id="pcTaskNameCount" aria-live="polite">${taskName.length}/50</small></span></label><label class="pc-field"><span>产品名称</span><select id="pcTaskProduct" ${editor.editable && editor.isNew ? "" : "disabled"}><option value="" ${editor.productId ? "" : "selected"} disabled>请选择产品</option>${app.data.products.map(product => `<option value="${product.id}" ${product.id === editor.productId ? "selected" : ""}>${app.escape(product.name)}</option>`).join("")}</select></label>${editor.isNew ? `<div class="pc-field pc-field-wide"><span>商品主图</span>${sourcePicker()}</div>` : ""}</div>${task?.failureReason ? `<div class="pc-note-error">${app.escape(task.failureReason)}</div>` : ""}<div id="pcUploadFeedback" aria-live="polite"></div><input type="file" id="pcSourceLocalInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg" hidden><input type="file" id="pcRuleLocalInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg" hidden><div id="pcRuleEditor"></div></div>`;
+    const showSource = editor.isNew || (editor.editable && !editor.rules.length);
+    return `<div class="pc-form"><div class="pc-form-grid ${editor.editable ? "pc-generation-form-grid" : ""}">
+      <label class="pc-field pc-field-wide"><span>任务名称</span><span class="pc-input-with-count">
+        <input id="pcTaskName" maxlength="50" value="${app.escape(taskName)}" ${editor.editable ? "" : "disabled"}>
+        <small id="pcTaskNameCount" aria-live="polite">${taskName.length}/50</small>
+      </span></label>
+      <label class="pc-field"><span>产品名称</span>
+        <select id="pcTaskProduct" ${editor.editable && editor.isNew ? "" : "disabled"}>
+          <option value="" ${editor.productId ? "" : "selected"} disabled>请选择产品</option>
+          ${app.data.products.map(product => `<option value="${product.id}" ${product.id === editor.productId ? "selected" : ""}>${app.escape(product.name)}</option>`).join("")}
+        </select>
+      </label>
+      <label class="pc-field"><span>图片模型</span>
+        <select id="pcImageModel" ${editor.editable ? "" : "disabled"}>
+          ${app.imageModels.map(model => `<option value="${model.id}" ${model.id === editor.imageModel ? "selected" : ""}>${app.escape(model.name)}</option>`).join("")}
+        </select>
+      </label>
+      ${editor.editable ? initialRuleCountField() : ""}
+      ${showSource ? `<div class="pc-field pc-field-wide" id="pcSourceField"><span>商品主图</span>${sourcePicker()}</div>` : ""}
+    </div>
+    ${task?.failureReason ? `<div class="pc-note-error">${app.escape(task.failureReason)}</div>` : ""}
+    <div id="pcUploadFeedback" aria-live="polite"></div>
+    <input type="file" id="pcSourceLocalInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg" hidden>
+    <input type="file" id="pcRuleLocalInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg" hidden>
+    <div id="pcRuleEditor"></div></div>`;
   }
   function strategyFooter() {
     if (!editor.editable) return `<button class="pc-btn" data-pc-close-drawer>关闭</button>`;
@@ -91,8 +138,8 @@
     const node = app.els.drawerBody.querySelector("#pcRuleSummary");
     if (!node) return;
     const total = totalQuantity();
-    node.textContent = `${editor.rules.length}/50 条规则 · ${total}/200 张 · 剩余 ${remainingRuleCount()} 条 / ${remainingImageCount()} 张`;
-    node.classList.toggle("pc-capacity-error", editor.rules.length > 50 || total > 200);
+    node.textContent = `${editor.rules.length}/${MAX_RULES} 条规则 · ${total}/200 张 · 剩余 ${remainingRuleCount()} 条 / ${remainingImageCount()} 张`;
+    node.classList.toggle("pc-capacity-error", editor.rules.length > MAX_RULES || total > 200);
     const remaining = insertLimit();
     const add = app.els.drawerBody.querySelector("#pcAddRule");
     if (add) add.disabled = remaining < 1;
@@ -116,8 +163,10 @@
   }
   function renderRules() {
     const box = app.els.drawerBody.querySelector("#pcRuleEditor"); if (!box) return;
+
     const addDisabled = insertLimit() < 1;
-    box.innerHTML = `<div class="pc-rule-toolbar"><div><label><input type="checkbox" id="pcRuleCheckAll" ${editor.editable ? "" : "disabled"}> 全选</label>${editor.editable ? `<button class="pc-btn" id="pcBatchReplace">批量换图</button><button class="pc-btn" id="pcAddRule" ${addDisabled ? "disabled" : ""}>新建规则</button>` : ""}</div><span id="pcRuleSummary"></span></div>${editor.rules.length ? `<div class="pc-rule-table"><div class="pc-rule-head"><span></span><span>序号</span><span>垫图${app.tip(`每条规则最多 ${MAX_RULE_IMAGES} 张，本地上传与图片库选择合并计数。`)}</span><span class="pc-rule-prompt-head">提示词 <small class="pc-prompt-status" id="pcPromptStatus" aria-live="polite" hidden></small></span><span>生图数量${app.tip("单条规则默认生成 1 张，可调整为 1–20 张；任务总数最多 200 张。")}</span><span>操作</span></div><div class="pc-rule-list">${editor.rules.map(ruleRow).join("")}</div></div>` : `<div class="pc-rule-table"><div class="pc-rule-empty">暂无规则，上传商品主图或新建规则</div></div>`}`;
+    box.innerHTML = `<div class="pc-rule-toolbar"><div><label><input type="checkbox" id="pcRuleCheckAll" ${editor.editable ? "" : "disabled"}> 全选</label>${editor.editable ? `<button class="pc-btn" id="pcBatchReplace">批量换图</button><button class="pc-btn" id="pcAddRule" ${addDisabled ? "disabled" : ""}>新建规则</button>` : ""}</div><div class="pc-rule-toolbar-meta"><span id="pcRuleSummary"></span></div></div>${editor.rules.length ? `<div class="pc-rule-table"><div class="pc-rule-head"><span></span><span>序号</span><span>垫图${app.tip(`每条规则最多 ${MAX_RULE_IMAGES} 张，本地上传与图片库选择合并计数。`)}</span><span class="pc-rule-prompt-head">提示词 <small class="pc-prompt-status" id="pcPromptStatus" aria-live="polite" hidden></small></span><span>生图数量${app.tip("单条规则默认生成 1 张，可调整为 1–20 张；任务总数最多 200 张。")}</span><span>操作</span></div><div class="pc-rule-list">${editor.rules.map(ruleRow).join("")}</div></div>` : `<div class="pc-rule-table"><div class="pc-rule-empty">暂无规则，上传商品主图或新建规则</div></div>`}`;
+    updateInitialRuleCount();
     updateSummary();
     updatePromptStatus();
     editor.rules.forEach(rule => { rule.isNew = false; });
@@ -177,7 +226,10 @@
     editor.taskId = isNew ? null : task?.id || null;
     editor.sourceTaskId = isNew ? task?.repeatSourceId || "" : task?.sourceTaskId || "";
     editor.rules = (task?.rules || []).map(normalizeRule);
+    editor.initialRuleCount = task?.initialRuleCount || editor.rules.length || DEFAULT_INITIAL_RULE_COUNT;
+    editor.rulesInitialized = Boolean(task?.rulesInitialized || editor.rules.length);
     editor.productId = preferredProductId || task?.productId || "";
+    editor.imageModel = task?.imageModel || app.imageModels[0].id;
     editor.sourceImage = editor.rules[0]?.images[0] ? copyImage(editor.rules[0].images[0]) : null;
     editor.isNew = Boolean(isNew);
     editor.editable = Boolean(isNew || task?.status === "draft");
@@ -231,14 +283,15 @@
     return valid;
   }
   async function applySourceImage(image) {
+    if (!validateInitialRuleCount()) return;
     if (editor.rules.length) {
       const ok = await app.confirm("替换全部规则的垫图？", "更换商品主图后，将替换当前全部规则的垫图并重新生成提示词。", "确认替换");
       if (!ok) return;
     }
     editor.sourceImage = copyImage(image);
-    if (!editor.rules.length) editor.rules = Array.from({ length: 50 }, (_, index) => ({ id: nextId("RULE"), images: [copyImage(image)], prompt: "", promptState: "generating", promptVersion: 0, quantity: DEFAULT_QUANTITY, isNew: false, failNextPromptGeneration: index === 0 }));
+    if (!editor.rulesInitialized) editor.rules = Array.from({ length: editor.initialRuleCount }, (_, index) => ({ id: nextId("RULE"), images: [copyImage(image)], prompt: "", promptState: "generating", promptVersion: 0, quantity: DEFAULT_QUANTITY, isNew: false, failNextPromptGeneration: index === 0 }));
     else editor.rules.forEach(rule => { rule.images = [copyImage(image)]; rule.prompt = ""; });
-    const sourceBox = app.els.drawerBody.querySelector(".pc-field-wide");
+    const sourceBox = app.els.drawerBody.querySelector("#pcSourceField");
     if (sourceBox) sourceBox.innerHTML = `<span>商品主图</span>${sourcePicker()}`;
     renderRules(); schedulePromptGeneration(editor.rules.map(rule => rule.id)); app.markDrawerDirty();
   }
@@ -267,7 +320,7 @@
     if (!name) return invalid("请填写任务名称", "#pcTaskName");
     if (name.length > 50) return invalid("任务名称最多 50 个字符", "#pcTaskName");
     if (!editor.rules.length) return invalid("请至少创建 1 条规则", "#pcRuleEditor");
-    if (editor.rules.length > 50) return invalid("一个任务最多 50 条规则", "#pcRuleEditor");
+    if (editor.rules.length > MAX_RULES) return invalid(`一个任务最多 ${MAX_RULES} 条规则`, "#pcRuleEditor");
     const generating = generatingCount();
     if (generating) return invalid(`还有 ${generating} 条提示词正在生成`, ".pc-prompt-skeleton");
     const missingImage = editor.rules.find(rule => !rule.images.length);
@@ -298,12 +351,16 @@
     const now = new Date();
     const createdAt = `${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
     const task = existing || { id: `GT-0902-${String(nextNumber).padStart(3, "0")}`, creator: app.currentIdentity?.name || "周宁", team: app.currentIdentity?.team || "抖音三区", success: 0, failed: 0, createdAt: app.now() };
+    task.initialRuleCount = editor.initialRuleCount;
+    task.imageModel = editor.imageModel;
+    task.rulesInitialized = editor.rulesInitialized;
     Object.assign(task, { name: values.name || "未命名生图任务", productId: values.productId, sourceTaskId: editor.sourceTaskId, rules: editor.rules.map(rule => ({ id: rule.id, images: rule.images.map(copyImage), prompt: rule.prompt, promptState: rule.promptState, promptVersion: rule.promptVersion, promptSource: rule.promptSource, quantity: rule.quantity })), target: totalQuantity(), status });
     if (!existing) app.data.generationTasks.unshift(task);
     editor.taskId = task.id; app.state.drawerDirty = false; app.renderGeneration();
     return task;
   }
   function saveGenerationDraft(closeAfterSave = true) {
+    if (!validateInitialRuleCount()) return false;
     if (!editor.productId) { app.toast("请先选择产品后再保存草稿"); return false; }
     const task = persistDraft("draft");
     app.toast(`草稿 ${task.id} 已保存`);
@@ -353,7 +410,7 @@
         const count = Number(row.querySelector(".pc-inline-input")?.value || 1);
         if (!Number.isInteger(count) || count < 1) { app.toast("插入行数必须为正整数"); return; }
         const remaining = insertLimit();
-        if (count > remaining) { app.toast(remaining ? `最多还能插入 ${remaining} 条` : remainingRuleCount() < 1 ? "当前已有 50 条规则，不能继续插入" : "剩余图片额度不足，不能继续插入"); return; }
+        if (count > remaining) { app.toast(remaining ? `最多还能插入 ${remaining} 条` : remainingRuleCount() < 1 ? `当前已有 ${MAX_RULES} 条规则，不能继续插入` : "剩余图片额度不足，不能继续插入"); return; }
         const rows = Array.from({ length: count }, () => ({ id: nextId("RULE"), images: rule.images.map(copyImage), prompt: "", promptState: rule.images.length ? "generating" : "idle", promptVersion: 0, quantity: DEFAULT_QUANTITY, isNew: true }));
         editor.rules.splice(index + 1, 0, ...rows); renderRules(); schedulePromptGeneration(rows.filter(item => item.images.length).map(item => item.id));
       }
@@ -386,6 +443,10 @@
   app.els.drawerBody.addEventListener("pointerleave", hideHoverPreview);
 
   app.els.drawerBody.addEventListener("input", event => {
+    if (event.target.matches("#pcInitialRuleCount") && !editor.rulesInitialized) {
+      editor.initialRuleCount = Number(event.target.value);
+      app.markDrawerDirty();
+    }
     if (event.target.matches("#pcTaskName")) {
       const count = app.els.drawerBody.querySelector("#pcTaskNameCount");
       if (count) count.textContent = `${event.target.value.length}/50`;
@@ -403,6 +464,10 @@
     if (event.target.matches("[data-rule-qty]") && rule) { rule.quantity = Number(event.target.value || 0); updateSummary(); }
   });
   app.els.drawerBody.addEventListener("change", async event => {
+    if (event.target.matches("#pcImageModel") && editor.editable) {
+      editor.imageModel = event.target.value;
+      app.markDrawerDirty();
+    }
     if (event.target.matches("#pcTaskProduct")) editor.productId = event.target.value;
     if (event.target.matches("[data-rule-qty]")) { const row = event.target.closest(".pc-rule-row"), rule = editor.rules.find(item => item.id === row?.dataset.ruleId); if (rule) { rule.quantity = Math.max(1, Math.min(20, Math.trunc(Number(event.target.value) || 1))); event.target.value = rule.quantity; updateSummary(); } }
     if (event.target.matches("#pcSourceLocalInput")) { const token = editor.token; const images = await validateFiles(event.target.files); if (token === editor.token && images[0]) applySourceImage(images[0]); }

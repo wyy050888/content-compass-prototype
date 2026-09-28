@@ -17,3 +17,5 @@
 .pc-distribution-status-badge{position:absolute;z-index:2;top:7px;left:7px;padding:3px 6px;box-shadow:0 2px 7px rgba(35,48,70,.1)}
 .pc-wizard-image-source .pc-image-time{min-width:0;overflow:hidden;margin:0;color:#8992a2;font-size:8px;line-height:16px;text-overflow:ellipsis;white-space:nowrap}
 .pc-distribution-source-row .pc-image-time{min-width:0;overflow:hidden;margin:0;color:#8992a2;font-size:8px;line-height:16px;text-overflow:ellipsis;white-space:nowrap}
+
+.pc-failure-reason{flex:1;min-width:0;overflow:hidden;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;text-overflow:ellipsis;white-space:nowrap;cursor:help}.pc-failure-reason:focus-visible{outline:2px solid #bd5560;outline-offset:2px}.pc-tip-popover.pc-failure-tip{max-width:min(360px,calc(100vw - 20px));max-height:min(300px,calc(100vh - 20px));box-sizing:border-box;overflow-y:auto;overflow-wrap:anywhere;white-space:pre-wrap;font-size:12px;line-height:1.6;pointer-events:auto;user-select:text}

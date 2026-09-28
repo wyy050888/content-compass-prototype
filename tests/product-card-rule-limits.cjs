@@ -13,6 +13,11 @@ const { pathToFileURL } = require('node:url');
     await page.waitForFunction(() => window.ProductCardApp?.openNewGeneration);
     await page.locator('[data-pc-nav="generation"]').click();
     const openNew = () => page.evaluate(() => ProductCardApp.openNewGeneration(ProductCardApp.data.products[0].id));
+    const selectSource = async () => {
+      await page.locator('[data-source-library]').click();
+      await page.locator('[data-library-image]').first().click();
+      await page.locator('#pcLibraryConfirm').click();
+    };
     await openNew();
     await page.locator('#pcAddRule').click();
     assert.equal(await page.locator('[data-rule-qty]').first().inputValue(), '1');
@@ -24,12 +29,60 @@ const { pathToFileURL } = require('node:url');
     assert.equal(await page.locator('[data-rule-qty]').nth(1).inputValue(), '1');
 
     await openNew();
-    await page.locator('[data-source-library]').click();
-    await page.locator('[data-library-image]').first().click();
-    await page.locator('#pcLibraryConfirm').click();
-    assert.equal(await page.locator('[data-rule-qty]').count(), 50);
+    assert.equal(await page.locator('#pcInitialRuleCount').inputValue(), '10');
+    assert.equal(await page.locator('#pcInitialRuleCount').getAttribute('max'), '100');
+    assert.equal(await page.locator('#pcImageModel').inputValue(), 'gpt-image-2');
+    const productBounds = await page.locator('#pcTaskProduct').boundingBox();
+    const modelBounds = await page.locator('#pcImageModel').boundingBox();
+    const sourceBounds = await page.locator('#pcSourceField').boundingBox();
+    const countBounds = await page.locator('#pcInitialRuleCount').boundingBox();
+    assert.equal(productBounds.y, modelBounds.y);
+    assert(modelBounds.x > productBounds.x);
+    assert.equal(countBounds.y, modelBounds.y);
+    assert.equal(countBounds.height, modelBounds.height);
+    assert(countBounds.x >= modelBounds.x + modelBounds.width);
+    assert(sourceBounds.y >= countBounds.y + countBounds.height);
+    if (process.env.PC_VISUAL_OUTPUT) await page.screenshot({ path: process.env.PC_VISUAL_OUTPUT });
+    await selectSource();
+    assert.equal(await page.locator('[data-rule-qty]').count(), 10);
+    assert(await page.locator('#pcInitialRuleCount').isDisabled());
     assert(await page.locator('[data-rule-qty]').evaluateAll(nodes => nodes.every(node => node.value === '1')));
-    assert.match(await page.locator('#pcRuleSummary').innerText(), /50\/200 张/);
+    assert.match(await page.locator('#pcRuleSummary').innerText(), /10\/100 条规则 · 10\/200 张/);
+
+    for (const count of ['1', '100']) {
+      await openNew();
+      await page.locator('#pcInitialRuleCount').fill(count);
+      await selectSource();
+      assert.equal(await page.locator('.pc-rule-row').count(), Number(count));
+      assert.equal(await page.locator('#pcAddRule').isDisabled(), count === '100');
+    }
+    for (const invalid of ['', '0', '101', '1.5']) {
+      await openNew();
+      await page.locator('#pcInitialRuleCount').fill(invalid);
+      await selectSource();
+      assert.equal(await page.locator('.pc-rule-row').count(), 0, `reject ${invalid}`);
+      assert.equal(await page.locator('#pcInitialRuleCount').isDisabled(), false);
+    }
+
+    await openNew();
+    await page.locator('#pcTaskName').fill('首次规则数草稿');
+    await page.locator('#pcInitialRuleCount').fill('7');
+    await page.locator('#pcSaveDraft').click();
+    await page.evaluate(() => ProductCardApp.openGenerationStrategy(ProductCardApp.data.generationTasks.find(task => task.name === '首次规则数草稿')));
+    assert.equal(await page.evaluate(() => ProductCardApp.data.generationTasks.find(task => task.name === '首次规则数草稿').imageModel), 'gpt-image-2');
+    assert.equal(await page.locator('#pcImageModel').inputValue(), 'gpt-image-2');
+    assert.equal(await page.locator('#pcInitialRuleCount').inputValue(), '7');
+    await selectSource();
+    assert.equal(await page.locator('.pc-rule-row').count(), 7);
+    await page.locator('#pcSaveDraft').click();
+    await page.evaluate(() => ProductCardApp.openRepeatedGeneration(ProductCardApp.data.generationTasks.find(task => task.name === '首次规则数草稿')));
+    assert.equal(await page.locator('.pc-rule-row').count(), 7);
+    assert(await page.locator('#pcInitialRuleCount').isDisabled());
+    await page.locator('[data-rule-action="delete"]').first().click();
+    await page.locator('#pcConfirmLayer').getByRole('button', { name: '删除', exact: true }).click();
+    await selectSource();
+    await page.locator('#pcConfirmLayer').getByRole('button', { name: '确认替换', exact: true }).click();
+    assert.equal(await page.locator('.pc-rule-row').count(), 6, 'replacement preserves current count');
 
     await openNew();
     await page.locator('#pcAddRule').click();
